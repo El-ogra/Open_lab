@@ -62,5 +62,17 @@
         <DataTemplate DataType="{x:Type vm:ReferralsViewModel}">
             <views:ReferralsView />
         </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:UsersPermissionsViewModel}">
+            <views:UsersPermissionsView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:StatisticsViewModel}">
+            <views:StatisticsView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:SystemSettingsViewModel}">
+            <views:SystemSettingsView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:BackupRestoreViewModel}">
+            <views:BackupRestoreView />
+        </DataTemplate>
     </Application.Resources>
 </Application>

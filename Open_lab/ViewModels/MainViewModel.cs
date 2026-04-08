@@ -31,6 +31,10 @@ namespace Open_lab.ViewModels
             NavigatePriceListsCommand = new RelayCommand(_ => NavigatePriceLists(), _ => IsLoggedIn);
             NavigateCustomGroupsCommand = new RelayCommand(_ => NavigateCustomGroups(), _ => IsLoggedIn);
             NavigateReferralsCommand = new RelayCommand(_ => NavigateReferrals(), _ => IsLoggedIn);
+            NavigateUsersPermissionsCommand = new RelayCommand(_ => NavigateUsersPermissions(), _ => IsLoggedIn);
+            NavigateStatisticsCommand = new RelayCommand(_ => NavigateStatistics(), _ => IsLoggedIn);
+            NavigateSystemSettingsCommand = new RelayCommand(_ => NavigateSystemSettings(), _ => IsLoggedIn);
+            NavigateBackupRestoreCommand = new RelayCommand(_ => NavigateBackupRestore(), _ => IsLoggedIn);
 
             LogoutCommand = new RelayCommand(_ => ShowLogin());
 
@@ -72,6 +76,10 @@ namespace Open_lab.ViewModels
         public ICommand NavigatePriceListsCommand { get; }
         public ICommand NavigateCustomGroupsCommand { get; }
         public ICommand NavigateReferralsCommand { get; }
+        public ICommand NavigateUsersPermissionsCommand { get; }
+        public ICommand NavigateStatisticsCommand { get; }
+        public ICommand NavigateSystemSettingsCommand { get; }
+        public ICommand NavigateBackupRestoreCommand { get; }
 
         public ICommand LogoutCommand { get; }
 
@@ -167,6 +175,26 @@ namespace Open_lab.ViewModels
             CurrentViewModel = new ReferralsViewModel(_dbFactory);
         }
 
+        private void NavigateUsersPermissions()
+        {
+            CurrentViewModel = new UsersPermissionsViewModel(_dbFactory);
+        }
+
+        private void NavigateStatistics()
+        {
+            CurrentViewModel = new StatisticsViewModel(_dbFactory);
+        }
+
+        private void NavigateSystemSettings()
+        {
+            CurrentViewModel = new SystemSettingsViewModel(_dbFactory);
+        }
+
+        private void NavigateBackupRestore()
+        {
+            CurrentViewModel = new BackupRestoreViewModel(_dbFactory);
+        }
+
         private void RaiseNavigationCanExecuteChanged()
         {
             (NavigateDashboardCommand as RelayCommand)?.RaiseCanExecuteChanged();
@@ -186,6 +214,12 @@ namespace Open_lab.ViewModels
             (NavigatePriceListsCommand as RelayCommand)?.RaiseCanExecuteChanged();
             (NavigateCustomGroupsCommand as RelayCommand)?.RaiseCanExecuteChanged();
             (NavigateReferralsCommand as RelayCommand)?.RaiseCanExecuteChanged();
+            (NavigateUsersPermissionsCommand as RelayCommand)?.RaiseCanExecuteChanged();
+            (NavigateStatisticsCommand as RelayCommand)?.RaiseCanExecuteChanged();
+            (NavigateSystemSettingsCommand as RelayCommand)?.RaiseCanExecuteChanged();
+            (NavigateBackupRestoreCommand as RelayCommand)?.RaiseCanExecuteChanged();
         }
     }
 }
+
+

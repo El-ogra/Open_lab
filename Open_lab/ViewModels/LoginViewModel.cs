@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using Microsoft.EntityFrameworkCore;
 using Open_lab.Data;
+using Open_lab.Services;
 
 namespace Open_lab.ViewModels
 {
@@ -72,6 +73,16 @@ namespace Open_lab.ViewModels
                 {
                     StatusMessage = "بيانات الدخول غير صحيحة.";
                     return;
+                }
+
+                AppSession.UserId = user.UserId;
+                AppSession.Username = user.Username;
+                AppSession.IsAdmin = user.Username.Equals("admin", StringComparison.OrdinalIgnoreCase);
+
+                if (AppSession.IsAdmin)
+                {
+                    var setup = new AdminSetupService(db);
+                    await setup.EnsureAdminAccessAsync(user.UserId);
                 }
 
                 StatusMessage = string.Empty;

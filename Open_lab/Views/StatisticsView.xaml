@@ -1,0 +1,53 @@
+<UserControl x:Class="Open_lab.Views.StatisticsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d">
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Orientation="Horizontal">
+            <TextBlock Text="من" VerticalAlignment="Center" Margin="0,0,8,0" />
+            <DatePicker SelectedDate="{Binding From}" Width="160" />
+            <TextBlock Text="إلى" VerticalAlignment="Center" Margin="12,0,8,0" />
+            <DatePicker SelectedDate="{Binding To}" Width="160" />
+            <Button Content="تحميل" Margin="12,0,0,0" Command="{Binding LoadCommand}" />
+        </StackPanel>
+
+        <Grid Grid.Row="1" Margin="0,12,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="200" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <TextBlock Text="عدد الزيارات" Grid.Row="0" Grid.Column="0" Margin="0,6,8,6" />
+            <TextBlock Text="{Binding VisitCount}" Grid.Row="0" Grid.Column="1" Margin="0,6,0,6" />
+
+            <TextBlock Text="عدد المرضى" Grid.Row="1" Grid.Column="0" Margin="0,6,8,6" />
+            <TextBlock Text="{Binding PatientCount}" Grid.Row="1" Grid.Column="1" Margin="0,6,0,6" />
+
+            <TextBlock Text="عدد التحاليل" Grid.Row="2" Grid.Column="0" Margin="0,6,8,6" />
+            <TextBlock Text="{Binding TestCount}" Grid.Row="2" Grid.Column="1" Margin="0,6,0,6" />
+
+            <TextBlock Text="إجمالي الفواتير" Grid.Row="3" Grid.Column="0" Margin="0,6,8,6" />
+            <TextBlock Text="{Binding TotalRevenue}" Grid.Row="3" Grid.Column="1" Margin="0,6,0,6" />
+
+            <TextBlock Text="إجمالي المدفوع" Grid.Row="4" Grid.Column="0" Margin="0,6,8,6" />
+            <TextBlock Text="{Binding TotalPaid}" Grid.Row="4" Grid.Column="1" Margin="0,6,0,6" />
+        </Grid>
+
+        <TextBlock Grid.Row="2" Text="{Binding StatusMessage}" Foreground="DarkGreen" Margin="0,12,0,0" />
+    </Grid>
+</UserControl>
