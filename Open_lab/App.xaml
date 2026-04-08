@@ -31,5 +31,36 @@
         <DataTemplate DataType="{x:Type vm:ReportViewerViewModel}">
             <views:ReportViewerView />
         </DataTemplate>
+
+        <DataTemplate DataType="{x:Type vm:PatientSearchViewModel}">
+            <views:PatientSearchView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:PatientHistoryViewModel}">
+            <views:PatientHistoryView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:WorkSheetByPatientViewModel}">
+            <views:WorkSheetByPatientView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:WorkSheetByTestViewModel}">
+            <views:WorkSheetByTestView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:TestCatalogViewModel}">
+            <views:TestCatalogView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:ReferenceRangesViewModel}">
+            <views:ReferenceRangesView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:TestCommentsViewModel}">
+            <views:TestCommentsView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:PriceListsViewModel}">
+            <views:PriceListsView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:CustomGroupsViewModel}">
+            <views:CustomGroupsView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:ReferralsViewModel}">
+            <views:ReferralsView />
+        </DataTemplate>
     </Application.Resources>
 </Application>

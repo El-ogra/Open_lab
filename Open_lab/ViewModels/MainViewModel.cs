@@ -20,6 +20,18 @@ namespace Open_lab.ViewModels
             NavigatePatientBillingCommand = new RelayCommand(_ => NavigatePatientBilling(), _ => IsLoggedIn);
             NavigateResultsEntryCommand = new RelayCommand(_ => NavigateResultsEntry(), _ => IsLoggedIn);
             NavigateReportViewerCommand = new RelayCommand(_ => NavigateReportViewer(), _ => IsLoggedIn);
+
+            NavigatePatientSearchCommand = new RelayCommand(_ => NavigatePatientSearch(), _ => IsLoggedIn);
+            NavigatePatientHistoryCommand = new RelayCommand(_ => NavigatePatientHistory(), _ => IsLoggedIn);
+            NavigateWorkSheetByPatientCommand = new RelayCommand(_ => NavigateWorkSheetByPatient(), _ => IsLoggedIn);
+            NavigateWorkSheetByTestCommand = new RelayCommand(_ => NavigateWorkSheetByTest(), _ => IsLoggedIn);
+            NavigateTestCatalogCommand = new RelayCommand(_ => NavigateTestCatalog(), _ => IsLoggedIn);
+            NavigateReferenceRangesCommand = new RelayCommand(_ => NavigateReferenceRanges(), _ => IsLoggedIn);
+            NavigateTestCommentsCommand = new RelayCommand(_ => NavigateTestComments(), _ => IsLoggedIn);
+            NavigatePriceListsCommand = new RelayCommand(_ => NavigatePriceLists(), _ => IsLoggedIn);
+            NavigateCustomGroupsCommand = new RelayCommand(_ => NavigateCustomGroups(), _ => IsLoggedIn);
+            NavigateReferralsCommand = new RelayCommand(_ => NavigateReferrals(), _ => IsLoggedIn);
+
             LogoutCommand = new RelayCommand(_ => ShowLogin());
 
             ShowLogin();
@@ -49,6 +61,18 @@ namespace Open_lab.ViewModels
         public ICommand NavigatePatientBillingCommand { get; }
         public ICommand NavigateResultsEntryCommand { get; }
         public ICommand NavigateReportViewerCommand { get; }
+
+        public ICommand NavigatePatientSearchCommand { get; }
+        public ICommand NavigatePatientHistoryCommand { get; }
+        public ICommand NavigateWorkSheetByPatientCommand { get; }
+        public ICommand NavigateWorkSheetByTestCommand { get; }
+        public ICommand NavigateTestCatalogCommand { get; }
+        public ICommand NavigateReferenceRangesCommand { get; }
+        public ICommand NavigateTestCommentsCommand { get; }
+        public ICommand NavigatePriceListsCommand { get; }
+        public ICommand NavigateCustomGroupsCommand { get; }
+        public ICommand NavigateReferralsCommand { get; }
+
         public ICommand LogoutCommand { get; }
 
         private void ShowLogin()
@@ -93,6 +117,56 @@ namespace Open_lab.ViewModels
             CurrentViewModel = new ReportViewerViewModel(_dbFactory);
         }
 
+        private void NavigatePatientSearch()
+        {
+            CurrentViewModel = new PatientSearchViewModel(_dbFactory);
+        }
+
+        private void NavigatePatientHistory()
+        {
+            CurrentViewModel = new PatientHistoryViewModel(_dbFactory);
+        }
+
+        private void NavigateWorkSheetByPatient()
+        {
+            CurrentViewModel = new WorkSheetByPatientViewModel(_dbFactory);
+        }
+
+        private void NavigateWorkSheetByTest()
+        {
+            CurrentViewModel = new WorkSheetByTestViewModel(_dbFactory);
+        }
+
+        private void NavigateTestCatalog()
+        {
+            CurrentViewModel = new TestCatalogViewModel(_dbFactory);
+        }
+
+        private void NavigateReferenceRanges()
+        {
+            CurrentViewModel = new ReferenceRangesViewModel(_dbFactory);
+        }
+
+        private void NavigateTestComments()
+        {
+            CurrentViewModel = new TestCommentsViewModel(_dbFactory);
+        }
+
+        private void NavigatePriceLists()
+        {
+            CurrentViewModel = new PriceListsViewModel(_dbFactory);
+        }
+
+        private void NavigateCustomGroups()
+        {
+            CurrentViewModel = new CustomGroupsViewModel(_dbFactory);
+        }
+
+        private void NavigateReferrals()
+        {
+            CurrentViewModel = new ReferralsViewModel(_dbFactory);
+        }
+
         private void RaiseNavigationCanExecuteChanged()
         {
             (NavigateDashboardCommand as RelayCommand)?.RaiseCanExecuteChanged();
@@ -101,6 +175,17 @@ namespace Open_lab.ViewModels
             (NavigatePatientBillingCommand as RelayCommand)?.RaiseCanExecuteChanged();
             (NavigateResultsEntryCommand as RelayCommand)?.RaiseCanExecuteChanged();
             (NavigateReportViewerCommand as RelayCommand)?.RaiseCanExecuteChanged();
+
+            (NavigatePatientSearchCommand as RelayCommand)?.RaiseCanExecuteChanged();
+            (NavigatePatientHistoryCommand as RelayCommand)?.RaiseCanExecuteChanged();
+            (NavigateWorkSheetByPatientCommand as RelayCommand)?.RaiseCanExecuteChanged();
+            (NavigateWorkSheetByTestCommand as RelayCommand)?.RaiseCanExecuteChanged();
+            (NavigateTestCatalogCommand as RelayCommand)?.RaiseCanExecuteChanged();
+            (NavigateReferenceRangesCommand as RelayCommand)?.RaiseCanExecuteChanged();
+            (NavigateTestCommentsCommand as RelayCommand)?.RaiseCanExecuteChanged();
+            (NavigatePriceListsCommand as RelayCommand)?.RaiseCanExecuteChanged();
+            (NavigateCustomGroupsCommand as RelayCommand)?.RaiseCanExecuteChanged();
+            (NavigateReferralsCommand as RelayCommand)?.RaiseCanExecuteChanged();
         }
     }
 }

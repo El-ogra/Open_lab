@@ -27,4 +27,18 @@ namespace Open_lab.ViewModels
         public string? Flag { get; set; }
         public string? Comment { get; set; }
     }
+
+    public class WorkSheetPatientRow
+    {
+        public int VisitId { get; set; }
+        public string PatientName { get; set; } = string.Empty;
+        public DateTime VisitDate { get; set; }
+        public int TestsCount { get; set; }
+    }
+
+    public class WorkSheetTestRow
+    {
+        public string TestName { get; set; } = string.Empty;
+        public int Count { get; set; }
+    }
 }

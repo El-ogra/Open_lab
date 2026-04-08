@@ -1,0 +1,41 @@
+<UserControl x:Class="Open_lab.Views.PatientSearchView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d">
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Orientation="Horizontal">
+            <TextBlock Text="الاسم" VerticalAlignment="Center" Margin="0,0,8,0" />
+            <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Width="160" />
+            <TextBlock Text="Lab ID" VerticalAlignment="Center" Margin="12,0,8,0" />
+            <TextBox Text="{Binding LabId, UpdateSourceTrigger=PropertyChanged}" Width="120" />
+            <TextBlock Text="الهاتف" VerticalAlignment="Center" Margin="12,0,8,0" />
+            <TextBox Text="{Binding Phone, UpdateSourceTrigger=PropertyChanged}" Width="120" />
+            <Button Content="بحث" Margin="12,0,0,0" Command="{Binding SearchCommand}" />
+        </StackPanel>
+
+        <DataGrid Grid.Row="1" ItemsSource="{Binding Patients}" SelectedItem="{Binding SelectedPatient}" AutoGenerateColumns="False" Margin="0,12,0,0">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="ID" Binding="{Binding PatientId}" Width="60" />
+                <DataGridTextColumn Header="Lab ID" Binding="{Binding LabId}" Width="100" />
+                <DataGridTextColumn Header="الاسم" Binding="{Binding FullName}" Width="*" />
+                <DataGridTextColumn Header="الهاتف" Binding="{Binding Phone}" Width="120" />
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <DataGrid Grid.Row="2" ItemsSource="{Binding Visits}" AutoGenerateColumns="False" Margin="0,12,0,0">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="زيارة" Binding="{Binding VisitId}" Width="80" />
+                <DataGridTextColumn Header="التاريخ" Binding="{Binding VisitDate}" Width="180" />
+                <DataGridTextColumn Header="الحالة" Binding="{Binding Status}" Width="120" />
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
+</UserControl>
