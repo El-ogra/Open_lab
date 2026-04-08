@@ -1,0 +1,35 @@
+<UserControl x:Class="Open_lab.Views.PatientBillingView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d">
+    <Grid Margin="16">
+        <StackPanel>
+            <TextBlock Text="حساب المريض" FontSize="20" FontWeight="Bold" />
+            <TextBlock Text="رقم الزيارة" Margin="0,12,0,4" />
+            <TextBox Text="{Binding VisitId, UpdateSourceTrigger=PropertyChanged}" />
+            <Button Content="تحميل" Margin="0,8,0,0" Command="{Binding LoadVisitCommand}" />
+
+            <UniformGrid Columns="2" Margin="0,16,0,0">
+                <TextBlock Text="الإجمالي" />
+                <TextBlock Text="{Binding Total}" />
+                <TextBlock Text="الخصم" />
+                <TextBox Text="{Binding Discount, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBlock Text="المدفوع" />
+                <TextBox Text="{Binding Paid, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBlock Text="الصافي" />
+                <TextBlock Text="{Binding NetTotal}" />
+                <TextBlock Text="المتبقي" />
+                <TextBlock Text="{Binding Balance}" />
+            </UniformGrid>
+
+            <StackPanel Orientation="Horizontal" Margin="0,16,0,0">
+                <Button Content="حفظ الفاتورة" Margin="0,0,8,0" Command="{Binding SaveInvoiceCommand}" />
+                <Button Content="تسجيل دفعة" Command="{Binding AddPaymentCommand}" />
+            </StackPanel>
+
+            <TextBlock Text="{Binding StatusMessage}" Foreground="DarkGreen" Margin="0,12,0,0" />
+        </StackPanel>
+    </Grid>
+</UserControl>

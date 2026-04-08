@@ -1,0 +1,54 @@
+<UserControl x:Class="Open_lab.Views.PatientRegistrationView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d">
+    <Grid Margin="16">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="2*" />
+            <ColumnDefinition Width="3*" />
+        </Grid.ColumnDefinitions>
+        <StackPanel Margin="0,0,16,0">
+            <TextBlock Text="تسجيل مريض" FontSize="20" FontWeight="Bold" />
+            <TextBlock Text="Lab ID" Margin="0,12,0,4" />
+            <TextBox Text="{Binding LabId, UpdateSourceTrigger=PropertyChanged}" />
+            <Button Content="تحميل" Margin="0,8,0,0" Command="{Binding LoadByLabIdCommand}" />
+
+            <TextBlock Text="الاسم" Margin="0,12,0,4" />
+            <TextBox Text="{Binding FullName, UpdateSourceTrigger=PropertyChanged}" />
+
+            <TextBlock Text="النوع" Margin="0,12,0,4" />
+            <TextBox Text="{Binding Gender, UpdateSourceTrigger=PropertyChanged}" />
+
+            <TextBlock Text="تاريخ الميلاد" Margin="0,12,0,4" />
+            <DatePicker SelectedDate="{Binding BirthDate}" />
+
+            <TextBlock Text="الهاتف" Margin="0,12,0,4" />
+            <TextBox Text="{Binding Phone, UpdateSourceTrigger=PropertyChanged}" />
+
+            <TextBlock Text="العنوان" Margin="0,12,0,4" />
+            <TextBox Text="{Binding Address, UpdateSourceTrigger=PropertyChanged}" />
+
+            <StackPanel Orientation="Horizontal" Margin="0,16,0,0">
+                <Button Content="جديد" Width="80" Margin="0,0,8,0" Command="{Binding NewCommand}" />
+                <Button Content="حفظ" Width="80" Margin="0,0,8,0" Command="{Binding SaveCommand}" />
+                <Button Content="حذف" Width="80" Command="{Binding DeleteCommand}" />
+            </StackPanel>
+            <TextBlock Text="{Binding StatusMessage}" Foreground="DarkGreen" Margin="0,12,0,0" />
+        </StackPanel>
+
+        <StackPanel Grid.Column="1">
+            <TextBlock Text="بحث" FontSize="16" FontWeight="Bold" />
+            <Button Content="بحث" Margin="0,8,0,8" Command="{Binding SearchCommand}" />
+            <DataGrid ItemsSource="{Binding Results}" SelectedItem="{Binding SelectedPatient}" AutoGenerateColumns="False" Height="400">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="ID" Binding="{Binding PatientId}" Width="60" />
+                    <DataGridTextColumn Header="Lab ID" Binding="{Binding LabId}" Width="100" />
+                    <DataGridTextColumn Header="الاسم" Binding="{Binding FullName}" Width="*" />
+                    <DataGridTextColumn Header="الهاتف" Binding="{Binding Phone}" Width="120" />
+                </DataGrid.Columns>
+            </DataGrid>
+        </StackPanel>
+    </Grid>
+</UserControl>

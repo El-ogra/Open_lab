@@ -6,8 +6,30 @@
              StartupUri="Views/MainWindow.xaml">
     <Application.Resources>
         <vm:MainViewModel x:Key="MainViewModel" />
+
+        <DataTemplate DataType="{x:Type vm:LoginViewModel}">
+            <views:LoginView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:DashboardViewModel}">
+            <views:DashboardView />
+        </DataTemplate>
         <DataTemplate DataType="{x:Type vm:HomeViewModel}">
             <views:HomeView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:PatientRegistrationViewModel}">
+            <views:PatientRegistrationView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:PatientTestsSelectionViewModel}">
+            <views:PatientTestsSelectionView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:PatientBillingViewModel}">
+            <views:PatientBillingView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:ResultsEntryViewModel}">
+            <views:ResultsEntryView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:ReportViewerViewModel}">
+            <views:ReportViewerView />
         </DataTemplate>
     </Application.Resources>
 </Application>

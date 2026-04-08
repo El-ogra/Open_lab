@@ -22,6 +22,7 @@ namespace Open_lab.Services
             return _db.VisitTests
                 .AsNoTracking()
                 .Include(vt => vt.Visit)
+                .ThenInclude(v => v.Patient)
                 .Include(vt => vt.Test)
                 .Where(vt => vt.Visit.VisitDate >= from && vt.Visit.VisitDate <= to)
                 .OrderBy(vt => vt.Visit.VisitDate)
@@ -34,6 +35,15 @@ namespace Open_lab.Services
                 .AsNoTracking()
                 .Include(rv => rv.Parameter)
                 .Where(rv => rv.VisitTestId == visitTestId)
+                .ToListAsync();
+        }
+
+        public Task<List<TestParameter>> GetParametersForTestAsync(int testId)
+        {
+            return _db.TestParameters
+                .AsNoTracking()
+                .Where(p => p.TestId == testId)
+                .OrderBy(p => p.OrderNo)
                 .ToListAsync();
         }
 
