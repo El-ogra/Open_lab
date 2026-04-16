@@ -18,34 +18,14 @@ namespace Open_lab.Services
 
         public async Task<bool> HasPermissionAsync(int userId, string permissionCode)
         {
-            if (await IsAdminAsync(userId))
-            {
-                return true;
-            }
-
             var codes = await GetPermissionCodesInternalAsync(userId);
-            return codes.Contains(PermissionCodes.FullAccess) || codes.Contains(permissionCode, StringComparer.OrdinalIgnoreCase);
+            return codes.Contains(PermissionCodes.FullAccess, StringComparer.OrdinalIgnoreCase)
+                || codes.Contains(permissionCode, StringComparer.OrdinalIgnoreCase);
         }
 
         public async Task<IReadOnlyCollection<string>> GetPermissionCodesAsync(int userId)
         {
-            if (await IsAdminAsync(userId))
-            {
-                return PermissionCodes.All.ToArray();
-            }
-
             return await GetPermissionCodesInternalAsync(userId);
-        }
-
-        private async Task<bool> IsAdminAsync(int userId)
-        {
-            var username = await _db.Users
-                .AsNoTracking()
-                .Where(u => u.UserId == userId)
-                .Select(u => u.Username)
-                .FirstOrDefaultAsync();
-
-            return string.Equals(username, "admin", StringComparison.OrdinalIgnoreCase);
         }
 
         private async Task<List<string>> GetPermissionCodesInternalAsync(int userId)

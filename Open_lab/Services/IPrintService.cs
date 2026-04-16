@@ -13,5 +13,6 @@ namespace Open_lab.Services
         Task PrintPatientHistoryAsync(PatientHistoryReportData history);
         Task PrintWorksheetByPatientAsync(DateTime from, DateTime to, IReadOnlyCollection<WorkSheetPatientRow> rows);
         Task PrintWorksheetByTestAsync(DateTime from, DateTime to, IReadOnlyCollection<WorkSheetTestRow> rows);
+        Task PrintTextReportAsync(string title, IReadOnlyCollection<string> lines, string? jobName = null);
     }
 }

@@ -7,26 +7,77 @@
     <Grid Margin="16">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <StackPanel Orientation="Horizontal">
-            <TextBlock Text="المفتاح" VerticalAlignment="Center" Margin="0,0,8,0" />
-            <TextBox Text="{Binding Key, UpdateSourceTrigger=PropertyChanged}" Width="200" />
-            <TextBlock Text="القيمة" VerticalAlignment="Center" Margin="12,0,8,0" />
-            <TextBox Text="{Binding Value, UpdateSourceTrigger=PropertyChanged}" Width="260" />
-            <Button Content="حفظ" Margin="12,0,0,0" Command="{Binding SaveCommand}" />
-            <Button Content="حذف" Margin="8,0,0,0" Command="{Binding DeleteCommand}" />
+        <GroupBox Header="إعدادات التقارير والطباعة" Margin="0,0,0,10">
+            <Grid Margin="8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="180" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="180" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <TextBlock Grid.Row="0" Grid.Column="0" Text="رأس التقرير" Margin="0,4" VerticalAlignment="Center" />
+                <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding ReportHeader, UpdateSourceTrigger=PropertyChanged}" Margin="0,4" />
+                <TextBlock Grid.Row="0" Grid.Column="2" Text="ذيل التقرير" Margin="10,4,0,4" VerticalAlignment="Center" />
+                <TextBox Grid.Row="0" Grid.Column="3" Text="{Binding ReportFooter, UpdateSourceTrigger=PropertyChanged}" Margin="0,4" />
+
+                <TextBlock Grid.Row="1" Grid.Column="0" Text="الهامش العلوي (سم)" Margin="0,4" VerticalAlignment="Center" />
+                <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding ReportMarginTop, UpdateSourceTrigger=PropertyChanged}" Margin="0,4" />
+                <TextBlock Grid.Row="1" Grid.Column="2" Text="الهامش السفلي (سم)" Margin="10,4,0,4" VerticalAlignment="Center" />
+                <TextBox Grid.Row="1" Grid.Column="3" Text="{Binding ReportMarginBottom, UpdateSourceTrigger=PropertyChanged}" Margin="0,4" />
+
+                <TextBlock Grid.Row="2" Grid.Column="0" Text="اللون الأساسي" Margin="0,4" VerticalAlignment="Center" />
+                <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding ReportPrimaryColor, UpdateSourceTrigger=PropertyChanged}" Margin="0,4" />
+                <TextBlock Grid.Row="2" Grid.Column="2" Text="الطابعة الافتراضية" Margin="10,4,0,4" VerticalAlignment="Center" />
+                <TextBox Grid.Row="2" Grid.Column="3" Text="{Binding DefaultPrinterName, UpdateSourceTrigger=PropertyChanged}" Margin="0,4" />
+
+                <TextBlock Grid.Row="3" Grid.Column="0" Text="رأس الإيصال" Margin="0,4" VerticalAlignment="Center" />
+                <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding ReceiptHeaderText, UpdateSourceTrigger=PropertyChanged}" Margin="0,4" />
+                <TextBlock Grid.Row="3" Grid.Column="2" Text="ذيل الإيصال" Margin="10,4,0,4" VerticalAlignment="Center" />
+                <TextBox Grid.Row="3" Grid.Column="3" Text="{Binding ReceiptFooterText, UpdateSourceTrigger=PropertyChanged}" Margin="0,4" />
+
+                <TextBlock Grid.Row="4" Grid.Column="0" Text="عدد نسخ الإيصال" Margin="0,4" VerticalAlignment="Center" />
+                <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding ReceiptCopies, UpdateSourceTrigger=PropertyChanged}" Margin="0,4" />
+                <CheckBox Grid.Row="4" Grid.Column="3" Content="إظهار الشعار في الإيصال" IsChecked="{Binding ReceiptShowLogo}" Margin="0,4" VerticalAlignment="Center" />
+            </Grid>
+        </GroupBox>
+
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,10">
+            <Button Content="حفظ الإعدادات المتخصصة" Command="{Binding SaveProfileCommand}" />
+            <Button Content="إعادة تحميل" Margin="8,0,0,0" Command="{Binding ReloadCommand}" />
         </StackPanel>
 
-        <DataGrid Grid.Row="1" ItemsSource="{Binding Settings}" SelectedItem="{Binding SelectedSetting}" AutoGenerateColumns="False" Margin="0,12,0,0">
+        <GroupBox Grid.Row="2" Header="إعدادات متقدمة (Key/Value)" Margin="0,0,0,8">
+            <StackPanel Orientation="Horizontal" Margin="8">
+                <TextBlock Text="المفتاح" VerticalAlignment="Center" Margin="0,0,8,0" />
+                <TextBox Text="{Binding Key, UpdateSourceTrigger=PropertyChanged}" Width="200" />
+                <TextBlock Text="القيمة" VerticalAlignment="Center" Margin="12,0,8,0" />
+                <TextBox Text="{Binding Value, UpdateSourceTrigger=PropertyChanged}" Width="280" />
+                <Button Content="حفظ" Margin="12,0,0,0" Command="{Binding SaveRawSettingCommand}" />
+                <Button Content="حذف" Margin="8,0,0,0" Command="{Binding DeleteRawSettingCommand}" />
+            </StackPanel>
+        </GroupBox>
+
+        <DataGrid Grid.Row="3" ItemsSource="{Binding Settings}" SelectedItem="{Binding SelectedSetting}" AutoGenerateColumns="False">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="المفتاح" Binding="{Binding Key}" Width="220" />
                 <DataGridTextColumn Header="القيمة" Binding="{Binding Value}" Width="*" />
             </DataGrid.Columns>
         </DataGrid>
 
-        <TextBlock Grid.Row="2" Text="{Binding StatusMessage}" Foreground="DarkGreen" Margin="0,12,0,0" />
+        <TextBlock Grid.Row="4" Text="{Binding StatusMessage}" Foreground="DarkGreen" Margin="0,10,0,0" TextWrapping="Wrap" />
     </Grid>
 </UserControl>

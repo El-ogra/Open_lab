@@ -17,7 +17,7 @@ namespace Open_lab.ViewModels
         {
             _attendanceService = attendanceService;
             Logs = new ObservableCollection<AttendanceLogRow>();
-            LoadLogsCommand = new RelayCommand(async _ => await LoadLogsAsync());
+            LoadLogsCommand = new RelayCommand(async _ => await LoadLogsAsync(), _ => AppSession.HasPermission(PermissionCodes.UsersView));
         }
 
         public DateTime DateFrom

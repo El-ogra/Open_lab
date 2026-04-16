@@ -63,6 +63,39 @@ namespace Open_lab.ViewModels
         public string? Username { get; set; }
     }
 
+    public class TreasuryByUserRow
+    {
+        public string Username { get; set; } = string.Empty;
+        public int PaymentsCount { get; set; }
+        public decimal TotalAmount { get; set; }
+    }
+
+    public class TreasuryByReferralRow
+    {
+        public string ReferralName { get; set; } = string.Empty;
+        public int VisitsCount { get; set; }
+        public decimal TotalInvoiced { get; set; }
+        public decimal TotalPaid { get; set; }
+        public decimal TotalBalance { get; set; }
+    }
+
+    public class StatisticsGenderRow
+    {
+        public string Gender { get; set; } = string.Empty;
+        public int VisitsCount { get; set; }
+        public int TestsCount { get; set; }
+        public decimal Revenue { get; set; }
+    }
+
+    public class StatisticsReferralRow
+    {
+        public string ReferralName { get; set; } = string.Empty;
+        public int VisitsCount { get; set; }
+        public int TestsCount { get; set; }
+        public decimal Revenue { get; set; }
+        public decimal Paid { get; set; }
+    }
+
     public class InvoicePaymentRow
     {
         public int PaymentId { get; set; }

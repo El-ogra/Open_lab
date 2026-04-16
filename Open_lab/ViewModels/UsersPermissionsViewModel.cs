@@ -28,9 +28,12 @@ namespace Open_lab.ViewModels
             Permissions = new ObservableCollection<PermissionToggle>();
 
             SaveUserCommand = new RelayCommand(async _ => await SaveUserAsync(), _ => AppSession.HasPermission(PermissionCodes.UsersEdit));
+            DeleteUserCommand = new RelayCommand(async _ => await DeleteUserAsync(), _ => AppSession.HasPermission(PermissionCodes.UsersEdit) && SelectedUser != null);
             SaveRoleCommand = new RelayCommand(async _ => await SaveRoleAsync(), _ => AppSession.HasPermission(PermissionCodes.UsersEdit));
+            DeleteRoleCommand = new RelayCommand(async _ => await DeleteRoleAsync(), _ => AppSession.HasPermission(PermissionCodes.UsersEdit) && SelectedRole != null);
             SaveRolePermissionsCommand = new RelayCommand(async _ => await SaveRolePermissionsAsync(), _ => AppSession.HasPermission(PermissionCodes.UsersEdit));
             AssignRoleCommand = new RelayCommand(async _ => await AssignRoleAsync(), _ => AppSession.HasPermission(PermissionCodes.UsersEdit) && SelectedUser != null && SelectedRole != null);
+            UnassignRoleCommand = new RelayCommand(async _ => await UnassignRoleAsync(), _ => AppSession.HasPermission(PermissionCodes.UsersEdit) && SelectedUser != null && SelectedRole != null);
             ReloadCommand = new RelayCommand(async _ => await LoadAsync(), _ => AppSession.HasPermission(PermissionCodes.UsersView));
 
             _ = LoadAsync();
@@ -48,6 +51,8 @@ namespace Open_lab.ViewModels
                 if (SetProperty(ref _selectedUser, value))
                 {
                     (AssignRoleCommand as RelayCommand)?.RaiseCanExecuteChanged();
+                    (UnassignRoleCommand as RelayCommand)?.RaiseCanExecuteChanged();
+                    (DeleteUserCommand as RelayCommand)?.RaiseCanExecuteChanged();
                     LoadFromUser();
                 }
             }
@@ -61,6 +66,8 @@ namespace Open_lab.ViewModels
                 if (SetProperty(ref _selectedRole, value))
                 {
                     (AssignRoleCommand as RelayCommand)?.RaiseCanExecuteChanged();
+                    (UnassignRoleCommand as RelayCommand)?.RaiseCanExecuteChanged();
+                    (DeleteRoleCommand as RelayCommand)?.RaiseCanExecuteChanged();
                     _ = LoadPermissionsAsync();
                 }
             }
@@ -103,9 +110,12 @@ namespace Open_lab.ViewModels
         }
 
         public ICommand SaveUserCommand { get; }
+        public ICommand DeleteUserCommand { get; }
         public ICommand SaveRoleCommand { get; }
+        public ICommand DeleteRoleCommand { get; }
         public ICommand SaveRolePermissionsCommand { get; }
         public ICommand AssignRoleCommand { get; }
+        public ICommand UnassignRoleCommand { get; }
         public ICommand ReloadCommand { get; }
 
         private async Task LoadAsync()
@@ -161,31 +171,58 @@ namespace Open_lab.ViewModels
                 return;
             }
 
-            if (SelectedUser == null || SelectedUser.UserId == 0)
+            try
             {
-                var user = await _userAdminService.CreateUserAsync(new User
+                if (SelectedUser == null || SelectedUser.UserId == 0)
                 {
-                    Username = Username,
-                    FullName = FullName,
-                    IsActive = IsActive
-                }, Password);
+                    var user = await _userAdminService.CreateUserAsync(new User
+                    {
+                        Username = Username,
+                        FullName = FullName,
+                        IsActive = IsActive
+                    }, Password);
 
-                Users.Add(user);
-                SelectedUser = user;
-                StatusMessage = "تم إنشاء المستخدم.";
+                    Users.Add(user);
+                    SelectedUser = user;
+                    StatusMessage = "تم إنشاء المستخدم.";
+                }
+                else
+                {
+                    await _userAdminService.UpdateUserAsync(new User
+                    {
+                        UserId = SelectedUser.UserId,
+                        Username = Username,
+                        FullName = FullName,
+                        IsActive = IsActive
+                    }, Password);
+
+                    StatusMessage = "تم تحديث المستخدم.";
+                    await LoadAsync();
+                }
             }
-            else
+            catch (Exception ex)
             {
-                await _userAdminService.UpdateUserAsync(new User
-                {
-                    UserId = SelectedUser.UserId,
-                    Username = Username,
-                    FullName = FullName,
-                    IsActive = IsActive
-                }, Password);
+                StatusMessage = "خطأ: " + ex.Message;
+            }
+        }
 
-                StatusMessage = "تم تحديث المستخدم.";
+        private async Task DeleteUserAsync()
+        {
+            if (SelectedUser == null)
+            {
+                return;
+            }
+
+            try
+            {
+                await _userAdminService.DeleteUserAsync(SelectedUser.UserId);
+                StatusMessage = "تم حذف المستخدم.";
+                SelectedUser = null;
                 await LoadAsync();
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = "خطأ: " + ex.Message;
             }
         }
 
@@ -197,10 +234,38 @@ namespace Open_lab.ViewModels
                 return;
             }
 
-            var role = await _userAdminService.CreateRoleAsync(RoleName);
-            Roles.Add(role);
-            SelectedRole = role;
-            StatusMessage = "تم إنشاء الدور.";
+            try
+            {
+                var role = await _userAdminService.CreateRoleAsync(RoleName);
+                Roles.Add(role);
+                SelectedRole = role;
+                RoleName = string.Empty;
+                StatusMessage = "تم إنشاء الدور.";
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = "خطأ: " + ex.Message;
+            }
+        }
+
+        private async Task DeleteRoleAsync()
+        {
+            if (SelectedRole == null)
+            {
+                return;
+            }
+
+            try
+            {
+                await _userAdminService.DeleteRoleAsync(SelectedRole.RoleId);
+                StatusMessage = "تم حذف الدور.";
+                SelectedRole = null;
+                await LoadAsync();
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = "خطأ: " + ex.Message;
+            }
         }
 
         private async Task AssignRoleAsync()
@@ -210,8 +275,33 @@ namespace Open_lab.ViewModels
                 return;
             }
 
-            await _userAdminService.AssignSingleRoleAsync(SelectedUser.UserId, SelectedRole.RoleId);
-            StatusMessage = "تم ربط المستخدم بالدور.";
+            try
+            {
+                await _userAdminService.AssignSingleRoleAsync(SelectedUser.UserId, SelectedRole.RoleId);
+                StatusMessage = "تم ربط المستخدم بالدور.";
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = "خطأ: " + ex.Message;
+            }
+        }
+
+        private async Task UnassignRoleAsync()
+        {
+            if (SelectedUser == null || SelectedRole == null)
+            {
+                return;
+            }
+
+            try
+            {
+                await _userAdminService.RemoveUserRoleAsync(SelectedUser.UserId, SelectedRole.RoleId);
+                StatusMessage = "تم فك ربط الدور من المستخدم.";
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = "خطأ: " + ex.Message;
+            }
         }
 
         private async Task SaveRolePermissionsAsync()
@@ -221,8 +311,15 @@ namespace Open_lab.ViewModels
                 return;
             }
 
-            await _userAdminService.SaveRolePermissionsAsync(SelectedRole.RoleId, Permissions.Where(p => p.IsGranted).Select(p => p.Code));
-            StatusMessage = "تم حفظ الصلاحيات.";
+            try
+            {
+                await _userAdminService.SaveRolePermissionsAsync(SelectedRole.RoleId, Permissions.Where(p => p.IsGranted).Select(p => p.Code));
+                StatusMessage = "تم حفظ الصلاحيات.";
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = "خطأ: " + ex.Message;
+            }
         }
     }
 }

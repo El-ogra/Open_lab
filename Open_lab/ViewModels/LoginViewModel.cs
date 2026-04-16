@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Open_lab.Services;
@@ -82,17 +83,18 @@ namespace Open_lab.ViewModels
                     return;
                 }
 
-                AppSession.UserId = user.UserId;
-                AppSession.Username = user.Username;
-                AppSession.IsAdmin = user.Username.Equals("admin", StringComparison.OrdinalIgnoreCase);
-
-                if (AppSession.IsAdmin)
+                var isAdminAccount = user.Username.Equals("admin", StringComparison.OrdinalIgnoreCase);
+                if (isAdminAccount)
                 {
                     await _adminSetupService.EnsureAdminAccessAsync(user.UserId);
                 }
 
                 var permissionCodes = await _authorizationService.GetPermissionCodesAsync(user.UserId);
+
+                AppSession.UserId = user.UserId;
+                AppSession.Username = user.Username;
                 AppSession.SetPermissions(permissionCodes);
+                AppSession.IsAdmin = permissionCodes.Contains(PermissionCodes.FullAccess, StringComparer.OrdinalIgnoreCase);
 
                 var attendance = await _attendanceService.CreateLoginAsync(user.UserId, "تسجيل دخول");
                 AppSession.AttendanceLogId = attendance.AttendanceLogId;

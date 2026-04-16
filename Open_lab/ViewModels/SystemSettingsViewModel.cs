@@ -1,3 +1,4 @@
+using System;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -12,18 +13,92 @@ namespace Open_lab.ViewModels
         private Setting? _selectedSetting;
         private string _key = string.Empty;
         private string _value = string.Empty;
+        private string _reportHeader = string.Empty;
+        private string _reportFooter = string.Empty;
+        private double _reportMarginTop = 1.5;
+        private double _reportMarginBottom = 1.5;
+        private string _reportPrimaryColor = "#2B2B2B";
+        private string _defaultPrinterName = "Microsoft Print to PDF";
+        private string _receiptHeaderText = "إيصال مختبر";
+        private string _receiptFooterText = "شكراً لتعاملكم";
+        private bool _receiptShowLogo;
+        private int _receiptCopies = 1;
         private string _statusMessage = string.Empty;
 
         public SystemSettingsViewModel(ISystemSettingsService settingsService)
         {
             _settingsService = settingsService;
             Settings = new ObservableCollection<Setting>();
-            SaveCommand = new RelayCommand(async _ => await SaveAsync(), _ => AppSession.HasPermission(PermissionCodes.SettingsEdit));
-            DeleteCommand = new RelayCommand(async _ => await DeleteAsync(), _ => AppSession.HasPermission(PermissionCodes.SettingsEdit) && SelectedSetting != null);
+
+            SaveProfileCommand = new RelayCommand(async _ => await SaveProfileAsync(), _ => AppSession.HasPermission(PermissionCodes.SettingsEdit));
+            ReloadCommand = new RelayCommand(async _ => await LoadAsync(), _ => AppSession.HasPermission(PermissionCodes.SettingsView));
+            SaveRawSettingCommand = new RelayCommand(async _ => await SaveRawSettingAsync(), _ => AppSession.HasPermission(PermissionCodes.SettingsEdit));
+            DeleteRawSettingCommand = new RelayCommand(async _ => await DeleteRawSettingAsync(), _ => AppSession.HasPermission(PermissionCodes.SettingsEdit) && SelectedSetting != null);
+
             _ = LoadAsync();
         }
 
         public ObservableCollection<Setting> Settings { get; }
+
+        public string ReportHeader
+        {
+            get => _reportHeader;
+            set => SetProperty(ref _reportHeader, value);
+        }
+
+        public string ReportFooter
+        {
+            get => _reportFooter;
+            set => SetProperty(ref _reportFooter, value);
+        }
+
+        public double ReportMarginTop
+        {
+            get => _reportMarginTop;
+            set => SetProperty(ref _reportMarginTop, value);
+        }
+
+        public double ReportMarginBottom
+        {
+            get => _reportMarginBottom;
+            set => SetProperty(ref _reportMarginBottom, value);
+        }
+
+        public string ReportPrimaryColor
+        {
+            get => _reportPrimaryColor;
+            set => SetProperty(ref _reportPrimaryColor, value);
+        }
+
+        public string DefaultPrinterName
+        {
+            get => _defaultPrinterName;
+            set => SetProperty(ref _defaultPrinterName, value);
+        }
+
+        public string ReceiptHeaderText
+        {
+            get => _receiptHeaderText;
+            set => SetProperty(ref _receiptHeaderText, value);
+        }
+
+        public string ReceiptFooterText
+        {
+            get => _receiptFooterText;
+            set => SetProperty(ref _receiptFooterText, value);
+        }
+
+        public bool ReceiptShowLogo
+        {
+            get => _receiptShowLogo;
+            set => SetProperty(ref _receiptShowLogo, value);
+        }
+
+        public int ReceiptCopies
+        {
+            get => _receiptCopies;
+            set => SetProperty(ref _receiptCopies, value);
+        }
 
         public Setting? SelectedSetting
         {
@@ -37,7 +112,8 @@ namespace Open_lab.ViewModels
                         Key = value.Key;
                         Value = value.Value ?? string.Empty;
                     }
-                    (DeleteCommand as RelayCommand)?.RaiseCanExecuteChanged();
+
+                    (DeleteRawSettingCommand as RelayCommand)?.RaiseCanExecuteChanged();
                 }
             }
         }
@@ -60,20 +136,73 @@ namespace Open_lab.ViewModels
             private set => SetProperty(ref _statusMessage, value);
         }
 
-        public ICommand SaveCommand { get; }
-        public ICommand DeleteCommand { get; }
+        public ICommand SaveProfileCommand { get; }
+        public ICommand ReloadCommand { get; }
+        public ICommand SaveRawSettingCommand { get; }
+        public ICommand DeleteRawSettingCommand { get; }
 
         private async Task LoadAsync()
         {
-            var items = await _settingsService.GetSettingsAsync();
-            Settings.Clear();
-            foreach (var item in items)
+            try
             {
-                Settings.Add(item);
+                var profile = await _settingsService.GetProfileAsync();
+                ReportHeader = profile.ReportHeader;
+                ReportFooter = profile.ReportFooter;
+                ReportMarginTop = profile.ReportMarginTop;
+                ReportMarginBottom = profile.ReportMarginBottom;
+                ReportPrimaryColor = profile.ReportPrimaryColor;
+                DefaultPrinterName = profile.DefaultPrinterName;
+                ReceiptHeaderText = profile.ReceiptHeaderText;
+                ReceiptFooterText = profile.ReceiptFooterText;
+                ReceiptShowLogo = profile.ReceiptShowLogo;
+                ReceiptCopies = profile.ReceiptCopies;
+
+                var items = await _settingsService.GetSettingsAsync();
+                Settings.Clear();
+                foreach (var item in items)
+                {
+                    Settings.Add(item);
+                }
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = "خطأ: " + ex.Message;
             }
         }
 
-        private async Task SaveAsync()
+        private async Task SaveProfileAsync()
+        {
+            try
+            {
+                if (ReceiptCopies < 1)
+                {
+                    ReceiptCopies = 1;
+                }
+
+                await _settingsService.SaveProfileAsync(new SystemSettingsProfile
+                {
+                    ReportHeader = ReportHeader,
+                    ReportFooter = ReportFooter,
+                    ReportMarginTop = ReportMarginTop,
+                    ReportMarginBottom = ReportMarginBottom,
+                    ReportPrimaryColor = ReportPrimaryColor,
+                    DefaultPrinterName = DefaultPrinterName,
+                    ReceiptHeaderText = ReceiptHeaderText,
+                    ReceiptFooterText = ReceiptFooterText,
+                    ReceiptShowLogo = ReceiptShowLogo,
+                    ReceiptCopies = ReceiptCopies
+                });
+
+                await LoadAsync();
+                StatusMessage = "تم حفظ إعدادات النظام المتخصصة.";
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = "خطأ: " + ex.Message;
+            }
+        }
+
+        private async Task SaveRawSettingAsync()
         {
             if (string.IsNullOrWhiteSpace(Key))
             {
@@ -81,23 +210,36 @@ namespace Open_lab.ViewModels
                 return;
             }
 
-            await _settingsService.SaveSettingAsync(Key, Value);
-            await LoadAsync();
-            StatusMessage = "تم حفظ الإعداد.";
+            try
+            {
+                await _settingsService.SaveSettingAsync(Key, Value);
+                await LoadAsync();
+                StatusMessage = "تم حفظ الإعداد المتقدم.";
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = "خطأ: " + ex.Message;
+            }
         }
 
-        private async Task DeleteAsync()
+        private async Task DeleteRawSettingAsync()
         {
             if (SelectedSetting == null)
             {
                 return;
             }
 
-            await _settingsService.DeleteSettingAsync(SelectedSetting.Key);
-            await LoadAsync();
-            SelectedSetting = null;
-            StatusMessage = "تم حذف الإعداد.";
+            try
+            {
+                await _settingsService.DeleteSettingAsync(SelectedSetting.Key);
+                await LoadAsync();
+                SelectedSetting = null;
+                StatusMessage = "تم حذف الإعداد المتقدم.";
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = "خطأ: " + ex.Message;
+            }
         }
     }
 }
-

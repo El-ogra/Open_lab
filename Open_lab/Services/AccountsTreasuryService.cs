@@ -19,19 +19,50 @@ namespace Open_lab.Services
         public async Task<AccountsTreasurySnapshot> GetSnapshotAsync(DateTime from, DateTime to)
         {
             var invoices = await _db.Invoices
+                .AsNoTracking()
                 .Include(i => i.Visit)
                 .ThenInclude(v => v.Patient)
+                .Include(i => i.Visit)
+                .ThenInclude(v => v.Referral)
                 .Where(i => i.Visit.VisitDate >= from && i.Visit.VisitDate <= to)
                 .ToListAsync();
 
             var payments = await _db.Payments
+                .AsNoTracking()
                 .Include(p => p.Invoice)
                 .ThenInclude(i => i.Visit)
                 .ThenInclude(v => v.Patient)
+                .Include(p => p.Invoice)
+                .ThenInclude(i => i.Visit)
+                .ThenInclude(v => v.Referral)
                 .Include(p => p.User)
                 .Where(p => p.PaymentDate >= from && p.PaymentDate <= to)
                 .OrderByDescending(p => p.PaymentDate)
                 .ToListAsync();
+
+            var byUser = payments
+                .GroupBy(p => string.IsNullOrWhiteSpace(p.User?.Username) ? "غير محدد" : p.User!.Username)
+                .Select(g => new TreasuryByUserRow
+                {
+                    Username = g.Key,
+                    PaymentsCount = g.Count(),
+                    TotalAmount = g.Sum(p => p.Amount)
+                })
+                .OrderByDescending(r => r.TotalAmount)
+                .ToList();
+
+            var byReferral = invoices
+                .GroupBy(i => i.Visit.Referral?.Name ?? "بدون جهة")
+                .Select(g => new TreasuryByReferralRow
+                {
+                    ReferralName = g.Key,
+                    VisitsCount = g.Select(i => i.VisitId).Distinct().Count(),
+                    TotalInvoiced = g.Sum(i => i.NetTotal),
+                    TotalPaid = g.Sum(i => i.Paid),
+                    TotalBalance = g.Sum(i => i.Balance)
+                })
+                .OrderByDescending(r => r.TotalInvoiced)
+                .ToList();
 
             return new AccountsTreasurySnapshot
             {
@@ -46,7 +77,9 @@ namespace Open_lab.Services
                     Amount = p.Amount,
                     PaymentDate = p.PaymentDate,
                     Username = p.User?.Username
-                }).ToList()
+                }).ToList(),
+                ByUser = byUser,
+                ByReferral = byReferral
             };
         }
     }

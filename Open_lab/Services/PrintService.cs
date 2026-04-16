@@ -153,6 +153,32 @@ namespace Open_lab.Services
             return Task.CompletedTask;
         }
 
+        public Task PrintTextReportAsync(string title, IReadOnlyCollection<string> lines, string? jobName = null)
+        {
+            if (string.IsNullOrWhiteSpace(title))
+            {
+                throw new ArgumentException("العنوان مطلوب.", nameof(title));
+            }
+
+            var document = CreateDocument(title, 12);
+            document.Blocks.Add(CreateHeader(title));
+
+            if (lines.Count == 0)
+            {
+                document.Blocks.Add(new Paragraph(new Run("لا توجد بيانات.")));
+            }
+            else
+            {
+                foreach (var line in lines)
+                {
+                    document.Blocks.Add(new Paragraph(new Run(line)));
+                }
+            }
+
+            PrintDocument(document, jobName ?? title);
+            return Task.CompletedTask;
+        }
+
         private static FlowDocument CreateDocument(string title, double fontSize)
         {
             return new FlowDocument

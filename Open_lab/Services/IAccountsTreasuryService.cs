@@ -11,6 +11,8 @@ namespace Open_lab.Services
         public decimal TotalPaid { get; init; }
         public decimal TotalBalance { get; init; }
         public List<AccountsPaymentRow> Payments { get; init; } = new();
+        public List<TreasuryByUserRow> ByUser { get; init; } = new();
+        public List<TreasuryByReferralRow> ByReferral { get; init; } = new();
     }
 
     public interface IAccountsTreasuryService

@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
@@ -9,6 +11,17 @@ namespace Open_lab.Services
 {
     public class SystemSettingsService : ISystemSettingsService
     {
+        private const string ReportHeaderKey = "Report.Header";
+        private const string ReportFooterKey = "Report.Footer";
+        private const string ReportMarginTopKey = "Report.MarginTop";
+        private const string ReportMarginBottomKey = "Report.MarginBottom";
+        private const string ReportPrimaryColorKey = "Report.PrimaryColor";
+        private const string PrinterDefaultKey = "Printer.Default";
+        private const string ReceiptHeaderKey = "Receipt.Header";
+        private const string ReceiptFooterKey = "Receipt.Footer";
+        private const string ReceiptShowLogoKey = "Receipt.ShowLogo";
+        private const string ReceiptCopiesKey = "Receipt.Copies";
+
         private readonly OpenLabDbContext _db;
 
         public SystemSettingsService(OpenLabDbContext db)
@@ -47,6 +60,82 @@ namespace Open_lab.Services
 
             _db.Settings.Remove(setting);
             await _db.SaveChangesAsync();
+        }
+
+        public async Task<SystemSettingsProfile> GetProfileAsync()
+        {
+            var dictionary = await _db.Settings
+                .AsNoTracking()
+                .Where(s =>
+                    s.Key == ReportHeaderKey ||
+                    s.Key == ReportFooterKey ||
+                    s.Key == ReportMarginTopKey ||
+                    s.Key == ReportMarginBottomKey ||
+                    s.Key == ReportPrimaryColorKey ||
+                    s.Key == PrinterDefaultKey ||
+                    s.Key == ReceiptHeaderKey ||
+                    s.Key == ReceiptFooterKey ||
+                    s.Key == ReceiptShowLogoKey ||
+                    s.Key == ReceiptCopiesKey)
+                .ToDictionaryAsync(s => s.Key, s => s.Value);
+
+            return new SystemSettingsProfile
+            {
+                ReportHeader = GetValue(dictionary, ReportHeaderKey, "Open_lab"),
+                ReportFooter = GetValue(dictionary, ReportFooterKey, string.Empty),
+                ReportMarginTop = ParseDouble(GetValue(dictionary, ReportMarginTopKey, "1.5"), 1.5),
+                ReportMarginBottom = ParseDouble(GetValue(dictionary, ReportMarginBottomKey, "1.5"), 1.5),
+                ReportPrimaryColor = GetValue(dictionary, ReportPrimaryColorKey, "#2B2B2B"),
+                DefaultPrinterName = GetValue(dictionary, PrinterDefaultKey, "Microsoft Print to PDF"),
+                ReceiptHeaderText = GetValue(dictionary, ReceiptHeaderKey, "إيصال مختبر"),
+                ReceiptFooterText = GetValue(dictionary, ReceiptFooterKey, "شكراً لتعاملكم"),
+                ReceiptShowLogo = ParseBool(GetValue(dictionary, ReceiptShowLogoKey, "false")),
+                ReceiptCopies = ParseInt(GetValue(dictionary, ReceiptCopiesKey, "1"), 1)
+            };
+        }
+
+        public async Task SaveProfileAsync(SystemSettingsProfile profile)
+        {
+            await SaveSettingAsync(ReportHeaderKey, profile.ReportHeader);
+            await SaveSettingAsync(ReportFooterKey, profile.ReportFooter);
+            await SaveSettingAsync(ReportMarginTopKey, profile.ReportMarginTop.ToString(CultureInfo.InvariantCulture));
+            await SaveSettingAsync(ReportMarginBottomKey, profile.ReportMarginBottom.ToString(CultureInfo.InvariantCulture));
+            await SaveSettingAsync(ReportPrimaryColorKey, profile.ReportPrimaryColor);
+            await SaveSettingAsync(PrinterDefaultKey, profile.DefaultPrinterName);
+            await SaveSettingAsync(ReceiptHeaderKey, profile.ReceiptHeaderText);
+            await SaveSettingAsync(ReceiptFooterKey, profile.ReceiptFooterText);
+            await SaveSettingAsync(ReceiptShowLogoKey, profile.ReceiptShowLogo ? "true" : "false");
+            await SaveSettingAsync(ReceiptCopiesKey, profile.ReceiptCopies.ToString(CultureInfo.InvariantCulture));
+        }
+
+        private static string GetValue(IReadOnlyDictionary<string, string?> dictionary, string key, string fallback)
+        {
+            return dictionary.TryGetValue(key, out var value) && !string.IsNullOrWhiteSpace(value) ? value : fallback;
+        }
+
+        private static double ParseDouble(string raw, double fallback)
+        {
+            if (double.TryParse(raw, NumberStyles.Any, CultureInfo.InvariantCulture, out var value))
+            {
+                return value;
+            }
+
+            if (double.TryParse(raw, NumberStyles.Any, CultureInfo.CurrentCulture, out value))
+            {
+                return value;
+            }
+
+            return fallback;
+        }
+
+        private static int ParseInt(string raw, int fallback)
+        {
+            return int.TryParse(raw, NumberStyles.Integer, CultureInfo.InvariantCulture, out var value) ? value : fallback;
+        }
+
+        private static bool ParseBool(string raw)
+        {
+            return string.Equals(raw, "true", StringComparison.OrdinalIgnoreCase) || raw == "1";
         }
     }
 }

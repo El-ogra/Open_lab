@@ -20,12 +20,19 @@
             <TextBlock Text="الاسم الكامل" Margin="0,12,0,4" />
             <TextBox Text="{Binding FullName, UpdateSourceTrigger=PropertyChanged}" />
             <CheckBox Content="نشط" IsChecked="{Binding IsActive}" Margin="0,8,0,0" />
-            <Button Content="حفظ المستخدم" Margin="0,12,0,0" Command="{Binding SaveUserCommand}" />
+
+            <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
+                <Button Content="حفظ المستخدم" Command="{Binding SaveUserCommand}" />
+                <Button Content="حذف المستخدم" Margin="8,0,0,0" Command="{Binding DeleteUserCommand}" />
+            </StackPanel>
 
             <TextBlock Text="الدور" Margin="0,12,0,4" />
             <ComboBox ItemsSource="{Binding Roles}" SelectedItem="{Binding SelectedRole}" DisplayMemberPath="RoleName" />
-            <Button Content="ربط الدور" Margin="0,8,0,0" Command="{Binding AssignRoleCommand}" />
-            <TextBlock Text="{Binding StatusMessage}" Foreground="DarkGreen" Margin="0,8,0,0" />
+            <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                <Button Content="ربط الدور" Command="{Binding AssignRoleCommand}" />
+                <Button Content="فك الربط" Margin="8,0,0,0" Command="{Binding UnassignRoleCommand}" />
+            </StackPanel>
+            <TextBlock Text="{Binding StatusMessage}" Foreground="DarkGreen" Margin="0,8,0,0" TextWrapping="Wrap" />
         </StackPanel>
 
         <DataGrid Grid.Column="1" ItemsSource="{Binding Users}" SelectedItem="{Binding SelectedUser}" AutoGenerateColumns="False">
@@ -40,16 +47,21 @@
             <TextBlock Text="الأدوار والصلاحيات" FontSize="18" FontWeight="Bold" />
             <TextBlock Text="اسم الدور" Margin="0,12,0,4" />
             <TextBox Text="{Binding RoleName, UpdateSourceTrigger=PropertyChanged}" />
-            <Button Content="إنشاء دور" Margin="0,8,0,0" Command="{Binding SaveRoleCommand}" />
+            <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                <Button Content="إنشاء دور" Command="{Binding SaveRoleCommand}" />
+                <Button Content="حذف الدور" Margin="8,0,0,0" Command="{Binding DeleteRoleCommand}" />
+            </StackPanel>
 
             <TextBlock Text="الصلاحيات" Margin="0,12,0,4" />
-            <ItemsControl ItemsSource="{Binding Permissions}">
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <CheckBox Content="{Binding Code}" IsChecked="{Binding IsGranted}" />
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
+            <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="360">
+                <ItemsControl ItemsSource="{Binding Permissions}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <CheckBox Content="{Binding Code}" IsChecked="{Binding IsGranted}" />
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
             <Button Content="حفظ الصلاحيات" Margin="0,8,0,0" Command="{Binding SaveRolePermissionsCommand}" />
         </StackPanel>
     </Grid>
