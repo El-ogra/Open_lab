@@ -7,6 +7,7 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
         <TextBlock Grid.Row="0" Text="المزارع والمضادات الحيوية" FontSize="20" FontWeight="Bold" Margin="0,0,0,12" />
@@ -20,11 +21,10 @@
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
-            <!-- Cultures -->
             <GroupBox Grid.Column="0" Header="المزارع">
                 <StackPanel>
                     <DataGrid ItemsSource="{Binding Cultures}" SelectedItem="{Binding SelectedCulture}"
-                              AutoGenerateColumns="False" IsReadOnly="True" Height="250" Margin="0,0,0,8">
+                              AutoGenerateColumns="False" IsReadOnly="True" Height="220" Margin="0,0,0,8">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="#" Binding="{Binding CultureId}" Width="40" />
                             <DataGridTextColumn Header="اسم المزرعة" Binding="{Binding Name}" Width="*" />
@@ -38,11 +38,10 @@
                 </StackPanel>
             </GroupBox>
 
-            <!-- Antibiotics -->
             <GroupBox Grid.Column="2" Header="المضادات الحيوية">
                 <StackPanel>
                     <DataGrid ItemsSource="{Binding Antibiotics}" SelectedItem="{Binding SelectedAntibiotic}"
-                              AutoGenerateColumns="False" IsReadOnly="True" Height="250" Margin="0,0,0,8">
+                              AutoGenerateColumns="False" IsReadOnly="True" Height="220" Margin="0,0,0,8">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="#" Binding="{Binding AntibioticId}" Width="40" />
                             <DataGridTextColumn Header="اسم المضاد" Binding="{Binding Name}" Width="*" />
@@ -56,11 +55,10 @@
                 </StackPanel>
             </GroupBox>
 
-            <!-- Linked Antibiotics -->
-            <GroupBox Grid.Column="4" Header="المضادات المرتبطة بالمزرعة المختارة">
+            <GroupBox Grid.Column="4" Header="المضادات المرتبطة بالمزرعة">
                 <StackPanel>
                     <DataGrid ItemsSource="{Binding LinkedAntibiotics}" SelectedItem="{Binding SelectedLink}"
-                              AutoGenerateColumns="False" IsReadOnly="True" Height="250" Margin="0,0,0,8">
+                              AutoGenerateColumns="False" IsReadOnly="True" Height="220" Margin="0,0,0,8">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="المضاد" Binding="{Binding Antibiotic.Name}" Width="*" />
                         </DataGrid.Columns>
@@ -73,9 +71,48 @@
             </GroupBox>
         </Grid>
 
-        <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,12,0,0">
+        <GroupBox Grid.Row="2" Header="النتيجة التشغيلية للمريض" Margin="0,12,0,0">
+            <Grid Margin="0,8,0,0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Lab ID" VerticalAlignment="Center" Margin="0,0,8,0" />
+                    <TextBox Text="{Binding LabIdFilter, UpdateSourceTrigger=PropertyChanged}" Width="130" />
+                    <TextBlock Text="من" VerticalAlignment="Center" Margin="12,0,8,0" />
+                    <DatePicker SelectedDate="{Binding DateFrom}" Width="130" />
+                    <TextBlock Text="إلى" VerticalAlignment="Center" Margin="12,0,8,0" />
+                    <DatePicker SelectedDate="{Binding DateTo}" Width="130" />
+                    <Button Content="تحميل طلبات المزارع" Margin="12,0,0,0" Command="{Binding LoadVisitTestsCommand}" />
+                    <Button Content="حفظ النتيجة للزيارة" Margin="8,0,0,0" Command="{Binding SaveResultCommand}" />
+                </StackPanel>
+
+                <DataGrid Grid.Row="1" Margin="0,8,0,0" Height="160" ItemsSource="{Binding VisitTests}" SelectedItem="{Binding SelectedVisitTest}" AutoGenerateColumns="False">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="VisitTest" Binding="{Binding VisitTestId}" Width="80" />
+                        <DataGridTextColumn Header="Lab ID" Binding="{Binding LabId}" Width="100" />
+                        <DataGridTextColumn Header="المريض" Binding="{Binding PatientName}" Width="*" />
+                        <DataGridTextColumn Header="التحليل" Binding="{Binding TestName}" Width="180" />
+                        <DataGridTextColumn Header="الحالة" Binding="{Binding Status}" Width="90" />
+                    </DataGrid.Columns>
+                </DataGrid>
+
+                <DataGrid Grid.Row="2" Margin="0,8,0,0" ItemsSource="{Binding ResultRows}" AutoGenerateColumns="False">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="المضاد" Binding="{Binding AntibioticName}" Width="*" />
+                        <DataGridComboBoxColumn Header="الحساسية" SelectedItemBinding="{Binding Sensitivity, UpdateSourceTrigger=PropertyChanged}" ItemsSource="{Binding DataContext.AllowedSensitivities, RelativeSource={RelativeSource AncestorType=UserControl}}" Width="120" />
+                        <DataGridTextColumn Header="ملاحظة" Binding="{Binding Comment, UpdateSourceTrigger=PropertyChanged}" Width="200" />
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Grid>
+        </GroupBox>
+
+        <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="0,12,0,0">
             <Button Content="تحديث" Command="{Binding LoadCommand}" Margin="0,0,8,0" />
-            <TextBlock Text="{Binding StatusMessage}" VerticalAlignment="Center" Foreground="Green" />
+            <TextBlock Text="{Binding StatusMessage}" VerticalAlignment="Center" Foreground="Green" TextWrapping="Wrap" />
         </StackPanel>
     </Grid>
 </UserControl>

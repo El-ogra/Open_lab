@@ -9,15 +9,18 @@ namespace Open_lab.ViewModels
     public class WorkSheetByPatientViewModel : BaseViewModel
     {
         private readonly IWorksheetService _worksheetService;
+        private readonly IPrintService _printService;
         private DateTime _from = DateTime.Today;
         private DateTime _to = DateTime.Today;
         private string _statusMessage = string.Empty;
 
-        public WorkSheetByPatientViewModel(IWorksheetService worksheetService)
+        public WorkSheetByPatientViewModel(IWorksheetService worksheetService, IPrintService printService)
         {
             _worksheetService = worksheetService;
+            _printService = printService;
             Rows = new ObservableCollection<WorkSheetPatientRow>();
             LoadCommand = new RelayCommand(async _ => await LoadAsync());
+            PrintCommand = new RelayCommand(async _ => await PrintAsync(), _ => Rows.Count > 0);
         }
 
         public DateTime From
@@ -41,6 +44,7 @@ namespace Open_lab.ViewModels
         public ObservableCollection<WorkSheetPatientRow> Rows { get; }
 
         public ICommand LoadCommand { get; }
+        public ICommand PrintCommand { get; }
 
         private async Task LoadAsync()
         {
@@ -56,11 +60,25 @@ namespace Open_lab.ViewModels
                     Rows.Add(row);
                 }
 
+                (PrintCommand as RelayCommand)?.RaiseCanExecuteChanged();
                 StatusMessage = $"تم تحميل {Rows.Count} زيارة.";
             }
             catch (Exception ex)
             {
                 StatusMessage = $"خطأ: {ex.Message}";
+            }
+        }
+
+        private async Task PrintAsync()
+        {
+            try
+            {
+                await _printService.PrintWorksheetByPatientAsync(From.Date, To.Date, Rows);
+                StatusMessage = "تم إرسال ورقة العمل (حسب المرضى) للطباعة عبر Microsoft Print to PDF.";
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = $"خطأ طباعة: {ex.Message}";
             }
         }
     }

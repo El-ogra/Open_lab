@@ -342,9 +342,45 @@ namespace Open_lab.Services
             return priceList;
         }
 
+        public async Task UpdatePriceListAsync(PriceList priceList)
+        {
+            if (priceList == null)
+            {
+                throw new ArgumentNullException(nameof(priceList));
+            }
+
+            if (string.IsNullOrWhiteSpace(priceList.Name))
+            {
+                throw new ArgumentException("Price list name is required.", nameof(priceList));
+            }
+
+            priceList.Name = priceList.Name.Trim();
+            var current = await _db.PriceLists.FirstOrDefaultAsync(p => p.PriceListId == priceList.PriceListId);
+            if (current == null)
+            {
+                throw new InvalidOperationException("Price list not found.");
+            }
+
+            var duplicate = await _db.PriceLists.AnyAsync(p => p.PriceListId != priceList.PriceListId && p.Name == priceList.Name && p.ReferralId == priceList.ReferralId);
+            if (duplicate)
+            {
+                throw new InvalidOperationException("Price list already exists for the same referral.");
+            }
+
+            if (priceList.IsDefault)
+            {
+                await ClearDefaultPriceListsAsync(priceList.ReferralId);
+            }
+
+            current.Name = priceList.Name;
+            current.ReferralId = priceList.ReferralId;
+            current.IsDefault = priceList.IsDefault;
+            await _db.SaveChangesAsync();
+        }
+
         public Task<List<PriceList>> GetPriceListsAsync()
         {
-            return _db.PriceLists.AsNoTracking().OrderBy(p => p.Name).ToListAsync();
+            return _db.PriceLists.AsNoTracking().Include(p => p.Referral).OrderBy(p => p.Name).ToListAsync();
         }
 
         public async Task<PriceListItem> AddPriceListItemAsync(PriceListItem item)
@@ -375,6 +411,28 @@ namespace Open_lab.Services
             _db.PriceListItems.Add(item);
             await _db.SaveChangesAsync();
             return item;
+        }
+
+        public async Task UpdatePriceListItemAsync(PriceListItem item)
+        {
+            if (item == null)
+            {
+                throw new ArgumentNullException(nameof(item));
+            }
+
+            if (item.Price < 0)
+            {
+                throw new ArgumentException("Price cannot be negative.", nameof(item));
+            }
+
+            var current = await _db.PriceListItems.FirstOrDefaultAsync(i => i.PriceListItemId == item.PriceListItemId);
+            if (current == null)
+            {
+                throw new InvalidOperationException("Price list item not found.");
+            }
+
+            current.Price = item.Price;
+            await _db.SaveChangesAsync();
         }
 
         public Task<List<PriceListItem>> GetPriceListItemsAsync(int priceListId)
@@ -593,3 +651,7 @@ namespace Open_lab.Services
         }
     }
 }
+
+
+
+

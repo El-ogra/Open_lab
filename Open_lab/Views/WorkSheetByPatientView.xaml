@@ -8,6 +8,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
         <StackPanel Orientation="Horizontal">
@@ -16,6 +17,7 @@
             <TextBlock Text="إلى" VerticalAlignment="Center" Margin="12,0,8,0" />
             <DatePicker SelectedDate="{Binding To}" Width="140" />
             <Button Content="تحميل" Margin="12,0,0,0" Command="{Binding LoadCommand}" />
+            <Button Content="طباعة" Margin="8,0,0,0" Command="{Binding PrintCommand}" />
         </StackPanel>
 
         <DataGrid Grid.Row="1" ItemsSource="{Binding Rows}" AutoGenerateColumns="False" Margin="0,12,0,0">
@@ -26,5 +28,7 @@
                 <DataGridTextColumn Header="عدد التحاليل" Binding="{Binding TestsCount}" Width="120" />
             </DataGrid.Columns>
         </DataGrid>
+
+        <TextBlock Grid.Row="2" Text="{Binding StatusMessage}" Margin="0,8,0,0" Foreground="DarkGreen" TextWrapping="Wrap" />
     </Grid>
 </UserControl>

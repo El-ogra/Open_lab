@@ -8,6 +8,7 @@ namespace Open_lab.Services
     {
         Task<Visit?> GetByIdAsync(int visitId);
         Task<List<Visit>> GetByPatientIdAsync(int patientId);
+        Task<List<VisitTest>> GetVisitTestsAsync(int visitId);
         Task<Visit> CreateAsync(Visit visit);
         Task UpdateAsync(Visit visit);
         Task DeleteAsync(int visitId);

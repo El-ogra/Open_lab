@@ -38,6 +38,16 @@ namespace Open_lab.Services
                 .ToListAsync();
         }
 
+        public Task<List<VisitTest>> GetVisitTestsAsync(int visitId)
+        {
+            return _db.VisitTests
+                .AsNoTracking()
+                .Include(vt => vt.Test)
+                .Where(vt => vt.VisitId == visitId)
+                .OrderBy(vt => vt.VisitTestId)
+                .ToListAsync();
+        }
+
         public async Task<Visit> CreateAsync(Visit visit)
         {
             if (visit == null)

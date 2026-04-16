@@ -25,10 +25,13 @@ namespace Open_lab.ViewModels
             _patientService = patientService;
             Results = new ObservableCollection<Patient>();
             SaveCommand = new RelayCommand(async _ => await SaveAsync(), _ => AppSession.HasPermission(PermissionCodes.PatientsEdit));
-            NewCommand = new RelayCommand(_ => ClearForm(), _ => AppSession.HasPermission(PermissionCodes.PatientsEdit));
+            NewCommand = new RelayCommand(async _ => await ClearFormAsync(), _ => AppSession.HasPermission(PermissionCodes.PatientsEdit));
+            GenerateLabIdCommand = new RelayCommand(async _ => await GenerateLabIdAsync(), _ => AppSession.HasPermission(PermissionCodes.PatientsEdit) && PatientId == 0);
             LoadByLabIdCommand = new RelayCommand(async _ => await LoadByLabIdAsync(), _ => AppSession.HasPermission(PermissionCodes.PatientsView));
             SearchCommand = new RelayCommand(async _ => await SearchAsync(), _ => AppSession.HasPermission(PermissionCodes.PatientsView));
             DeleteCommand = new RelayCommand(async _ => await DeleteAsync(), _ => AppSession.HasPermission(PermissionCodes.PatientsEdit) && PatientId > 0);
+
+            _ = GenerateLabIdAsync();
         }
 
         public int PatientId
@@ -39,6 +42,7 @@ namespace Open_lab.ViewModels
                 if (SetProperty(ref _patientId, value))
                 {
                     (DeleteCommand as RelayCommand)?.RaiseCanExecuteChanged();
+                    (GenerateLabIdCommand as RelayCommand)?.RaiseCanExecuteChanged();
                 }
             }
         }
@@ -101,6 +105,7 @@ namespace Open_lab.ViewModels
 
         public ICommand SaveCommand { get; }
         public ICommand NewCommand { get; }
+        public ICommand GenerateLabIdCommand { get; }
         public ICommand LoadByLabIdCommand { get; }
         public ICommand SearchCommand { get; }
         public ICommand DeleteCommand { get; }
@@ -122,6 +127,7 @@ namespace Open_lab.ViewModels
                     });
 
                     PatientId = created.PatientId;
+                    LabId = created.LabId;
                     StatusMessage = "تم إنشاء المريض بنجاح.";
                 }
                 else
@@ -143,6 +149,23 @@ namespace Open_lab.ViewModels
             catch (Exception ex)
             {
                 StatusMessage = $"خطأ: {ex.Message}";
+            }
+        }
+
+        private async Task GenerateLabIdAsync()
+        {
+            if (PatientId > 0)
+            {
+                return;
+            }
+
+            try
+            {
+                LabId = await _patientService.GenerateNextLabIdAsync(DateTime.Today);
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = $"خطأ توليد Lab ID: {ex.Message}";
             }
         }
 
@@ -201,7 +224,7 @@ namespace Open_lab.ViewModels
             {
                 await _patientService.DeleteAsync(PatientId);
                 StatusMessage = "تم حذف المريض.";
-                ClearForm();
+                await ClearFormAsync();
             }
             catch (Exception ex)
             {
@@ -209,16 +232,16 @@ namespace Open_lab.ViewModels
             }
         }
 
-        private void ClearForm()
+        private async Task ClearFormAsync()
         {
             PatientId = 0;
-            LabId = string.Empty;
             FullName = string.Empty;
             Gender = string.Empty;
             BirthDate = null;
             Phone = null;
             Address = null;
             SelectedPatient = null;
+            await GenerateLabIdAsync();
         }
 
         private void LoadFromPatient(Patient patient)
@@ -233,4 +256,3 @@ namespace Open_lab.ViewModels
         }
     }
 }
-

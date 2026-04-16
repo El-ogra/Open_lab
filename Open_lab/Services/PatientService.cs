@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
@@ -52,6 +53,43 @@ namespace Open_lab.Services
             return query.OrderBy(p => p.FullName).ToListAsync();
         }
 
+        public async Task<string> GenerateNextLabIdAsync(DateTime? forDate = null)
+        {
+            var date = (forDate ?? DateTime.Today).Date;
+            var prefix = date.ToString("yyyyMMdd", CultureInfo.InvariantCulture);
+
+            var latestForDay = await _db.Patients
+                .AsNoTracking()
+                .Where(p => p.LabId.StartsWith(prefix))
+                .Select(p => p.LabId)
+                .ToListAsync();
+
+            var maxSequence = 0;
+            foreach (var labId in latestForDay)
+            {
+                if (labId.Length <= prefix.Length)
+                {
+                    continue;
+                }
+
+                var suffix = labId[prefix.Length..];
+                if (int.TryParse(suffix, out var value) && value > maxSequence)
+                {
+                    maxSequence = value;
+                }
+            }
+
+            var next = maxSequence + 1;
+            var candidate = $"{prefix}{next:D3}";
+            while (await _db.Patients.AnyAsync(p => p.LabId == candidate))
+            {
+                next++;
+                candidate = $"{prefix}{next:D3}";
+            }
+
+            return candidate;
+        }
+
         public async Task<Patient> CreateAsync(Patient patient)
         {
             if (patient == null)
@@ -60,6 +98,11 @@ namespace Open_lab.Services
             }
 
             Normalize(patient);
+            if (string.IsNullOrWhiteSpace(patient.LabId))
+            {
+                patient.LabId = await GenerateNextLabIdAsync(DateTime.Today);
+            }
+
             ValidateBusinessRules(patient);
 
             var exists = await _db.Patients.AnyAsync(p => p.LabId == patient.LabId);

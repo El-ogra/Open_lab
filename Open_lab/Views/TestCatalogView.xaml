@@ -34,17 +34,32 @@
             <StackPanel Orientation="Horizontal" Margin="0,16,0,0">
                 <Button Content="جديد" Width="80" Margin="0,0,8,0" Command="{Binding NewCommand}" />
                 <Button Content="حفظ" Width="80" Margin="0,0,8,0" Command="{Binding SaveCommand}" />
-                <Button Content="حذف" Width="80" Command="{Binding DeleteCommand}" />
+                <Button Content="حذف" Width="80" Margin="0,0,8,0" Command="{Binding DeleteCommand}" />
+                <Button Content="توليد باركود" Width="100" Command="{Binding GenerateBarcodeCommand}" />
             </StackPanel>
-            <TextBlock Text="{Binding StatusMessage}" Foreground="DarkGreen" Margin="0,8,0,0" />
+            <TextBlock Text="{Binding StatusMessage}" Foreground="DarkGreen" Margin="0,8,0,0" TextWrapping="Wrap" />
         </StackPanel>
 
-        <DataGrid Grid.Column="1" ItemsSource="{Binding Tests}" SelectedItem="{Binding SelectedTest}" AutoGenerateColumns="False">
-            <DataGrid.Columns>
-                <DataGridTextColumn Header="الكود" Binding="{Binding Code}" Width="120" />
-                <DataGridTextColumn Header="اسم التقرير" Binding="{Binding NameReport}" Width="*" />
-                <DataGridTextColumn Header="السعر" Binding="{Binding Price}" Width="100" />
-            </DataGrid.Columns>
-        </DataGrid>
+        <Grid Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <DataGrid Grid.Row="0" ItemsSource="{Binding Tests}" SelectedItem="{Binding SelectedTest}" AutoGenerateColumns="False">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="الكود" Binding="{Binding Code}" Width="120" />
+                    <DataGridTextColumn Header="اسم التقرير" Binding="{Binding NameReport}" Width="*" />
+                    <DataGridTextColumn Header="السعر" Binding="{Binding Price}" Width="100" />
+                </DataGrid.Columns>
+            </DataGrid>
+
+            <Border Grid.Row="1" Margin="0,12,0,0" BorderBrush="#DDD" BorderThickness="1" Padding="8">
+                <StackPanel>
+                    <TextBlock Text="Barcode (Code128)" FontWeight="Bold" />
+                    <Image Source="{Binding BarcodeImage}" Height="90" Stretch="Uniform" Margin="0,8,0,0" />
+                </StackPanel>
+            </Border>
+        </Grid>
     </Grid>
 </UserControl>

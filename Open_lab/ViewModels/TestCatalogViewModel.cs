@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using System.Windows.Media;
 using Open_lab.Models;
 using Open_lab.Services;
 
@@ -11,6 +12,7 @@ namespace Open_lab.ViewModels
     public class TestCatalogViewModel : BaseViewModel
     {
         private readonly ITestCatalogService _testCatalogService;
+        private readonly IBarcodeService _barcodeService;
         private Test? _selectedTest;
         private string _code = string.Empty;
         private string _nameReport = string.Empty;
@@ -23,10 +25,12 @@ namespace Open_lab.ViewModels
         private SampleType? _selectedSampleType;
         private Unit? _selectedUnit;
         private string _statusMessage = string.Empty;
+        private ImageSource? _barcodeImage;
 
-        public TestCatalogViewModel(ITestCatalogService testCatalogService)
+        public TestCatalogViewModel(ITestCatalogService testCatalogService, IBarcodeService barcodeService)
         {
             _testCatalogService = testCatalogService;
+            _barcodeService = barcodeService;
             Tests = new ObservableCollection<Test>();
             Groups = new ObservableCollection<TestGroup>();
             SampleTypes = new ObservableCollection<SampleType>();
@@ -36,6 +40,7 @@ namespace Open_lab.ViewModels
             NewCommand = new RelayCommand(_ => ClearForm(), _ => AppSession.HasPermission(PermissionCodes.TestsEdit));
             DeleteCommand = new RelayCommand(async _ => await DeleteAsync(), _ => AppSession.HasPermission(PermissionCodes.TestsEdit) && SelectedTest != null);
             ReloadCommand = new RelayCommand(async _ => await LoadAsync(), _ => AppSession.HasPermission(PermissionCodes.TestsView));
+            GenerateBarcodeCommand = new RelayCommand(_ => GenerateBarcode(), _ => !string.IsNullOrWhiteSpace(Code));
 
             _ = LoadAsync();
         }
@@ -61,7 +66,14 @@ namespace Open_lab.ViewModels
         public string Code
         {
             get => _code;
-            set => SetProperty(ref _code, value);
+            set
+            {
+                if (SetProperty(ref _code, value))
+                {
+                    (GenerateBarcodeCommand as RelayCommand)?.RaiseCanExecuteChanged();
+                    GenerateBarcode();
+                }
+            }
         }
 
         public string NameReport
@@ -118,6 +130,12 @@ namespace Open_lab.ViewModels
             set => SetProperty(ref _selectedUnit, value);
         }
 
+        public ImageSource? BarcodeImage
+        {
+            get => _barcodeImage;
+            private set => SetProperty(ref _barcodeImage, value);
+        }
+
         public string StatusMessage
         {
             get => _statusMessage;
@@ -128,6 +146,7 @@ namespace Open_lab.ViewModels
         public ICommand NewCommand { get; }
         public ICommand DeleteCommand { get; }
         public ICommand ReloadCommand { get; }
+        public ICommand GenerateBarcodeCommand { get; }
 
         private async Task LoadAsync()
         {
@@ -187,6 +206,7 @@ namespace Open_lab.ViewModels
             SelectedGroup = Groups.FirstOrDefault(g => g.GroupId == SelectedTest.GroupId);
             SelectedSampleType = SampleTypes.FirstOrDefault(s => s.SampleTypeId == SelectedTest.SampleTypeId);
             SelectedUnit = Units.FirstOrDefault(u => u.UnitId == SelectedTest.UnitId);
+            GenerateBarcode();
         }
 
         private async Task SaveAsync()
@@ -229,6 +249,8 @@ namespace Open_lab.ViewModels
                     await _testCatalogService.UpdateTestAsync(SelectedTest);
                     StatusMessage = "تم تحديث التحليل.";
                 }
+
+                GenerateBarcode();
             }
             catch (Exception ex)
             {
@@ -256,6 +278,24 @@ namespace Open_lab.ViewModels
             }
         }
 
+        private void GenerateBarcode()
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(Code))
+                {
+                    BarcodeImage = null;
+                    return;
+                }
+
+                BarcodeImage = _barcodeService.GenerateCode128(Code.Trim());
+            }
+            catch
+            {
+                BarcodeImage = null;
+            }
+        }
+
         private void ClearForm()
         {
             SelectedTest = null;
@@ -269,7 +309,7 @@ namespace Open_lab.ViewModels
             SelectedGroup = null;
             SelectedSampleType = null;
             SelectedUnit = null;
+            BarcodeImage = null;
         }
     }
 }
-

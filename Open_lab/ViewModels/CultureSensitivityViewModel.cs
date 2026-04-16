@@ -10,6 +10,8 @@ namespace Open_lab.ViewModels
 {
     public class CultureSensitivityViewModel : BaseViewModel
     {
+        private static readonly string[] SensitivityOptions = { "", "S", "I", "R" };
+
         private readonly ICultureSensitivityService _service;
         private Culture? _selectedCulture;
         private Antibiotic? _selectedAntibiotic;
@@ -17,6 +19,10 @@ namespace Open_lab.ViewModels
         private string _newCultureName = string.Empty;
         private string _newAntibioticName = string.Empty;
         private string _statusMessage = string.Empty;
+        private string _labIdFilter = string.Empty;
+        private DateTime _dateFrom = DateTime.Today;
+        private DateTime _dateTo = DateTime.Today;
+        private CultureVisitTestRow? _selectedVisitTest;
 
         public CultureSensitivityViewModel(ICultureSensitivityService service)
         {
@@ -24,6 +30,9 @@ namespace Open_lab.ViewModels
             Cultures = new ObservableCollection<Culture>();
             Antibiotics = new ObservableCollection<Antibiotic>();
             LinkedAntibiotics = new ObservableCollection<CultureAntibiotic>();
+            VisitTests = new ObservableCollection<CultureVisitTestRow>();
+            ResultRows = new ObservableCollection<CultureSensitivityRow>();
+            AllowedSensitivities = new ObservableCollection<string>(SensitivityOptions);
 
             LoadCommand = new RelayCommand(async _ => await LoadAsync(), _ => AppSession.HasPermission(PermissionCodes.TestsView));
             AddCultureCommand = new RelayCommand(async _ => await AddCultureAsync(), _ => AppSession.HasPermission(PermissionCodes.TestsEdit));
@@ -33,12 +42,18 @@ namespace Open_lab.ViewModels
             LinkCommand = new RelayCommand(async _ => await LinkAsync(), _ => AppSession.HasPermission(PermissionCodes.TestsEdit) && SelectedCulture != null && SelectedAntibiotic != null);
             UnlinkCommand = new RelayCommand(async _ => await UnlinkAsync(), _ => AppSession.HasPermission(PermissionCodes.TestsEdit) && SelectedLink != null);
 
+            LoadVisitTestsCommand = new RelayCommand(async _ => await LoadVisitTestsAsync(), _ => AppSession.HasPermission(PermissionCodes.ResultsView));
+            SaveResultCommand = new RelayCommand(async _ => await SaveResultAsync(), _ => AppSession.HasPermission(PermissionCodes.ResultsEdit) && SelectedVisitTest != null && SelectedCulture != null);
+
             _ = LoadAsync();
         }
 
         public ObservableCollection<Culture> Cultures { get; }
         public ObservableCollection<Antibiotic> Antibiotics { get; }
         public ObservableCollection<CultureAntibiotic> LinkedAntibiotics { get; }
+        public ObservableCollection<CultureVisitTestRow> VisitTests { get; }
+        public ObservableCollection<CultureSensitivityRow> ResultRows { get; }
+        public ObservableCollection<string> AllowedSensitivities { get; }
 
         public Culture? SelectedCulture
         {
@@ -48,8 +63,10 @@ namespace Open_lab.ViewModels
                 if (SetProperty(ref _selectedCulture, value))
                 {
                     _ = LoadLinkedAsync();
+                    _ = BuildResultRowsAsync();
                     (DeleteCultureCommand as RelayCommand)?.RaiseCanExecuteChanged();
                     (LinkCommand as RelayCommand)?.RaiseCanExecuteChanged();
+                    (SaveResultCommand as RelayCommand)?.RaiseCanExecuteChanged();
                 }
             }
         }
@@ -79,6 +96,36 @@ namespace Open_lab.ViewModels
             }
         }
 
+        public CultureVisitTestRow? SelectedVisitTest
+        {
+            get => _selectedVisitTest;
+            set
+            {
+                if (SetProperty(ref _selectedVisitTest, value))
+                {
+                    (SaveResultCommand as RelayCommand)?.RaiseCanExecuteChanged();
+                }
+            }
+        }
+
+        public string LabIdFilter
+        {
+            get => _labIdFilter;
+            set => SetProperty(ref _labIdFilter, value);
+        }
+
+        public DateTime DateFrom
+        {
+            get => _dateFrom;
+            set => SetProperty(ref _dateFrom, value);
+        }
+
+        public DateTime DateTo
+        {
+            get => _dateTo;
+            set => SetProperty(ref _dateTo, value);
+        }
+
         public string NewCultureName
         {
             get => _newCultureName;
@@ -104,6 +151,8 @@ namespace Open_lab.ViewModels
         public ICommand DeleteAntibioticCommand { get; }
         public ICommand LinkCommand { get; }
         public ICommand UnlinkCommand { get; }
+        public ICommand LoadVisitTestsCommand { get; }
+        public ICommand SaveResultCommand { get; }
 
         private async Task LoadAsync()
         {
@@ -123,6 +172,7 @@ namespace Open_lab.ViewModels
                     Antibiotics.Add(a);
                 }
 
+                await BuildResultRowsAsync();
                 StatusMessage = "تم تحميل البيانات.";
             }
             catch (Exception ex)
@@ -150,6 +200,27 @@ namespace Open_lab.ViewModels
             catch (Exception ex)
             {
                 StatusMessage = $"خطأ: {ex.Message}";
+            }
+        }
+
+        private async Task BuildResultRowsAsync()
+        {
+            ResultRows.Clear();
+            if (SelectedCulture == null)
+            {
+                return;
+            }
+
+            var links = await _service.GetCultureAntibioticsAsync(SelectedCulture.CultureId);
+            foreach (var link in links)
+            {
+                ResultRows.Add(new CultureSensitivityRow
+                {
+                    AntibioticId = link.AntibioticId,
+                    AntibioticName = link.Antibiotic.Name,
+                    Sensitivity = string.Empty,
+                    Comment = null
+                });
             }
         }
 
@@ -187,6 +258,7 @@ namespace Open_lab.ViewModels
                 Cultures.Remove(SelectedCulture);
                 SelectedCulture = null;
                 LinkedAntibiotics.Clear();
+                ResultRows.Clear();
                 StatusMessage = "تم حذف المزرعة.";
             }
             catch (Exception ex)
@@ -247,6 +319,7 @@ namespace Open_lab.ViewModels
             {
                 await _service.LinkAntibioticAsync(SelectedCulture.CultureId, SelectedAntibiotic.AntibioticId);
                 await LoadLinkedAsync();
+                await BuildResultRowsAsync();
                 StatusMessage = "تم ربط المضاد بالمزرعة.";
             }
             catch (Exception ex)
@@ -265,7 +338,8 @@ namespace Open_lab.ViewModels
             try
             {
                 await _service.UnlinkAntibioticAsync(SelectedLink.CultureId, SelectedLink.AntibioticId);
-                LinkedAntibiotics.Remove(SelectedLink);
+                await LoadLinkedAsync();
+                await BuildResultRowsAsync();
                 SelectedLink = null;
                 StatusMessage = "تم فك الربط.";
             }
@@ -274,6 +348,57 @@ namespace Open_lab.ViewModels
                 StatusMessage = $"خطأ: {ex.Message}";
             }
         }
+
+        private async Task LoadVisitTestsAsync()
+        {
+            try
+            {
+                var from = DateFrom.Date;
+                var to = DateTo.Date.AddDays(1).AddSeconds(-1);
+                var rows = await _service.SearchCultureVisitTestsAsync(LabIdFilter, from, to);
+
+                VisitTests.Clear();
+                foreach (var row in rows)
+                {
+                    VisitTests.Add(row);
+                }
+
+                StatusMessage = $"تم تحميل {VisitTests.Count} طلب مزرعة.";
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = $"خطأ: {ex.Message}";
+            }
+        }
+
+        private async Task SaveResultAsync()
+        {
+            if (SelectedVisitTest == null || SelectedCulture == null)
+            {
+                StatusMessage = "اختر الزيارة والمزرعة أولًا.";
+                return;
+            }
+
+            try
+            {
+                var values = ResultRows
+                    .Where(r => !string.IsNullOrWhiteSpace(r.Sensitivity))
+                    .Select(r => new CultureSensitivityValue
+                    {
+                        AntibioticId = r.AntibioticId,
+                        Sensitivity = r.Sensitivity,
+                        Comment = r.Comment
+                    })
+                    .ToList();
+
+                await _service.SaveCultureResultAsync(SelectedVisitTest.VisitTestId, SelectedCulture.CultureId, values);
+                StatusMessage = "تم حفظ نتيجة المزرعة وربطها بالزيارة بنجاح.";
+                await LoadVisitTestsAsync();
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = $"خطأ: {ex.Message}";
+            }
+        }
     }
 }
-

@@ -14,8 +14,13 @@
             <TextBlock Text="قوائم الأسعار" FontSize="20" FontWeight="Bold" />
             <TextBlock Text="اسم القائمة" Margin="0,12,0,4" />
             <TextBox Text="{Binding ListName, UpdateSourceTrigger=PropertyChanged}" />
+            <TextBlock Text="جهة الإحالة" Margin="0,12,0,4" />
+            <ComboBox ItemsSource="{Binding Referrals}" SelectedItem="{Binding SelectedReferral}" DisplayMemberPath="Name" />
             <CheckBox Content="افتراضية" IsChecked="{Binding IsDefault}" Margin="0,8,0,0" />
-            <Button Content="إنشاء قائمة" Margin="0,8,0,0" Command="{Binding SaveListCommand}" />
+            <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                <Button Content="إنشاء قائمة" Margin="0,0,8,0" Command="{Binding SaveListCommand}" />
+                <Button Content="تحديث القائمة" Command="{Binding UpdateListCommand}" />
+            </StackPanel>
 
             <TextBlock Text="القائمة الحالية" Margin="0,12,0,4" />
             <ComboBox ItemsSource="{Binding PriceLists}" SelectedItem="{Binding SelectedPriceList}" DisplayMemberPath="Name" />
@@ -24,8 +29,12 @@
             <ComboBox ItemsSource="{Binding Tests}" SelectedItem="{Binding SelectedTest}" DisplayMemberPath="NameReport" />
             <TextBlock Text="السعر" Margin="0,12,0,4" />
             <TextBox Text="{Binding Price, UpdateSourceTrigger=PropertyChanged}" />
-            <Button Content="إضافة" Margin="0,8,0,0" Command="{Binding AddItemCommand}" />
-            <TextBlock Text="{Binding StatusMessage}" Foreground="DarkGreen" Margin="0,8,0,0" />
+            <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                <Button Content="إضافة" Margin="0,0,8,0" Command="{Binding AddItemCommand}" />
+                <Button Content="تحديث السعر" Margin="0,0,8,0" Command="{Binding UpdateItemCommand}" />
+                <Button Content="حذف" Command="{Binding DeleteItemCommand}" />
+            </StackPanel>
+            <TextBlock Text="{Binding StatusMessage}" Foreground="DarkGreen" Margin="0,8,0,0" TextWrapping="Wrap" />
         </StackPanel>
 
         <DataGrid Grid.Column="1" ItemsSource="{Binding Items}" SelectedItem="{Binding SelectedItem}" AutoGenerateColumns="False">

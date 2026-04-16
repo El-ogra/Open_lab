@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Open_lab.Data;
 using Open_lab.Models;
+using Open_lab.ViewModels;
 
 namespace Open_lab.Services
 {
@@ -27,6 +28,13 @@ namespace Open_lab.Services
             if (culture == null || string.IsNullOrWhiteSpace(culture.Name))
             {
                 throw new ArgumentException("اسم المزرعة مطلوب.", nameof(culture));
+            }
+
+            culture.Name = culture.Name.Trim();
+            var duplicate = await _db.Cultures.AnyAsync(c => c.Name == culture.Name);
+            if (duplicate)
+            {
+                throw new InvalidOperationException("اسم المزرعة موجود مسبقًا.");
             }
 
             _db.Cultures.Add(culture);
@@ -56,6 +64,13 @@ namespace Open_lab.Services
             if (antibiotic == null || string.IsNullOrWhiteSpace(antibiotic.Name))
             {
                 throw new ArgumentException("اسم المضاد الحيوي مطلوب.", nameof(antibiotic));
+            }
+
+            antibiotic.Name = antibiotic.Name.Trim();
+            var duplicate = await _db.Antibiotics.AnyAsync(a => a.Name == antibiotic.Name);
+            if (duplicate)
+            {
+                throw new InvalidOperationException("اسم المضاد الحيوي موجود مسبقًا.");
             }
 
             _db.Antibiotics.Add(antibiotic);
@@ -115,6 +130,124 @@ namespace Open_lab.Services
 
             _db.CultureAntibiotics.Remove(link);
             await _db.SaveChangesAsync();
+        }
+
+        public async Task<List<CultureVisitTestRow>> SearchCultureVisitTestsAsync(string? labId, DateTime from, DateTime to)
+        {
+            var query = _db.VisitTests
+                .AsNoTracking()
+                .Include(vt => vt.Visit)
+                .ThenInclude(v => v.Patient)
+                .Include(vt => vt.Test)
+                .Where(vt => vt.Visit.VisitDate >= from && vt.Visit.VisitDate <= to)
+                .Where(vt => vt.Test.NameReport.Contains("Culture") || vt.Test.NameReport.Contains("مزرعة"));
+
+            if (!string.IsNullOrWhiteSpace(labId))
+            {
+                var term = labId.Trim();
+                query = query.Where(vt => vt.Visit.Patient.LabId.Contains(term));
+            }
+
+            return await query
+                .OrderByDescending(vt => vt.Visit.VisitDate)
+                .Select(vt => new CultureVisitTestRow
+                {
+                    VisitTestId = vt.VisitTestId,
+                    VisitId = vt.VisitId,
+                    LabId = vt.Visit.Patient.LabId,
+                    PatientName = vt.Visit.Patient.FullName,
+                    TestName = vt.Test.NameReport,
+                    VisitDate = vt.Visit.VisitDate,
+                    Status = vt.Status
+                })
+                .ToListAsync();
+        }
+
+        public async Task SaveCultureResultAsync(int visitTestId, int cultureId, IReadOnlyCollection<CultureSensitivityValue> sensitivities)
+        {
+            var visitTest = await _db.VisitTests
+                .Include(vt => vt.Test)
+                .FirstOrDefaultAsync(vt => vt.VisitTestId == visitTestId);
+            if (visitTest == null)
+            {
+                throw new InvalidOperationException("Visit test not found.");
+            }
+
+            if (string.Equals(visitTest.Status, "Verified", StringComparison.OrdinalIgnoreCase))
+            {
+                throw new InvalidOperationException("لا يمكن تعديل نتيجة معتمدة.");
+            }
+
+            var culture = await _db.Cultures.FirstOrDefaultAsync(c => c.CultureId == cultureId);
+            if (culture == null)
+            {
+                throw new InvalidOperationException("المزرعة غير موجودة.");
+            }
+
+            var cultureParameter = await EnsureParameterAsync(visitTest.TestId, "Culture");
+            await UpsertResultValueAsync(visitTestId, cultureParameter.ParameterId, culture.Name, null);
+
+            foreach (var item in sensitivities.Where(s => !string.IsNullOrWhiteSpace(s.Sensitivity)))
+            {
+                var antibiotic = await _db.Antibiotics.FirstOrDefaultAsync(a => a.AntibioticId == item.AntibioticId);
+                if (antibiotic == null)
+                {
+                    continue;
+                }
+
+                var parameter = await EnsureParameterAsync(visitTest.TestId, antibiotic.Name);
+                await UpsertResultValueAsync(visitTestId, parameter.ParameterId, item.Sensitivity.Trim(), item.Comment);
+            }
+
+            visitTest.Status = "InProgress";
+            await _db.SaveChangesAsync();
+        }
+
+        private async Task<TestParameter> EnsureParameterAsync(int testId, string parameterName)
+        {
+            var existing = await _db.TestParameters.FirstOrDefaultAsync(p => p.TestId == testId && p.Name == parameterName);
+            if (existing != null)
+            {
+                return existing;
+            }
+
+            var maxOrder = await _db.TestParameters
+                .Where(p => p.TestId == testId)
+                .Select(p => (int?)p.OrderNo)
+                .MaxAsync() ?? 0;
+
+            var parameter = new TestParameter
+            {
+                TestId = testId,
+                Name = parameterName,
+                OrderNo = maxOrder + 1
+            };
+            _db.TestParameters.Add(parameter);
+            await _db.SaveChangesAsync();
+            return parameter;
+        }
+
+        private async Task UpsertResultValueAsync(int visitTestId, int parameterId, string value, string? comment)
+        {
+            var existing = await _db.ResultValues.FirstOrDefaultAsync(r => r.VisitTestId == visitTestId && r.ParameterId == parameterId);
+            if (existing == null)
+            {
+                _db.ResultValues.Add(new ResultValue
+                {
+                    VisitTestId = visitTestId,
+                    ParameterId = parameterId,
+                    Value = value,
+                    Comment = comment,
+                    Flag = null
+                });
+                return;
+            }
+
+            existing.Value = value;
+            existing.Comment = comment;
+            existing.Flag = null;
+            existing.VerifiedAt = null;
+            existing.VerifiedBy = null;
         }
     }
 }

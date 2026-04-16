@@ -35,8 +35,10 @@ namespace Open_lab.Services
         Task DeleteTestCommentAsync(int commentId);
 
         Task<PriceList> CreatePriceListAsync(PriceList priceList);
+        Task UpdatePriceListAsync(PriceList priceList);
         Task<List<PriceList>> GetPriceListsAsync();
         Task<PriceListItem> AddPriceListItemAsync(PriceListItem item);
+        Task UpdatePriceListItemAsync(PriceListItem item);
         Task<List<PriceListItem>> GetPriceListItemsAsync(int priceListId);
         Task DeletePriceListItemAsync(int priceListItemId);
 

@@ -12,6 +12,7 @@ namespace Open_lab.ViewModels
         private readonly ITestCatalogService _testCatalogService;
         private string _listName = string.Empty;
         private bool _isDefault;
+        private Referral? _selectedReferral;
         private PriceList? _selectedPriceList;
         private Test? _selectedTest;
         private PriceListItem? _selectedItem;
@@ -24,10 +25,13 @@ namespace Open_lab.ViewModels
             PriceLists = new ObservableCollection<PriceList>();
             Items = new ObservableCollection<PriceListItem>();
             Tests = new ObservableCollection<Test>();
+            Referrals = new ObservableCollection<Referral>();
 
             LoadCommand = new RelayCommand(async _ => await LoadAsync(), _ => AppSession.HasPermission(PermissionCodes.TestsView));
             SaveListCommand = new RelayCommand(async _ => await SaveListAsync(), _ => AppSession.HasPermission(PermissionCodes.TestsEdit));
+            UpdateListCommand = new RelayCommand(async _ => await UpdateListAsync(), _ => AppSession.HasPermission(PermissionCodes.TestsEdit) && SelectedPriceList != null);
             AddItemCommand = new RelayCommand(async _ => await AddItemAsync(), _ => AppSession.HasPermission(PermissionCodes.TestsEdit) && SelectedPriceList != null && SelectedTest != null);
+            UpdateItemCommand = new RelayCommand(async _ => await UpdateItemAsync(), _ => AppSession.HasPermission(PermissionCodes.TestsEdit) && SelectedItem != null);
             DeleteItemCommand = new RelayCommand(async _ => await DeleteItemAsync(), _ => AppSession.HasPermission(PermissionCodes.TestsEdit) && SelectedItem != null);
 
             _ = LoadAsync();
@@ -36,6 +40,7 @@ namespace Open_lab.ViewModels
         public ObservableCollection<PriceList> PriceLists { get; }
         public ObservableCollection<PriceListItem> Items { get; }
         public ObservableCollection<Test> Tests { get; }
+        public ObservableCollection<Referral> Referrals { get; }
 
         public PriceListItem? SelectedItem
         {
@@ -44,7 +49,14 @@ namespace Open_lab.ViewModels
             {
                 if (SetProperty(ref _selectedItem, value))
                 {
+                    if (value != null)
+                    {
+                        SelectedTest = value.Test;
+                        Price = value.Price;
+                    }
+
                     (DeleteItemCommand as RelayCommand)?.RaiseCanExecuteChanged();
+                    (UpdateItemCommand as RelayCommand)?.RaiseCanExecuteChanged();
                 }
             }
         }
@@ -56,7 +68,15 @@ namespace Open_lab.ViewModels
             {
                 if (SetProperty(ref _selectedPriceList, value))
                 {
+                    if (value != null)
+                    {
+                        ListName = value.Name;
+                        IsDefault = value.IsDefault;
+                        SelectedReferral = value.ReferralId.HasValue ? FindReferral(value.ReferralId.Value) : null;
+                    }
+
                     (AddItemCommand as RelayCommand)?.RaiseCanExecuteChanged();
+                    (UpdateListCommand as RelayCommand)?.RaiseCanExecuteChanged();
                     _ = LoadItemsAsync();
                 }
             }
@@ -69,9 +89,20 @@ namespace Open_lab.ViewModels
             {
                 if (SetProperty(ref _selectedTest, value))
                 {
+                    if (value != null && SelectedItem == null)
+                    {
+                        Price = value.Price;
+                    }
+
                     (AddItemCommand as RelayCommand)?.RaiseCanExecuteChanged();
                 }
             }
+        }
+
+        public Referral? SelectedReferral
+        {
+            get => _selectedReferral;
+            set => SetProperty(ref _selectedReferral, value);
         }
 
         public string ListName
@@ -100,7 +131,9 @@ namespace Open_lab.ViewModels
 
         public ICommand LoadCommand { get; }
         public ICommand SaveListCommand { get; }
+        public ICommand UpdateListCommand { get; }
         public ICommand AddItemCommand { get; }
+        public ICommand UpdateItemCommand { get; }
         public ICommand DeleteItemCommand { get; }
 
         private async Task LoadAsync()
@@ -117,6 +150,14 @@ namespace Open_lab.ViewModels
             foreach (var test in tests)
             {
                 Tests.Add(test);
+            }
+
+            var referrals = await _testCatalogService.GetReferralsAsync();
+            Referrals.Clear();
+            Referrals.Add(new Referral { ReferralId = 0, Name = "عام (بدون جهة)", ReferralType = "General" });
+            foreach (var referral in referrals)
+            {
+                Referrals.Add(referral);
             }
 
             if (SelectedPriceList != null)
@@ -153,12 +194,40 @@ namespace Open_lab.ViewModels
                 var list = await _testCatalogService.CreatePriceListAsync(new PriceList
                 {
                     Name = ListName,
-                    IsDefault = IsDefault
+                    IsDefault = IsDefault,
+                    ReferralId = NormalizeReferralId(SelectedReferral)
                 });
 
-                PriceLists.Add(list);
+                await LoadAsync();
                 SelectedPriceList = list;
                 StatusMessage = "تم حفظ قائمة الأسعار.";
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = $"خطأ: {ex.Message}";
+            }
+        }
+
+        private async Task UpdateListAsync()
+        {
+            if (SelectedPriceList == null)
+            {
+                return;
+            }
+
+            try
+            {
+                await _testCatalogService.UpdatePriceListAsync(new PriceList
+                {
+                    PriceListId = SelectedPriceList.PriceListId,
+                    Name = ListName,
+                    IsDefault = IsDefault,
+                    ReferralId = NormalizeReferralId(SelectedReferral)
+                });
+
+                await LoadAsync();
+                SelectedPriceList = FindPriceList(SelectedPriceList.PriceListId);
+                StatusMessage = "تم تحديث قائمة الأسعار.";
             }
             catch (Exception ex)
             {
@@ -192,6 +261,31 @@ namespace Open_lab.ViewModels
             }
         }
 
+        private async Task UpdateItemAsync()
+        {
+            if (SelectedItem == null)
+            {
+                return;
+            }
+
+            try
+            {
+                await _testCatalogService.UpdatePriceListItemAsync(new PriceListItem
+                {
+                    PriceListItemId = SelectedItem.PriceListItemId,
+                    Price = Price
+                });
+
+                SelectedItem.Price = Price;
+                await LoadItemsAsync();
+                StatusMessage = "تم تحديث السعر.";
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = $"خطأ: {ex.Message}";
+            }
+        }
+
         private async Task DeleteItemAsync()
         {
             if (SelectedItem == null)
@@ -203,12 +297,49 @@ namespace Open_lab.ViewModels
             {
                 await _testCatalogService.DeletePriceListItemAsync(SelectedItem.PriceListItemId);
                 Items.Remove(SelectedItem);
+                SelectedItem = null;
                 StatusMessage = "تم حذف عنصر التسعير.";
             }
             catch (Exception ex)
             {
                 StatusMessage = $"خطأ: {ex.Message}";
             }
+        }
+
+        private int? NormalizeReferralId(Referral? referral)
+        {
+            if (referral == null || referral.ReferralId <= 0)
+            {
+                return null;
+            }
+
+            return referral.ReferralId;
+        }
+
+        private Referral? FindReferral(int referralId)
+        {
+            foreach (var referral in Referrals)
+            {
+                if (referral.ReferralId == referralId)
+                {
+                    return referral;
+                }
+            }
+
+            return null;
+        }
+
+        private PriceList? FindPriceList(int priceListId)
+        {
+            foreach (var list in PriceLists)
+            {
+                if (list.PriceListId == priceListId)
+                {
+                    return list;
+                }
+            }
+
+            return null;
         }
     }
 }

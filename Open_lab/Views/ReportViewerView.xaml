@@ -11,9 +11,11 @@
                 <TextBlock Text="رقم الزيارة" VerticalAlignment="Center" Margin="0,0,8,0" />
                 <TextBox Text="{Binding VisitId, UpdateSourceTrigger=PropertyChanged}" Width="120" />
                 <Button Content="تحميل" Margin="12,0,0,0" Command="{Binding LoadReportCommand}" />
+                <Button Content="طباعة" Margin="8,0,0,0" Command="{Binding PrintCommand}" />
+                <Button Content="إعادة طباعة" Margin="8,0,0,0" Command="{Binding ReprintCommand}" />
             </StackPanel>
 
-            <TextBlock Text="{Binding StatusMessage}" Foreground="DarkGreen" Margin="0,8,0,0" />
+            <TextBlock Text="{Binding StatusMessage}" Foreground="DarkGreen" Margin="0,8,0,0" TextWrapping="Wrap" />
 
             <GroupBox Header="بيانات المريض" Margin="0,12,0,0">
                 <StackPanel Margin="8">

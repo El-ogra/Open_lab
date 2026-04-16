@@ -11,18 +11,21 @@ namespace Open_lab.ViewModels
     {
         private readonly IPatientService _patientService;
         private readonly IReportService _reportService;
+        private readonly IPrintService _printService;
         private string _labId = string.Empty;
         private DateTime? _from;
         private DateTime? _to;
         private string _statusMessage = string.Empty;
         private PatientHistoryReportData? _history;
 
-        public PatientHistoryViewModel(IPatientService patientService, IReportService reportService)
+        public PatientHistoryViewModel(IPatientService patientService, IReportService reportService, IPrintService printService)
         {
             _patientService = patientService;
             _reportService = reportService;
+            _printService = printService;
             Visits = new ObservableCollection<VisitReportData>();
             LoadHistoryCommand = new RelayCommand(async _ => await LoadHistoryAsync());
+            PrintHistoryCommand = new RelayCommand(async _ => await PrintHistoryAsync(), _ => History != null);
         }
 
         public string LabId
@@ -52,12 +55,19 @@ namespace Open_lab.ViewModels
         public PatientHistoryReportData? History
         {
             get => _history;
-            private set => SetProperty(ref _history, value);
+            private set
+            {
+                if (SetProperty(ref _history, value))
+                {
+                    (PrintHistoryCommand as RelayCommand)?.RaiseCanExecuteChanged();
+                }
+            }
         }
 
         public ObservableCollection<VisitReportData> Visits { get; }
 
         public ICommand LoadHistoryCommand { get; }
+        public ICommand PrintHistoryCommand { get; }
 
         private async Task LoadHistoryAsync()
         {
@@ -89,6 +99,24 @@ namespace Open_lab.ViewModels
             catch (Exception ex)
             {
                 StatusMessage = $"خطأ: {ex.Message}";
+            }
+        }
+
+        private async Task PrintHistoryAsync()
+        {
+            if (History == null)
+            {
+                return;
+            }
+
+            try
+            {
+                await _printService.PrintPatientHistoryAsync(History);
+                StatusMessage = "تم إرسال التاريخ المرضي للطباعة عبر Microsoft Print to PDF.";
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = $"خطأ طباعة: {ex.Message}";
             }
         }
     }

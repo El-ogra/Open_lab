@@ -29,31 +29,48 @@
             <TextBlock Text="رقم الزيارة" Margin="0,12,0,4" />
             <TextBox Text="{Binding VisitId}" IsReadOnly="True" />
 
-            <TextBlock Text="{Binding StatusMessage}" Foreground="DarkGreen" Margin="0,12,0,0" />
+            <TextBlock Text="إجمالي التحاليل" Margin="0,12,0,4" />
+            <TextBox Text="{Binding TotalAmount, StringFormat=N2}" IsReadOnly="True" />
+
+            <TextBlock Text="{Binding StatusMessage}" Foreground="DarkGreen" Margin="0,12,0,0" TextWrapping="Wrap" />
         </StackPanel>
 
         <Grid Grid.Column="1">
             <Grid.RowDefinitions>
-                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
-            <StackPanel>
-                <TextBlock Text="التحاليل المتاحة" FontWeight="Bold" />
-                <ComboBox ItemsSource="{Binding AvailableTests}" SelectedItem="{Binding SelectedAvailableTest}" DisplayMemberPath="NameReport" />
-                <Button Content="إضافة تحليل" Margin="0,8,0,0" Command="{Binding AddTestCommand}" />
-            </StackPanel>
+            <GroupBox Header="البحث وإضافة التحاليل">
+                <StackPanel>
+                    <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,8" />
+                    <ComboBox ItemsSource="{Binding FilteredAvailableTests}" SelectedItem="{Binding SelectedAvailableTest}" DisplayMemberPath="NameReport" />
+                    <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                        <Button Content="إضافة تحليل" Command="{Binding AddTestCommand}" Margin="0,0,8,0" />
+                        <Button Content="تحديث القائمة" Command="{Binding RefreshTestsCommand}" />
+                    </StackPanel>
+                </StackPanel>
+            </GroupBox>
 
-            <StackPanel Grid.Row="1" Margin="0,12,0,0">
-                <TextBlock Text="تحاليل الزيارة" FontWeight="Bold" />
-                <DataGrid ItemsSource="{Binding SelectedTests}" SelectedItem="{Binding SelectedVisitTest}" AutoGenerateColumns="False" Height="200">
-                    <DataGrid.Columns>
-                        <DataGridTextColumn Header="التحليل" Binding="{Binding TestName}" Width="*" />
-                        <DataGridTextColumn Header="السعر" Binding="{Binding Price}" Width="100" />
-                    </DataGrid.Columns>
-                </DataGrid>
-                <Button Content="حذف" Margin="0,8,0,0" Command="{Binding RemoveTestCommand}" />
-            </StackPanel>
+            <GroupBox Grid.Row="1" Header="المجموعات الجاهزة" Margin="0,12,0,0">
+                <StackPanel>
+                    <ComboBox ItemsSource="{Binding CustomGroups}" SelectedItem="{Binding SelectedCustomGroup}" DisplayMemberPath="Name" />
+                    <Button Content="إضافة المجموعة للزيارة" Margin="0,8,0,0" Command="{Binding AddCustomGroupCommand}" />
+                </StackPanel>
+            </GroupBox>
+
+            <GroupBox Grid.Row="2" Header="تحاليل الزيارة" Margin="0,12,0,0">
+                <StackPanel>
+                    <DataGrid ItemsSource="{Binding SelectedTests}" SelectedItem="{Binding SelectedVisitTest}" AutoGenerateColumns="False" Height="260">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="التحليل" Binding="{Binding TestName}" Width="*" />
+                            <DataGridTextColumn Header="السعر" Binding="{Binding Price, StringFormat=N2}" Width="120" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                    <Button Content="حذف التحليل المحدد" Margin="0,8,0,0" Command="{Binding RemoveTestCommand}" />
+                </StackPanel>
+            </GroupBox>
         </Grid>
     </Grid>
 </UserControl>

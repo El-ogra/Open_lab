@@ -82,4 +82,36 @@ namespace Open_lab.ViewModels
         public DateTime? CollectedAt { get; set; }
         public string? CollectedBy { get; set; }
     }
+
+    public class CultureVisitTestRow
+    {
+        public int VisitTestId { get; set; }
+        public int VisitId { get; set; }
+        public string LabId { get; set; } = string.Empty;
+        public string PatientName { get; set; } = string.Empty;
+        public string TestName { get; set; } = string.Empty;
+        public DateTime VisitDate { get; set; }
+        public string? Status { get; set; }
+    }
+
+    public class CultureSensitivityRow : BaseViewModel
+    {
+        private string _sensitivity = string.Empty;
+        private string? _comment;
+
+        public int AntibioticId { get; set; }
+        public string AntibioticName { get; set; } = string.Empty;
+
+        public string Sensitivity
+        {
+            get => _sensitivity;
+            set => SetProperty(ref _sensitivity, value);
+        }
+
+        public string? Comment
+        {
+            get => _comment;
+            set => SetProperty(ref _comment, value);
+        }
+    }
 }

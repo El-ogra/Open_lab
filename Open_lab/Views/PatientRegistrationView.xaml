@@ -12,7 +12,10 @@
         <StackPanel Margin="0,0,16,0">
             <TextBlock Text="تسجيل مريض" FontSize="20" FontWeight="Bold" />
             <TextBlock Text="Lab ID" Margin="0,12,0,4" />
-            <TextBox Text="{Binding LabId, UpdateSourceTrigger=PropertyChanged}" />
+            <DockPanel>
+                <TextBox Text="{Binding LabId, UpdateSourceTrigger=PropertyChanged}" MinWidth="150" />
+                <Button Content="توليد تلقائي" Margin="8,0,0,0" Command="{Binding GenerateLabIdCommand}" />
+            </DockPanel>
             <Button Content="تحميل" Margin="0,8,0,0" Command="{Binding LoadByLabIdCommand}" />
 
             <TextBlock Text="الاسم" Margin="0,12,0,4" />
@@ -44,7 +47,7 @@
             <DataGrid ItemsSource="{Binding Results}" SelectedItem="{Binding SelectedPatient}" AutoGenerateColumns="False" Height="400">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="ID" Binding="{Binding PatientId}" Width="60" />
-                    <DataGridTextColumn Header="Lab ID" Binding="{Binding LabId}" Width="100" />
+                    <DataGridTextColumn Header="Lab ID" Binding="{Binding LabId}" Width="120" />
                     <DataGridTextColumn Header="الاسم" Binding="{Binding FullName}" Width="*" />
                     <DataGridTextColumn Header="الهاتف" Binding="{Binding Phone}" Width="120" />
                 </DataGrid.Columns>

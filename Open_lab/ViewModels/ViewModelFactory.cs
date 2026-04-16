@@ -21,15 +21,15 @@ namespace Open_lab.ViewModels
                 NavigationTarget.Login => CreateLoginViewModel(onLoginSuccess),
                 NavigationTarget.Dashboard => new DashboardViewModel(CreateDashboardService()),
                 NavigationTarget.PatientRegistration => new PatientRegistrationViewModel(CreatePatientService()),
-                NavigationTarget.PatientTestsSelection => new PatientTestsSelectionViewModel(CreatePatientService(), CreateVisitService(), CreateTestCatalogService()),
+                NavigationTarget.PatientTestsSelection => new PatientTestsSelectionViewModel(CreatePatientService(), CreateVisitService(), CreateTestCatalogService(), CreateInvoiceService()),
                 NavigationTarget.PatientBilling => new PatientBillingViewModel(CreateInvoiceService()),
                 NavigationTarget.ResultsEntry => new ResultsEntryViewModel(CreateResultsService()),
-                NavigationTarget.ReportViewer => new ReportViewerViewModel(CreateReportService()),
+                NavigationTarget.ReportViewer => new ReportViewerViewModel(CreateReportService(), CreatePrintService()),
                 NavigationTarget.PatientSearch => new PatientSearchViewModel(CreatePatientSearchService()),
-                NavigationTarget.PatientHistory => new PatientHistoryViewModel(CreatePatientService(), CreateReportService()),
-                NavigationTarget.WorkSheetByPatient => new WorkSheetByPatientViewModel(CreateWorksheetService()),
-                NavigationTarget.WorkSheetByTest => new WorkSheetByTestViewModel(CreateWorksheetService()),
-                NavigationTarget.TestCatalog => new TestCatalogViewModel(CreateTestCatalogService()),
+                NavigationTarget.PatientHistory => new PatientHistoryViewModel(CreatePatientService(), CreateReportService(), CreatePrintService()),
+                NavigationTarget.WorkSheetByPatient => new WorkSheetByPatientViewModel(CreateWorksheetService(), CreatePrintService()),
+                NavigationTarget.WorkSheetByTest => new WorkSheetByTestViewModel(CreateWorksheetService(), CreatePrintService()),
+                NavigationTarget.TestCatalog => new TestCatalogViewModel(CreateTestCatalogService(), CreateBarcodeService()),
                 NavigationTarget.ReferenceRanges => new ReferenceRangesViewModel(CreateTestCatalogService()),
                 NavigationTarget.TestComments => new TestCommentsViewModel(CreateTestCatalogService()),
                 NavigationTarget.PriceLists => new PriceListsViewModel(CreateTestCatalogService()),
@@ -43,7 +43,7 @@ namespace Open_lab.ViewModels
                 NavigationTarget.AccountsTreasury => new AccountsTreasuryViewModel(CreateAccountsTreasuryService()),
                 NavigationTarget.SampleCollection => new SampleCollectionViewModel(CreateSampleCollectionService()),
                 NavigationTarget.CultureSensitivity => new CultureSensitivityViewModel(CreateCultureSensitivityService()),
-                NavigationTarget.ReceiptPrinting => new ReceiptPrintingViewModel(CreateReceiptService()),
+                NavigationTarget.ReceiptPrinting => new ReceiptPrintingViewModel(CreateReceiptService(), CreatePrintService(), CreateBarcodeService()),
                 NavigationTarget.CombinedReport => new CombinedReportViewModel(CreateReportService()),
                 NavigationTarget.BlankReport => new BlankReportViewModel(CreateReportService()),
                 _ => throw new ArgumentOutOfRangeException(nameof(target), target, "Unsupported navigation target.")
@@ -87,5 +87,7 @@ namespace Open_lab.ViewModels
         private ISampleCollectionService CreateSampleCollectionService() => new SampleCollectionService(_dbFactory());
         private ICultureSensitivityService CreateCultureSensitivityService() => new CultureSensitivityService(_dbFactory());
         private IReceiptService CreateReceiptService() => new ReceiptService(_dbFactory());
+        private IPrintService CreatePrintService() => new PrintService();
+        private IBarcodeService CreateBarcodeService() => new BarcodeService();
     }
 }

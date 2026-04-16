@@ -18,10 +18,11 @@
             <TextBlock Text="إلى" VerticalAlignment="Center" Margin="12,0,8,0" />
             <DatePicker SelectedDate="{Binding To}" Width="140" />
             <Button Content="تحميل" Margin="12,0,0,0" Command="{Binding LoadHistoryCommand}" />
+            <Button Content="طباعة التاريخ المرضي" Margin="8,0,0,0" Command="{Binding PrintHistoryCommand}" />
         </StackPanel>
 
         <StackPanel Grid.Row="1" Margin="0,12,0,0">
-            <TextBlock Text="{Binding StatusMessage}" Foreground="DarkGreen" />
+            <TextBlock Text="{Binding StatusMessage}" Foreground="DarkGreen" TextWrapping="Wrap" />
             <ItemsControl ItemsSource="{Binding Visits}" Margin="0,8,0,0">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
