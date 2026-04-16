@@ -14,6 +14,7 @@ namespace Open_lab.ViewModels
         private bool _isDefault;
         private PriceList? _selectedPriceList;
         private Test? _selectedTest;
+        private PriceListItem? _selectedItem;
         private decimal _price;
         private string _statusMessage = string.Empty;
 
@@ -24,10 +25,10 @@ namespace Open_lab.ViewModels
             Items = new ObservableCollection<PriceListItem>();
             Tests = new ObservableCollection<Test>();
 
-            LoadCommand = new RelayCommand(async _ => await LoadAsync());
-            SaveListCommand = new RelayCommand(async _ => await SaveListAsync());
-            AddItemCommand = new RelayCommand(async _ => await AddItemAsync(), _ => SelectedPriceList != null && SelectedTest != null);
-            DeleteItemCommand = new RelayCommand(async _ => await DeleteItemAsync(), _ => SelectedItem != null);
+            LoadCommand = new RelayCommand(async _ => await LoadAsync(), _ => AppSession.HasPermission(PermissionCodes.TestsView));
+            SaveListCommand = new RelayCommand(async _ => await SaveListAsync(), _ => AppSession.HasPermission(PermissionCodes.TestsEdit));
+            AddItemCommand = new RelayCommand(async _ => await AddItemAsync(), _ => AppSession.HasPermission(PermissionCodes.TestsEdit) && SelectedPriceList != null && SelectedTest != null);
+            DeleteItemCommand = new RelayCommand(async _ => await DeleteItemAsync(), _ => AppSession.HasPermission(PermissionCodes.TestsEdit) && SelectedItem != null);
 
             _ = LoadAsync();
         }
@@ -36,7 +37,17 @@ namespace Open_lab.ViewModels
         public ObservableCollection<PriceListItem> Items { get; }
         public ObservableCollection<Test> Tests { get; }
 
-        public PriceListItem? SelectedItem { get; set; }
+        public PriceListItem? SelectedItem
+        {
+            get => _selectedItem;
+            set
+            {
+                if (SetProperty(ref _selectedItem, value))
+                {
+                    (DeleteItemCommand as RelayCommand)?.RaiseCanExecuteChanged();
+                }
+            }
+        }
 
         public PriceList? SelectedPriceList
         {
@@ -45,6 +56,7 @@ namespace Open_lab.ViewModels
             {
                 if (SetProperty(ref _selectedPriceList, value))
                 {
+                    (AddItemCommand as RelayCommand)?.RaiseCanExecuteChanged();
                     _ = LoadItemsAsync();
                 }
             }
@@ -53,7 +65,13 @@ namespace Open_lab.ViewModels
         public Test? SelectedTest
         {
             get => _selectedTest;
-            set => SetProperty(ref _selectedTest, value);
+            set
+            {
+                if (SetProperty(ref _selectedTest, value))
+                {
+                    (AddItemCommand as RelayCommand)?.RaiseCanExecuteChanged();
+                }
+            }
         }
 
         public string ListName
@@ -100,6 +118,11 @@ namespace Open_lab.ViewModels
             {
                 Tests.Add(test);
             }
+
+            if (SelectedPriceList != null)
+            {
+                await LoadItemsAsync();
+            }
         }
 
         private async Task LoadItemsAsync()
@@ -134,7 +157,8 @@ namespace Open_lab.ViewModels
                 });
 
                 PriceLists.Add(list);
-                StatusMessage = "تم إنشاء القائمة.";
+                SelectedPriceList = list;
+                StatusMessage = "تم حفظ قائمة الأسعار.";
             }
             catch (Exception ex)
             {
@@ -155,12 +179,12 @@ namespace Open_lab.ViewModels
                 {
                     PriceListId = SelectedPriceList.PriceListId,
                     TestId = SelectedTest.TestId,
-                    Price = Price
+                    Price = Price > 0 ? Price : SelectedTest.Price
                 });
 
                 item.Test = SelectedTest;
                 Items.Add(item);
-                StatusMessage = "تمت إضافة التحليل للقائمة.";
+                StatusMessage = "تمت إضافة عنصر التسعير.";
             }
             catch (Exception ex)
             {
@@ -179,8 +203,7 @@ namespace Open_lab.ViewModels
             {
                 await _testCatalogService.DeletePriceListItemAsync(SelectedItem.PriceListItemId);
                 Items.Remove(SelectedItem);
-                SelectedItem = null;
-                StatusMessage = "تم حذف العنصر.";
+                StatusMessage = "تم حذف عنصر التسعير.";
             }
             catch (Exception ex)
             {

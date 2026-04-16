@@ -63,6 +63,14 @@ namespace Open_lab.ViewModels
         public string? Username { get; set; }
     }
 
+    public class InvoicePaymentRow
+    {
+        public int PaymentId { get; set; }
+        public decimal Amount { get; set; }
+        public DateTime PaymentDate { get; set; }
+        public int UserId { get; set; }
+    }
+
     public class SampleCollectionRow
     {
         public int VisitTestId { get; set; }
@@ -75,4 +83,3 @@ namespace Open_lab.ViewModels
         public string? CollectedBy { get; set; }
     }
 }
-

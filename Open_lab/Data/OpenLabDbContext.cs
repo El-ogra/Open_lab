@@ -74,6 +74,7 @@ namespace Open_lab.Data
                 entity.HasIndex(e => e.Username).IsUnique();
                 entity.Property(e => e.Username).IsRequired();
                 entity.Property(e => e.PasswordHash).IsRequired();
+                entity.Property(e => e.Salt).IsRequired();
             });
 
             modelBuilder.Entity<Role>(entity =>
@@ -340,6 +341,8 @@ namespace Open_lab.Data
         }
     }
 }
+
+
 
 
 

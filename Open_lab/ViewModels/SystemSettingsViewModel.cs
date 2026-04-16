@@ -18,8 +18,8 @@ namespace Open_lab.ViewModels
         {
             _settingsService = settingsService;
             Settings = new ObservableCollection<Setting>();
-            SaveCommand = new RelayCommand(async _ => await SaveAsync());
-            DeleteCommand = new RelayCommand(async _ => await DeleteAsync(), _ => SelectedSetting != null);
+            SaveCommand = new RelayCommand(async _ => await SaveAsync(), _ => AppSession.HasPermission(PermissionCodes.SettingsEdit));
+            DeleteCommand = new RelayCommand(async _ => await DeleteAsync(), _ => AppSession.HasPermission(PermissionCodes.SettingsEdit) && SelectedSetting != null);
             _ = LoadAsync();
         }
 
@@ -100,3 +100,4 @@ namespace Open_lab.ViewModels
         }
     }
 }
+

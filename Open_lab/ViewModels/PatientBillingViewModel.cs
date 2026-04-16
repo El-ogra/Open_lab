@@ -1,4 +1,5 @@
 using System;
+using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Open_lab.Services;
@@ -15,13 +16,17 @@ namespace Open_lab.ViewModels
         private decimal _netTotal;
         private decimal _balance;
         private string _statusMessage = string.Empty;
+        private InvoicePaymentRow? _selectedPayment;
 
         public PatientBillingViewModel(IInvoiceService invoiceService)
         {
             _invoiceService = invoiceService;
-            LoadVisitCommand = new RelayCommand(async _ => await LoadVisitAsync());
-            SaveInvoiceCommand = new RelayCommand(async _ => await SaveInvoiceAsync());
-            AddPaymentCommand = new RelayCommand(async _ => await AddPaymentAsync(), _ => VisitId > 0);
+            Payments = new ObservableCollection<InvoicePaymentRow>();
+
+            LoadVisitCommand = new RelayCommand(async _ => await LoadVisitAsync(), _ => AppSession.HasPermission(PermissionCodes.AccountsView));
+            SaveInvoiceCommand = new RelayCommand(async _ => await SaveInvoiceAsync(), _ => AppSession.HasPermission(PermissionCodes.AccountsEdit));
+            AddPaymentCommand = new RelayCommand(async _ => await AddPaymentAsync(), _ => AppSession.HasPermission(PermissionCodes.AccountsEdit) && VisitId > 0);
+            DeletePaymentCommand = new RelayCommand(async _ => await DeletePaymentAsync(), _ => AppSession.HasPermission(PermissionCodes.AccountsEdit) && SelectedPayment != null);
         }
 
         public int VisitId
@@ -66,6 +71,20 @@ namespace Open_lab.ViewModels
             private set => SetProperty(ref _balance, value);
         }
 
+        public InvoicePaymentRow? SelectedPayment
+        {
+            get => _selectedPayment;
+            set
+            {
+                if (SetProperty(ref _selectedPayment, value))
+                {
+                    (DeletePaymentCommand as RelayCommand)?.RaiseCanExecuteChanged();
+                }
+            }
+        }
+
+        public ObservableCollection<InvoicePaymentRow> Payments { get; }
+
         public string StatusMessage
         {
             get => _statusMessage;
@@ -75,6 +94,7 @@ namespace Open_lab.ViewModels
         public ICommand LoadVisitCommand { get; }
         public ICommand SaveInvoiceCommand { get; }
         public ICommand AddPaymentCommand { get; }
+        public ICommand DeletePaymentCommand { get; }
 
         private async Task LoadVisitAsync()
         {
@@ -95,6 +115,7 @@ namespace Open_lab.ViewModels
                     Paid = invoice.Paid;
                     NetTotal = invoice.NetTotal;
                     Balance = invoice.Balance;
+                    await LoadPaymentsAsync(invoice.InvoiceId);
                 }
                 else
                 {
@@ -102,6 +123,7 @@ namespace Open_lab.ViewModels
                     Paid = 0;
                     NetTotal = Total;
                     Balance = Total;
+                    Payments.Clear();
                 }
 
                 StatusMessage = "تم تحميل بيانات الفاتورة.";
@@ -122,10 +144,12 @@ namespace Open_lab.ViewModels
 
             try
             {
-                var invoice = await _invoiceService.CreateOrUpdateInvoiceAsync(VisitId, Discount, Paid);
+                var invoice = await _invoiceService.CreateOrUpdateInvoiceAsync(VisitId, Discount, 0);
                 Total = invoice.Total;
+                Paid = invoice.Paid;
                 NetTotal = invoice.NetTotal;
                 Balance = invoice.Balance;
+                await LoadPaymentsAsync(invoice.InvoiceId);
                 StatusMessage = "تم حفظ الفاتورة.";
             }
             catch (Exception ex)
@@ -151,12 +175,48 @@ namespace Open_lab.ViewModels
             {
                 var invoice = await _invoiceService.CreateOrUpdateInvoiceAsync(VisitId, Discount, 0);
                 await _invoiceService.AddPaymentAsync(invoice.InvoiceId, Paid, AppSession.UserId > 0 ? AppSession.UserId : 1);
+                Paid = 0;
                 await LoadVisitAsync();
                 StatusMessage = "تم تسجيل الدفعة.";
             }
             catch (Exception ex)
             {
                 StatusMessage = $"خطأ: {ex.Message}";
+            }
+        }
+
+        private async Task DeletePaymentAsync()
+        {
+            if (SelectedPayment == null)
+            {
+                return;
+            }
+
+            try
+            {
+                await _invoiceService.DeletePaymentAsync(SelectedPayment.PaymentId);
+                await LoadVisitAsync();
+                StatusMessage = "تم حذف الدفعة.";
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = $"خطأ: {ex.Message}";
+            }
+        }
+
+        private async Task LoadPaymentsAsync(int invoiceId)
+        {
+            var items = await _invoiceService.GetPaymentsAsync(invoiceId);
+            Payments.Clear();
+            foreach (var payment in items)
+            {
+                Payments.Add(new InvoicePaymentRow
+                {
+                    PaymentId = payment.PaymentId,
+                    Amount = payment.Amount,
+                    PaymentDate = payment.PaymentDate,
+                    UserId = payment.UserId
+                });
             }
         }
     }

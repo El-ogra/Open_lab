@@ -24,11 +24,11 @@ namespace Open_lab.ViewModels
         {
             _patientService = patientService;
             Results = new ObservableCollection<Patient>();
-            SaveCommand = new RelayCommand(async _ => await SaveAsync());
-            NewCommand = new RelayCommand(_ => ClearForm());
-            LoadByLabIdCommand = new RelayCommand(async _ => await LoadByLabIdAsync());
-            SearchCommand = new RelayCommand(async _ => await SearchAsync());
-            DeleteCommand = new RelayCommand(async _ => await DeleteAsync(), _ => PatientId > 0);
+            SaveCommand = new RelayCommand(async _ => await SaveAsync(), _ => AppSession.HasPermission(PermissionCodes.PatientsEdit));
+            NewCommand = new RelayCommand(_ => ClearForm(), _ => AppSession.HasPermission(PermissionCodes.PatientsEdit));
+            LoadByLabIdCommand = new RelayCommand(async _ => await LoadByLabIdAsync(), _ => AppSession.HasPermission(PermissionCodes.PatientsView));
+            SearchCommand = new RelayCommand(async _ => await SearchAsync(), _ => AppSession.HasPermission(PermissionCodes.PatientsView));
+            DeleteCommand = new RelayCommand(async _ => await DeleteAsync(), _ => AppSession.HasPermission(PermissionCodes.PatientsEdit) && PatientId > 0);
         }
 
         public int PatientId
@@ -233,3 +233,4 @@ namespace Open_lab.ViewModels
         }
     }
 }
+

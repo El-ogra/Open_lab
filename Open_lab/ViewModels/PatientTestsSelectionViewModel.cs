@@ -19,6 +19,8 @@ namespace Open_lab.ViewModels
         private string _statusMessage = string.Empty;
         private Test? _selectedAvailableTest;
         private SelectedTestItem? _selectedVisitTest;
+        private string _selectedAccountType = "Cash";
+        private Referral? _selectedReferral;
 
         public PatientTestsSelectionViewModel(IPatientService patientService, IVisitService visitService, ITestCatalogService testCatalogService)
         {
@@ -27,14 +29,16 @@ namespace Open_lab.ViewModels
             _testCatalogService = testCatalogService;
             AvailableTests = new ObservableCollection<Test>();
             SelectedTests = new ObservableCollection<SelectedTestItem>();
+            Referrals = new ObservableCollection<Referral>();
+            AccountTypes = new ObservableCollection<string> { "Cash", "Referral" };
 
-            LoadPatientCommand = new RelayCommand(async _ => await LoadPatientAsync());
-            CreateVisitCommand = new RelayCommand(async _ => await CreateVisitAsync(), _ => PatientId > 0);
-            AddTestCommand = new RelayCommand(async _ => await AddTestAsync(), _ => VisitId > 0 && SelectedAvailableTest != null);
-            RemoveTestCommand = new RelayCommand(async _ => await RemoveTestAsync(), _ => SelectedVisitTest != null);
-            RefreshTestsCommand = new RelayCommand(async _ => await LoadAvailableTestsAsync());
+            LoadPatientCommand = new RelayCommand(async _ => await LoadPatientAsync(), _ => AppSession.HasPermission(PermissionCodes.PatientsView));
+            CreateVisitCommand = new RelayCommand(async _ => await CreateVisitAsync(), _ => AppSession.HasPermission(PermissionCodes.VisitsEdit) && PatientId > 0);
+            AddTestCommand = new RelayCommand(async _ => await AddTestAsync(), _ => AppSession.HasPermission(PermissionCodes.VisitsEdit) && VisitId > 0 && SelectedAvailableTest != null);
+            RemoveTestCommand = new RelayCommand(async _ => await RemoveTestAsync(), _ => AppSession.HasPermission(PermissionCodes.VisitsEdit) && SelectedVisitTest != null);
+            RefreshTestsCommand = new RelayCommand(async _ => await LoadAvailableTestsAsync(), _ => AppSession.HasPermission(PermissionCodes.TestsView));
 
-            _ = LoadAvailableTestsAsync();
+            _ = InitializeAsync();
         }
 
         public string LabId
@@ -73,6 +77,18 @@ namespace Open_lab.ViewModels
             }
         }
 
+        public string SelectedAccountType
+        {
+            get => _selectedAccountType;
+            set => SetProperty(ref _selectedAccountType, value);
+        }
+
+        public Referral? SelectedReferral
+        {
+            get => _selectedReferral;
+            set => SetProperty(ref _selectedReferral, value);
+        }
+
         public string StatusMessage
         {
             get => _statusMessage;
@@ -81,6 +97,8 @@ namespace Open_lab.ViewModels
 
         public ObservableCollection<Test> AvailableTests { get; }
         public ObservableCollection<SelectedTestItem> SelectedTests { get; }
+        public ObservableCollection<Referral> Referrals { get; }
+        public ObservableCollection<string> AccountTypes { get; }
 
         public Test? SelectedAvailableTest
         {
@@ -111,6 +129,12 @@ namespace Open_lab.ViewModels
         public ICommand AddTestCommand { get; }
         public ICommand RemoveTestCommand { get; }
         public ICommand RefreshTestsCommand { get; }
+
+        private async Task InitializeAsync()
+        {
+            await LoadAvailableTestsAsync();
+            await LoadReferralsAsync();
+        }
 
         private async Task LoadPatientAsync()
         {
@@ -149,6 +173,8 @@ namespace Open_lab.ViewModels
                 {
                     PatientId = PatientId,
                     VisitDate = DateTime.Now,
+                    AccountType = SelectedAccountType,
+                    ReferralId = string.Equals(SelectedAccountType, "Referral", StringComparison.OrdinalIgnoreCase) ? SelectedReferral?.ReferralId : null,
                     Status = "Open"
                 });
 
@@ -171,6 +197,23 @@ namespace Open_lab.ViewModels
                 foreach (var test in tests)
                 {
                     AvailableTests.Add(test);
+                }
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = $"خطأ: {ex.Message}";
+            }
+        }
+
+        private async Task LoadReferralsAsync()
+        {
+            try
+            {
+                var referrals = await _testCatalogService.GetReferralsAsync();
+                Referrals.Clear();
+                foreach (var referral in referrals)
+                {
+                    Referrals.Add(referral);
                 }
             }
             catch (Exception ex)

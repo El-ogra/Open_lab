@@ -21,9 +21,10 @@ namespace Open_lab.ViewModels
             VisitTests = new ObservableCollection<VisitTestRow>();
             ResultItems = new ObservableCollection<ResultEntryItem>();
 
-            LoadVisitTestsCommand = new RelayCommand(async _ => await LoadVisitTestsAsync());
-            SaveResultsCommand = new RelayCommand(async _ => await SaveResultsAsync(), _ => SelectedVisitTest != null);
-            VerifyResultsCommand = new RelayCommand(async _ => await VerifyResultsAsync(), _ => SelectedVisitTest != null);
+            LoadVisitTestsCommand = new RelayCommand(async _ => await LoadVisitTestsAsync(), _ => AppSession.HasPermission(PermissionCodes.ResultsView));
+            SaveResultsCommand = new RelayCommand(async _ => await SaveResultsAsync(), _ => AppSession.HasPermission(PermissionCodes.ResultsEdit) && SelectedVisitTest != null && !IsSelectedVerified());
+            VerifyResultsCommand = new RelayCommand(async _ => await VerifyResultsAsync(), _ => AppSession.HasPermission(PermissionCodes.ResultsEdit) && SelectedVisitTest != null);
+            ReopenResultsCommand = new RelayCommand(async _ => await ReopenResultsAsync(), _ => AppSession.HasPermission(PermissionCodes.ResultsEdit) && SelectedVisitTest != null && IsSelectedVerified());
         }
 
         public DateTime DateFrom
@@ -48,8 +49,7 @@ namespace Open_lab.ViewModels
             {
                 if (SetProperty(ref _selectedVisitTest, value))
                 {
-                    (SaveResultsCommand as RelayCommand)?.RaiseCanExecuteChanged();
-                    (VerifyResultsCommand as RelayCommand)?.RaiseCanExecuteChanged();
+                    RaiseCommandStates();
                     _ = LoadResultsAsync();
                 }
             }
@@ -64,6 +64,7 @@ namespace Open_lab.ViewModels
         public ICommand LoadVisitTestsCommand { get; }
         public ICommand SaveResultsCommand { get; }
         public ICommand VerifyResultsCommand { get; }
+        public ICommand ReopenResultsCommand { get; }
 
         private async Task LoadVisitTestsAsync()
         {
@@ -139,6 +140,8 @@ namespace Open_lab.ViewModels
                     await _resultsService.SaveResultAsync(SelectedVisitTest.VisitTestId, item.ParameterId, item.Value, item.Flag, item.Comment);
                 }
 
+                SelectedVisitTest.Status = "InProgress";
+                RaiseCommandStates();
                 StatusMessage = "تم حفظ النتائج.";
             }
             catch (Exception ex)
@@ -157,13 +160,48 @@ namespace Open_lab.ViewModels
             try
             {
                 await _resultsService.VerifyVisitTestAsync(SelectedVisitTest.VisitTestId, AppSession.UserId > 0 ? AppSession.UserId : 1);
-                StatusMessage = "تم اعتماد النتائج.";
+                SelectedVisitTest.Status = "Verified";
+                RaiseCommandStates();
+                StatusMessage = "تم اعتماد النتائج وقفلها.";
                 await LoadVisitTestsAsync();
             }
             catch (Exception ex)
             {
                 StatusMessage = $"خطأ: {ex.Message}";
             }
+        }
+
+        private async Task ReopenResultsAsync()
+        {
+            if (SelectedVisitTest == null)
+            {
+                return;
+            }
+
+            try
+            {
+                await _resultsService.ReopenVisitTestAsync(SelectedVisitTest.VisitTestId);
+                SelectedVisitTest.Status = "InProgress";
+                RaiseCommandStates();
+                StatusMessage = "تم إعادة فتح النتائج للتعديل.";
+                await LoadVisitTestsAsync();
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = $"خطأ: {ex.Message}";
+            }
+        }
+
+        private bool IsSelectedVerified()
+        {
+            return string.Equals(SelectedVisitTest?.Status, "Verified", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private void RaiseCommandStates()
+        {
+            (SaveResultsCommand as RelayCommand)?.RaiseCanExecuteChanged();
+            (VerifyResultsCommand as RelayCommand)?.RaiseCanExecuteChanged();
+            (ReopenResultsCommand as RelayCommand)?.RaiseCanExecuteChanged();
         }
     }
 }

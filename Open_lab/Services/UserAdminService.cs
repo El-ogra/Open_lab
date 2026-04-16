@@ -47,7 +47,7 @@ namespace Open_lab.Services
                 throw new ArgumentException("Username is required.", nameof(user));
             }
 
-            user.PasswordHash = string.IsNullOrWhiteSpace(plainPassword) ? string.Empty : plainPassword;
+            ApplyPassword(user, plainPassword);
             _db.Users.Add(user);
             await _db.SaveChangesAsync();
             return user;
@@ -64,9 +64,10 @@ namespace Open_lab.Services
             current.Username = user.Username;
             current.FullName = user.FullName;
             current.IsActive = user.IsActive;
+
             if (!string.IsNullOrWhiteSpace(plainPassword))
             {
-                current.PasswordHash = plainPassword;
+                ApplyPassword(current, plainPassword);
             }
 
             await _db.SaveChangesAsync();
@@ -104,6 +105,20 @@ namespace Open_lab.Services
             }
 
             await _db.SaveChangesAsync();
+        }
+
+        private static void ApplyPassword(User user, string? plainPassword)
+        {
+            if (string.IsNullOrWhiteSpace(plainPassword))
+            {
+                user.PasswordHash = string.Empty;
+                user.Salt = string.Empty;
+                return;
+            }
+
+            var salt = PasswordSecurity.GenerateSalt();
+            user.Salt = salt;
+            user.PasswordHash = PasswordSecurity.ComputeSha256(plainPassword, salt);
         }
     }
 }

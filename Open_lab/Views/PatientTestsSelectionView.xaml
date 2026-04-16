@@ -19,6 +19,12 @@
             <TextBlock Text="اسم المريض" Margin="0,12,0,4" />
             <TextBox Text="{Binding PatientName}" IsReadOnly="True" />
 
+            <TextBlock Text="نوع الحساب" Margin="0,12,0,4" />
+            <ComboBox ItemsSource="{Binding AccountTypes}" SelectedItem="{Binding SelectedAccountType}" />
+
+            <TextBlock Text="الجهة (للتحويل)" Margin="0,12,0,4" />
+            <ComboBox ItemsSource="{Binding Referrals}" SelectedItem="{Binding SelectedReferral}" DisplayMemberPath="Name" />
+
             <Button Content="إنشاء زيارة جديدة" Margin="0,12,0,0" Command="{Binding CreateVisitCommand}" />
             <TextBlock Text="رقم الزيارة" Margin="0,12,0,4" />
             <TextBox Text="{Binding VisitId}" IsReadOnly="True" />

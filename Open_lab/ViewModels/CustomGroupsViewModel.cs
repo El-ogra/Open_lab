@@ -14,6 +14,7 @@ namespace Open_lab.ViewModels
         private decimal _groupPrice;
         private CustomGroup? _selectedGroup;
         private Test? _selectedTest;
+        private CustomGroupItem? _selectedItem;
         private string _statusMessage = string.Empty;
 
         public CustomGroupsViewModel(ITestCatalogService testCatalogService)
@@ -23,9 +24,9 @@ namespace Open_lab.ViewModels
             GroupItems = new ObservableCollection<CustomGroupItem>();
             Tests = new ObservableCollection<Test>();
 
-            SaveGroupCommand = new RelayCommand(async _ => await SaveGroupAsync());
-            AddItemCommand = new RelayCommand(async _ => await AddItemAsync(), _ => SelectedGroup != null && SelectedTest != null);
-            DeleteItemCommand = new RelayCommand(async _ => await DeleteItemAsync(), _ => SelectedItem != null);
+            SaveGroupCommand = new RelayCommand(async _ => await SaveGroupAsync(), _ => AppSession.HasPermission(PermissionCodes.TestsEdit));
+            AddItemCommand = new RelayCommand(async _ => await AddItemAsync(), _ => AppSession.HasPermission(PermissionCodes.TestsEdit) && SelectedGroup != null && SelectedTest != null);
+            DeleteItemCommand = new RelayCommand(async _ => await DeleteItemAsync(), _ => AppSession.HasPermission(PermissionCodes.TestsEdit) && SelectedItem != null);
 
             _ = LoadAsync();
         }
@@ -34,7 +35,17 @@ namespace Open_lab.ViewModels
         public ObservableCollection<CustomGroupItem> GroupItems { get; }
         public ObservableCollection<Test> Tests { get; }
 
-        public CustomGroupItem? SelectedItem { get; set; }
+        public CustomGroupItem? SelectedItem
+        {
+            get => _selectedItem;
+            set
+            {
+                if (SetProperty(ref _selectedItem, value))
+                {
+                    (DeleteItemCommand as RelayCommand)?.RaiseCanExecuteChanged();
+                }
+            }
+        }
 
         public CustomGroup? SelectedGroup
         {
@@ -43,6 +54,7 @@ namespace Open_lab.ViewModels
             {
                 if (SetProperty(ref _selectedGroup, value))
                 {
+                    (AddItemCommand as RelayCommand)?.RaiseCanExecuteChanged();
                     _ = LoadItemsAsync();
                 }
             }
@@ -51,7 +63,13 @@ namespace Open_lab.ViewModels
         public Test? SelectedTest
         {
             get => _selectedTest;
-            set => SetProperty(ref _selectedTest, value);
+            set
+            {
+                if (SetProperty(ref _selectedTest, value))
+                {
+                    (AddItemCommand as RelayCommand)?.RaiseCanExecuteChanged();
+                }
+            }
         }
 
         public string GroupName
@@ -91,6 +109,11 @@ namespace Open_lab.ViewModels
             {
                 Tests.Add(test);
             }
+
+            if (SelectedGroup != null)
+            {
+                await LoadItemsAsync();
+            }
         }
 
         private async Task LoadItemsAsync()
@@ -125,7 +148,8 @@ namespace Open_lab.ViewModels
                 });
 
                 Groups.Add(group);
-                StatusMessage = "تم إنشاء المجموعة.";
+                SelectedGroup = group;
+                StatusMessage = "تم حفظ المجموعة.";
             }
             catch (Exception ex)
             {
@@ -150,7 +174,7 @@ namespace Open_lab.ViewModels
 
                 item.Test = SelectedTest;
                 GroupItems.Add(item);
-                StatusMessage = "تمت إضافة التحليل.";
+                StatusMessage = "تمت إضافة التحليل للمجموعة.";
             }
             catch (Exception ex)
             {
@@ -169,8 +193,7 @@ namespace Open_lab.ViewModels
             {
                 await _testCatalogService.DeleteCustomGroupItemAsync(SelectedItem.CustomGroupItemId);
                 GroupItems.Remove(SelectedItem);
-                SelectedItem = null;
-                StatusMessage = "تم حذف العنصر.";
+                StatusMessage = "تم حذف التحليل من المجموعة.";
             }
             catch (Exception ex)
             {

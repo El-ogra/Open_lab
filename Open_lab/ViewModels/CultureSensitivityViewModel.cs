@@ -25,13 +25,13 @@ namespace Open_lab.ViewModels
             Antibiotics = new ObservableCollection<Antibiotic>();
             LinkedAntibiotics = new ObservableCollection<CultureAntibiotic>();
 
-            LoadCommand = new RelayCommand(async _ => await LoadAsync());
-            AddCultureCommand = new RelayCommand(async _ => await AddCultureAsync());
-            DeleteCultureCommand = new RelayCommand(async _ => await DeleteCultureAsync(), _ => SelectedCulture != null);
-            AddAntibioticCommand = new RelayCommand(async _ => await AddAntibioticAsync());
-            DeleteAntibioticCommand = new RelayCommand(async _ => await DeleteAntibioticAsync(), _ => SelectedAntibiotic != null);
-            LinkCommand = new RelayCommand(async _ => await LinkAsync(), _ => SelectedCulture != null && SelectedAntibiotic != null);
-            UnlinkCommand = new RelayCommand(async _ => await UnlinkAsync(), _ => SelectedLink != null);
+            LoadCommand = new RelayCommand(async _ => await LoadAsync(), _ => AppSession.HasPermission(PermissionCodes.TestsView));
+            AddCultureCommand = new RelayCommand(async _ => await AddCultureAsync(), _ => AppSession.HasPermission(PermissionCodes.TestsEdit));
+            DeleteCultureCommand = new RelayCommand(async _ => await DeleteCultureAsync(), _ => AppSession.HasPermission(PermissionCodes.TestsEdit) && SelectedCulture != null);
+            AddAntibioticCommand = new RelayCommand(async _ => await AddAntibioticAsync(), _ => AppSession.HasPermission(PermissionCodes.TestsEdit));
+            DeleteAntibioticCommand = new RelayCommand(async _ => await DeleteAntibioticAsync(), _ => AppSession.HasPermission(PermissionCodes.TestsEdit) && SelectedAntibiotic != null);
+            LinkCommand = new RelayCommand(async _ => await LinkAsync(), _ => AppSession.HasPermission(PermissionCodes.TestsEdit) && SelectedCulture != null && SelectedAntibiotic != null);
+            UnlinkCommand = new RelayCommand(async _ => await UnlinkAsync(), _ => AppSession.HasPermission(PermissionCodes.TestsEdit) && SelectedLink != null);
 
             _ = LoadAsync();
         }
@@ -276,3 +276,4 @@ namespace Open_lab.ViewModels
         }
     }
 }
+

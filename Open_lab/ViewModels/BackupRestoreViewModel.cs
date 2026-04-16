@@ -15,8 +15,8 @@ namespace Open_lab.ViewModels
         public BackupRestoreViewModel(IBackupRestoreService backupRestoreService)
         {
             _backupRestoreService = backupRestoreService;
-            BackupCommand = new RelayCommand(async _ => await BackupAsync());
-            RestoreCommand = new RelayCommand(async _ => await RestoreAsync());
+            BackupCommand = new RelayCommand(async _ => await BackupAsync(), _ => AppSession.HasPermission(PermissionCodes.BackupRestore));
+            RestoreCommand = new RelayCommand(async _ => await RestoreAsync(), _ => AppSession.HasPermission(PermissionCodes.BackupRestore));
         }
 
         public string BackupPath
@@ -79,3 +79,4 @@ namespace Open_lab.ViewModels
         }
     }
 }
+

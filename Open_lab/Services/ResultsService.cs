@@ -54,6 +54,17 @@ namespace Open_lab.Services
 
         public async Task SaveResultAsync(int visitTestId, int parameterId, string? value, string? flag, string? comment)
         {
+            var visitTest = await _db.VisitTests.FirstOrDefaultAsync(vt => vt.VisitTestId == visitTestId);
+            if (visitTest == null)
+            {
+                throw new InvalidOperationException("Visit test not found.");
+            }
+
+            if (string.Equals(visitTest.Status, "Verified", StringComparison.OrdinalIgnoreCase))
+            {
+                throw new InvalidOperationException("Verified results are locked. Reopen first.");
+            }
+
             var existing = await _db.ResultValues
                 .FirstOrDefaultAsync(rv => rv.VisitTestId == visitTestId && rv.ParameterId == parameterId);
 
@@ -74,6 +85,13 @@ namespace Open_lab.Services
                 existing.Value = value;
                 existing.Flag = flag;
                 existing.Comment = comment;
+                existing.VerifiedBy = null;
+                existing.VerifiedAt = null;
+            }
+
+            if (!string.Equals(visitTest.Status, "InProgress", StringComparison.OrdinalIgnoreCase))
+            {
+                visitTest.Status = "InProgress";
             }
 
             await _db.SaveChangesAsync();
@@ -81,10 +99,23 @@ namespace Open_lab.Services
 
         public async Task VerifyVisitTestAsync(int visitTestId, int verifiedByUserId)
         {
+            var visitTest = await _db.VisitTests.FirstOrDefaultAsync(vt => vt.VisitTestId == visitTestId);
+            if (visitTest == null)
+            {
+                throw new InvalidOperationException("Visit test not found.");
+            }
+
+            var parametersCount = await _db.TestParameters.CountAsync(p => p.TestId == visitTest.TestId);
             var results = await _db.ResultValues.Where(rv => rv.VisitTestId == visitTestId).ToListAsync();
             if (results.Count == 0)
             {
                 throw new InvalidOperationException("No results to verify.");
+            }
+
+            var hasMissing = parametersCount > 0 && results.Count < parametersCount;
+            if (hasMissing || results.Any(r => string.IsNullOrWhiteSpace(r.Value)))
+            {
+                throw new InvalidOperationException("All parameters must have values before verification.");
             }
 
             var now = DateTime.Now;
@@ -94,12 +125,31 @@ namespace Open_lab.Services
                 result.VerifiedAt = now;
             }
 
+            visitTest.Status = "Verified";
+            await _db.SaveChangesAsync();
+        }
+
+        public async Task ReopenVisitTestAsync(int visitTestId)
+        {
             var visitTest = await _db.VisitTests.FirstOrDefaultAsync(vt => vt.VisitTestId == visitTestId);
-            if (visitTest != null)
+            if (visitTest == null)
             {
-                visitTest.Status = "Verified";
+                throw new InvalidOperationException("Visit test not found.");
             }
 
+            if (!string.Equals(visitTest.Status, "Verified", StringComparison.OrdinalIgnoreCase))
+            {
+                return;
+            }
+
+            var results = await _db.ResultValues.Where(rv => rv.VisitTestId == visitTestId).ToListAsync();
+            foreach (var result in results)
+            {
+                result.VerifiedBy = null;
+                result.VerifiedAt = null;
+            }
+
+            visitTest.Status = "InProgress";
             await _db.SaveChangesAsync();
         }
     }

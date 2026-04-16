@@ -17,35 +17,35 @@ namespace Open_lab.ViewModels
             _dbFactory = () => new OpenLabDbContextFactory().CreateDbContext(Array.Empty<string>());
 
             NavigateDashboardCommand = new RelayCommand(_ => NavigateDashboard(), _ => IsLoggedIn);
-            NavigatePatientRegistrationCommand = new RelayCommand(_ => NavigatePatientRegistration(), _ => IsLoggedIn);
-            NavigatePatientTestsCommand = new RelayCommand(_ => NavigatePatientTests(), _ => IsLoggedIn);
-            NavigatePatientBillingCommand = new RelayCommand(_ => NavigatePatientBilling(), _ => IsLoggedIn);
-            NavigateResultsEntryCommand = new RelayCommand(_ => NavigateResultsEntry(), _ => IsLoggedIn);
-            NavigateReportViewerCommand = new RelayCommand(_ => NavigateReportViewer(), _ => IsLoggedIn);
+            NavigatePatientRegistrationCommand = new RelayCommand(_ => NavigatePatientRegistration(), _ => CanNavigate(PermissionCodes.PatientsView));
+            NavigatePatientTestsCommand = new RelayCommand(_ => NavigatePatientTests(), _ => CanNavigate(PermissionCodes.VisitsView));
+            NavigatePatientBillingCommand = new RelayCommand(_ => NavigatePatientBilling(), _ => CanNavigate(PermissionCodes.AccountsView));
+            NavigateResultsEntryCommand = new RelayCommand(_ => NavigateResultsEntry(), _ => CanNavigate(PermissionCodes.ResultsView));
+            NavigateReportViewerCommand = new RelayCommand(_ => NavigateReportViewer(), _ => CanNavigate(PermissionCodes.ReportsView));
 
-            NavigatePatientSearchCommand = new RelayCommand(_ => NavigatePatientSearch(), _ => IsLoggedIn);
-            NavigatePatientHistoryCommand = new RelayCommand(_ => NavigatePatientHistory(), _ => IsLoggedIn);
-            NavigateWorkSheetByPatientCommand = new RelayCommand(_ => NavigateWorkSheetByPatient(), _ => IsLoggedIn);
-            NavigateWorkSheetByTestCommand = new RelayCommand(_ => NavigateWorkSheetByTest(), _ => IsLoggedIn);
-            NavigateTestCatalogCommand = new RelayCommand(_ => NavigateTestCatalog(), _ => IsLoggedIn);
-            NavigateReferenceRangesCommand = new RelayCommand(_ => NavigateReferenceRanges(), _ => IsLoggedIn);
-            NavigateTestCommentsCommand = new RelayCommand(_ => NavigateTestComments(), _ => IsLoggedIn);
-            NavigatePriceListsCommand = new RelayCommand(_ => NavigatePriceLists(), _ => IsLoggedIn);
-            NavigateCustomGroupsCommand = new RelayCommand(_ => NavigateCustomGroups(), _ => IsLoggedIn);
-            NavigateReferralsCommand = new RelayCommand(_ => NavigateReferrals(), _ => IsLoggedIn);
-            NavigateUsersPermissionsCommand = new RelayCommand(_ => NavigateUsersPermissions(), _ => IsLoggedIn);
-            NavigateStatisticsCommand = new RelayCommand(_ => NavigateStatistics(), _ => IsLoggedIn);
-            NavigateSystemSettingsCommand = new RelayCommand(_ => NavigateSystemSettings(), _ => IsLoggedIn);
-            NavigateBackupRestoreCommand = new RelayCommand(_ => NavigateBackupRestore(), _ => IsLoggedIn);
-            NavigateAttendanceLogCommand = new RelayCommand(_ => NavigateAttendanceLog(), _ => IsLoggedIn);
-            NavigateAccountsTreasuryCommand = new RelayCommand(_ => NavigateAccountsTreasury(), _ => IsLoggedIn);
-            NavigateSampleCollectionCommand = new RelayCommand(_ => NavigateSampleCollection(), _ => IsLoggedIn);
-            NavigateCultureSensitivityCommand = new RelayCommand(_ => NavigateCultureSensitivity(), _ => IsLoggedIn);
-            NavigateReceiptPrintingCommand = new RelayCommand(_ => NavigateReceiptPrinting(), _ => IsLoggedIn);
-            NavigateCombinedReportCommand = new RelayCommand(_ => NavigateCombinedReport(), _ => IsLoggedIn);
-            NavigateBlankReportCommand = new RelayCommand(_ => NavigateBlankReport(), _ => IsLoggedIn);
+            NavigatePatientSearchCommand = new RelayCommand(_ => NavigatePatientSearch(), _ => CanNavigate(PermissionCodes.PatientsView));
+            NavigatePatientHistoryCommand = new RelayCommand(_ => NavigatePatientHistory(), _ => CanNavigate(PermissionCodes.PatientsView));
+            NavigateWorkSheetByPatientCommand = new RelayCommand(_ => NavigateWorkSheetByPatient(), _ => CanNavigate(PermissionCodes.TestsView));
+            NavigateWorkSheetByTestCommand = new RelayCommand(_ => NavigateWorkSheetByTest(), _ => CanNavigate(PermissionCodes.TestsView));
+            NavigateTestCatalogCommand = new RelayCommand(_ => NavigateTestCatalog(), _ => CanNavigate(PermissionCodes.TestsEdit));
+            NavigateReferenceRangesCommand = new RelayCommand(_ => NavigateReferenceRanges(), _ => CanNavigate(PermissionCodes.TestsEdit));
+            NavigateTestCommentsCommand = new RelayCommand(_ => NavigateTestComments(), _ => CanNavigate(PermissionCodes.TestsEdit));
+            NavigatePriceListsCommand = new RelayCommand(_ => NavigatePriceLists(), _ => CanNavigate(PermissionCodes.TestsEdit));
+            NavigateCustomGroupsCommand = new RelayCommand(_ => NavigateCustomGroups(), _ => CanNavigate(PermissionCodes.TestsEdit));
+            NavigateReferralsCommand = new RelayCommand(_ => NavigateReferrals(), _ => CanNavigate(PermissionCodes.TestsEdit));
+            NavigateUsersPermissionsCommand = new RelayCommand(_ => NavigateUsersPermissions(), _ => CanNavigate(PermissionCodes.UsersView));
+            NavigateStatisticsCommand = new RelayCommand(_ => NavigateStatistics(), _ => CanNavigate(PermissionCodes.StatisticsView));
+            NavigateSystemSettingsCommand = new RelayCommand(_ => NavigateSystemSettings(), _ => CanNavigate(PermissionCodes.SettingsView));
+            NavigateBackupRestoreCommand = new RelayCommand(_ => NavigateBackupRestore(), _ => CanNavigate(PermissionCodes.BackupRestore));
+            NavigateAttendanceLogCommand = new RelayCommand(_ => NavigateAttendanceLog(), _ => CanNavigate(PermissionCodes.UsersView));
+            NavigateAccountsTreasuryCommand = new RelayCommand(_ => NavigateAccountsTreasury(), _ => CanNavigate(PermissionCodes.AccountsView));
+            NavigateSampleCollectionCommand = new RelayCommand(_ => NavigateSampleCollection(), _ => CanNavigate(PermissionCodes.TestsView));
+            NavigateCultureSensitivityCommand = new RelayCommand(_ => NavigateCultureSensitivity(), _ => CanNavigate(PermissionCodes.TestsView));
+            NavigateReceiptPrintingCommand = new RelayCommand(_ => NavigateReceiptPrinting(), _ => CanNavigate(PermissionCodes.AccountsView));
+            NavigateCombinedReportCommand = new RelayCommand(_ => NavigateCombinedReport(), _ => CanNavigate(PermissionCodes.ReportsView));
+            NavigateBlankReportCommand = new RelayCommand(_ => NavigateBlankReport(), _ => CanNavigate(PermissionCodes.ReportsView));
 
-            LogoutCommand = new RelayCommand(async _ => await LogoutAsync());
+            LogoutCommand = new RelayCommand(async _ => await LogoutAsync(), _ => IsLoggedIn);
 
             ShowLogin();
         }
@@ -101,14 +101,21 @@ namespace Open_lab.ViewModels
 
         private void ShowLogin()
         {
+            AppSession.Clear();
             IsLoggedIn = false;
-            CurrentViewModel = new LoginViewModel(CreateAuthService(), CreateAdminSetupService(), CreateAttendanceService(), OnLoginSuccess);
+            CurrentViewModel = new LoginViewModel(CreateAuthService(), CreateAuthorizationService(), CreateAdminSetupService(), CreateAttendanceService(), () => _ = OnLoginSuccessAsync());
         }
 
-        private void OnLoginSuccess()
+        private async Task OnLoginSuccessAsync()
         {
             IsLoggedIn = true;
             NavigateDashboard();
+            await Task.CompletedTask;
+        }
+
+        private bool CanNavigate(string permissionCode)
+        {
+            return IsLoggedIn && AppSession.HasPermission(permissionCode);
         }
 
         private void NavigateDashboard()
@@ -273,6 +280,7 @@ namespace Open_lab.ViewModels
         }
 
         private IAuthService CreateAuthService() => new AuthService(_dbFactory());
+        private IAuthorizationService CreateAuthorizationService() => new AuthorizationService(_dbFactory());
         private IAdminSetupService CreateAdminSetupService() => new AdminSetupService(_dbFactory());
         private IAttendanceService CreateAttendanceService() => new AttendanceService(_dbFactory());
         private IDashboardService CreateDashboardService() => new DashboardService(_dbFactory());
@@ -323,6 +331,7 @@ namespace Open_lab.ViewModels
             (NavigateReceiptPrintingCommand as RelayCommand)?.RaiseCanExecuteChanged();
             (NavigateCombinedReportCommand as RelayCommand)?.RaiseCanExecuteChanged();
             (NavigateBlankReportCommand as RelayCommand)?.RaiseCanExecuteChanged();
+            (LogoutCommand as RelayCommand)?.RaiseCanExecuteChanged();
         }
     }
 }

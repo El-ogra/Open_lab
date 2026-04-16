@@ -39,9 +39,13 @@ namespace Open_lab.Services
                 throw new ArgumentNullException(nameof(test));
             }
 
-            if (string.IsNullOrWhiteSpace(test.Code) || string.IsNullOrWhiteSpace(test.NameReport) || string.IsNullOrWhiteSpace(test.NameReceipt))
+            NormalizeTest(test);
+            ValidateTest(test);
+
+            var duplicateCode = await _db.Tests.AnyAsync(t => t.Code == test.Code);
+            if (duplicateCode)
             {
-                throw new ArgumentException("Test code and names are required.", nameof(test));
+                throw new InvalidOperationException("Test code already exists.");
             }
 
             _db.Tests.Add(test);
@@ -56,7 +60,32 @@ namespace Open_lab.Services
                 throw new ArgumentNullException(nameof(test));
             }
 
-            _db.Tests.Update(test);
+            NormalizeTest(test);
+            ValidateTest(test);
+
+            var current = await _db.Tests.FirstOrDefaultAsync(t => t.TestId == test.TestId);
+            if (current == null)
+            {
+                throw new InvalidOperationException("Test not found.");
+            }
+
+            var duplicateCode = await _db.Tests.AnyAsync(t => t.TestId != test.TestId && t.Code == test.Code);
+            if (duplicateCode)
+            {
+                throw new InvalidOperationException("Test code already exists.");
+            }
+
+            current.Code = test.Code;
+            current.NameReport = test.NameReport;
+            current.NameReceipt = test.NameReceipt;
+            current.GroupId = test.GroupId;
+            current.SampleTypeId = test.SampleTypeId;
+            current.UnitId = test.UnitId;
+            current.Price = test.Price;
+            current.TurnaroundHours = test.TurnaroundHours;
+            current.IsRoutine = test.IsRoutine;
+            current.IsSendOut = test.IsSendOut;
+
             await _db.SaveChangesAsync();
         }
 
@@ -68,6 +97,16 @@ namespace Open_lab.Services
                 return;
             }
 
+            var isUsed = await _db.VisitTests.AnyAsync(vt => vt.TestId == testId)
+                || await _db.PriceListItems.AnyAsync(i => i.TestId == testId)
+                || await _db.CustomGroupItems.AnyAsync(i => i.TestId == testId)
+                || await _db.TestParameters.AnyAsync(p => p.TestId == testId);
+
+            if (isUsed)
+            {
+                throw new InvalidOperationException("Cannot delete test that is already used.");
+            }
+
             _db.Tests.Remove(test);
             await _db.SaveChangesAsync();
         }
@@ -77,6 +116,13 @@ namespace Open_lab.Services
             if (group == null || string.IsNullOrWhiteSpace(group.GroupName))
             {
                 throw new ArgumentException("Group name is required.", nameof(group));
+            }
+
+            group.GroupName = group.GroupName.Trim();
+            var exists = await _db.TestGroups.AnyAsync(g => g.GroupName == group.GroupName);
+            if (exists)
+            {
+                throw new InvalidOperationException("Group name already exists.");
             }
 
             _db.TestGroups.Add(group);
@@ -96,6 +142,13 @@ namespace Open_lab.Services
                 throw new ArgumentException("Sample type name is required.", nameof(sampleType));
             }
 
+            sampleType.Name = sampleType.Name.Trim();
+            var exists = await _db.SampleTypes.AnyAsync(s => s.Name == sampleType.Name);
+            if (exists)
+            {
+                throw new InvalidOperationException("Sample type already exists.");
+            }
+
             _db.SampleTypes.Add(sampleType);
             await _db.SaveChangesAsync();
             return sampleType;
@@ -111,6 +164,13 @@ namespace Open_lab.Services
             if (unit == null || string.IsNullOrWhiteSpace(unit.Name))
             {
                 throw new ArgumentException("Unit name is required.", nameof(unit));
+            }
+
+            unit.Name = unit.Name.Trim();
+            var exists = await _db.Units.AnyAsync(u => u.Name == unit.Name);
+            if (exists)
+            {
+                throw new InvalidOperationException("Unit already exists.");
             }
 
             _db.Units.Add(unit);
@@ -130,6 +190,25 @@ namespace Open_lab.Services
                 throw new ArgumentException("Parameter name is required.", nameof(parameter));
             }
 
+            var testExists = await _db.Tests.AnyAsync(t => t.TestId == parameter.TestId);
+            if (!testExists)
+            {
+                throw new InvalidOperationException("Test not found.");
+            }
+
+            parameter.Name = parameter.Name.Trim();
+            if (parameter.OrderNo <= 0)
+            {
+                parameter.OrderNo = await _db.TestParameters.Where(p => p.TestId == parameter.TestId).Select(p => (int?)p.OrderNo).MaxAsync() ?? 0;
+                parameter.OrderNo += 1;
+            }
+
+            var duplicate = await _db.TestParameters.AnyAsync(p => p.TestId == parameter.TestId && p.Name == parameter.Name);
+            if (duplicate)
+            {
+                throw new InvalidOperationException("Parameter already exists for this test.");
+            }
+
             _db.TestParameters.Add(parameter);
             await _db.SaveChangesAsync();
             return parameter;
@@ -147,6 +226,7 @@ namespace Open_lab.Services
                 throw new ArgumentNullException(nameof(range));
             }
 
+            ValidateReferenceRange(range);
             _db.TestReferenceRanges.Add(range);
             await _db.SaveChangesAsync();
             return range;
@@ -164,6 +244,7 @@ namespace Open_lab.Services
                 throw new ArgumentNullException(nameof(range));
             }
 
+            ValidateReferenceRange(range);
             _db.TestReferenceRanges.Update(range);
             await _db.SaveChangesAsync();
         }
@@ -187,6 +268,12 @@ namespace Open_lab.Services
                 throw new ArgumentException("Comment text is required.", nameof(comment));
             }
 
+            comment.CommentText = comment.CommentText.Trim();
+            if (comment.IsDefault)
+            {
+                await ClearDefaultCommentAsync(comment.TestId);
+            }
+
             _db.TestComments.Add(comment);
             await _db.SaveChangesAsync();
             return comment;
@@ -202,6 +289,17 @@ namespace Open_lab.Services
             if (comment == null)
             {
                 throw new ArgumentNullException(nameof(comment));
+            }
+
+            comment.CommentText = comment.CommentText?.Trim() ?? string.Empty;
+            if (string.IsNullOrWhiteSpace(comment.CommentText))
+            {
+                throw new ArgumentException("Comment text is required.", nameof(comment));
+            }
+
+            if (comment.IsDefault)
+            {
+                await ClearDefaultCommentAsync(comment.TestId, comment.CommentId);
             }
 
             _db.TestComments.Update(comment);
@@ -227,6 +325,18 @@ namespace Open_lab.Services
                 throw new ArgumentException("Price list name is required.", nameof(priceList));
             }
 
+            priceList.Name = priceList.Name.Trim();
+            var duplicate = await _db.PriceLists.AnyAsync(p => p.Name == priceList.Name && p.ReferralId == priceList.ReferralId);
+            if (duplicate)
+            {
+                throw new InvalidOperationException("Price list already exists for the same referral.");
+            }
+
+            if (priceList.IsDefault)
+            {
+                await ClearDefaultPriceListsAsync(priceList.ReferralId);
+            }
+
             _db.PriceLists.Add(priceList);
             await _db.SaveChangesAsync();
             return priceList;
@@ -242,6 +352,24 @@ namespace Open_lab.Services
             if (item == null)
             {
                 throw new ArgumentNullException(nameof(item));
+            }
+
+            if (item.Price < 0)
+            {
+                throw new ArgumentException("Price cannot be negative.", nameof(item));
+            }
+
+            var priceListExists = await _db.PriceLists.AnyAsync(p => p.PriceListId == item.PriceListId);
+            var testExists = await _db.Tests.AnyAsync(t => t.TestId == item.TestId);
+            if (!priceListExists || !testExists)
+            {
+                throw new InvalidOperationException("Invalid price list or test.");
+            }
+
+            var duplicate = await _db.PriceListItems.AnyAsync(i => i.PriceListId == item.PriceListId && i.TestId == item.TestId);
+            if (duplicate)
+            {
+                throw new InvalidOperationException("Test already exists in this price list.");
             }
 
             _db.PriceListItems.Add(item);
@@ -277,6 +405,18 @@ namespace Open_lab.Services
                 throw new ArgumentException("Custom group name is required.", nameof(group));
             }
 
+            if (group.Price < 0)
+            {
+                throw new ArgumentException("Custom group price cannot be negative.", nameof(group));
+            }
+
+            group.Name = group.Name.Trim();
+            var duplicate = await _db.CustomGroups.AnyAsync(g => g.Name == group.Name);
+            if (duplicate)
+            {
+                throw new InvalidOperationException("Custom group already exists.");
+            }
+
             _db.CustomGroups.Add(group);
             await _db.SaveChangesAsync();
             return group;
@@ -292,6 +432,19 @@ namespace Open_lab.Services
             if (item == null)
             {
                 throw new ArgumentNullException(nameof(item));
+            }
+
+            var groupExists = await _db.CustomGroups.AnyAsync(g => g.CustomGroupId == item.CustomGroupId);
+            var testExists = await _db.Tests.AnyAsync(t => t.TestId == item.TestId);
+            if (!groupExists || !testExists)
+            {
+                throw new InvalidOperationException("Invalid custom group or test.");
+            }
+
+            var duplicate = await _db.CustomGroupItems.AnyAsync(i => i.CustomGroupId == item.CustomGroupId && i.TestId == item.TestId);
+            if (duplicate)
+            {
+                throw new InvalidOperationException("Test already exists in this custom group.");
             }
 
             _db.CustomGroupItems.Add(item);
@@ -327,6 +480,17 @@ namespace Open_lab.Services
                 throw new ArgumentException("Referral name and type are required.", nameof(referral));
             }
 
+            referral.Name = referral.Name.Trim();
+            referral.ReferralType = referral.ReferralType.Trim();
+            referral.Phone = string.IsNullOrWhiteSpace(referral.Phone) ? null : referral.Phone.Trim();
+            referral.City = string.IsNullOrWhiteSpace(referral.City) ? null : referral.City.Trim();
+
+            var duplicate = await _db.Referrals.AnyAsync(r => r.Name == referral.Name && r.ReferralType == referral.ReferralType);
+            if (duplicate)
+            {
+                throw new InvalidOperationException("Referral already exists.");
+            }
+
             _db.Referrals.Add(referral);
             await _db.SaveChangesAsync();
             return referral;
@@ -345,8 +509,87 @@ namespace Open_lab.Services
                 return;
             }
 
+            var inUse = await _db.Visits.AnyAsync(v => v.ReferralId == referralId)
+                || await _db.PriceLists.AnyAsync(p => p.ReferralId == referralId);
+            if (inUse)
+            {
+                throw new InvalidOperationException("Cannot delete referral in use.");
+            }
+
             _db.Referrals.Remove(referral);
             await _db.SaveChangesAsync();
+        }
+
+        private static void NormalizeTest(Test test)
+        {
+            test.Code = test.Code?.Trim() ?? string.Empty;
+            test.NameReport = test.NameReport?.Trim() ?? string.Empty;
+            test.NameReceipt = test.NameReceipt?.Trim() ?? string.Empty;
+        }
+
+        private static void ValidateTest(Test test)
+        {
+            if (string.IsNullOrWhiteSpace(test.Code) || string.IsNullOrWhiteSpace(test.NameReport) || string.IsNullOrWhiteSpace(test.NameReceipt))
+            {
+                throw new ArgumentException("Test code and names are required.", nameof(test));
+            }
+
+            if (test.Price < 0)
+            {
+                throw new ArgumentException("Test price cannot be negative.", nameof(test));
+            }
+
+            if (test.TurnaroundHours < 0)
+            {
+                throw new ArgumentException("Turnaround hours cannot be negative.", nameof(test));
+            }
+        }
+
+        private static void ValidateReferenceRange(TestReferenceRange range)
+        {
+            if (range.TestId <= 0)
+            {
+                throw new ArgumentException("TestId is required.", nameof(range));
+            }
+
+            if (range.AgeFrom.HasValue && range.AgeTo.HasValue && range.AgeFrom > range.AgeTo)
+            {
+                throw new ArgumentException("AgeFrom cannot be greater than AgeTo.", nameof(range));
+            }
+
+            if (range.LowValue.HasValue && range.HighValue.HasValue && range.LowValue > range.HighValue)
+            {
+                throw new ArgumentException("LowValue cannot be greater than HighValue.", nameof(range));
+            }
+
+            if (!range.LowValue.HasValue && !range.HighValue.HasValue && string.IsNullOrWhiteSpace(range.NormalText))
+            {
+                throw new ArgumentException("Reference range requires numeric limits or normal text.", nameof(range));
+            }
+        }
+
+        private async Task ClearDefaultCommentAsync(int testId, int? exceptCommentId = null)
+        {
+            var defaults = await _db.TestComments
+                .Where(c => c.TestId == testId && c.IsDefault && (!exceptCommentId.HasValue || c.CommentId != exceptCommentId.Value))
+                .ToListAsync();
+
+            foreach (var item in defaults)
+            {
+                item.IsDefault = false;
+            }
+        }
+
+        private async Task ClearDefaultPriceListsAsync(int? referralId)
+        {
+            var defaults = await _db.PriceLists
+                .Where(p => p.IsDefault && p.ReferralId == referralId)
+                .ToListAsync();
+
+            foreach (var item in defaults)
+            {
+                item.IsDefault = false;
+            }
         }
     }
 }

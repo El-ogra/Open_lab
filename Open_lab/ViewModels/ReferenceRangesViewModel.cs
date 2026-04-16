@@ -26,9 +26,9 @@ namespace Open_lab.ViewModels
             Tests = new ObservableCollection<Test>();
             Ranges = new ObservableCollection<TestReferenceRange>();
 
-            LoadCommand = new RelayCommand(async _ => await LoadRangesAsync());
-            SaveCommand = new RelayCommand(async _ => await SaveAsync());
-            DeleteCommand = new RelayCommand(async _ => await DeleteAsync(), _ => SelectedRange != null);
+            LoadCommand = new RelayCommand(async _ => await LoadRangesAsync(), _ => AppSession.HasPermission(PermissionCodes.TestsView));
+            SaveCommand = new RelayCommand(async _ => await SaveAsync(), _ => AppSession.HasPermission(PermissionCodes.TestsEdit));
+            DeleteCommand = new RelayCommand(async _ => await DeleteAsync(), _ => AppSession.HasPermission(PermissionCodes.TestsEdit) && SelectedRange != null);
 
             _ = LoadTestsAsync();
         }
@@ -216,3 +216,4 @@ namespace Open_lab.ViewModels
         }
     }
 }
+

@@ -40,9 +40,10 @@
             </DataGrid>
             <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
                 <Button Content="حفظ النتائج" Margin="0,0,8,0" Command="{Binding SaveResultsCommand}" />
-                <Button Content="اعتماد" Command="{Binding VerifyResultsCommand}" />
+                <Button Content="اعتماد" Margin="0,0,8,0" Command="{Binding VerifyResultsCommand}" />`r`n                <Button Content="إعادة فتح" Command="{Binding ReopenResultsCommand}" />
             </StackPanel>
             <TextBlock Text="{Binding StatusMessage}" Foreground="DarkGreen" Margin="0,8,0,0" />
         </StackPanel>
     </Grid>
 </UserControl>
+

@@ -27,11 +27,11 @@ namespace Open_lab.ViewModels
             Roles = new ObservableCollection<Role>();
             Permissions = new ObservableCollection<PermissionToggle>();
 
-            SaveUserCommand = new RelayCommand(async _ => await SaveUserAsync());
-            SaveRoleCommand = new RelayCommand(async _ => await SaveRoleAsync());
-            SaveRolePermissionsCommand = new RelayCommand(async _ => await SaveRolePermissionsAsync());
-            AssignRoleCommand = new RelayCommand(async _ => await AssignRoleAsync(), _ => SelectedUser != null && SelectedRole != null);
-            ReloadCommand = new RelayCommand(async _ => await LoadAsync());
+            SaveUserCommand = new RelayCommand(async _ => await SaveUserAsync(), _ => AppSession.HasPermission(PermissionCodes.UsersEdit));
+            SaveRoleCommand = new RelayCommand(async _ => await SaveRoleAsync(), _ => AppSession.HasPermission(PermissionCodes.UsersEdit));
+            SaveRolePermissionsCommand = new RelayCommand(async _ => await SaveRolePermissionsAsync(), _ => AppSession.HasPermission(PermissionCodes.UsersEdit));
+            AssignRoleCommand = new RelayCommand(async _ => await AssignRoleAsync(), _ => AppSession.HasPermission(PermissionCodes.UsersEdit) && SelectedUser != null && SelectedRole != null);
+            ReloadCommand = new RelayCommand(async _ => await LoadAsync(), _ => AppSession.HasPermission(PermissionCodes.UsersView));
 
             _ = LoadAsync();
         }
@@ -47,6 +47,7 @@ namespace Open_lab.ViewModels
             {
                 if (SetProperty(ref _selectedUser, value))
                 {
+                    (AssignRoleCommand as RelayCommand)?.RaiseCanExecuteChanged();
                     LoadFromUser();
                 }
             }
@@ -59,6 +60,7 @@ namespace Open_lab.ViewModels
             {
                 if (SetProperty(ref _selectedRole, value))
                 {
+                    (AssignRoleCommand as RelayCommand)?.RaiseCanExecuteChanged();
                     _ = LoadPermissionsAsync();
                 }
             }

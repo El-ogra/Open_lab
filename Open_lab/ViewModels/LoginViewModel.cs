@@ -8,6 +8,7 @@ namespace Open_lab.ViewModels
     public class LoginViewModel : BaseViewModel
     {
         private readonly IAuthService _authService;
+        private readonly IAuthorizationService _authorizationService;
         private readonly IAdminSetupService _adminSetupService;
         private readonly IAttendanceService _attendanceService;
         private readonly Action _onLoginSuccess;
@@ -18,11 +19,13 @@ namespace Open_lab.ViewModels
 
         public LoginViewModel(
             IAuthService authService,
+            IAuthorizationService authorizationService,
             IAdminSetupService adminSetupService,
             IAttendanceService attendanceService,
             Action onLoginSuccess)
         {
             _authService = authService;
+            _authorizationService = authorizationService;
             _adminSetupService = adminSetupService;
             _attendanceService = attendanceService;
             _onLoginSuccess = onLoginSuccess;
@@ -87,6 +90,9 @@ namespace Open_lab.ViewModels
                 {
                     await _adminSetupService.EnsureAdminAccessAsync(user.UserId);
                 }
+
+                var permissionCodes = await _authorizationService.GetPermissionCodesAsync(user.UserId);
+                AppSession.SetPermissions(permissionCodes);
 
                 var attendance = await _attendanceService.CreateLoginAsync(user.UserId, "تسجيل دخول");
                 AppSession.AttendanceLogId = attendance.AttendanceLogId;
