@@ -1,23 +1,21 @@
 using System;
 using System.Collections.ObjectModel;
-using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using Microsoft.EntityFrameworkCore;
-using Open_lab.Data;
+using Open_lab.Services;
 
 namespace Open_lab.ViewModels
 {
     public class WorkSheetByPatientViewModel : BaseViewModel
     {
-        private readonly Func<OpenLabDbContext> _dbFactory;
+        private readonly IWorksheetService _worksheetService;
         private DateTime _from = DateTime.Today;
         private DateTime _to = DateTime.Today;
         private string _statusMessage = string.Empty;
 
-        public WorkSheetByPatientViewModel(Func<OpenLabDbContext> dbFactory)
+        public WorkSheetByPatientViewModel(IWorksheetService worksheetService)
         {
-            _dbFactory = dbFactory;
+            _worksheetService = worksheetService;
             Rows = new ObservableCollection<WorkSheetPatientRow>();
             LoadCommand = new RelayCommand(async _ => await LoadAsync());
         }
@@ -48,22 +46,9 @@ namespace Open_lab.ViewModels
         {
             try
             {
-                using var db = _dbFactory();
                 var from = From.Date;
                 var to = To.Date.AddDays(1).AddSeconds(-1);
-
-                var rows = await db.Visits
-                    .AsNoTracking()
-                    .Where(v => v.VisitDate >= from && v.VisitDate <= to)
-                    .Select(v => new WorkSheetPatientRow
-                    {
-                        VisitId = v.VisitId,
-                        PatientName = v.Patient.FullName,
-                        VisitDate = v.VisitDate,
-                        TestsCount = v.VisitTests.Count
-                    })
-                    .OrderBy(v => v.VisitDate)
-                    .ToListAsync();
+                var rows = await _worksheetService.GetWorksheetByPatientAsync(from, to);
 
                 Rows.Clear();
                 foreach (var row in rows)

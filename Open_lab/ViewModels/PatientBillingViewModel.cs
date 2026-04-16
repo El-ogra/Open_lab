@@ -1,16 +1,13 @@
 using System;
-using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using Microsoft.EntityFrameworkCore;
-using Open_lab.Data;
 using Open_lab.Services;
 
 namespace Open_lab.ViewModels
 {
     public class PatientBillingViewModel : BaseViewModel
     {
-        private readonly Func<OpenLabDbContext> _dbFactory;
+        private readonly IInvoiceService _invoiceService;
         private int _visitId;
         private decimal _total;
         private decimal _discount;
@@ -19,9 +16,9 @@ namespace Open_lab.ViewModels
         private decimal _balance;
         private string _statusMessage = string.Empty;
 
-        public PatientBillingViewModel(Func<OpenLabDbContext> dbFactory)
+        public PatientBillingViewModel(IInvoiceService invoiceService)
         {
-            _dbFactory = dbFactory;
+            _invoiceService = invoiceService;
             LoadVisitCommand = new RelayCommand(async _ => await LoadVisitAsync());
             SaveInvoiceCommand = new RelayCommand(async _ => await SaveInvoiceAsync());
             AddPaymentCommand = new RelayCommand(async _ => await AddPaymentAsync(), _ => VisitId > 0);
@@ -89,10 +86,9 @@ namespace Open_lab.ViewModels
 
             try
             {
-                using var db = _dbFactory();
-                Total = await db.VisitTests.Where(vt => vt.VisitId == VisitId).SumAsync(vt => vt.Price);
+                Total = await _invoiceService.GetVisitTotalAsync(VisitId);
 
-                var invoice = await db.Invoices.AsNoTracking().FirstOrDefaultAsync(i => i.VisitId == VisitId);
+                var invoice = await _invoiceService.GetByVisitIdAsync(VisitId);
                 if (invoice != null)
                 {
                     Discount = invoice.Discount;
@@ -126,9 +122,7 @@ namespace Open_lab.ViewModels
 
             try
             {
-                using var db = _dbFactory();
-                var invoiceService = new InvoiceService(db);
-                var invoice = await invoiceService.CreateOrUpdateInvoiceAsync(VisitId, Discount, Paid);
+                var invoice = await _invoiceService.CreateOrUpdateInvoiceAsync(VisitId, Discount, Paid);
                 Total = invoice.Total;
                 NetTotal = invoice.NetTotal;
                 Balance = invoice.Balance;
@@ -155,10 +149,8 @@ namespace Open_lab.ViewModels
 
             try
             {
-                using var db = _dbFactory();
-                var invoiceService = new InvoiceService(db);
-                var invoice = await invoiceService.CreateOrUpdateInvoiceAsync(VisitId, Discount, 0);
-                await invoiceService.AddPaymentAsync(invoice.InvoiceId, Paid, 1);
+                var invoice = await _invoiceService.CreateOrUpdateInvoiceAsync(VisitId, Discount, 0);
+                await _invoiceService.AddPaymentAsync(invoice.InvoiceId, Paid, AppSession.UserId > 0 ? AppSession.UserId : 1);
                 await LoadVisitAsync();
                 StatusMessage = "تم تسجيل الدفعة.";
             }

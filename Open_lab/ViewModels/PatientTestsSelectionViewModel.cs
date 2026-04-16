@@ -1,9 +1,7 @@
 using System;
 using System.Collections.ObjectModel;
-using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using Open_lab.Data;
 using Open_lab.Models;
 using Open_lab.Services;
 
@@ -11,7 +9,9 @@ namespace Open_lab.ViewModels
 {
     public class PatientTestsSelectionViewModel : BaseViewModel
     {
-        private readonly Func<OpenLabDbContext> _dbFactory;
+        private readonly IPatientService _patientService;
+        private readonly IVisitService _visitService;
+        private readonly ITestCatalogService _testCatalogService;
         private string _labId = string.Empty;
         private string _patientName = string.Empty;
         private int _patientId;
@@ -20,9 +20,11 @@ namespace Open_lab.ViewModels
         private Test? _selectedAvailableTest;
         private SelectedTestItem? _selectedVisitTest;
 
-        public PatientTestsSelectionViewModel(Func<OpenLabDbContext> dbFactory)
+        public PatientTestsSelectionViewModel(IPatientService patientService, IVisitService visitService, ITestCatalogService testCatalogService)
         {
-            _dbFactory = dbFactory;
+            _patientService = patientService;
+            _visitService = visitService;
+            _testCatalogService = testCatalogService;
             AvailableTests = new ObservableCollection<Test>();
             SelectedTests = new ObservableCollection<SelectedTestItem>();
 
@@ -120,9 +122,7 @@ namespace Open_lab.ViewModels
 
             try
             {
-                using var db = _dbFactory();
-                var patientService = new PatientService(db);
-                var patient = await patientService.GetByLabIdAsync(LabId);
+                var patient = await _patientService.GetByLabIdAsync(LabId);
                 if (patient == null)
                 {
                     StatusMessage = "لم يتم العثور على المريض.";
@@ -145,9 +145,7 @@ namespace Open_lab.ViewModels
         {
             try
             {
-                using var db = _dbFactory();
-                var visitService = new VisitService(db);
-                var visit = await visitService.CreateAsync(new Visit
+                var visit = await _visitService.CreateAsync(new Visit
                 {
                     PatientId = PatientId,
                     VisitDate = DateTime.Now,
@@ -168,9 +166,7 @@ namespace Open_lab.ViewModels
         {
             try
             {
-                using var db = _dbFactory();
-                var catalog = new TestCatalogService(db);
-                var tests = await catalog.GetAllTestsAsync();
+                var tests = await _testCatalogService.GetAllTestsAsync();
                 AvailableTests.Clear();
                 foreach (var test in tests)
                 {
@@ -192,9 +188,7 @@ namespace Open_lab.ViewModels
 
             try
             {
-                using var db = _dbFactory();
-                var visitService = new VisitService(db);
-                var visitTest = await visitService.AddTestToVisitAsync(VisitId, SelectedAvailableTest.TestId);
+                var visitTest = await _visitService.AddTestToVisitAsync(VisitId, SelectedAvailableTest.TestId);
                 SelectedTests.Add(new SelectedTestItem
                 {
                     VisitTestId = visitTest.VisitTestId,
@@ -219,9 +213,7 @@ namespace Open_lab.ViewModels
 
             try
             {
-                using var db = _dbFactory();
-                var visitService = new VisitService(db);
-                await visitService.RemoveVisitTestAsync(SelectedVisitTest.VisitTestId);
+                await _visitService.RemoveVisitTestAsync(SelectedVisitTest.VisitTestId);
                 SelectedTests.Remove(SelectedVisitTest);
                 StatusMessage = "تم حذف التحليل.";
             }

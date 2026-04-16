@@ -24,7 +24,7 @@ namespace Open_lab.Services
                 throw new InvalidOperationException("Visit not found.");
             }
 
-            var total = await _db.VisitTests.Where(vt => vt.VisitId == visitId).SumAsync(vt => vt.Price);
+            var total = await GetVisitTotalAsync(visitId);
             var netTotal = total - discount;
             if (netTotal < 0)
             {
@@ -104,6 +104,11 @@ namespace Open_lab.Services
         public Task<Invoice?> GetByVisitIdAsync(int visitId)
         {
             return _db.Invoices.AsNoTracking().FirstOrDefaultAsync(i => i.VisitId == visitId);
+        }
+
+        public async Task<decimal> GetVisitTotalAsync(int visitId)
+        {
+            return await _db.VisitTests.Where(vt => vt.VisitId == visitId).SumAsync(vt => vt.Price);
         }
     }
 }

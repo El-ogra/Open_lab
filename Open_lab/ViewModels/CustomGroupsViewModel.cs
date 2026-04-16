@@ -1,10 +1,7 @@
 using System;
 using System.Collections.ObjectModel;
-using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using Microsoft.EntityFrameworkCore;
-using Open_lab.Data;
 using Open_lab.Models;
 using Open_lab.Services;
 
@@ -12,16 +9,16 @@ namespace Open_lab.ViewModels
 {
     public class CustomGroupsViewModel : BaseViewModel
     {
-        private readonly Func<OpenLabDbContext> _dbFactory;
+        private readonly ITestCatalogService _testCatalogService;
         private string _groupName = string.Empty;
         private decimal _groupPrice;
         private CustomGroup? _selectedGroup;
         private Test? _selectedTest;
         private string _statusMessage = string.Empty;
 
-        public CustomGroupsViewModel(Func<OpenLabDbContext> dbFactory)
+        public CustomGroupsViewModel(ITestCatalogService testCatalogService)
         {
-            _dbFactory = dbFactory;
+            _testCatalogService = testCatalogService;
             Groups = new ObservableCollection<CustomGroup>();
             GroupItems = new ObservableCollection<CustomGroupItem>();
             Tests = new ObservableCollection<Test>();
@@ -81,17 +78,14 @@ namespace Open_lab.ViewModels
 
         private async Task LoadAsync()
         {
-            using var db = _dbFactory();
-            var service = new TestCatalogService(db);
-
-            var groups = await service.GetCustomGroupsAsync();
+            var groups = await _testCatalogService.GetCustomGroupsAsync();
             Groups.Clear();
             foreach (var group in groups)
             {
                 Groups.Add(group);
             }
 
-            var tests = await service.GetAllTestsAsync();
+            var tests = await _testCatalogService.GetAllTestsAsync();
             Tests.Clear();
             foreach (var test in tests)
             {
@@ -107,12 +101,7 @@ namespace Open_lab.ViewModels
                 return;
             }
 
-            using var db = _dbFactory();
-            var items = await db.CustomGroupItems.AsNoTracking()
-                .Include(i => i.Test)
-                .Where(i => i.CustomGroupId == SelectedGroup.CustomGroupId)
-                .ToListAsync();
-
+            var items = await _testCatalogService.GetCustomGroupItemsAsync(SelectedGroup.CustomGroupId);
             foreach (var item in items)
             {
                 GroupItems.Add(item);
@@ -129,9 +118,7 @@ namespace Open_lab.ViewModels
 
             try
             {
-                using var db = _dbFactory();
-                var service = new TestCatalogService(db);
-                var group = await service.CreateCustomGroupAsync(new CustomGroup
+                var group = await _testCatalogService.CreateCustomGroupAsync(new CustomGroup
                 {
                     Name = GroupName,
                     Price = GroupPrice
@@ -155,9 +142,7 @@ namespace Open_lab.ViewModels
 
             try
             {
-                using var db = _dbFactory();
-                var service = new TestCatalogService(db);
-                var item = await service.AddCustomGroupItemAsync(new CustomGroupItem
+                var item = await _testCatalogService.AddCustomGroupItemAsync(new CustomGroupItem
                 {
                     CustomGroupId = SelectedGroup.CustomGroupId,
                     TestId = SelectedTest.TestId
@@ -182,10 +167,7 @@ namespace Open_lab.ViewModels
 
             try
             {
-                using var db = _dbFactory();
-                var item = await db.CustomGroupItems.FirstAsync(i => i.CustomGroupItemId == SelectedItem.CustomGroupItemId);
-                db.CustomGroupItems.Remove(item);
-                await db.SaveChangesAsync();
+                await _testCatalogService.DeleteCustomGroupItemAsync(SelectedItem.CustomGroupItemId);
                 GroupItems.Remove(SelectedItem);
                 SelectedItem = null;
                 StatusMessage = "تم حذف العنصر.";

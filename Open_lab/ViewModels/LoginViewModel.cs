@@ -1,25 +1,30 @@
 using System;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using Microsoft.EntityFrameworkCore;
-using Open_lab.Data;
-using Open_lab.Models;
 using Open_lab.Services;
 
 namespace Open_lab.ViewModels
 {
     public class LoginViewModel : BaseViewModel
     {
-        private readonly Func<OpenLabDbContext> _dbFactory;
+        private readonly IAuthService _authService;
+        private readonly IAdminSetupService _adminSetupService;
+        private readonly IAttendanceService _attendanceService;
         private readonly Action _onLoginSuccess;
         private string _username = string.Empty;
         private string _password = string.Empty;
         private string _statusMessage = string.Empty;
         private bool _isBusy;
 
-        public LoginViewModel(Func<OpenLabDbContext> dbFactory, Action onLoginSuccess)
+        public LoginViewModel(
+            IAuthService authService,
+            IAdminSetupService adminSetupService,
+            IAttendanceService attendanceService,
+            Action onLoginSuccess)
         {
-            _dbFactory = dbFactory;
+            _authService = authService;
+            _adminSetupService = adminSetupService;
+            _attendanceService = attendanceService;
             _onLoginSuccess = onLoginSuccess;
             LoginCommand = new RelayCommand(async _ => await LoginAsync(), _ => !IsBusy);
         }
@@ -67,9 +72,8 @@ namespace Open_lab.ViewModels
             IsBusy = true;
             try
             {
-                using var db = _dbFactory();
-                var user = await db.Users.FirstOrDefaultAsync(u => u.Username == Username);
-                if (user == null || user.PasswordHash != Password)
+                var user = await _authService.ValidateCredentialsAsync(Username, Password);
+                if (user == null)
                 {
                     StatusMessage = "بيانات الدخول غير صحيحة.";
                     return;
@@ -79,21 +83,12 @@ namespace Open_lab.ViewModels
                 AppSession.Username = user.Username;
                 AppSession.IsAdmin = user.Username.Equals("admin", StringComparison.OrdinalIgnoreCase);
 
-                var attendance = new AttendanceLog
-                {
-                    UserId = user.UserId,
-                    LoginAt = DateTime.Now,
-                    Note = "تسجيل دخول"
-                };
-                db.AttendanceLogs.Add(attendance);
-
                 if (AppSession.IsAdmin)
                 {
-                    var setup = new AdminSetupService(db);
-                    await setup.EnsureAdminAccessAsync(user.UserId);
+                    await _adminSetupService.EnsureAdminAccessAsync(user.UserId);
                 }
 
-                await db.SaveChangesAsync();
+                var attendance = await _attendanceService.CreateLoginAsync(user.UserId, "تسجيل دخول");
                 AppSession.AttendanceLogId = attendance.AttendanceLogId;
 
                 StatusMessage = string.Empty;

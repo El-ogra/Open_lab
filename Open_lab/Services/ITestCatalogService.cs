@@ -26,19 +26,28 @@ namespace Open_lab.Services
 
         Task<TestReferenceRange> CreateReferenceRangeAsync(TestReferenceRange range);
         Task<List<TestReferenceRange>> GetReferenceRangesAsync(int testId);
+        Task UpdateReferenceRangeAsync(TestReferenceRange range);
+        Task DeleteReferenceRangeAsync(int rangeId);
 
         Task<TestComment> CreateTestCommentAsync(TestComment comment);
         Task<List<TestComment>> GetTestCommentsAsync(int testId);
+        Task UpdateTestCommentAsync(TestComment comment);
+        Task DeleteTestCommentAsync(int commentId);
 
         Task<PriceList> CreatePriceListAsync(PriceList priceList);
         Task<List<PriceList>> GetPriceListsAsync();
         Task<PriceListItem> AddPriceListItemAsync(PriceListItem item);
+        Task<List<PriceListItem>> GetPriceListItemsAsync(int priceListId);
+        Task DeletePriceListItemAsync(int priceListItemId);
 
         Task<CustomGroup> CreateCustomGroupAsync(CustomGroup group);
         Task<List<CustomGroup>> GetCustomGroupsAsync();
         Task<CustomGroupItem> AddCustomGroupItemAsync(CustomGroupItem item);
+        Task<List<CustomGroupItem>> GetCustomGroupItemsAsync(int customGroupId);
+        Task DeleteCustomGroupItemAsync(int customGroupItemId);
 
         Task<Referral> CreateReferralAsync(Referral referral);
         Task<List<Referral>> GetReferralsAsync();
+        Task DeleteReferralAsync(int referralId);
     }
 }

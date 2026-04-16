@@ -1,16 +1,14 @@
 using System;
 using System.Collections.ObjectModel;
-using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using Microsoft.EntityFrameworkCore;
-using Open_lab.Data;
+using Open_lab.Services;
 
 namespace Open_lab.ViewModels
 {
     public class AccountsTreasuryViewModel : BaseViewModel
     {
-        private readonly Func<OpenLabDbContext> _dbFactory;
+        private readonly IAccountsTreasuryService _accountsTreasuryService;
         private DateTime _dateFrom = DateTime.Today;
         private DateTime _dateTo = DateTime.Today;
         private decimal _totalInvoiced;
@@ -18,9 +16,9 @@ namespace Open_lab.ViewModels
         private decimal _totalBalance;
         private string _statusMessage = string.Empty;
 
-        public AccountsTreasuryViewModel(Func<OpenLabDbContext> dbFactory)
+        public AccountsTreasuryViewModel(IAccountsTreasuryService accountsTreasuryService)
         {
-            _dbFactory = dbFactory;
+            _accountsTreasuryService = accountsTreasuryService;
             Payments = new ObservableCollection<AccountsPaymentRow>();
             LoadCommand = new RelayCommand(async _ => await LoadAsync());
         }
@@ -69,41 +67,18 @@ namespace Open_lab.ViewModels
         {
             try
             {
-                using var db = _dbFactory();
                 var from = DateFrom.Date;
                 var to = DateTo.Date.AddDays(1).AddSeconds(-1);
+                var snapshot = await _accountsTreasuryService.GetSnapshotAsync(from, to);
 
-                var invoices = await db.Invoices
-                    .Include(i => i.Visit)
-                    .ThenInclude(v => v.Patient)
-                    .Where(i => i.Visit.VisitDate >= from && i.Visit.VisitDate <= to)
-                    .ToListAsync();
-
-                TotalInvoiced = invoices.Sum(i => i.NetTotal);
-                TotalPaid = invoices.Sum(i => i.Paid);
-                TotalBalance = invoices.Sum(i => i.Balance);
-
-                var payments = await db.Payments
-                    .Include(p => p.Invoice)
-                    .ThenInclude(i => i.Visit)
-                    .ThenInclude(v => v.Patient)
-                    .Include(p => p.User)
-                    .Where(p => p.PaymentDate >= from && p.PaymentDate <= to)
-                    .OrderByDescending(p => p.PaymentDate)
-                    .ToListAsync();
+                TotalInvoiced = snapshot.TotalInvoiced;
+                TotalPaid = snapshot.TotalPaid;
+                TotalBalance = snapshot.TotalBalance;
 
                 Payments.Clear();
-                foreach (var p in payments)
+                foreach (var payment in snapshot.Payments)
                 {
-                    Payments.Add(new AccountsPaymentRow
-                    {
-                        PaymentId = p.PaymentId,
-                        PatientName = p.Invoice.Visit.Patient.FullName,
-                        ReferralName = p.Invoice.Visit.Referral?.Name,
-                        Amount = p.Amount,
-                        PaymentDate = p.PaymentDate,
-                        Username = p.User?.Username
-                    });
+                    Payments.Add(payment);
                 }
 
                 StatusMessage = "تم تحميل " + Payments.Count + " دفعة.";

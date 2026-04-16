@@ -1,10 +1,7 @@
 using System;
 using System.Collections.ObjectModel;
-using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using Microsoft.EntityFrameworkCore;
-using Open_lab.Data;
 using Open_lab.Models;
 using Open_lab.Services;
 
@@ -12,7 +9,7 @@ namespace Open_lab.ViewModels
 {
     public class ReferenceRangesViewModel : BaseViewModel
     {
-        private readonly Func<OpenLabDbContext> _dbFactory;
+        private readonly ITestCatalogService _testCatalogService;
         private Test? _selectedTest;
         private TestReferenceRange? _selectedRange;
         private string? _gender;
@@ -23,9 +20,9 @@ namespace Open_lab.ViewModels
         private string? _normalText;
         private string _statusMessage = string.Empty;
 
-        public ReferenceRangesViewModel(Func<OpenLabDbContext> dbFactory)
+        public ReferenceRangesViewModel(ITestCatalogService testCatalogService)
         {
-            _dbFactory = dbFactory;
+            _testCatalogService = testCatalogService;
             Tests = new ObservableCollection<Test>();
             Ranges = new ObservableCollection<TestReferenceRange>();
 
@@ -112,9 +109,7 @@ namespace Open_lab.ViewModels
 
         private async Task LoadTestsAsync()
         {
-            using var db = _dbFactory();
-            var service = new TestCatalogService(db);
-            var tests = await service.GetAllTestsAsync();
+            var tests = await _testCatalogService.GetAllTestsAsync();
             Tests.Clear();
             foreach (var test in tests)
             {
@@ -130,11 +125,7 @@ namespace Open_lab.ViewModels
                 return;
             }
 
-            using var db = _dbFactory();
-            var ranges = await db.TestReferenceRanges.AsNoTracking()
-                .Where(r => r.TestId == SelectedTest.TestId)
-                .ToListAsync();
-
+            var ranges = await _testCatalogService.GetReferenceRangesAsync(SelectedTest.TestId);
             foreach (var range in ranges)
             {
                 Ranges.Add(range);
@@ -166,11 +157,9 @@ namespace Open_lab.ViewModels
 
             try
             {
-                using var db = _dbFactory();
-
                 if (SelectedRange == null || SelectedRange.RangeId == 0)
                 {
-                    var range = new TestReferenceRange
+                    var range = await _testCatalogService.CreateReferenceRangeAsync(new TestReferenceRange
                     {
                         TestId = SelectedTest.TestId,
                         Gender = Gender,
@@ -179,22 +168,23 @@ namespace Open_lab.ViewModels
                         LowValue = LowValue,
                         HighValue = HighValue,
                         NormalText = NormalText
-                    };
+                    });
 
-                    db.TestReferenceRanges.Add(range);
-                    await db.SaveChangesAsync();
                     Ranges.Add(range);
                 }
                 else
                 {
-                    var range = await db.TestReferenceRanges.FirstAsync(r => r.RangeId == SelectedRange.RangeId);
-                    range.Gender = Gender;
-                    range.AgeFrom = AgeFrom;
-                    range.AgeTo = AgeTo;
-                    range.LowValue = LowValue;
-                    range.HighValue = HighValue;
-                    range.NormalText = NormalText;
-                    await db.SaveChangesAsync();
+                    await _testCatalogService.UpdateReferenceRangeAsync(new TestReferenceRange
+                    {
+                        RangeId = SelectedRange.RangeId,
+                        TestId = SelectedRange.TestId,
+                        Gender = Gender,
+                        AgeFrom = AgeFrom,
+                        AgeTo = AgeTo,
+                        LowValue = LowValue,
+                        HighValue = HighValue,
+                        NormalText = NormalText
+                    });
                 }
 
                 StatusMessage = "تم حفظ النطاق المرجعي.";
@@ -214,10 +204,7 @@ namespace Open_lab.ViewModels
 
             try
             {
-                using var db = _dbFactory();
-                var range = await db.TestReferenceRanges.FirstAsync(r => r.RangeId == SelectedRange.RangeId);
-                db.TestReferenceRanges.Remove(range);
-                await db.SaveChangesAsync();
+                await _testCatalogService.DeleteReferenceRangeAsync(SelectedRange.RangeId);
                 Ranges.Remove(SelectedRange);
                 SelectedRange = null;
                 StatusMessage = "تم حذف النطاق.";

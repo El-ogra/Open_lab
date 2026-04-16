@@ -1,20 +1,18 @@
-using System;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using Open_lab.Data;
+using Open_lab.Services;
 
 namespace Open_lab.ViewModels
 {
     public class DashboardViewModel : BaseViewModel
     {
-        private readonly Func<OpenLabDbContext> _dbFactory;
+        private readonly IDashboardService _dashboardService;
         private int _patientCount;
         private int _visitCount;
         private int _testCount;
 
-        public DashboardViewModel(Func<OpenLabDbContext> dbFactory)
+        public DashboardViewModel(IDashboardService dashboardService)
         {
-            _dbFactory = dbFactory;
+            _dashboardService = dashboardService;
             _ = LoadAsync();
         }
 
@@ -38,10 +36,10 @@ namespace Open_lab.ViewModels
 
         private async Task LoadAsync()
         {
-            using var db = _dbFactory();
-            PatientCount = await db.Patients.CountAsync();
-            VisitCount = await db.Visits.CountAsync();
-            TestCount = await db.Tests.CountAsync();
+            var counts = await _dashboardService.GetCountsAsync();
+            PatientCount = counts.PatientCount;
+            VisitCount = counts.VisitCount;
+            TestCount = counts.TestCount;
         }
     }
 }

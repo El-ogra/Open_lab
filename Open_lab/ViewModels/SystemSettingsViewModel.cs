@@ -1,25 +1,22 @@
-using System;
 using System.Collections.ObjectModel;
-using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using Microsoft.EntityFrameworkCore;
-using Open_lab.Data;
 using Open_lab.Models;
+using Open_lab.Services;
 
 namespace Open_lab.ViewModels
 {
     public class SystemSettingsViewModel : BaseViewModel
     {
-        private readonly Func<OpenLabDbContext> _dbFactory;
+        private readonly ISystemSettingsService _settingsService;
         private Setting? _selectedSetting;
         private string _key = string.Empty;
         private string _value = string.Empty;
         private string _statusMessage = string.Empty;
 
-        public SystemSettingsViewModel(Func<OpenLabDbContext> dbFactory)
+        public SystemSettingsViewModel(ISystemSettingsService settingsService)
         {
-            _dbFactory = dbFactory;
+            _settingsService = settingsService;
             Settings = new ObservableCollection<Setting>();
             SaveCommand = new RelayCommand(async _ => await SaveAsync());
             DeleteCommand = new RelayCommand(async _ => await DeleteAsync(), _ => SelectedSetting != null);
@@ -68,8 +65,7 @@ namespace Open_lab.ViewModels
 
         private async Task LoadAsync()
         {
-            using var db = _dbFactory();
-            var items = await db.Settings.AsNoTracking().OrderBy(s => s.Key).ToListAsync();
+            var items = await _settingsService.GetSettingsAsync();
             Settings.Clear();
             foreach (var item in items)
             {
@@ -85,18 +81,7 @@ namespace Open_lab.ViewModels
                 return;
             }
 
-            using var db = _dbFactory();
-            var setting = await db.Settings.FirstOrDefaultAsync(s => s.Key == Key);
-            if (setting == null)
-            {
-                setting = new Setting { Key = Key, Value = Value };
-                db.Settings.Add(setting);
-            }
-            else
-            {
-                setting.Value = Value;
-            }
-            await db.SaveChangesAsync();
+            await _settingsService.SaveSettingAsync(Key, Value);
             await LoadAsync();
             StatusMessage = "تم حفظ الإعداد.";
         }
@@ -108,10 +93,7 @@ namespace Open_lab.ViewModels
                 return;
             }
 
-            using var db = _dbFactory();
-            var setting = await db.Settings.FirstAsync(s => s.Key == SelectedSetting.Key);
-            db.Settings.Remove(setting);
-            await db.SaveChangesAsync();
+            await _settingsService.DeleteSettingAsync(SelectedSetting.Key);
             await LoadAsync();
             SelectedSetting = null;
             StatusMessage = "تم حذف الإعداد.";

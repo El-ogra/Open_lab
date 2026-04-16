@@ -29,6 +29,11 @@ namespace Open_lab.Services
                 .ToListAsync();
         }
 
+        public Task<VisitTest?> GetVisitTestByIdAsync(int visitTestId)
+        {
+            return _db.VisitTests.AsNoTracking().FirstOrDefaultAsync(vt => vt.VisitTestId == visitTestId);
+        }
+
         public Task<List<ResultValue>> GetResultsForVisitTestAsync(int visitTestId)
         {
             return _db.ResultValues

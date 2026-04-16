@@ -3,23 +3,21 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using Microsoft.EntityFrameworkCore;
-using Open_lab.Data;
 using Open_lab.Services;
 
 namespace Open_lab.ViewModels
 {
     public class ResultsEntryViewModel : BaseViewModel
     {
-        private readonly Func<OpenLabDbContext> _dbFactory;
+        private readonly IResultsService _resultsService;
         private DateTime _dateFrom = DateTime.Today;
         private DateTime _dateTo = DateTime.Today;
         private VisitTestRow? _selectedVisitTest;
         private string _statusMessage = string.Empty;
 
-        public ResultsEntryViewModel(Func<OpenLabDbContext> dbFactory)
+        public ResultsEntryViewModel(IResultsService resultsService)
         {
-            _dbFactory = dbFactory;
+            _resultsService = resultsService;
             VisitTests = new ObservableCollection<VisitTestRow>();
             ResultItems = new ObservableCollection<ResultEntryItem>();
 
@@ -71,9 +69,7 @@ namespace Open_lab.ViewModels
         {
             try
             {
-                using var db = _dbFactory();
-                var service = new ResultsService(db);
-                var visitTests = await service.GetVisitTestsByDateAsync(DateFrom, DateTo.AddDays(1).AddSeconds(-1));
+                var visitTests = await _resultsService.GetVisitTestsByDateAsync(DateFrom, DateTo.AddDays(1).AddSeconds(-1));
 
                 VisitTests.Clear();
                 foreach (var vt in visitTests)
@@ -81,6 +77,7 @@ namespace Open_lab.ViewModels
                     VisitTests.Add(new VisitTestRow
                     {
                         VisitTestId = vt.VisitTestId,
+                        TestId = vt.TestId,
                         PatientName = vt.Visit.Patient.FullName,
                         TestName = vt.Test.NameReport,
                         VisitDate = vt.Visit.VisitDate,
@@ -106,19 +103,8 @@ namespace Open_lab.ViewModels
 
             try
             {
-                using var db = _dbFactory();
-                var service = new ResultsService(db);
-
-                var visitTestId = SelectedVisitTest.VisitTestId;
-                var visitTest = await db.VisitTests.AsNoTracking().FirstOrDefaultAsync(vt => vt.VisitTestId == visitTestId);
-                if (visitTest == null)
-                {
-                    StatusMessage = "التحليل غير موجود.";
-                    return;
-                }
-
-                var parameters = await service.GetParametersForTestAsync(visitTest.TestId);
-                var results = await service.GetResultsForVisitTestAsync(visitTestId);
+                var parameters = await _resultsService.GetParametersForTestAsync(SelectedVisitTest.TestId);
+                var results = await _resultsService.GetResultsForVisitTestAsync(SelectedVisitTest.VisitTestId);
 
                 foreach (var param in parameters)
                 {
@@ -148,12 +134,9 @@ namespace Open_lab.ViewModels
 
             try
             {
-                using var db = _dbFactory();
-                var service = new ResultsService(db);
-
                 foreach (var item in ResultItems)
                 {
-                    await service.SaveResultAsync(SelectedVisitTest.VisitTestId, item.ParameterId, item.Value, item.Flag, item.Comment);
+                    await _resultsService.SaveResultAsync(SelectedVisitTest.VisitTestId, item.ParameterId, item.Value, item.Flag, item.Comment);
                 }
 
                 StatusMessage = "تم حفظ النتائج.";
@@ -173,9 +156,7 @@ namespace Open_lab.ViewModels
 
             try
             {
-                using var db = _dbFactory();
-                var service = new ResultsService(db);
-                await service.VerifyVisitTestAsync(SelectedVisitTest.VisitTestId, 1);
+                await _resultsService.VerifyVisitTestAsync(SelectedVisitTest.VisitTestId, AppSession.UserId > 0 ? AppSession.UserId : 1);
                 StatusMessage = "تم اعتماد النتائج.";
                 await LoadVisitTestsAsync();
             }

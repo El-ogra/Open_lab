@@ -3,8 +3,6 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using Microsoft.EntityFrameworkCore;
-using Open_lab.Data;
 using Open_lab.Models;
 using Open_lab.Services;
 
@@ -12,7 +10,7 @@ namespace Open_lab.ViewModels
 {
     public class UsersPermissionsViewModel : BaseViewModel
     {
-        private readonly Func<OpenLabDbContext> _dbFactory;
+        private readonly IUserAdminService _userAdminService;
         private User? _selectedUser;
         private Role? _selectedRole;
         private string _username = string.Empty;
@@ -22,9 +20,9 @@ namespace Open_lab.ViewModels
         private string _roleName = string.Empty;
         private string _statusMessage = string.Empty;
 
-        public UsersPermissionsViewModel(Func<OpenLabDbContext> dbFactory)
+        public UsersPermissionsViewModel(IUserAdminService userAdminService)
         {
-            _dbFactory = dbFactory;
+            _userAdminService = userAdminService;
             Users = new ObservableCollection<User>();
             Roles = new ObservableCollection<Role>();
             Permissions = new ObservableCollection<PermissionToggle>();
@@ -110,15 +108,14 @@ namespace Open_lab.ViewModels
 
         private async Task LoadAsync()
         {
-            using var db = _dbFactory();
-            var users = await db.Users.AsNoTracking().OrderBy(u => u.Username).ToListAsync();
+            var users = await _userAdminService.GetUsersAsync();
             Users.Clear();
             foreach (var user in users)
             {
                 Users.Add(user);
             }
 
-            var roles = await db.Roles.AsNoTracking().OrderBy(r => r.RoleName).ToListAsync();
+            var roles = await _userAdminService.GetRolesAsync();
             Roles.Clear();
             foreach (var role in roles)
             {
@@ -147,12 +144,7 @@ namespace Open_lab.ViewModels
                 return;
             }
 
-            using var db = _dbFactory();
-            var granted = await db.RolePermissions.AsNoTracking()
-                .Where(rp => rp.RoleId == SelectedRole.RoleId)
-                .Select(rp => rp.PermissionCode)
-                .ToListAsync();
-
+            var granted = await _userAdminService.GetRolePermissionCodesAsync(SelectedRole.RoleId);
             foreach (var code in PermissionCodes.All)
             {
                 Permissions.Add(new PermissionToggle(code, granted.Contains(code)));
@@ -167,34 +159,31 @@ namespace Open_lab.ViewModels
                 return;
             }
 
-            using var db = _dbFactory();
             if (SelectedUser == null || SelectedUser.UserId == 0)
             {
-                var user = new User
+                var user = await _userAdminService.CreateUserAsync(new User
                 {
                     Username = Username,
-                    PasswordHash = string.IsNullOrWhiteSpace(Password) ? "" : Password,
                     FullName = FullName,
                     IsActive = IsActive
-                };
-                db.Users.Add(user);
-                await db.SaveChangesAsync();
+                }, Password);
+
                 Users.Add(user);
                 SelectedUser = user;
                 StatusMessage = "تم إنشاء المستخدم.";
             }
             else
             {
-                var user = await db.Users.FirstAsync(u => u.UserId == SelectedUser.UserId);
-                user.Username = Username;
-                user.FullName = FullName;
-                user.IsActive = IsActive;
-                if (!string.IsNullOrWhiteSpace(Password))
+                await _userAdminService.UpdateUserAsync(new User
                 {
-                    user.PasswordHash = Password;
-                }
-                await db.SaveChangesAsync();
+                    UserId = SelectedUser.UserId,
+                    Username = Username,
+                    FullName = FullName,
+                    IsActive = IsActive
+                }, Password);
+
                 StatusMessage = "تم تحديث المستخدم.";
+                await LoadAsync();
             }
         }
 
@@ -206,10 +195,7 @@ namespace Open_lab.ViewModels
                 return;
             }
 
-            using var db = _dbFactory();
-            var role = new Role { RoleName = RoleName };
-            db.Roles.Add(role);
-            await db.SaveChangesAsync();
+            var role = await _userAdminService.CreateRoleAsync(RoleName);
             Roles.Add(role);
             SelectedRole = role;
             StatusMessage = "تم إنشاء الدور.";
@@ -222,11 +208,7 @@ namespace Open_lab.ViewModels
                 return;
             }
 
-            using var db = _dbFactory();
-            var existing = await db.UserRoles.Where(ur => ur.UserId == SelectedUser.UserId).ToListAsync();
-            db.UserRoles.RemoveRange(existing);
-            db.UserRoles.Add(new UserRole { UserId = SelectedUser.UserId, RoleId = SelectedRole.RoleId });
-            await db.SaveChangesAsync();
+            await _userAdminService.AssignSingleRoleAsync(SelectedUser.UserId, SelectedRole.RoleId);
             StatusMessage = "تم ربط المستخدم بالدور.";
         }
 
@@ -237,16 +219,7 @@ namespace Open_lab.ViewModels
                 return;
             }
 
-            using var db = _dbFactory();
-            var existing = await db.RolePermissions.Where(rp => rp.RoleId == SelectedRole.RoleId).ToListAsync();
-            db.RolePermissions.RemoveRange(existing);
-
-            foreach (var perm in Permissions.Where(p => p.IsGranted))
-            {
-                db.RolePermissions.Add(new RolePermission { RoleId = SelectedRole.RoleId, PermissionCode = perm.Code });
-            }
-
-            await db.SaveChangesAsync();
+            await _userAdminService.SaveRolePermissionsAsync(SelectedRole.RoleId, Permissions.Where(p => p.IsGranted).Select(p => p.Code));
             StatusMessage = "تم حفظ الصلاحيات.";
         }
     }

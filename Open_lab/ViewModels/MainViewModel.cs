@@ -1,8 +1,8 @@
-﻿using System;
+using System;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using Microsoft.EntityFrameworkCore;
 using Open_lab.Data;
+using Open_lab.Services;
 
 namespace Open_lab.ViewModels
 {
@@ -94,7 +94,7 @@ namespace Open_lab.ViewModels
         private void ShowLogin()
         {
             IsLoggedIn = false;
-            CurrentViewModel = new LoginViewModel(_dbFactory, OnLoginSuccess);
+            CurrentViewModel = new LoginViewModel(CreateAuthService(), CreateAdminSetupService(), CreateAttendanceService(), OnLoginSuccess);
         }
 
         private void OnLoginSuccess()
@@ -105,117 +105,117 @@ namespace Open_lab.ViewModels
 
         private void NavigateDashboard()
         {
-            CurrentViewModel = new DashboardViewModel(_dbFactory);
+            CurrentViewModel = new DashboardViewModel(CreateDashboardService());
         }
 
         private void NavigatePatientRegistration()
         {
-            CurrentViewModel = new PatientRegistrationViewModel(_dbFactory);
+            CurrentViewModel = new PatientRegistrationViewModel(CreatePatientService());
         }
 
         private void NavigatePatientTests()
         {
-            CurrentViewModel = new PatientTestsSelectionViewModel(_dbFactory);
+            CurrentViewModel = new PatientTestsSelectionViewModel(CreatePatientService(), CreateVisitService(), CreateTestCatalogService());
         }
 
         private void NavigatePatientBilling()
         {
-            CurrentViewModel = new PatientBillingViewModel(_dbFactory);
+            CurrentViewModel = new PatientBillingViewModel(CreateInvoiceService());
         }
 
         private void NavigateResultsEntry()
         {
-            CurrentViewModel = new ResultsEntryViewModel(_dbFactory);
+            CurrentViewModel = new ResultsEntryViewModel(CreateResultsService());
         }
 
         private void NavigateReportViewer()
         {
-            CurrentViewModel = new ReportViewerViewModel(_dbFactory);
+            CurrentViewModel = new ReportViewerViewModel(CreateReportService());
         }
 
         private void NavigatePatientSearch()
         {
-            CurrentViewModel = new PatientSearchViewModel(_dbFactory);
+            CurrentViewModel = new PatientSearchViewModel(CreatePatientSearchService());
         }
 
         private void NavigatePatientHistory()
         {
-            CurrentViewModel = new PatientHistoryViewModel(_dbFactory);
+            CurrentViewModel = new PatientHistoryViewModel(CreatePatientService(), CreateReportService());
         }
 
         private void NavigateWorkSheetByPatient()
         {
-            CurrentViewModel = new WorkSheetByPatientViewModel(_dbFactory);
+            CurrentViewModel = new WorkSheetByPatientViewModel(CreateWorksheetService());
         }
 
         private void NavigateWorkSheetByTest()
         {
-            CurrentViewModel = new WorkSheetByTestViewModel(_dbFactory);
+            CurrentViewModel = new WorkSheetByTestViewModel(CreateWorksheetService());
         }
 
         private void NavigateTestCatalog()
         {
-            CurrentViewModel = new TestCatalogViewModel(_dbFactory);
+            CurrentViewModel = new TestCatalogViewModel(CreateTestCatalogService());
         }
 
         private void NavigateReferenceRanges()
         {
-            CurrentViewModel = new ReferenceRangesViewModel(_dbFactory);
+            CurrentViewModel = new ReferenceRangesViewModel(CreateTestCatalogService());
         }
 
         private void NavigateTestComments()
         {
-            CurrentViewModel = new TestCommentsViewModel(_dbFactory);
+            CurrentViewModel = new TestCommentsViewModel(CreateTestCatalogService());
         }
 
         private void NavigatePriceLists()
         {
-            CurrentViewModel = new PriceListsViewModel(_dbFactory);
+            CurrentViewModel = new PriceListsViewModel(CreateTestCatalogService());
         }
 
         private void NavigateCustomGroups()
         {
-            CurrentViewModel = new CustomGroupsViewModel(_dbFactory);
+            CurrentViewModel = new CustomGroupsViewModel(CreateTestCatalogService());
         }
 
         private void NavigateReferrals()
         {
-            CurrentViewModel = new ReferralsViewModel(_dbFactory);
+            CurrentViewModel = new ReferralsViewModel(CreateTestCatalogService());
         }
 
         private void NavigateUsersPermissions()
         {
-            CurrentViewModel = new UsersPermissionsViewModel(_dbFactory);
+            CurrentViewModel = new UsersPermissionsViewModel(CreateUserAdminService());
         }
 
         private void NavigateStatistics()
         {
-            CurrentViewModel = new StatisticsViewModel(_dbFactory);
+            CurrentViewModel = new StatisticsViewModel(CreateStatisticsService());
         }
 
         private void NavigateSystemSettings()
         {
-            CurrentViewModel = new SystemSettingsViewModel(_dbFactory);
+            CurrentViewModel = new SystemSettingsViewModel(CreateSystemSettingsService());
         }
 
         private void NavigateBackupRestore()
         {
-            CurrentViewModel = new BackupRestoreViewModel(_dbFactory);
+            CurrentViewModel = new BackupRestoreViewModel(CreateBackupRestoreService());
         }
 
         private void NavigateAttendanceLog()
         {
-            CurrentViewModel = new AttendanceLogViewModel(_dbFactory);
+            CurrentViewModel = new AttendanceLogViewModel(CreateAttendanceService());
         }
 
         private void NavigateAccountsTreasury()
         {
-            CurrentViewModel = new AccountsTreasuryViewModel(_dbFactory);
+            CurrentViewModel = new AccountsTreasuryViewModel(CreateAccountsTreasuryService());
         }
 
         private void NavigateSampleCollection()
         {
-            CurrentViewModel = new SampleCollectionViewModel(_dbFactory);
+            CurrentViewModel = new SampleCollectionViewModel(CreateSampleCollectionService());
         }
 
         private async Task LogoutAsync()
@@ -233,13 +233,7 @@ namespace Open_lab.ViewModels
 
             try
             {
-                using var db = _dbFactory();
-                var log = await db.AttendanceLogs.FirstOrDefaultAsync(l => l.AttendanceLogId == AppSession.AttendanceLogId);
-                if (log != null && log.LogoutAt == null)
-                {
-                    log.LogoutAt = DateTime.Now;
-                    await db.SaveChangesAsync();
-                }
+                await CreateAttendanceService().CloseAsync(AppSession.AttendanceLogId);
             }
             catch
             {
@@ -249,6 +243,25 @@ namespace Open_lab.ViewModels
                 AppSession.AttendanceLogId = 0;
             }
         }
+
+        private IAuthService CreateAuthService() => new AuthService(_dbFactory());
+        private IAdminSetupService CreateAdminSetupService() => new AdminSetupService(_dbFactory());
+        private IAttendanceService CreateAttendanceService() => new AttendanceService(_dbFactory());
+        private IDashboardService CreateDashboardService() => new DashboardService(_dbFactory());
+        private IPatientService CreatePatientService() => new PatientService(_dbFactory());
+        private IVisitService CreateVisitService() => new VisitService(_dbFactory());
+        private IInvoiceService CreateInvoiceService() => new InvoiceService(_dbFactory());
+        private IResultsService CreateResultsService() => new ResultsService(_dbFactory());
+        private IReportService CreateReportService() => new ReportService(_dbFactory());
+        private IPatientSearchService CreatePatientSearchService() => new PatientSearchService(_dbFactory());
+        private IWorksheetService CreateWorksheetService() => new WorksheetService(_dbFactory());
+        private ITestCatalogService CreateTestCatalogService() => new TestCatalogService(_dbFactory());
+        private IUserAdminService CreateUserAdminService() => new UserAdminService(_dbFactory());
+        private IStatisticsService CreateStatisticsService() => new StatisticsService(_dbFactory());
+        private ISystemSettingsService CreateSystemSettingsService() => new SystemSettingsService(_dbFactory());
+        private IBackupRestoreService CreateBackupRestoreService() => new BackupRestoreService(_dbFactory());
+        private IAccountsTreasuryService CreateAccountsTreasuryService() => new AccountsTreasuryService(_dbFactory());
+        private ISampleCollectionService CreateSampleCollectionService() => new SampleCollectionService(_dbFactory());
 
         private void RaiseNavigationCanExecuteChanged()
         {

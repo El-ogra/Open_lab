@@ -6,7 +6,7 @@ using Open_lab.Models;
 
 namespace Open_lab.Services
 {
-    public class AdminSetupService
+    public class AdminSetupService : IAdminSetupService
     {
         private readonly OpenLabDbContext _db;
 
@@ -49,3 +49,4 @@ namespace Open_lab.Services
         }
     }
 }
+

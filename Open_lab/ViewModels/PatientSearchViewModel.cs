@@ -1,26 +1,24 @@
 using System;
 using System.Collections.ObjectModel;
-using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using Microsoft.EntityFrameworkCore;
-using Open_lab.Data;
 using Open_lab.Models;
+using Open_lab.Services;
 
 namespace Open_lab.ViewModels
 {
     public class PatientSearchViewModel : BaseViewModel
     {
-        private readonly Func<OpenLabDbContext> _dbFactory;
+        private readonly IPatientSearchService _patientSearchService;
         private string _name = string.Empty;
         private string _phone = string.Empty;
         private string _labId = string.Empty;
         private string _statusMessage = string.Empty;
         private Patient? _selectedPatient;
 
-        public PatientSearchViewModel(Func<OpenLabDbContext> dbFactory)
+        public PatientSearchViewModel(IPatientSearchService patientSearchService)
         {
-            _dbFactory = dbFactory;
+            _patientSearchService = patientSearchService;
             Patients = new ObservableCollection<Patient>();
             Visits = new ObservableCollection<Visit>();
             SearchCommand = new RelayCommand(async _ => await SearchAsync());
@@ -71,29 +69,11 @@ namespace Open_lab.ViewModels
         {
             try
             {
-                using var db = _dbFactory();
-                var query = db.Patients.AsNoTracking().AsQueryable();
-
-                if (!string.IsNullOrWhiteSpace(Name))
-                {
-                    query = query.Where(p => p.FullName.Contains(Name));
-                }
-
-                if (!string.IsNullOrWhiteSpace(Phone))
-                {
-                    query = query.Where(p => p.Phone != null && p.Phone.Contains(Phone));
-                }
-
-                if (!string.IsNullOrWhiteSpace(LabId))
-                {
-                    query = query.Where(p => p.LabId == LabId);
-                }
-
-                var results = await query.OrderBy(p => p.FullName).ToListAsync();
+                var results = await _patientSearchService.SearchPatientsAsync(Name, Phone, LabId);
                 Patients.Clear();
-                foreach (var p in results)
+                foreach (var patient in results)
                 {
-                    Patients.Add(p);
+                    Patients.Add(patient);
                 }
 
                 StatusMessage = $"تم العثور على {Patients.Count} مريض.";
@@ -114,12 +94,7 @@ namespace Open_lab.ViewModels
 
             try
             {
-                using var db = _dbFactory();
-                var visits = await db.Visits.AsNoTracking()
-                    .Where(v => v.PatientId == SelectedPatient.PatientId)
-                    .OrderByDescending(v => v.VisitDate)
-                    .ToListAsync();
-
+                var visits = await _patientSearchService.GetPatientVisitsAsync(SelectedPatient.PatientId);
                 foreach (var visit in visits)
                 {
                     Visits.Add(visit);

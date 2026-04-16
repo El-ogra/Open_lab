@@ -154,7 +154,30 @@ namespace Open_lab.Services
 
         public Task<List<TestReferenceRange>> GetReferenceRangesAsync(int testId)
         {
-            return _db.TestReferenceRanges.AsNoTracking().Where(r => r.TestId == testId).ToListAsync();
+            return _db.TestReferenceRanges.AsNoTracking().Where(r => r.TestId == testId).OrderBy(r => r.RangeId).ToListAsync();
+        }
+
+        public async Task UpdateReferenceRangeAsync(TestReferenceRange range)
+        {
+            if (range == null)
+            {
+                throw new ArgumentNullException(nameof(range));
+            }
+
+            _db.TestReferenceRanges.Update(range);
+            await _db.SaveChangesAsync();
+        }
+
+        public async Task DeleteReferenceRangeAsync(int rangeId)
+        {
+            var range = await _db.TestReferenceRanges.FirstOrDefaultAsync(r => r.RangeId == rangeId);
+            if (range == null)
+            {
+                return;
+            }
+
+            _db.TestReferenceRanges.Remove(range);
+            await _db.SaveChangesAsync();
         }
 
         public async Task<TestComment> CreateTestCommentAsync(TestComment comment)
@@ -171,7 +194,30 @@ namespace Open_lab.Services
 
         public Task<List<TestComment>> GetTestCommentsAsync(int testId)
         {
-            return _db.TestComments.AsNoTracking().Where(c => c.TestId == testId).ToListAsync();
+            return _db.TestComments.AsNoTracking().Where(c => c.TestId == testId).OrderBy(c => c.CommentId).ToListAsync();
+        }
+
+        public async Task UpdateTestCommentAsync(TestComment comment)
+        {
+            if (comment == null)
+            {
+                throw new ArgumentNullException(nameof(comment));
+            }
+
+            _db.TestComments.Update(comment);
+            await _db.SaveChangesAsync();
+        }
+
+        public async Task DeleteTestCommentAsync(int commentId)
+        {
+            var comment = await _db.TestComments.FirstOrDefaultAsync(c => c.CommentId == commentId);
+            if (comment == null)
+            {
+                return;
+            }
+
+            _db.TestComments.Remove(comment);
+            await _db.SaveChangesAsync();
         }
 
         public async Task<PriceList> CreatePriceListAsync(PriceList priceList)
@@ -203,6 +249,27 @@ namespace Open_lab.Services
             return item;
         }
 
+        public Task<List<PriceListItem>> GetPriceListItemsAsync(int priceListId)
+        {
+            return _db.PriceListItems.AsNoTracking()
+                .Include(i => i.Test)
+                .Where(i => i.PriceListId == priceListId)
+                .OrderBy(i => i.PriceListItemId)
+                .ToListAsync();
+        }
+
+        public async Task DeletePriceListItemAsync(int priceListItemId)
+        {
+            var item = await _db.PriceListItems.FirstOrDefaultAsync(i => i.PriceListItemId == priceListItemId);
+            if (item == null)
+            {
+                return;
+            }
+
+            _db.PriceListItems.Remove(item);
+            await _db.SaveChangesAsync();
+        }
+
         public async Task<CustomGroup> CreateCustomGroupAsync(CustomGroup group)
         {
             if (group == null || string.IsNullOrWhiteSpace(group.Name))
@@ -232,6 +299,27 @@ namespace Open_lab.Services
             return item;
         }
 
+        public Task<List<CustomGroupItem>> GetCustomGroupItemsAsync(int customGroupId)
+        {
+            return _db.CustomGroupItems.AsNoTracking()
+                .Include(i => i.Test)
+                .Where(i => i.CustomGroupId == customGroupId)
+                .OrderBy(i => i.CustomGroupItemId)
+                .ToListAsync();
+        }
+
+        public async Task DeleteCustomGroupItemAsync(int customGroupItemId)
+        {
+            var item = await _db.CustomGroupItems.FirstOrDefaultAsync(i => i.CustomGroupItemId == customGroupItemId);
+            if (item == null)
+            {
+                return;
+            }
+
+            _db.CustomGroupItems.Remove(item);
+            await _db.SaveChangesAsync();
+        }
+
         public async Task<Referral> CreateReferralAsync(Referral referral)
         {
             if (referral == null || string.IsNullOrWhiteSpace(referral.Name) || string.IsNullOrWhiteSpace(referral.ReferralType))
@@ -247,6 +335,18 @@ namespace Open_lab.Services
         public Task<List<Referral>> GetReferralsAsync()
         {
             return _db.Referrals.AsNoTracking().OrderBy(r => r.Name).ToListAsync();
+        }
+
+        public async Task DeleteReferralAsync(int referralId)
+        {
+            var referral = await _db.Referrals.FirstOrDefaultAsync(r => r.ReferralId == referralId);
+            if (referral == null)
+            {
+                return;
+            }
+
+            _db.Referrals.Remove(referral);
+            await _db.SaveChangesAsync();
         }
     }
 }

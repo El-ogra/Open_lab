@@ -2,8 +2,6 @@ using System;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using Microsoft.EntityFrameworkCore;
-using Open_lab.Data;
 using Open_lab.Models;
 using Open_lab.Services;
 
@@ -11,7 +9,7 @@ namespace Open_lab.ViewModels
 {
     public class ReferralsViewModel : BaseViewModel
     {
-        private readonly Func<OpenLabDbContext> _dbFactory;
+        private readonly ITestCatalogService _testCatalogService;
         private string _name = string.Empty;
         private string _type = string.Empty;
         private string? _phone;
@@ -19,9 +17,9 @@ namespace Open_lab.ViewModels
         private Referral? _selectedReferral;
         private string _statusMessage = string.Empty;
 
-        public ReferralsViewModel(Func<OpenLabDbContext> dbFactory)
+        public ReferralsViewModel(ITestCatalogService testCatalogService)
         {
-            _dbFactory = dbFactory;
+            _testCatalogService = testCatalogService;
             Referrals = new ObservableCollection<Referral>();
 
             SaveCommand = new RelayCommand(async _ => await SaveAsync());
@@ -86,9 +84,7 @@ namespace Open_lab.ViewModels
 
         private async Task LoadAsync()
         {
-            using var db = _dbFactory();
-            var service = new TestCatalogService(db);
-            var referrals = await service.GetReferralsAsync();
+            var referrals = await _testCatalogService.GetReferralsAsync();
             Referrals.Clear();
             foreach (var referral in referrals)
             {
@@ -106,9 +102,7 @@ namespace Open_lab.ViewModels
 
             try
             {
-                using var db = _dbFactory();
-                var service = new TestCatalogService(db);
-                var referral = await service.CreateReferralAsync(new Referral
+                var referral = await _testCatalogService.CreateReferralAsync(new Referral
                 {
                     Name = Name,
                     ReferralType = Type,
@@ -134,10 +128,7 @@ namespace Open_lab.ViewModels
 
             try
             {
-                using var db = _dbFactory();
-                var referral = await db.Referrals.FirstAsync(r => r.ReferralId == SelectedReferral.ReferralId);
-                db.Referrals.Remove(referral);
-                await db.SaveChangesAsync();
+                await _testCatalogService.DeleteReferralAsync(SelectedReferral.ReferralId);
                 Referrals.Remove(SelectedReferral);
                 SelectedReferral = null;
                 StatusMessage = "تم حذف الجهة.";

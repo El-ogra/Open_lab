@@ -1,22 +1,20 @@
 using System;
-using System.Data;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using Microsoft.EntityFrameworkCore;
-using Open_lab.Data;
+using Open_lab.Services;
 
 namespace Open_lab.ViewModels
 {
     public class BackupRestoreViewModel : BaseViewModel
     {
-        private readonly Func<OpenLabDbContext> _dbFactory;
+        private readonly IBackupRestoreService _backupRestoreService;
         private string _backupPath = string.Empty;
         private string _restorePath = string.Empty;
         private string _statusMessage = string.Empty;
 
-        public BackupRestoreViewModel(Func<OpenLabDbContext> dbFactory)
+        public BackupRestoreViewModel(IBackupRestoreService backupRestoreService)
         {
-            _dbFactory = dbFactory;
+            _backupRestoreService = backupRestoreService;
             BackupCommand = new RelayCommand(async _ => await BackupAsync());
             RestoreCommand = new RelayCommand(async _ => await RestoreAsync());
         }
@@ -52,9 +50,7 @@ namespace Open_lab.ViewModels
 
             try
             {
-                using var db = _dbFactory();
-                var sql = $"BACKUP DATABASE [OpenLab] TO DISK = '{BackupPath}' WITH INIT";
-                await db.Database.ExecuteSqlRawAsync(sql);
+                await _backupRestoreService.BackupAsync(BackupPath);
                 StatusMessage = "تم إنشاء النسخة الاحتياطية.";
             }
             catch (Exception ex)
@@ -73,11 +69,7 @@ namespace Open_lab.ViewModels
 
             try
             {
-                using var db = _dbFactory();
-                var sql = $@"ALTER DATABASE [OpenLab] SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
-RESTORE DATABASE [OpenLab] FROM DISK = '{RestorePath}' WITH REPLACE;
-ALTER DATABASE [OpenLab] SET MULTI_USER;";
-                await db.Database.ExecuteSqlRawAsync(sql);
+                await _backupRestoreService.RestoreAsync(RestorePath);
                 StatusMessage = "تمت الاستعادة.";
             }
             catch (Exception ex)

@@ -1,10 +1,7 @@
 using System;
 using System.Collections.ObjectModel;
-using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using Microsoft.EntityFrameworkCore;
-using Open_lab.Data;
 using Open_lab.Models;
 using Open_lab.Services;
 
@@ -12,7 +9,7 @@ namespace Open_lab.ViewModels
 {
     public class PriceListsViewModel : BaseViewModel
     {
-        private readonly Func<OpenLabDbContext> _dbFactory;
+        private readonly ITestCatalogService _testCatalogService;
         private string _listName = string.Empty;
         private bool _isDefault;
         private PriceList? _selectedPriceList;
@@ -20,9 +17,9 @@ namespace Open_lab.ViewModels
         private decimal _price;
         private string _statusMessage = string.Empty;
 
-        public PriceListsViewModel(Func<OpenLabDbContext> dbFactory)
+        public PriceListsViewModel(ITestCatalogService testCatalogService)
         {
-            _dbFactory = dbFactory;
+            _testCatalogService = testCatalogService;
             PriceLists = new ObservableCollection<PriceList>();
             Items = new ObservableCollection<PriceListItem>();
             Tests = new ObservableCollection<Test>();
@@ -90,17 +87,14 @@ namespace Open_lab.ViewModels
 
         private async Task LoadAsync()
         {
-            using var db = _dbFactory();
-            var service = new TestCatalogService(db);
-
-            var lists = await service.GetPriceListsAsync();
+            var lists = await _testCatalogService.GetPriceListsAsync();
             PriceLists.Clear();
             foreach (var list in lists)
             {
                 PriceLists.Add(list);
             }
 
-            var tests = await service.GetAllTestsAsync();
+            var tests = await _testCatalogService.GetAllTestsAsync();
             Tests.Clear();
             foreach (var test in tests)
             {
@@ -116,12 +110,7 @@ namespace Open_lab.ViewModels
                 return;
             }
 
-            using var db = _dbFactory();
-            var items = await db.PriceListItems.AsNoTracking()
-                .Include(i => i.Test)
-                .Where(i => i.PriceListId == SelectedPriceList.PriceListId)
-                .ToListAsync();
-
+            var items = await _testCatalogService.GetPriceListItemsAsync(SelectedPriceList.PriceListId);
             foreach (var item in items)
             {
                 Items.Add(item);
@@ -138,9 +127,7 @@ namespace Open_lab.ViewModels
 
             try
             {
-                using var db = _dbFactory();
-                var service = new TestCatalogService(db);
-                var list = await service.CreatePriceListAsync(new PriceList
+                var list = await _testCatalogService.CreatePriceListAsync(new PriceList
                 {
                     Name = ListName,
                     IsDefault = IsDefault
@@ -164,9 +151,7 @@ namespace Open_lab.ViewModels
 
             try
             {
-                using var db = _dbFactory();
-                var service = new TestCatalogService(db);
-                var item = await service.AddPriceListItemAsync(new PriceListItem
+                var item = await _testCatalogService.AddPriceListItemAsync(new PriceListItem
                 {
                     PriceListId = SelectedPriceList.PriceListId,
                     TestId = SelectedTest.TestId,
@@ -192,10 +177,7 @@ namespace Open_lab.ViewModels
 
             try
             {
-                using var db = _dbFactory();
-                var item = await db.PriceListItems.FirstAsync(i => i.PriceListItemId == SelectedItem.PriceListItemId);
-                db.PriceListItems.Remove(item);
-                await db.SaveChangesAsync();
+                await _testCatalogService.DeletePriceListItemAsync(SelectedItem.PriceListItemId);
                 Items.Remove(SelectedItem);
                 SelectedItem = null;
                 StatusMessage = "تم حذف العنصر.";

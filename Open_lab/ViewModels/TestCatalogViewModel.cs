@@ -3,7 +3,6 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using Open_lab.Data;
 using Open_lab.Models;
 using Open_lab.Services;
 
@@ -11,7 +10,7 @@ namespace Open_lab.ViewModels
 {
     public class TestCatalogViewModel : BaseViewModel
     {
-        private readonly Func<OpenLabDbContext> _dbFactory;
+        private readonly ITestCatalogService _testCatalogService;
         private Test? _selectedTest;
         private string _code = string.Empty;
         private string _nameReport = string.Empty;
@@ -25,9 +24,9 @@ namespace Open_lab.ViewModels
         private Unit? _selectedUnit;
         private string _statusMessage = string.Empty;
 
-        public TestCatalogViewModel(Func<OpenLabDbContext> dbFactory)
+        public TestCatalogViewModel(ITestCatalogService testCatalogService)
         {
-            _dbFactory = dbFactory;
+            _testCatalogService = testCatalogService;
             Tests = new ObservableCollection<Test>();
             Groups = new ObservableCollection<TestGroup>();
             SampleTypes = new ObservableCollection<SampleType>();
@@ -134,31 +133,28 @@ namespace Open_lab.ViewModels
         {
             try
             {
-                using var db = _dbFactory();
-                var service = new TestCatalogService(db);
-
-                var tests = await service.GetAllTestsAsync();
+                var tests = await _testCatalogService.GetAllTestsAsync();
                 Tests.Clear();
                 foreach (var test in tests)
                 {
                     Tests.Add(test);
                 }
 
-                var groups = await service.GetTestGroupsAsync();
+                var groups = await _testCatalogService.GetTestGroupsAsync();
                 Groups.Clear();
                 foreach (var group in groups)
                 {
                     Groups.Add(group);
                 }
 
-                var sampleTypes = await service.GetSampleTypesAsync();
+                var sampleTypes = await _testCatalogService.GetSampleTypesAsync();
                 SampleTypes.Clear();
                 foreach (var sample in sampleTypes)
                 {
                     SampleTypes.Add(sample);
                 }
 
-                var units = await service.GetUnitsAsync();
+                var units = await _testCatalogService.GetUnitsAsync();
                 Units.Clear();
                 foreach (var unit in units)
                 {
@@ -197,12 +193,9 @@ namespace Open_lab.ViewModels
         {
             try
             {
-                using var db = _dbFactory();
-                var service = new TestCatalogService(db);
-
                 if (SelectedTest == null || SelectedTest.TestId == 0)
                 {
-                    var created = await service.CreateTestAsync(new Test
+                    var created = await _testCatalogService.CreateTestAsync(new Test
                     {
                         Code = Code,
                         NameReport = NameReport,
@@ -233,7 +226,7 @@ namespace Open_lab.ViewModels
                     SelectedTest.SampleTypeId = SelectedSampleType?.SampleTypeId;
                     SelectedTest.UnitId = SelectedUnit?.UnitId;
 
-                    await service.UpdateTestAsync(SelectedTest);
+                    await _testCatalogService.UpdateTestAsync(SelectedTest);
                     StatusMessage = "تم تحديث التحليل.";
                 }
             }
@@ -252,9 +245,7 @@ namespace Open_lab.ViewModels
 
             try
             {
-                using var db = _dbFactory();
-                var service = new TestCatalogService(db);
-                await service.DeleteTestAsync(SelectedTest.TestId);
+                await _testCatalogService.DeleteTestAsync(SelectedTest.TestId);
                 Tests.Remove(SelectedTest);
                 ClearForm();
                 StatusMessage = "تم حذف التحليل.";

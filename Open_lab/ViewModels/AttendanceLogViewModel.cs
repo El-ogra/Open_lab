@@ -1,23 +1,21 @@
 using System;
 using System.Collections.ObjectModel;
-using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using Microsoft.EntityFrameworkCore;
-using Open_lab.Data;
+using Open_lab.Services;
 
 namespace Open_lab.ViewModels
 {
     public class AttendanceLogViewModel : BaseViewModel
     {
-        private readonly Func<OpenLabDbContext> _dbFactory;
+        private readonly IAttendanceService _attendanceService;
         private DateTime _dateFrom = DateTime.Today;
         private DateTime _dateTo = DateTime.Today;
         private string _statusMessage = string.Empty;
 
-        public AttendanceLogViewModel(Func<OpenLabDbContext> dbFactory)
+        public AttendanceLogViewModel(IAttendanceService attendanceService)
         {
-            _dbFactory = dbFactory;
+            _attendanceService = attendanceService;
             Logs = new ObservableCollection<AttendanceLogRow>();
             LoadLogsCommand = new RelayCommand(async _ => await LoadLogsAsync());
         }
@@ -48,15 +46,9 @@ namespace Open_lab.ViewModels
         {
             try
             {
-                using var db = _dbFactory();
                 var from = DateFrom.Date;
                 var to = DateTo.Date.AddDays(1).AddSeconds(-1);
-
-                var logs = await db.AttendanceLogs
-                    .Include(l => l.User)
-                    .Where(l => l.LoginAt >= from && l.LoginAt <= to)
-                    .OrderByDescending(l => l.LoginAt)
-                    .ToListAsync();
+                var logs = await _attendanceService.GetLogsAsync(from, to);
 
                 Logs.Clear();
                 foreach (var log in logs)

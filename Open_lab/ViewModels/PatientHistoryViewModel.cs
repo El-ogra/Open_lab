@@ -1,10 +1,7 @@
 using System;
 using System.Collections.ObjectModel;
-using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using Microsoft.EntityFrameworkCore;
-using Open_lab.Data;
 using Open_lab.Models;
 using Open_lab.Services;
 
@@ -12,16 +9,18 @@ namespace Open_lab.ViewModels
 {
     public class PatientHistoryViewModel : BaseViewModel
     {
-        private readonly Func<OpenLabDbContext> _dbFactory;
+        private readonly IPatientService _patientService;
+        private readonly IReportService _reportService;
         private string _labId = string.Empty;
         private DateTime? _from;
         private DateTime? _to;
         private string _statusMessage = string.Empty;
         private PatientHistoryReportData? _history;
 
-        public PatientHistoryViewModel(Func<OpenLabDbContext> dbFactory)
+        public PatientHistoryViewModel(IPatientService patientService, IReportService reportService)
         {
-            _dbFactory = dbFactory;
+            _patientService = patientService;
+            _reportService = reportService;
             Visits = new ObservableCollection<VisitReportData>();
             LoadHistoryCommand = new RelayCommand(async _ => await LoadHistoryAsync());
         }
@@ -70,16 +69,14 @@ namespace Open_lab.ViewModels
 
             try
             {
-                using var db = _dbFactory();
-                var patient = await db.Patients.AsNoTracking().FirstOrDefaultAsync(p => p.LabId == LabId);
+                var patient = await _patientService.GetByLabIdAsync(LabId);
                 if (patient == null)
                 {
                     StatusMessage = "لم يتم العثور على المريض.";
                     return;
                 }
 
-                var service = new ReportService(db);
-                var history = await service.GetPatientHistoryAsync(patient.PatientId, From, To);
+                var history = await _reportService.GetPatientHistoryAsync(patient.PatientId, From, To);
                 History = history;
                 Visits.Clear();
                 foreach (var visit in history.Visits)

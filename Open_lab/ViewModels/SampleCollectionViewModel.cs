@@ -1,25 +1,22 @@
 using System;
 using System.Collections.ObjectModel;
-using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using Microsoft.EntityFrameworkCore;
-using Open_lab.Data;
-using Open_lab.Models;
+using Open_lab.Services;
 
 namespace Open_lab.ViewModels
 {
     public class SampleCollectionViewModel : BaseViewModel
     {
-        private readonly Func<OpenLabDbContext> _dbFactory;
+        private readonly ISampleCollectionService _sampleCollectionService;
         private DateTime _dateFrom = DateTime.Today;
         private DateTime _dateTo = DateTime.Today;
         private SampleCollectionRow? _selectedRow;
         private string _statusMessage = string.Empty;
 
-        public SampleCollectionViewModel(Func<OpenLabDbContext> dbFactory)
+        public SampleCollectionViewModel(ISampleCollectionService sampleCollectionService)
         {
-            _dbFactory = dbFactory;
+            _sampleCollectionService = sampleCollectionService;
             Items = new ObservableCollection<SampleCollectionRow>();
             LoadCommand = new RelayCommand(async _ => await LoadAsync());
             MarkCollectedCommand = new RelayCommand(async _ => await MarkCollectedAsync(), _ => SelectedRow != null);
@@ -67,34 +64,14 @@ namespace Open_lab.ViewModels
         {
             try
             {
-                using var db = _dbFactory();
                 var from = DateFrom.Date;
                 var to = DateTo.Date.AddDays(1).AddSeconds(-1);
-
-                var visitTests = await db.VisitTests
-                    .Include(vt => vt.Visit)
-                    .ThenInclude(v => v.Patient)
-                    .Include(vt => vt.Test)
-                    .Include(vt => vt.SampleCollection)
-                    .ThenInclude(sc => sc!.CollectedByUser)
-                    .Where(vt => vt.Visit.VisitDate >= from && vt.Visit.VisitDate <= to)
-                    .OrderByDescending(vt => vt.Visit.VisitDate)
-                    .ToListAsync();
+                var rows = await _sampleCollectionService.GetRowsAsync(from, to);
 
                 Items.Clear();
-                foreach (var vt in visitTests)
+                foreach (var row in rows)
                 {
-                    var sc = vt.SampleCollection;
-                    Items.Add(new SampleCollectionRow
-                    {
-                        VisitTestId = vt.VisitTestId,
-                        PatientName = vt.Visit.Patient.FullName,
-                        TestName = vt.Test.NameReport,
-                        VisitDate = vt.Visit.VisitDate,
-                        Status = sc?.Status ?? "غير مسحوبة",
-                        CollectedAt = sc?.CollectedAt,
-                        CollectedBy = sc?.CollectedByUser?.Username
-                    });
+                    Items.Add(row);
                 }
 
                 StatusMessage = "تم تحميل " + Items.Count + " تحليل.";
@@ -120,36 +97,7 @@ namespace Open_lab.ViewModels
 
             try
             {
-                using var db = _dbFactory();
-                var vt = await db.VisitTests
-                    .Include(v => v.SampleCollection)
-                    .FirstOrDefaultAsync(v => v.VisitTestId == SelectedRow.VisitTestId);
-
-                if (vt == null)
-                {
-                    StatusMessage = "العنصر غير موجود.";
-                    return;
-                }
-
-                if (vt.SampleCollection == null)
-                {
-                    vt.SampleCollection = new SampleCollection
-                    {
-                        VisitTestId = vt.VisitTestId,
-                        CollectedBy = AppSession.UserId,
-                        CollectedAt = DateTime.Now,
-                        Status = "مسحوبة"
-                    };
-                    db.SampleCollections.Add(vt.SampleCollection);
-                }
-                else
-                {
-                    vt.SampleCollection.CollectedBy = AppSession.UserId;
-                    vt.SampleCollection.CollectedAt = DateTime.Now;
-                    vt.SampleCollection.Status = "مسحوبة";
-                }
-
-                await db.SaveChangesAsync();
+                await _sampleCollectionService.MarkCollectedAsync(SelectedRow.VisitTestId, AppSession.UserId);
                 StatusMessage = "تم تحديث حالة العينة.";
                 await LoadAsync();
             }
@@ -168,16 +116,7 @@ namespace Open_lab.ViewModels
 
             try
             {
-                using var db = _dbFactory();
-                var sample = await db.SampleCollections
-                    .FirstOrDefaultAsync(s => s.VisitTestId == SelectedRow.VisitTestId);
-
-                if (sample != null)
-                {
-                    db.SampleCollections.Remove(sample);
-                    await db.SaveChangesAsync();
-                }
-
+                await _sampleCollectionService.MarkNotCollectedAsync(SelectedRow.VisitTestId);
                 StatusMessage = "تم تحديث الحالة.";
                 await LoadAsync();
             }
@@ -188,4 +127,3 @@ namespace Open_lab.ViewModels
         }
     }
 }
-

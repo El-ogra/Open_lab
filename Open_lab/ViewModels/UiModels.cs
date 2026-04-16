@@ -13,6 +13,7 @@ namespace Open_lab.ViewModels
     public class VisitTestRow
     {
         public int VisitTestId { get; set; }
+        public int TestId { get; set; }
         public string PatientName { get; set; } = string.Empty;
         public string TestName { get; set; } = string.Empty;
         public DateTime VisitDate { get; set; }
@@ -65,6 +66,7 @@ namespace Open_lab.ViewModels
     public class SampleCollectionRow
     {
         public int VisitTestId { get; set; }
+        public int TestId { get; set; }
         public string PatientName { get; set; } = string.Empty;
         public string TestName { get; set; } = string.Empty;
         public DateTime VisitDate { get; set; }
@@ -73,3 +75,4 @@ namespace Open_lab.ViewModels
         public string? CollectedBy { get; set; }
     }
 }
+

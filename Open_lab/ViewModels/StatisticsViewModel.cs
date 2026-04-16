@@ -1,14 +1,13 @@
 using System;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using Microsoft.EntityFrameworkCore;
-using Open_lab.Data;
+using Open_lab.Services;
 
 namespace Open_lab.ViewModels
 {
     public class StatisticsViewModel : BaseViewModel
     {
-        private readonly Func<OpenLabDbContext> _dbFactory;
+        private readonly IStatisticsService _statisticsService;
         private DateTime _from = DateTime.Today.AddDays(-30);
         private DateTime _to = DateTime.Today;
         private int _visitCount;
@@ -18,9 +17,9 @@ namespace Open_lab.ViewModels
         private decimal _totalPaid;
         private string _statusMessage = string.Empty;
 
-        public StatisticsViewModel(Func<OpenLabDbContext> dbFactory)
+        public StatisticsViewModel(IStatisticsService statisticsService)
         {
-            _dbFactory = dbFactory;
+            _statisticsService = statisticsService;
             LoadCommand = new RelayCommand(async _ => await LoadAsync());
         }
 
@@ -78,18 +77,13 @@ namespace Open_lab.ViewModels
         {
             var from = From.Date;
             var to = To.Date.AddDays(1).AddSeconds(-1);
+            var summary = await _statisticsService.GetSummaryAsync(from, to);
 
-            using var db = _dbFactory();
-            VisitCount = await db.Visits.CountAsync(v => v.VisitDate >= from && v.VisitDate <= to);
-            PatientCount = await db.Patients.CountAsync();
-            TestCount = await db.VisitTests.CountAsync(vt => vt.Visit.VisitDate >= from && vt.Visit.VisitDate <= to);
-
-            TotalRevenue = await db.Invoices
-                .Where(i => i.Visit.VisitDate >= from && i.Visit.VisitDate <= to)
-                .SumAsync(i => (decimal?)i.NetTotal) ?? 0;
-            TotalPaid = await db.Invoices
-                .Where(i => i.Visit.VisitDate >= from && i.Visit.VisitDate <= to)
-                .SumAsync(i => (decimal?)i.Paid) ?? 0;
+            VisitCount = summary.VisitCount;
+            PatientCount = summary.PatientCount;
+            TestCount = summary.TestCount;
+            TotalRevenue = summary.TotalRevenue;
+            TotalPaid = summary.TotalPaid;
 
             StatusMessage = "تم تحميل الإحصائيات.";
         }

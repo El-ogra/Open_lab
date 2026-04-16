@@ -1,9 +1,7 @@
 using System;
 using System.Collections.ObjectModel;
-using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using Open_lab.Data;
 using Open_lab.Models;
 using Open_lab.Services;
 
@@ -11,7 +9,7 @@ namespace Open_lab.ViewModels
 {
     public class PatientRegistrationViewModel : BaseViewModel
     {
-        private readonly Func<OpenLabDbContext> _dbFactory;
+        private readonly IPatientService _patientService;
         private string _labId = string.Empty;
         private string _fullName = string.Empty;
         private string _gender = string.Empty;
@@ -22,9 +20,9 @@ namespace Open_lab.ViewModels
         private string _statusMessage = string.Empty;
         private Patient? _selectedPatient;
 
-        public PatientRegistrationViewModel(Func<OpenLabDbContext> dbFactory)
+        public PatientRegistrationViewModel(IPatientService patientService)
         {
-            _dbFactory = dbFactory;
+            _patientService = patientService;
             Results = new ObservableCollection<Patient>();
             SaveCommand = new RelayCommand(async _ => await SaveAsync());
             NewCommand = new RelayCommand(_ => ClearForm());
@@ -111,12 +109,9 @@ namespace Open_lab.ViewModels
         {
             try
             {
-                using var db = _dbFactory();
-                var service = new PatientService(db);
-
                 if (PatientId == 0)
                 {
-                    var patient = new Patient
+                    var created = await _patientService.CreateAsync(new Patient
                     {
                         LabId = LabId,
                         FullName = FullName,
@@ -124,15 +119,14 @@ namespace Open_lab.ViewModels
                         BirthDate = BirthDate,
                         Phone = Phone,
                         Address = Address
-                    };
+                    });
 
-                    var created = await service.CreateAsync(patient);
                     PatientId = created.PatientId;
                     StatusMessage = "تم إنشاء المريض بنجاح.";
                 }
                 else
                 {
-                    var patient = new Patient
+                    await _patientService.UpdateAsync(new Patient
                     {
                         PatientId = PatientId,
                         LabId = LabId,
@@ -141,9 +135,8 @@ namespace Open_lab.ViewModels
                         BirthDate = BirthDate,
                         Phone = Phone,
                         Address = Address
-                    };
+                    });
 
-                    await service.UpdateAsync(patient);
                     StatusMessage = "تم تحديث بيانات المريض.";
                 }
             }
@@ -163,9 +156,7 @@ namespace Open_lab.ViewModels
 
             try
             {
-                using var db = _dbFactory();
-                var service = new PatientService(db);
-                var patient = await service.GetByLabIdAsync(LabId);
+                var patient = await _patientService.GetByLabIdAsync(LabId);
                 if (patient == null)
                 {
                     StatusMessage = "لم يتم العثور على المريض.";
@@ -185,9 +176,7 @@ namespace Open_lab.ViewModels
         {
             try
             {
-                using var db = _dbFactory();
-                var service = new PatientService(db);
-                var results = await service.SearchAsync(FullName, Phone);
+                var results = await _patientService.SearchAsync(FullName, Phone);
                 Results.Clear();
                 foreach (var patient in results)
                 {
@@ -210,9 +199,7 @@ namespace Open_lab.ViewModels
 
             try
             {
-                using var db = _dbFactory();
-                var service = new PatientService(db);
-                await service.DeleteAsync(PatientId);
+                await _patientService.DeleteAsync(PatientId);
                 StatusMessage = "تم حذف المريض.";
                 ClearForm();
             }
