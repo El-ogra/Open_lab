@@ -27,6 +27,10 @@
                 <Button Content="حسابات" Margin="12,4" Command="{Binding NavigatePatientBillingCommand}" />
                 <Button Content="إدخال نتائج" Margin="12,4" Command="{Binding NavigateResultsEntryCommand}" />
                 <Button Content="التقارير" Margin="12,4" Command="{Binding NavigateReportViewerCommand}" />
+                <Button Content="تقرير مجمّع" Margin="12,4" Command="{Binding NavigateCombinedReportCommand}" />
+                <Button Content="تقرير فارغ" Margin="12,4" Command="{Binding NavigateBlankReportCommand}" />
+                <Button Content="طباعة إيصال/باركود" Margin="12,4" Command="{Binding NavigateReceiptPrintingCommand}" />
+                <Button Content="المزارع والمضادات" Margin="12,4" Command="{Binding NavigateCultureSensitivityCommand}" />
 
                 <TextBlock Text="بحث وتاريخ" Foreground="White" Margin="16,12,16,4" />
                 <Button Content="بحث مريض" Margin="12,4" Command="{Binding NavigatePatientSearchCommand}" />

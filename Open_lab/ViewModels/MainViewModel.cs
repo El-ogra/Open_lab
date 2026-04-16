@@ -40,6 +40,10 @@ namespace Open_lab.ViewModels
             NavigateAttendanceLogCommand = new RelayCommand(_ => NavigateAttendanceLog(), _ => IsLoggedIn);
             NavigateAccountsTreasuryCommand = new RelayCommand(_ => NavigateAccountsTreasury(), _ => IsLoggedIn);
             NavigateSampleCollectionCommand = new RelayCommand(_ => NavigateSampleCollection(), _ => IsLoggedIn);
+            NavigateCultureSensitivityCommand = new RelayCommand(_ => NavigateCultureSensitivity(), _ => IsLoggedIn);
+            NavigateReceiptPrintingCommand = new RelayCommand(_ => NavigateReceiptPrinting(), _ => IsLoggedIn);
+            NavigateCombinedReportCommand = new RelayCommand(_ => NavigateCombinedReport(), _ => IsLoggedIn);
+            NavigateBlankReportCommand = new RelayCommand(_ => NavigateBlankReport(), _ => IsLoggedIn);
 
             LogoutCommand = new RelayCommand(async _ => await LogoutAsync());
 
@@ -88,6 +92,10 @@ namespace Open_lab.ViewModels
         public ICommand NavigateAttendanceLogCommand { get; }
         public ICommand NavigateAccountsTreasuryCommand { get; }
         public ICommand NavigateSampleCollectionCommand { get; }
+        public ICommand NavigateCultureSensitivityCommand { get; }
+        public ICommand NavigateReceiptPrintingCommand { get; }
+        public ICommand NavigateCombinedReportCommand { get; }
+        public ICommand NavigateBlankReportCommand { get; }
 
         public ICommand LogoutCommand { get; }
 
@@ -218,6 +226,26 @@ namespace Open_lab.ViewModels
             CurrentViewModel = new SampleCollectionViewModel(CreateSampleCollectionService());
         }
 
+        private void NavigateCultureSensitivity()
+        {
+            CurrentViewModel = new CultureSensitivityViewModel(CreateCultureSensitivityService());
+        }
+
+        private void NavigateReceiptPrinting()
+        {
+            CurrentViewModel = new ReceiptPrintingViewModel(CreateReceiptService());
+        }
+
+        private void NavigateCombinedReport()
+        {
+            CurrentViewModel = new CombinedReportViewModel(CreateReportService());
+        }
+
+        private void NavigateBlankReport()
+        {
+            CurrentViewModel = new BlankReportViewModel(CreateReportService());
+        }
+
         private async Task LogoutAsync()
         {
             await CloseAttendanceAsync();
@@ -262,6 +290,8 @@ namespace Open_lab.ViewModels
         private IBackupRestoreService CreateBackupRestoreService() => new BackupRestoreService(_dbFactory());
         private IAccountsTreasuryService CreateAccountsTreasuryService() => new AccountsTreasuryService(_dbFactory());
         private ISampleCollectionService CreateSampleCollectionService() => new SampleCollectionService(_dbFactory());
+        private ICultureSensitivityService CreateCultureSensitivityService() => new CultureSensitivityService(_dbFactory());
+        private IReceiptService CreateReceiptService() => new ReceiptService(_dbFactory());
 
         private void RaiseNavigationCanExecuteChanged()
         {
@@ -289,6 +319,10 @@ namespace Open_lab.ViewModels
             (NavigateAttendanceLogCommand as RelayCommand)?.RaiseCanExecuteChanged();
             (NavigateAccountsTreasuryCommand as RelayCommand)?.RaiseCanExecuteChanged();
             (NavigateSampleCollectionCommand as RelayCommand)?.RaiseCanExecuteChanged();
+            (NavigateCultureSensitivityCommand as RelayCommand)?.RaiseCanExecuteChanged();
+            (NavigateReceiptPrintingCommand as RelayCommand)?.RaiseCanExecuteChanged();
+            (NavigateCombinedReportCommand as RelayCommand)?.RaiseCanExecuteChanged();
+            (NavigateBlankReportCommand as RelayCommand)?.RaiseCanExecuteChanged();
         }
     }
 }

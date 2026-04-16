@@ -83,5 +83,17 @@
         <DataTemplate DataType="{x:Type vm:SampleCollectionViewModel}">
             <views:SampleCollectionView />
         </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:CultureSensitivityViewModel}">
+            <views:CultureSensitivityView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:ReceiptPrintingViewModel}">
+            <views:ReceiptPrintingView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:CombinedReportViewModel}">
+            <views:CombinedReportView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:BlankReportViewModel}">
+            <views:BlankReportView />
+        </DataTemplate>
     </Application.Resources>
 </Application>
