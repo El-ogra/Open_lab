@@ -2,18 +2,26 @@ using System;
 
 namespace Open_lab.ViewModels
 {
-    public class NavigationService
+    public class NavigationService : BaseViewModel, INavigationService
     {
-        private readonly Action<BaseViewModel> _navigate;
+        private readonly IViewModelFactory _viewModelFactory;
+        private BaseViewModel _currentViewModel;
 
-        public NavigationService(Action<BaseViewModel> navigate)
+        public NavigationService(IViewModelFactory viewModelFactory)
         {
-            _navigate = navigate ?? throw new ArgumentNullException(nameof(navigate));
+            _viewModelFactory = viewModelFactory ?? throw new ArgumentNullException(nameof(viewModelFactory));
+            _currentViewModel = _viewModelFactory.Create(NavigationTarget.Home);
         }
 
-        public void Navigate(BaseViewModel viewModel)
+        public BaseViewModel CurrentViewModel
         {
-            _navigate(viewModel);
+            get => _currentViewModel;
+            private set => SetProperty(ref _currentViewModel, value);
+        }
+
+        public void Navigate(NavigationTarget target, Action? onLoginSuccess = null)
+        {
+            CurrentViewModel = _viewModelFactory.Create(target, onLoginSuccess);
         }
     }
 }
