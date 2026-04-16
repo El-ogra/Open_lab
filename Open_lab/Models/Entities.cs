@@ -15,6 +15,18 @@ namespace Open_lab.Models
         public ICollection<Payment> Payments { get; set; } = new HashSet<Payment>();
         public ICollection<ResultValue> VerifiedResults { get; set; } = new HashSet<ResultValue>();
         public ICollection<SampleCollection> SampleCollections { get; set; } = new HashSet<SampleCollection>();
+        public ICollection<AttendanceLog> AttendanceLogs { get; set; } = new HashSet<AttendanceLog>();
+    }
+
+    public class AttendanceLog
+    {
+        public int AttendanceLogId { get; set; }
+        public int UserId { get; set; }
+        public DateTime LoginAt { get; set; }
+        public DateTime? LogoutAt { get; set; }
+        public string? Note { get; set; }
+
+        public User User { get; set; } = null!;
     }
 
     public class Role
@@ -33,7 +45,6 @@ namespace Open_lab.Models
 
         public Role Role { get; set; } = null!;
     }
-
     public class UserRole
     {
         public int UserId { get; set; }

@@ -1,0 +1,51 @@
+<UserControl x:Class="Open_lab.Views.AccountsTreasuryView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+            <TextBlock Text="من" VerticalAlignment="Center" Margin="0,0,6,0" />
+            <DatePicker SelectedDate="{Binding DateFrom}" Width="140" />
+            <TextBlock Text="إلى" VerticalAlignment="Center" Margin="12,0,6,0" />
+            <DatePicker SelectedDate="{Binding DateTo}" Width="140" />
+            <Button Content="تحميل" Margin="12,0,0,0" Command="{Binding LoadCommand}" />
+            <TextBlock Text="{Binding StatusMessage}" Margin="12,0,0,0" VerticalAlignment="Center" />
+        </StackPanel>
+
+        <UniformGrid Grid.Row="1" Columns="3" Margin="0,0,0,12">
+            <Border Margin="4" Padding="8" Background="#F4F4F4">
+                <StackPanel>
+                    <TextBlock Text="إجمالي الفواتير" />
+                    <TextBlock Text="{Binding TotalInvoiced}" FontWeight="Bold" />
+                </StackPanel>
+            </Border>
+            <Border Margin="4" Padding="8" Background="#F4F4F4">
+                <StackPanel>
+                    <TextBlock Text="إجمالي المدفوع" />
+                    <TextBlock Text="{Binding TotalPaid}" FontWeight="Bold" />
+                </StackPanel>
+            </Border>
+            <Border Margin="4" Padding="8" Background="#F4F4F4">
+                <StackPanel>
+                    <TextBlock Text="المتبقي" />
+                    <TextBlock Text="{Binding TotalBalance}" FontWeight="Bold" />
+                </StackPanel>
+            </Border>
+        </UniformGrid>
+
+        <DataGrid Grid.Row="2" ItemsSource="{Binding Payments}" AutoGenerateColumns="False">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="المريض" Binding="{Binding PatientName}" Width="*" />
+                <DataGridTextColumn Header="الجهة" Binding="{Binding ReferralName}" Width="*" />
+                <DataGridTextColumn Header="المبلغ" Binding="{Binding Amount}" Width="120" />
+                <DataGridTextColumn Header="التاريخ" Binding="{Binding PaymentDate}" Width="*" />
+                <DataGridTextColumn Header="المستخدم" Binding="{Binding Username}" Width="*" />
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
+</UserControl>

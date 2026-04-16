@@ -74,5 +74,14 @@
         <DataTemplate DataType="{x:Type vm:BackupRestoreViewModel}">
             <views:BackupRestoreView />
         </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:AttendanceLogViewModel}">
+            <views:AttendanceLogView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:AccountsTreasuryViewModel}">
+            <views:AccountsTreasuryView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:SampleCollectionViewModel}">
+            <views:SampleCollectionView />
+        </DataTemplate>
     </Application.Resources>
 </Application>

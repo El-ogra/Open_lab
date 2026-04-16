@@ -1,0 +1,36 @@
+<UserControl x:Class="Open_lab.Views.SampleCollectionView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+            <TextBlock Text="من" VerticalAlignment="Center" Margin="0,0,6,0" />
+            <DatePicker SelectedDate="{Binding DateFrom}" Width="140" />
+            <TextBlock Text="إلى" VerticalAlignment="Center" Margin="12,0,6,0" />
+            <DatePicker SelectedDate="{Binding DateTo}" Width="140" />
+            <Button Content="تحميل" Margin="12,0,0,0" Command="{Binding LoadCommand}" />
+            <TextBlock Text="{Binding StatusMessage}" Margin="12,0,0,0" VerticalAlignment="Center" />
+        </StackPanel>
+
+        <StackPanel Orientation="Horizontal" Grid.Row="1" Margin="0,0,0,12">
+            <Button Content="تعليم مسحوبة" Command="{Binding MarkCollectedCommand}" />
+            <Button Content="تعليم غير مسحوبة" Margin="8,0,0,0" Command="{Binding MarkNotCollectedCommand}" />
+        </StackPanel>
+
+        <DataGrid Grid.Row="2" ItemsSource="{Binding Items}" SelectedItem="{Binding SelectedRow}" AutoGenerateColumns="False">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="المريض" Binding="{Binding PatientName}" Width="*" />
+                <DataGridTextColumn Header="التحليل" Binding="{Binding TestName}" Width="*" />
+                <DataGridTextColumn Header="التاريخ" Binding="{Binding VisitDate}" Width="*" />
+                <DataGridTextColumn Header="الحالة" Binding="{Binding Status}" Width="120" />
+                <DataGridTextColumn Header="وقت السحب" Binding="{Binding CollectedAt}" Width="*" />
+                <DataGridTextColumn Header="المسؤول" Binding="{Binding CollectedBy}" Width="*" />
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
+</UserControl>

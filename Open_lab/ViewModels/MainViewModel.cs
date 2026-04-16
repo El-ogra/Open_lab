@@ -1,5 +1,7 @@
-using System;
+﻿using System;
+using System.Threading.Tasks;
 using System.Windows.Input;
+using Microsoft.EntityFrameworkCore;
 using Open_lab.Data;
 
 namespace Open_lab.ViewModels
@@ -35,8 +37,11 @@ namespace Open_lab.ViewModels
             NavigateStatisticsCommand = new RelayCommand(_ => NavigateStatistics(), _ => IsLoggedIn);
             NavigateSystemSettingsCommand = new RelayCommand(_ => NavigateSystemSettings(), _ => IsLoggedIn);
             NavigateBackupRestoreCommand = new RelayCommand(_ => NavigateBackupRestore(), _ => IsLoggedIn);
+            NavigateAttendanceLogCommand = new RelayCommand(_ => NavigateAttendanceLog(), _ => IsLoggedIn);
+            NavigateAccountsTreasuryCommand = new RelayCommand(_ => NavigateAccountsTreasury(), _ => IsLoggedIn);
+            NavigateSampleCollectionCommand = new RelayCommand(_ => NavigateSampleCollection(), _ => IsLoggedIn);
 
-            LogoutCommand = new RelayCommand(_ => ShowLogin());
+            LogoutCommand = new RelayCommand(async _ => await LogoutAsync());
 
             ShowLogin();
         }
@@ -80,6 +85,9 @@ namespace Open_lab.ViewModels
         public ICommand NavigateStatisticsCommand { get; }
         public ICommand NavigateSystemSettingsCommand { get; }
         public ICommand NavigateBackupRestoreCommand { get; }
+        public ICommand NavigateAttendanceLogCommand { get; }
+        public ICommand NavigateAccountsTreasuryCommand { get; }
+        public ICommand NavigateSampleCollectionCommand { get; }
 
         public ICommand LogoutCommand { get; }
 
@@ -195,6 +203,53 @@ namespace Open_lab.ViewModels
             CurrentViewModel = new BackupRestoreViewModel(_dbFactory);
         }
 
+        private void NavigateAttendanceLog()
+        {
+            CurrentViewModel = new AttendanceLogViewModel(_dbFactory);
+        }
+
+        private void NavigateAccountsTreasury()
+        {
+            CurrentViewModel = new AccountsTreasuryViewModel(_dbFactory);
+        }
+
+        private void NavigateSampleCollection()
+        {
+            CurrentViewModel = new SampleCollectionViewModel(_dbFactory);
+        }
+
+        private async Task LogoutAsync()
+        {
+            await CloseAttendanceAsync();
+            ShowLogin();
+        }
+
+        private async Task CloseAttendanceAsync()
+        {
+            if (AppSession.AttendanceLogId <= 0)
+            {
+                return;
+            }
+
+            try
+            {
+                using var db = _dbFactory();
+                var log = await db.AttendanceLogs.FirstOrDefaultAsync(l => l.AttendanceLogId == AppSession.AttendanceLogId);
+                if (log != null && log.LogoutAt == null)
+                {
+                    log.LogoutAt = DateTime.Now;
+                    await db.SaveChangesAsync();
+                }
+            }
+            catch
+            {
+            }
+            finally
+            {
+                AppSession.AttendanceLogId = 0;
+            }
+        }
+
         private void RaiseNavigationCanExecuteChanged()
         {
             (NavigateDashboardCommand as RelayCommand)?.RaiseCanExecuteChanged();
@@ -218,8 +273,9 @@ namespace Open_lab.ViewModels
             (NavigateStatisticsCommand as RelayCommand)?.RaiseCanExecuteChanged();
             (NavigateSystemSettingsCommand as RelayCommand)?.RaiseCanExecuteChanged();
             (NavigateBackupRestoreCommand as RelayCommand)?.RaiseCanExecuteChanged();
+            (NavigateAttendanceLogCommand as RelayCommand)?.RaiseCanExecuteChanged();
+            (NavigateAccountsTreasuryCommand as RelayCommand)?.RaiseCanExecuteChanged();
+            (NavigateSampleCollectionCommand as RelayCommand)?.RaiseCanExecuteChanged();
         }
     }
 }
-
-

@@ -1,9 +1,9 @@
 using System;
-using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Microsoft.EntityFrameworkCore;
 using Open_lab.Data;
+using Open_lab.Models;
 using Open_lab.Services;
 
 namespace Open_lab.ViewModels
@@ -68,7 +68,7 @@ namespace Open_lab.ViewModels
             try
             {
                 using var db = _dbFactory();
-                var user = await db.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Username == Username);
+                var user = await db.Users.FirstOrDefaultAsync(u => u.Username == Username);
                 if (user == null || user.PasswordHash != Password)
                 {
                     StatusMessage = "بيانات الدخول غير صحيحة.";
@@ -79,11 +79,22 @@ namespace Open_lab.ViewModels
                 AppSession.Username = user.Username;
                 AppSession.IsAdmin = user.Username.Equals("admin", StringComparison.OrdinalIgnoreCase);
 
+                var attendance = new AttendanceLog
+                {
+                    UserId = user.UserId,
+                    LoginAt = DateTime.Now,
+                    Note = "تسجيل دخول"
+                };
+                db.AttendanceLogs.Add(attendance);
+
                 if (AppSession.IsAdmin)
                 {
                     var setup = new AdminSetupService(db);
                     await setup.EnsureAdminAccessAsync(user.UserId);
                 }
+
+                await db.SaveChangesAsync();
+                AppSession.AttendanceLogId = attendance.AttendanceLogId;
 
                 StatusMessage = string.Empty;
                 _onLoginSuccess();

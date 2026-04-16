@@ -44,7 +44,12 @@
                 <Button Content="مجموعات التحاليل" Margin="12,4" Command="{Binding NavigateCustomGroupsCommand}" />
                 <Button Content="الجهات" Margin="12,4" Command="{Binding NavigateReferralsCommand}" />
 
-                                <TextBlock Text="الإدارة" Foreground="White" Margin="16,12,16,4" />
+                <TextBlock Text="العمليات" Foreground="White" Margin="16,12,16,4" />
+                <Button Content="سجل الحضور" Margin="12,4" Command="{Binding NavigateAttendanceLogCommand}" />
+                <Button Content="الخزينة" Margin="12,4" Command="{Binding NavigateAccountsTreasuryCommand}" />
+                <Button Content="سحب العينات" Margin="12,4" Command="{Binding NavigateSampleCollectionCommand}" />
+
+                <TextBlock Text="الإدارة" Foreground="White" Margin="16,12,16,4" />
                 <Button Content="المستخدمون والصلاحيات" Margin="12,4" Command="{Binding NavigateUsersPermissionsCommand}" />
                 <Button Content="الإحصائيات" Margin="12,4" Command="{Binding NavigateStatisticsCommand}" />
                 <Button Content="إعدادات النظام" Margin="12,4" Command="{Binding NavigateSystemSettingsCommand}" />
@@ -58,4 +63,3 @@
         </Border>
     </Grid>
 </Window>
-

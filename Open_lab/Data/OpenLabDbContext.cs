@@ -17,6 +17,7 @@ namespace Open_lab.Data
         }
 
         public DbSet<User> Users => Set<User>();
+        public DbSet<AttendanceLog> AttendanceLogs => Set<AttendanceLog>();
         public DbSet<Role> Roles => Set<Role>();
         public DbSet<RolePermission> RolePermissions => Set<RolePermission>();
         public DbSet<UserRole> UserRoles => Set<UserRole>();
@@ -324,6 +325,14 @@ namespace Open_lab.Data
                     .HasForeignKey(e => e.CollectedBy);
             });
 
+            modelBuilder.Entity<AttendanceLog>(entity =>
+            {
+                entity.HasKey(e => e.AttendanceLogId);
+                entity.HasOne(e => e.User)
+                    .WithMany(e => e.AttendanceLogs)
+                    .HasForeignKey(e => e.UserId);
+            });
+
             modelBuilder.Entity<Setting>(entity =>
             {
                 entity.HasKey(e => e.Key);
@@ -331,6 +340,7 @@ namespace Open_lab.Data
         }
     }
 }
+
 
 
 

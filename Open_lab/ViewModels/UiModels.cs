@@ -41,4 +41,35 @@ namespace Open_lab.ViewModels
         public string TestName { get; set; } = string.Empty;
         public int Count { get; set; }
     }
+
+    public class AttendanceLogRow
+    {
+        public int AttendanceLogId { get; set; }
+        public string Username { get; set; } = string.Empty;
+        public string? FullName { get; set; }
+        public DateTime LoginAt { get; set; }
+        public DateTime? LogoutAt { get; set; }
+        public string Duration { get; set; } = "-";
+    }
+
+    public class AccountsPaymentRow
+    {
+        public int PaymentId { get; set; }
+        public string PatientName { get; set; } = string.Empty;
+        public string? ReferralName { get; set; }
+        public decimal Amount { get; set; }
+        public DateTime PaymentDate { get; set; }
+        public string? Username { get; set; }
+    }
+
+    public class SampleCollectionRow
+    {
+        public int VisitTestId { get; set; }
+        public string PatientName { get; set; } = string.Empty;
+        public string TestName { get; set; } = string.Empty;
+        public DateTime VisitDate { get; set; }
+        public string Status { get; set; } = "غير مسحوبة";
+        public DateTime? CollectedAt { get; set; }
+        public string? CollectedBy { get; set; }
+    }
 }
