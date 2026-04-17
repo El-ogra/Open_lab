@@ -26,10 +26,13 @@ namespace Open_lab.ViewModels
         BackupRestore,
         AttendanceLog,
         AccountsTreasury,
+        Delivery,
         SampleCollection,
         CultureSensitivity,
         ReceiptPrinting,
         CombinedReport,
-        BlankReport
+        BlankReport,
+        Constants
     }
 }
+

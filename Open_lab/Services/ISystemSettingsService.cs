@@ -11,7 +11,10 @@ namespace Open_lab.Services
         public double ReportMarginTop { get; init; } = 1.5;
         public double ReportMarginBottom { get; init; } = 1.5;
         public string ReportPrimaryColor { get; init; } = "#2B2B2B";
-        public string DefaultPrinterName { get; init; } = "Microsoft Print to PDF";
+        public string ReportPrinterName { get; init; } = "Microsoft Print to PDF";
+        public string ReceiptPrinterName { get; init; } = "Microsoft Print to PDF";
+        public string BarcodePrinterName { get; init; } = "Microsoft Print to PDF";
+        public string EnvelopePrinterName { get; init; } = "Microsoft Print to PDF";
         public string ReceiptHeaderText { get; init; } = "إيصال مختبر";
         public string ReceiptFooterText { get; init; } = "شكراً لتعاملكم";
         public bool ReceiptShowLogo { get; init; } = false;

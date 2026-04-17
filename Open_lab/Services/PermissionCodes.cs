@@ -22,6 +22,10 @@ namespace Open_lab.Services
         public const string UsersEdit = "Users.Edit";
         public const string StatisticsView = "Statistics.View";
         public const string BackupRestore = "Backup.Restore";
+        public const string DeliveryView = "Delivery.View";
+        public const string DeliveryEdit = "Delivery.Edit";
+        public const string ConstantsView = "Constants.View";
+        public const string ConstantsEdit = "Constants.Edit";
 
         public static readonly IReadOnlyList<string> All = new List<string>
         {
@@ -42,7 +46,11 @@ namespace Open_lab.Services
             UsersView,
             UsersEdit,
             StatisticsView,
-            BackupRestore
+            BackupRestore,
+            DeliveryView,
+            DeliveryEdit,
+            ConstantsView,
+            ConstantsEdit
         };
     }
 }

@@ -27,6 +27,7 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
                 <TextBlock Grid.Row="0" Grid.Column="0" Text="رأس التقرير" Margin="0,4" VerticalAlignment="Center" />
@@ -41,17 +42,26 @@
 
                 <TextBlock Grid.Row="2" Grid.Column="0" Text="اللون الأساسي" Margin="0,4" VerticalAlignment="Center" />
                 <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding ReportPrimaryColor, UpdateSourceTrigger=PropertyChanged}" Margin="0,4" />
-                <TextBlock Grid.Row="2" Grid.Column="2" Text="الطابعة الافتراضية" Margin="10,4,0,4" VerticalAlignment="Center" />
-                <TextBox Grid.Row="2" Grid.Column="3" Text="{Binding DefaultPrinterName, UpdateSourceTrigger=PropertyChanged}" Margin="0,4" />
+                <TextBlock Grid.Row="2" Grid.Column="2" Text="طابعة التقرير" Margin="10,4,0,4" VerticalAlignment="Center" />
+                <TextBox Grid.Row="2" Grid.Column="3" Text="{Binding ReportPrinterName, UpdateSourceTrigger=PropertyChanged}" Margin="0,4" />
 
-                <TextBlock Grid.Row="3" Grid.Column="0" Text="رأس الإيصال" Margin="0,4" VerticalAlignment="Center" />
-                <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding ReceiptHeaderText, UpdateSourceTrigger=PropertyChanged}" Margin="0,4" />
-                <TextBlock Grid.Row="3" Grid.Column="2" Text="ذيل الإيصال" Margin="10,4,0,4" VerticalAlignment="Center" />
-                <TextBox Grid.Row="3" Grid.Column="3" Text="{Binding ReceiptFooterText, UpdateSourceTrigger=PropertyChanged}" Margin="0,4" />
+                <TextBlock Grid.Row="3" Grid.Column="0" Text="طابعة الإيصال" Margin="0,4" VerticalAlignment="Center" />
+                <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding ReceiptPrinterName, UpdateSourceTrigger=PropertyChanged}" Margin="0,4" />
+                <TextBlock Grid.Row="3" Grid.Column="2" Text="طابعة الباركود" Margin="10,4,0,4" VerticalAlignment="Center" />
+                <TextBox Grid.Row="3" Grid.Column="3" Text="{Binding BarcodePrinterName, UpdateSourceTrigger=PropertyChanged}" Margin="0,4" />
 
-                <TextBlock Grid.Row="4" Grid.Column="0" Text="عدد نسخ الإيصال" Margin="0,4" VerticalAlignment="Center" />
-                <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding ReceiptCopies, UpdateSourceTrigger=PropertyChanged}" Margin="0,4" />
-                <CheckBox Grid.Row="4" Grid.Column="3" Content="إظهار الشعار في الإيصال" IsChecked="{Binding ReceiptShowLogo}" Margin="0,4" VerticalAlignment="Center" />
+                <TextBlock Grid.Row="4" Grid.Column="0" Text="طابعة الظرف" Margin="0,4" VerticalAlignment="Center" />
+                <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding EnvelopePrinterName, UpdateSourceTrigger=PropertyChanged}" Margin="0,4" />
+                <TextBlock Grid.Row="4" Grid.Column="2" Text="رأس الإيصال" Margin="10,4,0,4" VerticalAlignment="Center" />
+                <TextBox Grid.Row="4" Grid.Column="3" Text="{Binding ReceiptHeaderText, UpdateSourceTrigger=PropertyChanged}" Margin="0,4" />
+
+                <TextBlock Grid.Row="5" Grid.Column="0" Text="ذيل الإيصال" Margin="0,4" VerticalAlignment="Center" />
+                <TextBox Grid.Row="5" Grid.Column="1" Text="{Binding ReceiptFooterText, UpdateSourceTrigger=PropertyChanged}" Margin="0,4" />
+                <TextBlock Grid.Row="5" Grid.Column="2" Text="عدد نسخ الإيصال" Margin="10,4,0,4" VerticalAlignment="Center" />
+                <StackPanel Grid.Row="5" Grid.Column="3" Orientation="Horizontal">
+                    <TextBox Width="90" Text="{Binding ReceiptCopies, UpdateSourceTrigger=PropertyChanged}" Margin="0,4,8,4" />
+                    <CheckBox Content="إظهار الشعار" IsChecked="{Binding ReceiptShowLogo}" VerticalAlignment="Center" />
+                </StackPanel>
             </Grid>
         </GroupBox>
 

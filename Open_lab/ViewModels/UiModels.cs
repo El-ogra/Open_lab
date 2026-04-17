@@ -147,4 +147,18 @@ namespace Open_lab.ViewModels
             set => SetProperty(ref _comment, value);
         }
     }
+    public class DeliveryVisitRow
+    {
+        public int VisitId { get; set; }
+        public string LabId { get; set; } = string.Empty;
+        public string PatientName { get; set; } = string.Empty;
+        public DateTime VisitDate { get; set; }
+        public string? VisitStatus { get; set; }
+        public int TestsCount { get; set; }
+        public int VerifiedCount { get; set; }
+        public int DeliveredCount { get; set; }
+        public decimal Balance { get; set; }
+        public bool IsReadyForDelivery { get; set; }
+        public bool IsDelivered { get; set; }
+    }
 }

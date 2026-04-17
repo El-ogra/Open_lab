@@ -18,7 +18,10 @@ namespace Open_lab.ViewModels
         private double _reportMarginTop = 1.5;
         private double _reportMarginBottom = 1.5;
         private string _reportPrimaryColor = "#2B2B2B";
-        private string _defaultPrinterName = "Microsoft Print to PDF";
+        private string _reportPrinterName = "Microsoft Print to PDF";
+        private string _receiptPrinterName = "Microsoft Print to PDF";
+        private string _barcodePrinterName = "Microsoft Print to PDF";
+        private string _envelopePrinterName = "Microsoft Print to PDF";
         private string _receiptHeaderText = "إيصال مختبر";
         private string _receiptFooterText = "شكراً لتعاملكم";
         private bool _receiptShowLogo;
@@ -70,10 +73,28 @@ namespace Open_lab.ViewModels
             set => SetProperty(ref _reportPrimaryColor, value);
         }
 
-        public string DefaultPrinterName
+        public string ReportPrinterName
         {
-            get => _defaultPrinterName;
-            set => SetProperty(ref _defaultPrinterName, value);
+            get => _reportPrinterName;
+            set => SetProperty(ref _reportPrinterName, value);
+        }
+
+        public string ReceiptPrinterName
+        {
+            get => _receiptPrinterName;
+            set => SetProperty(ref _receiptPrinterName, value);
+        }
+
+        public string BarcodePrinterName
+        {
+            get => _barcodePrinterName;
+            set => SetProperty(ref _barcodePrinterName, value);
+        }
+
+        public string EnvelopePrinterName
+        {
+            get => _envelopePrinterName;
+            set => SetProperty(ref _envelopePrinterName, value);
         }
 
         public string ReceiptHeaderText
@@ -151,7 +172,10 @@ namespace Open_lab.ViewModels
                 ReportMarginTop = profile.ReportMarginTop;
                 ReportMarginBottom = profile.ReportMarginBottom;
                 ReportPrimaryColor = profile.ReportPrimaryColor;
-                DefaultPrinterName = profile.DefaultPrinterName;
+                ReportPrinterName = profile.ReportPrinterName;
+                ReceiptPrinterName = profile.ReceiptPrinterName;
+                BarcodePrinterName = profile.BarcodePrinterName;
+                EnvelopePrinterName = profile.EnvelopePrinterName;
                 ReceiptHeaderText = profile.ReceiptHeaderText;
                 ReceiptFooterText = profile.ReceiptFooterText;
                 ReceiptShowLogo = profile.ReceiptShowLogo;
@@ -186,7 +210,10 @@ namespace Open_lab.ViewModels
                     ReportMarginTop = ReportMarginTop,
                     ReportMarginBottom = ReportMarginBottom,
                     ReportPrimaryColor = ReportPrimaryColor,
-                    DefaultPrinterName = DefaultPrinterName,
+                    ReportPrinterName = ReportPrinterName,
+                    ReceiptPrinterName = ReceiptPrinterName,
+                    BarcodePrinterName = BarcodePrinterName,
+                    EnvelopePrinterName = EnvelopePrinterName,
                     ReceiptHeaderText = ReceiptHeaderText,
                     ReceiptFooterText = ReceiptFooterText,
                     ReceiptShowLogo = ReceiptShowLogo,

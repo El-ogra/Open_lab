@@ -80,6 +80,9 @@
         <DataTemplate DataType="{x:Type vm:AccountsTreasuryViewModel}">
             <views:AccountsTreasuryView />
         </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:DeliveryViewModel}">
+            <views:DeliveryView />
+        </DataTemplate>
         <DataTemplate DataType="{x:Type vm:SampleCollectionViewModel}">
             <views:SampleCollectionView />
         </DataTemplate>
@@ -94,6 +97,9 @@
         </DataTemplate>
         <DataTemplate DataType="{x:Type vm:BlankReportViewModel}">
             <views:BlankReportView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:ConstantsViewModel}">
+            <views:ConstantsView />
         </DataTemplate>
     </Application.Resources>
 </Application>

@@ -41,11 +41,13 @@ namespace Open_lab.ViewModels
                 NavigationTarget.BackupRestore => new BackupRestoreViewModel(CreateBackupRestoreService()),
                 NavigationTarget.AttendanceLog => new AttendanceLogViewModel(CreateAttendanceService()),
                 NavigationTarget.AccountsTreasury => new AccountsTreasuryViewModel(CreateAccountsTreasuryService(), CreatePrintService()),
+                NavigationTarget.Delivery => new DeliveryViewModel(CreateDeliveryService()),
                 NavigationTarget.SampleCollection => new SampleCollectionViewModel(CreateSampleCollectionService()),
                 NavigationTarget.CultureSensitivity => new CultureSensitivityViewModel(CreateCultureSensitivityService()),
                 NavigationTarget.ReceiptPrinting => new ReceiptPrintingViewModel(CreateReceiptService(), CreatePrintService(), CreateBarcodeService()),
                 NavigationTarget.CombinedReport => new CombinedReportViewModel(CreateReportService()),
                 NavigationTarget.BlankReport => new BlankReportViewModel(CreateReportService()),
+                NavigationTarget.Constants => new ConstantsViewModel(CreateConstantsService()),
                 _ => throw new ArgumentOutOfRangeException(nameof(target), target, "Unsupported navigation target.")
             };
         }
@@ -85,9 +87,11 @@ namespace Open_lab.ViewModels
         private ISystemSettingsService CreateSystemSettingsService() => new SystemSettingsService(_dbFactory());
         private IBackupRestoreService CreateBackupRestoreService() => new BackupRestoreService(_dbFactory());
         private IAccountsTreasuryService CreateAccountsTreasuryService() => new AccountsTreasuryService(_dbFactory());
+        private IDeliveryService CreateDeliveryService() => new DeliveryService(_dbFactory());
         private ISampleCollectionService CreateSampleCollectionService() => new SampleCollectionService(_dbFactory());
         private ICultureSensitivityService CreateCultureSensitivityService() => new CultureSensitivityService(_dbFactory());
         private IReceiptService CreateReceiptService() => new ReceiptService(_dbFactory());
+        private IConstantsService CreateConstantsService() => new ConstantsService(_dbFactory());
         private IUserPreferenceService CreateUserPreferenceService() => new UserPreferenceService();
         private IPrintService CreatePrintService() => new PrintService();
         private IBarcodeService CreateBarcodeService() => new BarcodeService();

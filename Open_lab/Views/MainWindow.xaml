@@ -51,6 +51,7 @@
                 <TextBlock Text="العمليات" Foreground="White" Margin="16,12,16,4" />
                 <Button Content="سجل الحضور" Margin="12,4" Command="{Binding NavigateAttendanceLogCommand}" />
                 <Button Content="الخزينة" Margin="12,4" Command="{Binding NavigateAccountsTreasuryCommand}" />
+                <Button Content="تسليم النتائج" Margin="12,4" Command="{Binding NavigateDeliveryCommand}" />
                 <Button Content="سحب العينات" Margin="12,4" Command="{Binding NavigateSampleCollectionCommand}" />
 
                 <TextBlock Text="الإدارة" Foreground="White" Margin="16,12,16,4" />
@@ -58,6 +59,7 @@
                 <Button Content="الإحصائيات" Margin="12,4" Command="{Binding NavigateStatisticsCommand}" />
                 <Button Content="إعدادات النظام" Margin="12,4" Command="{Binding NavigateSystemSettingsCommand}" />
                 <Button Content="نسخ احتياطي واستعادة" Margin="12,4" Command="{Binding NavigateBackupRestoreCommand}" />
+                <Button Content="الثوابت والمعادلات" Margin="12,4" Command="{Binding NavigateConstantsCommand}" />
                 <Button Content="خروج" Margin="12,16" Command="{Binding LogoutCommand}" />
             </StackPanel>
         </ScrollViewer>

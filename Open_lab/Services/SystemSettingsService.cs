@@ -16,7 +16,10 @@ namespace Open_lab.Services
         private const string ReportMarginTopKey = "Report.MarginTop";
         private const string ReportMarginBottomKey = "Report.MarginBottom";
         private const string ReportPrimaryColorKey = "Report.PrimaryColor";
-        private const string PrinterDefaultKey = "Printer.Default";
+        private const string PrinterReportKey = "Printer.Report";
+        private const string PrinterReceiptKey = "Printer.Receipt";
+        private const string PrinterBarcodeKey = "Printer.Barcode";
+        private const string PrinterEnvelopeKey = "Printer.Envelope";
         private const string ReceiptHeaderKey = "Receipt.Header";
         private const string ReceiptFooterKey = "Receipt.Footer";
         private const string ReceiptShowLogoKey = "Receipt.ShowLogo";
@@ -72,7 +75,10 @@ namespace Open_lab.Services
                     s.Key == ReportMarginTopKey ||
                     s.Key == ReportMarginBottomKey ||
                     s.Key == ReportPrimaryColorKey ||
-                    s.Key == PrinterDefaultKey ||
+                    s.Key == PrinterReportKey ||
+                    s.Key == PrinterReceiptKey ||
+                    s.Key == PrinterBarcodeKey ||
+                    s.Key == PrinterEnvelopeKey ||
                     s.Key == ReceiptHeaderKey ||
                     s.Key == ReceiptFooterKey ||
                     s.Key == ReceiptShowLogoKey ||
@@ -86,7 +92,10 @@ namespace Open_lab.Services
                 ReportMarginTop = ParseDouble(GetValue(dictionary, ReportMarginTopKey, "1.5"), 1.5),
                 ReportMarginBottom = ParseDouble(GetValue(dictionary, ReportMarginBottomKey, "1.5"), 1.5),
                 ReportPrimaryColor = GetValue(dictionary, ReportPrimaryColorKey, "#2B2B2B"),
-                DefaultPrinterName = GetValue(dictionary, PrinterDefaultKey, "Microsoft Print to PDF"),
+                ReportPrinterName = GetValue(dictionary, PrinterReportKey, "Microsoft Print to PDF"),
+                ReceiptPrinterName = GetValue(dictionary, PrinterReceiptKey, "Microsoft Print to PDF"),
+                BarcodePrinterName = GetValue(dictionary, PrinterBarcodeKey, "Microsoft Print to PDF"),
+                EnvelopePrinterName = GetValue(dictionary, PrinterEnvelopeKey, "Microsoft Print to PDF"),
                 ReceiptHeaderText = GetValue(dictionary, ReceiptHeaderKey, "إيصال مختبر"),
                 ReceiptFooterText = GetValue(dictionary, ReceiptFooterKey, "شكراً لتعاملكم"),
                 ReceiptShowLogo = ParseBool(GetValue(dictionary, ReceiptShowLogoKey, "false")),
@@ -101,7 +110,10 @@ namespace Open_lab.Services
             await SaveSettingAsync(ReportMarginTopKey, profile.ReportMarginTop.ToString(CultureInfo.InvariantCulture));
             await SaveSettingAsync(ReportMarginBottomKey, profile.ReportMarginBottom.ToString(CultureInfo.InvariantCulture));
             await SaveSettingAsync(ReportPrimaryColorKey, profile.ReportPrimaryColor);
-            await SaveSettingAsync(PrinterDefaultKey, profile.DefaultPrinterName);
+            await SaveSettingAsync(PrinterReportKey, profile.ReportPrinterName);
+            await SaveSettingAsync(PrinterReceiptKey, profile.ReceiptPrinterName);
+            await SaveSettingAsync(PrinterBarcodeKey, profile.BarcodePrinterName);
+            await SaveSettingAsync(PrinterEnvelopeKey, profile.EnvelopePrinterName);
             await SaveSettingAsync(ReceiptHeaderKey, profile.ReceiptHeaderText);
             await SaveSettingAsync(ReceiptFooterKey, profile.ReceiptFooterText);
             await SaveSettingAsync(ReceiptShowLogoKey, profile.ReceiptShowLogo ? "true" : "false");

@@ -40,11 +40,13 @@ namespace Open_lab.ViewModels
             NavigateBackupRestoreCommand = new RelayCommand(_ => NavigateTo(NavigationTarget.BackupRestore), _ => CanNavigate(PermissionCodes.BackupRestore));
             NavigateAttendanceLogCommand = new RelayCommand(_ => NavigateTo(NavigationTarget.AttendanceLog), _ => CanNavigate(PermissionCodes.UsersView));
             NavigateAccountsTreasuryCommand = new RelayCommand(_ => NavigateTo(NavigationTarget.AccountsTreasury), _ => CanNavigate(PermissionCodes.AccountsView));
+            NavigateDeliveryCommand = new RelayCommand(_ => NavigateTo(NavigationTarget.Delivery), _ => CanNavigate(PermissionCodes.DeliveryView));
             NavigateSampleCollectionCommand = new RelayCommand(_ => NavigateTo(NavigationTarget.SampleCollection), _ => CanNavigate(PermissionCodes.TestsView));
             NavigateCultureSensitivityCommand = new RelayCommand(_ => NavigateTo(NavigationTarget.CultureSensitivity), _ => CanNavigate(PermissionCodes.TestsView));
             NavigateReceiptPrintingCommand = new RelayCommand(_ => NavigateTo(NavigationTarget.ReceiptPrinting), _ => CanNavigate(PermissionCodes.AccountsView));
             NavigateCombinedReportCommand = new RelayCommand(_ => NavigateTo(NavigationTarget.CombinedReport), _ => CanNavigate(PermissionCodes.ReportsView));
             NavigateBlankReportCommand = new RelayCommand(_ => NavigateTo(NavigationTarget.BlankReport), _ => CanNavigate(PermissionCodes.ReportsView));
+            NavigateConstantsCommand = new RelayCommand(_ => NavigateTo(NavigationTarget.Constants), _ => CanNavigate(PermissionCodes.ConstantsView));
 
             LogoutCommand = new RelayCommand(async _ => await LogoutAsync(), _ => IsLoggedIn);
 
@@ -87,11 +89,13 @@ namespace Open_lab.ViewModels
         public ICommand NavigateBackupRestoreCommand { get; }
         public ICommand NavigateAttendanceLogCommand { get; }
         public ICommand NavigateAccountsTreasuryCommand { get; }
+        public ICommand NavigateDeliveryCommand { get; }
         public ICommand NavigateSampleCollectionCommand { get; }
         public ICommand NavigateCultureSensitivityCommand { get; }
         public ICommand NavigateReceiptPrintingCommand { get; }
         public ICommand NavigateCombinedReportCommand { get; }
         public ICommand NavigateBlankReportCommand { get; }
+        public ICommand NavigateConstantsCommand { get; }
         public ICommand LogoutCommand { get; }
 
         private void ShowLogin()
@@ -176,11 +180,13 @@ namespace Open_lab.ViewModels
             (NavigateBackupRestoreCommand as RelayCommand)?.RaiseCanExecuteChanged();
             (NavigateAttendanceLogCommand as RelayCommand)?.RaiseCanExecuteChanged();
             (NavigateAccountsTreasuryCommand as RelayCommand)?.RaiseCanExecuteChanged();
+            (NavigateDeliveryCommand as RelayCommand)?.RaiseCanExecuteChanged();
             (NavigateSampleCollectionCommand as RelayCommand)?.RaiseCanExecuteChanged();
             (NavigateCultureSensitivityCommand as RelayCommand)?.RaiseCanExecuteChanged();
             (NavigateReceiptPrintingCommand as RelayCommand)?.RaiseCanExecuteChanged();
             (NavigateCombinedReportCommand as RelayCommand)?.RaiseCanExecuteChanged();
             (NavigateBlankReportCommand as RelayCommand)?.RaiseCanExecuteChanged();
+            (NavigateConstantsCommand as RelayCommand)?.RaiseCanExecuteChanged();
             (LogoutCommand as RelayCommand)?.RaiseCanExecuteChanged();
         }
     }
