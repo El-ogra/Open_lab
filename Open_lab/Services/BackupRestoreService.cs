@@ -1,7 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.Data;
-using System.Data.Common;
 using Microsoft.Data.SqlClient;
+using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Open_lab.Data;
@@ -54,6 +56,24 @@ ALTER DATABASE [OpenLab] SET MULTI_USER;";
             command.Parameters.Add(new SqlParameter("@path", SqlDbType.NVarChar, 4000) { Value = restorePath });
             await command.ExecuteNonQueryAsync();
         }
+
+        public Task<List<string>> ListBackupsAsync(string directoryPath)
+        {
+            if (string.IsNullOrWhiteSpace(directoryPath))
+            {
+                return Task.FromResult(new List<string>());
+            }
+
+            if (!Directory.Exists(directoryPath))
+            {
+                return Task.FromResult(new List<string>());
+            }
+
+            var files = Directory.GetFiles(directoryPath, "*.bak", SearchOption.TopDirectoryOnly)
+                .OrderByDescending(File.GetLastWriteTime)
+                .ToList();
+
+            return Task.FromResult(files);
+        }
     }
 }
-

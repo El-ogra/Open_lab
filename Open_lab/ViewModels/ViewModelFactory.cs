@@ -32,7 +32,7 @@ namespace Open_lab.ViewModels
                 NavigationTarget.TestCatalog => new TestCatalogViewModel(CreateTestCatalogService(), CreateBarcodeService()),
                 NavigationTarget.ReferenceRanges => new ReferenceRangesViewModel(CreateTestCatalogService()),
                 NavigationTarget.TestComments => new TestCommentsViewModel(CreateTestCatalogService()),
-                NavigationTarget.PriceLists => new PriceListsViewModel(CreateTestCatalogService()),
+                NavigationTarget.PriceLists => new PriceListsViewModel(CreateTestCatalogService(), CreatePrintService()),
                 NavigationTarget.CustomGroups => new CustomGroupsViewModel(CreateTestCatalogService()),
                 NavigationTarget.Referrals => new ReferralsViewModel(CreateTestCatalogService()),
                 NavigationTarget.UsersPermissions => new UsersPermissionsViewModel(CreateUserAdminService()),
@@ -64,6 +64,7 @@ namespace Open_lab.ViewModels
                 CreateAuthorizationService(),
                 CreateAdminSetupService(),
                 CreateAttendanceService(),
+                CreateUserPreferenceService(),
                 onLoginSuccess);
         }
 
@@ -87,6 +88,7 @@ namespace Open_lab.ViewModels
         private ISampleCollectionService CreateSampleCollectionService() => new SampleCollectionService(_dbFactory());
         private ICultureSensitivityService CreateCultureSensitivityService() => new CultureSensitivityService(_dbFactory());
         private IReceiptService CreateReceiptService() => new ReceiptService(_dbFactory());
+        private IUserPreferenceService CreateUserPreferenceService() => new UserPreferenceService();
         private IPrintService CreatePrintService() => new PrintService();
         private IBarcodeService CreateBarcodeService() => new BarcodeService();
     }

@@ -10,6 +10,7 @@ namespace Open_lab.ViewModels
     public class PriceListsViewModel : BaseViewModel
     {
         private readonly ITestCatalogService _testCatalogService;
+        private readonly IPrintService _printService;
         private string _listName = string.Empty;
         private bool _isDefault;
         private Referral? _selectedReferral;
@@ -19,9 +20,10 @@ namespace Open_lab.ViewModels
         private decimal _price;
         private string _statusMessage = string.Empty;
 
-        public PriceListsViewModel(ITestCatalogService testCatalogService)
+        public PriceListsViewModel(ITestCatalogService testCatalogService, IPrintService printService)
         {
             _testCatalogService = testCatalogService;
+            _printService = printService;
             PriceLists = new ObservableCollection<PriceList>();
             Items = new ObservableCollection<PriceListItem>();
             Tests = new ObservableCollection<Test>();
@@ -33,6 +35,7 @@ namespace Open_lab.ViewModels
             AddItemCommand = new RelayCommand(async _ => await AddItemAsync(), _ => AppSession.HasPermission(PermissionCodes.TestsEdit) && SelectedPriceList != null && SelectedTest != null);
             UpdateItemCommand = new RelayCommand(async _ => await UpdateItemAsync(), _ => AppSession.HasPermission(PermissionCodes.TestsEdit) && SelectedItem != null);
             DeleteItemCommand = new RelayCommand(async _ => await DeleteItemAsync(), _ => AppSession.HasPermission(PermissionCodes.TestsEdit) && SelectedItem != null);
+            PrintListCommand = new RelayCommand(async _ => await PrintListAsync(), _ => AppSession.HasPermission(PermissionCodes.TestsView) && SelectedPriceList != null && Items.Count > 0);
 
             _ = LoadAsync();
         }
@@ -77,6 +80,7 @@ namespace Open_lab.ViewModels
 
                     (AddItemCommand as RelayCommand)?.RaiseCanExecuteChanged();
                     (UpdateListCommand as RelayCommand)?.RaiseCanExecuteChanged();
+                    (PrintListCommand as RelayCommand)?.RaiseCanExecuteChanged();
                     _ = LoadItemsAsync();
                 }
             }
@@ -135,6 +139,7 @@ namespace Open_lab.ViewModels
         public ICommand AddItemCommand { get; }
         public ICommand UpdateItemCommand { get; }
         public ICommand DeleteItemCommand { get; }
+        public ICommand PrintListCommand { get; }
 
         private async Task LoadAsync()
         {
@@ -164,6 +169,8 @@ namespace Open_lab.ViewModels
             {
                 await LoadItemsAsync();
             }
+
+            (PrintListCommand as RelayCommand)?.RaiseCanExecuteChanged();
         }
 
         private async Task LoadItemsAsync()
@@ -171,6 +178,7 @@ namespace Open_lab.ViewModels
             Items.Clear();
             if (SelectedPriceList == null)
             {
+                (PrintListCommand as RelayCommand)?.RaiseCanExecuteChanged();
                 return;
             }
 
@@ -179,6 +187,8 @@ namespace Open_lab.ViewModels
             {
                 Items.Add(item);
             }
+
+            (PrintListCommand as RelayCommand)?.RaiseCanExecuteChanged();
         }
 
         private async Task SaveListAsync()
@@ -253,6 +263,7 @@ namespace Open_lab.ViewModels
 
                 item.Test = SelectedTest;
                 Items.Add(item);
+                (PrintListCommand as RelayCommand)?.RaiseCanExecuteChanged();
                 StatusMessage = "تمت إضافة عنصر التسعير.";
             }
             catch (Exception ex)
@@ -298,7 +309,41 @@ namespace Open_lab.ViewModels
                 await _testCatalogService.DeletePriceListItemAsync(SelectedItem.PriceListItemId);
                 Items.Remove(SelectedItem);
                 SelectedItem = null;
+                (PrintListCommand as RelayCommand)?.RaiseCanExecuteChanged();
                 StatusMessage = "تم حذف عنصر التسعير.";
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = $"خطأ: {ex.Message}";
+            }
+        }
+
+        private async Task PrintListAsync()
+        {
+            if (SelectedPriceList == null)
+            {
+                return;
+            }
+
+            try
+            {
+                var lines = new ObservableCollection<string>
+                {
+                    $"اسم القائمة: {SelectedPriceList.Name}",
+                    $"الجهة: {SelectedReferral?.Name ?? "عام (بدون جهة)"}",
+                    $"افتراضية: {(SelectedPriceList.IsDefault ? "نعم" : "لا")}",
+                    string.Empty,
+                    "العناصر:"
+                };
+
+                foreach (var item in Items)
+                {
+                    var testName = item.Test?.NameReport ?? item.Test?.NameReceipt ?? $"Test#{item.TestId}";
+                    lines.Add($"- {testName}: {item.Price:N2}");
+                }
+
+                await _printService.PrintTextReportAsync("قائمة الأسعار", lines, $"PriceList_{SelectedPriceList.PriceListId}");
+                StatusMessage = "تم إرسال قائمة الأسعار للطباعة.";
             }
             catch (Exception ex)
             {

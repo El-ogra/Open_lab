@@ -8,6 +8,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
@@ -27,6 +28,17 @@
             </StackPanel>
         </GroupBox>
 
-        <TextBlock Grid.Row="2" Text="{Binding StatusMessage}" Foreground="DarkGreen" Margin="0,12,0,0" />
+        <GroupBox Header="قائمة النسخ الاحتياطية" Grid.Row="2" Margin="0,12,0,0">
+            <Grid Margin="8">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <Button Content="تحديث القائمة" Width="120" Command="{Binding LoadBackupsCommand}" />
+                <ListBox Grid.Row="1" ItemsSource="{Binding BackupFiles}" SelectedItem="{Binding SelectedBackupFile}" Margin="0,8,0,0" />
+            </Grid>
+        </GroupBox>
+
+        <TextBlock Grid.Row="3" Text="{Binding StatusMessage}" Foreground="DarkGreen" Margin="0,12,0,0" TextWrapping="Wrap" />
     </Grid>
 </UserControl>

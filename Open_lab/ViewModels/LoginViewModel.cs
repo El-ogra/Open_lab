@@ -12,10 +12,12 @@ namespace Open_lab.ViewModels
         private readonly IAuthorizationService _authorizationService;
         private readonly IAdminSetupService _adminSetupService;
         private readonly IAttendanceService _attendanceService;
+        private readonly IUserPreferenceService _userPreferenceService;
         private readonly Action _onLoginSuccess;
         private string _username = string.Empty;
         private string _password = string.Empty;
         private string _statusMessage = string.Empty;
+        private bool _rememberMe;
         private bool _isBusy;
 
         public LoginViewModel(
@@ -23,13 +25,23 @@ namespace Open_lab.ViewModels
             IAuthorizationService authorizationService,
             IAdminSetupService adminSetupService,
             IAttendanceService attendanceService,
+            IUserPreferenceService userPreferenceService,
             Action onLoginSuccess)
         {
             _authService = authService;
             _authorizationService = authorizationService;
             _adminSetupService = adminSetupService;
             _attendanceService = attendanceService;
+            _userPreferenceService = userPreferenceService;
             _onLoginSuccess = onLoginSuccess;
+
+            var rememberedUsername = _userPreferenceService.GetRememberedUsername();
+            if (!string.IsNullOrWhiteSpace(rememberedUsername))
+            {
+                _username = rememberedUsername;
+                _rememberMe = true;
+            }
+
             LoginCommand = new RelayCommand(async _ => await LoginAsync(), _ => !IsBusy);
         }
 
@@ -43,6 +55,12 @@ namespace Open_lab.ViewModels
         {
             get => _password;
             set => SetProperty(ref _password, value);
+        }
+
+        public bool RememberMe
+        {
+            get => _rememberMe;
+            set => SetProperty(ref _rememberMe, value);
         }
 
         public string StatusMessage
@@ -95,6 +113,15 @@ namespace Open_lab.ViewModels
                 AppSession.Username = user.Username;
                 AppSession.SetPermissions(permissionCodes);
                 AppSession.IsAdmin = permissionCodes.Contains(PermissionCodes.FullAccess, StringComparer.OrdinalIgnoreCase);
+
+                if (RememberMe)
+                {
+                    _userPreferenceService.SetRememberedUsername(user.Username);
+                }
+                else
+                {
+                    _userPreferenceService.SetRememberedUsername(null);
+                }
 
                 var attendance = await _attendanceService.CreateLoginAsync(user.UserId, "تسجيل دخول");
                 AppSession.AttendanceLogId = attendance.AttendanceLogId;

@@ -18,9 +18,9 @@ namespace Open_lab.ViewModels
         {
             _sampleCollectionService = sampleCollectionService;
             Items = new ObservableCollection<SampleCollectionRow>();
-            LoadCommand = new RelayCommand(async _ => await LoadAsync());
-            MarkCollectedCommand = new RelayCommand(async _ => await MarkCollectedAsync(), _ => SelectedRow != null);
-            MarkNotCollectedCommand = new RelayCommand(async _ => await MarkNotCollectedAsync(), _ => SelectedRow != null);
+            LoadCommand = new RelayCommand(async _ => await LoadAsync(), _ => AppSession.HasPermission(PermissionCodes.TestsView));
+            MarkCollectedCommand = new RelayCommand(async _ => await MarkCollectedAsync(), _ => AppSession.HasPermission(PermissionCodes.TestsEdit) && SelectedRow != null);
+            MarkNotCollectedCommand = new RelayCommand(async _ => await MarkNotCollectedAsync(), _ => AppSession.HasPermission(PermissionCodes.TestsEdit) && SelectedRow != null);
         }
 
         public DateTime DateFrom
