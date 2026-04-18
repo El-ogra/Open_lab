@@ -102,12 +102,40 @@ namespace Open_lab.ViewModels
         {
             AppSession.Clear();
             IsLoggedIn = false;
+            
+            var window = System.Windows.Application.Current.MainWindow;
+            if (window != null)
+            {
+                window.Width = 400;
+                window.Height = 550;
+                window.ResizeMode = System.Windows.ResizeMode.NoResize;
+                
+                double screenWidth = System.Windows.SystemParameters.PrimaryScreenWidth;
+                double screenHeight = System.Windows.SystemParameters.PrimaryScreenHeight;
+                window.Left = (screenWidth - window.Width) / 2;
+                window.Top = (screenHeight - window.Height) / 2;
+            }
+
             _navigationService.Navigate(NavigationTarget.Login, () => _ = OnLoginSuccessAsync());
         }
 
         private async Task OnLoginSuccessAsync()
         {
             IsLoggedIn = true;
+            
+            var window = System.Windows.Application.Current.MainWindow;
+            if (window != null)
+            {
+                window.Width = 1100;
+                window.Height = 700;
+                window.ResizeMode = System.Windows.ResizeMode.CanResize;
+                
+                double screenWidth = System.Windows.SystemParameters.PrimaryScreenWidth;
+                double screenHeight = System.Windows.SystemParameters.PrimaryScreenHeight;
+                window.Left = (screenWidth - window.Width) / 2;
+                window.Top = (screenHeight - window.Height) / 2;
+            }
+
             NavigateTo(NavigationTarget.Dashboard);
             await Task.CompletedTask;
         }

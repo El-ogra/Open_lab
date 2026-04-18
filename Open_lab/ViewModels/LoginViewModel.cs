@@ -19,6 +19,7 @@ namespace Open_lab.ViewModels
         private string _statusMessage = string.Empty;
         private bool _rememberMe;
         private bool _isBusy;
+        private bool _isPasswordVisible;
 
         public LoginViewModel(
             IAuthService authService,
@@ -43,6 +44,7 @@ namespace Open_lab.ViewModels
             }
 
             LoginCommand = new RelayCommand(async _ => await LoginAsync(), _ => !IsBusy);
+            TogglePasswordVisibilityCommand = new RelayCommand(_ => IsPasswordVisible = !IsPasswordVisible);
         }
 
         public string Username
@@ -69,6 +71,12 @@ namespace Open_lab.ViewModels
             private set => SetProperty(ref _statusMessage, value);
         }
 
+        public bool IsPasswordVisible
+        {
+            get => _isPasswordVisible;
+            set => SetProperty(ref _isPasswordVisible, value);
+        }
+
         public bool IsBusy
         {
             get => _isBusy;
@@ -82,6 +90,7 @@ namespace Open_lab.ViewModels
         }
 
         public ICommand LoginCommand { get; }
+        public ICommand TogglePasswordVisibilityCommand { get; }
 
         private async Task LoginAsync()
         {
