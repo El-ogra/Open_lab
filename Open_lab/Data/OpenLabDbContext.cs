@@ -53,7 +53,9 @@ namespace Open_lab.Data
         public DbSet<ExternalLabQueue> ExternalLabQueues => Set<ExternalLabQueue>();
         public DbSet<ShipmentManifest> ShipmentManifests => Set<ShipmentManifest>();
         public DbSet<ShipmentItem> ShipmentItems => Set<ShipmentItem>();
-        public DbSet<ExternalLabSettlement> ExternalLabSettlements => Set<ExternalLabSettlement>();
+        public DbSet<ExternalLabSettlement> ExternalLabSettlements { get; set; } = null!;
+        public DbSet<Reagent> Reagents { get; set; } = null!;
+        public DbSet<TestConsumption> TestConsumptions { get; set; } = null!;
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -463,6 +465,24 @@ namespace Open_lab.Data
                 entity.HasOne(e => e.Referral)
                     .WithMany(e => e.Settlements)
                     .HasForeignKey(e => e.ReferralId);
+            });
+
+            modelBuilder.Entity<Reagent>(entity =>
+            {
+                entity.HasKey(e => e.ReagentId);
+                entity.Property(e => e.CurrentStock).HasPrecision(18, 2);
+            });
+
+            modelBuilder.Entity<TestConsumption>(entity =>
+            {
+                entity.HasKey(e => e.ConsumptionId);
+                entity.Property(e => e.AmountPerTest).HasPrecision(18, 4);
+                entity.HasOne(e => e.Test)
+                    .WithMany()
+                    .HasForeignKey(e => e.TestId);
+                entity.HasOne(e => e.Reagent)
+                    .WithMany(e => e.Consumptions)
+                    .HasForeignKey(e => e.ReagentId);
             });
         }
     }

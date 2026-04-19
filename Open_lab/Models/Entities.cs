@@ -466,4 +466,25 @@ namespace Open_lab.Models
 
         public Referral Referral { get; set; } = null!;
     }
+
+    public class Reagent
+    {
+        public int ReagentId { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string Unit { get; set; } = string.Empty; // e.g., ml, tests, etc.
+        public decimal CurrentStock { get; set; }
+
+        public ICollection<TestConsumption> Consumptions { get; set; } = new HashSet<TestConsumption>();
+    }
+
+    public class TestConsumption
+    {
+        public int ConsumptionId { get; set; }
+        public int TestId { get; set; }
+        public int ReagentId { get; set; }
+        public decimal AmountPerTest { get; set; }
+
+        public Test Test { get; set; } = null!;
+        public Reagent Reagent { get; set; } = null!;
+    }
 }
