@@ -110,10 +110,30 @@ namespace Open_lab.Models
         public string Name { get; set; } = string.Empty;
         public string? Phone { get; set; }
         public string? City { get; set; }
+        public decimal DiscountPercentage { get; set; }
+        public decimal CommissionPercentage { get; set; }
 
         public ICollection<Visit> Visits { get; set; } = new HashSet<Visit>();
         public ICollection<PriceList> PriceLists { get; set; } = new HashSet<PriceList>();
         public ICollection<ExternalLabSettlement> Settlements { get; set; } = new HashSet<ExternalLabSettlement>();
+        public ICollection<ContractInvoice> ContractInvoices { get; set; } = new HashSet<ContractInvoice>();
+    }
+
+    public class ContractInvoice
+    {
+        public int ContractInvoiceId { get; set; }
+        public int ReferralId { get; set; }
+        public string InvoiceNumber { get; set; } = string.Empty;
+        public DateTime DateFrom { get; set; }
+        public DateTime DateTo { get; set; }
+        public decimal TotalAmount { get; set; }
+        public decimal DiscountAmount { get; set; }
+        public decimal NetAmount { get; set; }
+        public bool IsPaid { get; set; }
+        public DateTime CreatedAt { get; set; }
+
+        public Referral Referral { get; set; } = null!;
+        public ICollection<Invoice> Invoices { get; set; } = new HashSet<Invoice>();
     }
 
     public class Test
@@ -246,6 +266,7 @@ namespace Open_lab.Models
     {
         public int InvoiceId { get; set; }
         public int VisitId { get; set; }
+        public int? ContractInvoiceId { get; set; }
         public decimal Total { get; set; }
         public decimal Discount { get; set; }
         public decimal NetTotal { get; set; }
@@ -256,6 +277,7 @@ namespace Open_lab.Models
 
         public Visit Visit { get; set; } = null!;
         public Branch? Branch { get; set; }
+        public ContractInvoice? ContractInvoice { get; set; }
         public ICollection<Payment> Payments { get; set; } = new HashSet<Payment>();
         public ICollection<AdditionalCharge> AdditionalCharges { get; set; } = new HashSet<AdditionalCharge>();
     }

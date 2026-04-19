@@ -36,6 +36,7 @@ namespace Open_lab.Data
         public DbSet<ResultValue> ResultValues => Set<ResultValue>();
         public DbSet<Invoice> Invoices => Set<Invoice>();
         public DbSet<Payment> Payments => Set<Payment>();
+        public DbSet<ContractInvoice> ContractInvoices => Set<ContractInvoice>();
         public DbSet<PriceList> PriceLists => Set<PriceList>();
         public DbSet<PriceListItem> PriceListItems => Set<PriceListItem>();
         public DbSet<CustomGroup> CustomGroups => Set<CustomGroup>();
@@ -145,6 +146,19 @@ namespace Open_lab.Data
                 entity.HasKey(e => e.ReferralId);
                 entity.Property(e => e.ReferralType).IsRequired();
                 entity.Property(e => e.Name).IsRequired();
+                entity.Property(e => e.DiscountPercentage).HasPrecision(18, 2);
+                entity.Property(e => e.CommissionPercentage).HasPrecision(18, 2);
+            });
+
+            modelBuilder.Entity<ContractInvoice>(entity =>
+            {
+                entity.HasKey(e => e.ContractInvoiceId);
+                entity.HasOne(e => e.Referral)
+                    .WithMany(e => e.ContractInvoices)
+                    .HasForeignKey(e => e.ReferralId);
+                entity.Property(e => e.TotalAmount).HasPrecision(18, 2);
+                entity.Property(e => e.DiscountAmount).HasPrecision(18, 2);
+                entity.Property(e => e.NetAmount).HasPrecision(18, 2);
             });
 
             modelBuilder.Entity<Test>(entity =>
@@ -257,6 +271,9 @@ namespace Open_lab.Data
                 entity.HasOne(e => e.Branch)
                     .WithMany(e => e.Invoices)
                     .HasForeignKey(e => e.BranchId);
+                entity.HasOne(e => e.ContractInvoice)
+                    .WithMany(e => e.Invoices)
+                    .HasForeignKey(e => e.ContractInvoiceId);
             });
 
             modelBuilder.Entity<Payment>(entity =>
