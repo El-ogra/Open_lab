@@ -17,7 +17,7 @@ namespace Open_lab.Data
 
             if (string.IsNullOrWhiteSpace(connectionString))
             {
-                connectionString = "Server=.\\SQLEXPRESS;Database=OpenLab;User ID=sa;Password=og2026ra;TrustServerCertificate=True";
+                connectionString = "Server=.\\SQLEXPRESS;Database=OpenLab;User ID=sa;Password=og2026ra;TrustServerCertificate=True;MultipleActiveResultSets=True;Encrypt=False;Connect Timeout=30";
             }
 
             var optionsBuilder = new DbContextOptionsBuilder<OpenLabDbContext>();
