@@ -118,6 +118,12 @@ namespace Open_lab.Models
         public bool IsRoutine { get; set; }
         public bool IsSendOut { get; set; }
 
+        /// <summary>
+        /// This field defines the order of the test in the final printed report.
+        /// Note: This is different from Parameter.OrderNo which orders internal parameters.
+        /// </summary>
+        public int ReportOrder { get; set; }
+
         public TestGroup? Group { get; set; }
         public SampleType? SampleType { get; set; }
         public Unit? Unit { get; set; }
