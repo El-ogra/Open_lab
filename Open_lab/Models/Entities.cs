@@ -99,6 +99,7 @@ namespace Open_lab.Models
 
         public ICollection<Visit> Visits { get; set; } = new HashSet<Visit>();
         public ICollection<PriceList> PriceLists { get; set; } = new HashSet<PriceList>();
+        public ICollection<ExternalLabSettlement> Settlements { get; set; } = new HashSet<ExternalLabSettlement>();
     }
 
     public class Test
@@ -189,6 +190,7 @@ namespace Open_lab.Models
         public Test Test { get; set; } = null!;
         public ICollection<ResultValue> ResultValues { get; set; } = new HashSet<ResultValue>();
         public SampleCollection? SampleCollection { get; set; }
+        public ExternalLabQueue? ExternalQueueItem { get; set; }
     }
 
     public class TestParameter
@@ -406,5 +408,56 @@ namespace Open_lab.Models
         public int UserId { get; set; }
 
         public User User { get; set; } = null!;
+    }
+
+    public class ExternalLabQueue
+    {
+        public int QueueId { get; set; }
+        public int VisitTestId { get; set; }
+        public int? ReferralId { get; set; } // The target external lab
+        public string Status { get; set; } = "Pending"; // Pending, InManifest, Shipped, Received
+        public DateTime DateQueued { get; set; }
+        public string? ExternalReference { get; set; }
+
+        public VisitTest VisitTest { get; set; } = null!;
+        public Referral? Referral { get; set; }
+        public ShipmentItem? ShipmentItem { get; set; }
+    }
+
+    public class ShipmentManifest
+    {
+        public int ManifestId { get; set; }
+        public string ManifestNumber { get; set; } = string.Empty;
+        public int ReferralId { get; set; }
+        public DateTime DateCreated { get; set; }
+        public DateTime? DateShipped { get; set; }
+        public string Status { get; set; } = "Open"; // Open, Shipped, Cancelled
+        public string? CourierNotes { get; set; }
+
+        public Referral Referral { get; set; } = null!;
+        public ICollection<ShipmentItem> Items { get; set; } = new HashSet<ShipmentItem>();
+    }
+
+    public class ShipmentItem
+    {
+        public int ShipmentItemId { get; set; }
+        public int ManifestId { get; set; }
+        public int QueueId { get; set; }
+
+        public ShipmentManifest Manifest { get; set; } = null!;
+        public ExternalLabQueue QueueItem { get; set; } = null!;
+    }
+
+    public class ExternalLabSettlement
+    {
+        public int SettlementId { get; set; }
+        public int ReferralId { get; set; }
+        public decimal TotalCost { get; set; }
+        public decimal AmountPaid { get; set; }
+        public decimal Balance { get; set; }
+        public DateTime SettlementDate { get; set; }
+        public string? Note { get; set; }
+
+        public Referral Referral { get; set; } = null!;
     }
 }

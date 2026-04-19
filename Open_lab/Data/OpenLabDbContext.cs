@@ -50,6 +50,10 @@ namespace Open_lab.Data
         public DbSet<Branch> Branches => Set<Branch>();
         public DbSet<DoctorCommission> DoctorCommissions => Set<DoctorCommission>();
         public DbSet<Expense> Expenses => Set<Expense>();
+        public DbSet<ExternalLabQueue> ExternalLabQueues => Set<ExternalLabQueue>();
+        public DbSet<ShipmentManifest> ShipmentManifests => Set<ShipmentManifest>();
+        public DbSet<ShipmentItem> ShipmentItems => Set<ShipmentItem>();
+        public DbSet<ExternalLabSettlement> ExternalLabSettlements => Set<ExternalLabSettlement>();
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -411,6 +415,50 @@ namespace Open_lab.Data
                 entity.HasOne(e => e.User)
                     .WithMany()
                     .HasForeignKey(e => e.UserId);
+            });
+
+            modelBuilder.Entity<ExternalLabQueue>(entity =>
+            {
+                entity.HasKey(e => e.QueueId);
+                entity.HasOne(e => e.VisitTest)
+                    .WithOne(e => e.ExternalQueueItem)
+                    .HasForeignKey<ExternalLabQueue>(e => e.VisitTestId);
+                entity.HasOne(e => e.Referral)
+                    .WithMany()
+                    .HasForeignKey(e => e.ReferralId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            modelBuilder.Entity<ShipmentManifest>(entity =>
+            {
+                entity.HasKey(e => e.ManifestId);
+                entity.Property(e => e.ManifestNumber).IsRequired();
+                entity.HasOne(e => e.Referral)
+                    .WithMany()
+                    .HasForeignKey(e => e.ReferralId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            modelBuilder.Entity<ShipmentItem>(entity =>
+            {
+                entity.HasKey(e => e.ShipmentItemId);
+                entity.HasOne(e => e.Manifest)
+                    .WithMany(e => e.Items)
+                    .HasForeignKey(e => e.ManifestId);
+                entity.HasOne(e => e.QueueItem)
+                    .WithOne(e => e.ShipmentItem)
+                    .HasForeignKey<ShipmentItem>(e => e.QueueId);
+            });
+
+            modelBuilder.Entity<ExternalLabSettlement>(entity =>
+            {
+                entity.HasKey(e => e.SettlementId);
+                entity.Property(e => e.TotalCost).HasPrecision(18, 2);
+                entity.Property(e => e.AmountPaid).HasPrecision(18, 2);
+                entity.Property(e => e.Balance).HasPrecision(18, 2);
+                entity.HasOne(e => e.Referral)
+                    .WithMany(e => e.Settlements)
+                    .HasForeignKey(e => e.ReferralId);
             });
         }
     }
