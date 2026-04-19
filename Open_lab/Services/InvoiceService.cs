@@ -140,6 +140,25 @@ namespace Open_lab.Services
             return await _db.VisitTests.Where(vt => vt.VisitId == visitId).SumAsync(vt => vt.Price);
         }
 
+        public Task<List<Invoice>> GetPatientInvoicesByDateAsync(int patientId, DateTime from, DateTime to)
+        {
+            return _db.Invoices.AsNoTracking()
+                .Include(i => i.Visit)
+                .Where(i => i.Visit.PatientId == patientId && i.Visit.VisitDate >= from && i.Visit.VisitDate <= to)
+                .OrderBy(i => i.Visit.VisitDate)
+                .ToListAsync();
+        }
+
+        public Task<List<Payment>> GetPatientPaymentsByDateAsync(int patientId, DateTime from, DateTime to)
+        {
+            return _db.Payments.AsNoTracking()
+                .Include(p => p.Invoice)
+                .ThenInclude(i => i.Visit)
+                .Where(p => p.Invoice.Visit.PatientId == patientId && p.PaymentDate >= from && p.PaymentDate <= to)
+                .OrderBy(p => p.PaymentDate)
+                .ToListAsync();
+        }
+
         private async Task RecalculateInvoiceAsync(int invoiceId, decimal manualPaid)
         {
             var invoice = await _db.Invoices.FirstAsync(i => i.InvoiceId == invoiceId);

@@ -80,9 +80,11 @@ namespace Open_lab.Models
         public string? AccountType { get; set; }
         public int? ReferralId { get; set; }
         public string? Status { get; set; }
+        public int? BranchId { get; set; }
 
         public Patient Patient { get; set; } = null!;
         public Referral? Referral { get; set; }
+        public Branch? Branch { get; set; }
         public ICollection<VisitTest> VisitTests { get; set; } = new HashSet<VisitTest>();
         public Invoice? Invoice { get; set; }
     }
@@ -228,8 +230,10 @@ namespace Open_lab.Models
         public decimal Paid { get; set; }
         public decimal Balance { get; set; }
         public string? Status { get; set; }
+        public int? BranchId { get; set; }
 
         public Visit Visit { get; set; } = null!;
+        public Branch? Branch { get; set; }
         public ICollection<Payment> Payments { get; set; } = new HashSet<Payment>();
         public ICollection<AdditionalCharge> AdditionalCharges { get; set; } = new HashSet<AdditionalCharge>();
     }
@@ -241,9 +245,11 @@ namespace Open_lab.Models
         public decimal Amount { get; set; }
         public DateTime PaymentDate { get; set; }
         public int UserId { get; set; }
+        public int? BranchId { get; set; }
 
         public Invoice Invoice { get; set; } = null!;
         public User User { get; set; } = null!;
+        public Branch? Branch { get; set; }
     }
 
     public class PriceList
@@ -364,5 +370,41 @@ namespace Open_lab.Models
         public decimal Amount { get; set; }
 
         public Invoice Invoice { get; set; } = null!;
+    }
+
+    public class Branch
+    {
+        public int BranchId { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string? Address { get; set; }
+        public string? Phone { get; set; }
+
+        public ICollection<Visit> Visits { get; set; } = new HashSet<Visit>();
+        public ICollection<Invoice> Invoices { get; set; } = new HashSet<Invoice>();
+        public ICollection<Payment> Payments { get; set; } = new HashSet<Payment>();
+    }
+
+    public class DoctorCommission
+    {
+        public int CommissionId { get; set; }
+        public int ReferralId { get; set; }
+        public int VisitId { get; set; }
+        public decimal Amount { get; set; }
+        public bool IsPaid { get; set; }
+        public DateTime DateCalculated { get; set; }
+
+        public Referral Referral { get; set; } = null!;
+        public Visit Visit { get; set; } = null!;
+    }
+
+    public class Expense
+    {
+        public int ExpenseId { get; set; }
+        public decimal Amount { get; set; }
+        public string Description { get; set; } = string.Empty;
+        public DateTime Date { get; set; }
+        public int UserId { get; set; }
+
+        public User User { get; set; } = null!;
     }
 }

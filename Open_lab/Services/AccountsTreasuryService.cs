@@ -64,11 +64,24 @@ namespace Open_lab.Services
                 .OrderByDescending(r => r.TotalInvoiced)
                 .ToList();
 
+            var totalDiscount = invoices.Sum(i => i.Discount);
+            var expenses = await _db.Expenses
+                .AsNoTracking()
+                .Where(e => e.Date >= from && e.Date <= to)
+                .ToListAsync();
+            var totalExpenses = expenses.Sum(e => e.Amount);
+
+            var totalPaid = invoices.Sum(i => i.Paid);
+            var netProfit = totalPaid - totalExpenses;
+
             return new AccountsTreasurySnapshot
             {
                 TotalInvoiced = invoices.Sum(i => i.NetTotal),
-                TotalPaid = invoices.Sum(i => i.Paid),
+                TotalPaid = totalPaid,
                 TotalBalance = invoices.Sum(i => i.Balance),
+                TotalDiscount = totalDiscount,
+                TotalExpenses = totalExpenses,
+                NetProfit = netProfit,
                 Payments = payments.Select(p => new AccountsPaymentRow
                 {
                     PaymentId = p.PaymentId,

@@ -47,6 +47,9 @@ namespace Open_lab.Data
         public DbSet<MedicalHistory> MedicalHistories => Set<MedicalHistory>();
         public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
         public DbSet<AdditionalCharge> AdditionalCharges => Set<AdditionalCharge>();
+        public DbSet<Branch> Branches => Set<Branch>();
+        public DbSet<DoctorCommission> DoctorCommissions => Set<DoctorCommission>();
+        public DbSet<Expense> Expenses => Set<Expense>();
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -125,6 +128,9 @@ namespace Open_lab.Data
                 entity.HasOne(e => e.Referral)
                     .WithMany(e => e.Visits)
                     .HasForeignKey(e => e.ReferralId);
+                entity.HasOne(e => e.Branch)
+                    .WithMany(e => e.Visits)
+                    .HasForeignKey(e => e.BranchId);
             });
 
             modelBuilder.Entity<Referral>(entity =>
@@ -241,6 +247,9 @@ namespace Open_lab.Data
                     .WithOne(e => e.Invoice)
                     .HasForeignKey<Invoice>(e => e.VisitId);
                 entity.HasIndex(e => e.VisitId).IsUnique();
+                entity.HasOne(e => e.Branch)
+                    .WithMany(e => e.Invoices)
+                    .HasForeignKey(e => e.BranchId);
             });
 
             modelBuilder.Entity<Payment>(entity =>
@@ -253,6 +262,9 @@ namespace Open_lab.Data
                 entity.HasOne(e => e.User)
                     .WithMany(e => e.Payments)
                     .HasForeignKey(e => e.UserId);
+                entity.HasOne(e => e.Branch)
+                    .WithMany(e => e.Payments)
+                    .HasForeignKey(e => e.BranchId);
             });
 
             modelBuilder.Entity<PriceList>(entity =>
@@ -369,6 +381,36 @@ namespace Open_lab.Data
                 entity.HasOne(e => e.Invoice)
                     .WithMany(e => e.AdditionalCharges)
                     .HasForeignKey(e => e.InvoiceId);
+            });
+
+            modelBuilder.Entity<Branch>(entity =>
+            {
+                entity.HasKey(e => e.BranchId);
+                entity.Property(e => e.Name).IsRequired();
+            });
+
+            modelBuilder.Entity<DoctorCommission>(entity =>
+            {
+                entity.HasKey(e => e.CommissionId);
+                entity.Property(e => e.Amount).HasPrecision(18, 2);
+                entity.HasOne(e => e.Referral)
+                    .WithMany()
+                    .HasForeignKey(e => e.ReferralId)
+                    .OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne(e => e.Visit)
+                    .WithMany()
+                    .HasForeignKey(e => e.VisitId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            modelBuilder.Entity<Expense>(entity =>
+            {
+                entity.HasKey(e => e.ExpenseId);
+                entity.Property(e => e.Description).IsRequired();
+                entity.Property(e => e.Amount).HasPrecision(18, 2);
+                entity.HasOne(e => e.User)
+                    .WithMany()
+                    .HasForeignKey(e => e.UserId);
             });
         }
     }
