@@ -18,6 +18,7 @@ namespace Open_lab.Data
 
         public DbSet<User> Users => Set<User>();
         public DbSet<AttendanceLog> AttendanceLogs => Set<AttendanceLog>();
+        public DbSet<ShiftSchedule> ShiftSchedules => Set<ShiftSchedule>();
         public DbSet<Role> Roles => Set<Role>();
         public DbSet<RolePermission> RolePermissions => Set<RolePermission>();
         public DbSet<UserRole> UserRoles => Set<UserRole>();
@@ -357,6 +358,14 @@ namespace Open_lab.Data
                 entity.HasOne(e => e.User)
                     .WithMany(e => e.AttendanceLogs)
                     .HasForeignKey(e => e.UserId);
+                entity.HasOne(e => e.Shift)
+                    .WithMany(e => e.AttendanceLogs)
+                    .HasForeignKey(e => e.ShiftId);
+            });
+
+            modelBuilder.Entity<ShiftSchedule>(entity =>
+            {
+                entity.HasKey(e => e.ShiftId);
             });
 
             modelBuilder.Entity<Setting>(entity =>

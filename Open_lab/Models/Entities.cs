@@ -24,11 +24,25 @@ namespace Open_lab.Models
     {
         public int AttendanceLogId { get; set; }
         public int UserId { get; set; }
+        public int? ShiftId { get; set; } // Manual shift selection
         public DateTime LoginAt { get; set; }
         public DateTime? LogoutAt { get; set; }
+        public DateTime LastActivityAt { get; set; }
         public string? Note { get; set; }
 
         public User User { get; set; } = null!;
+        public ShiftSchedule? Shift { get; set; }
+    }
+
+    public class ShiftSchedule
+    {
+        public int ShiftId { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public TimeSpan StartTime { get; set; }
+        public TimeSpan EndTime { get; set; }
+        public int GracePeriodMinutes { get; set; }
+
+        public ICollection<AttendanceLog> AttendanceLogs { get; set; } = new HashSet<AttendanceLog>();
     }
 
     public class Role

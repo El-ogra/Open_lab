@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Open_lab.Data;
 
@@ -11,9 +12,11 @@ using Open_lab.Data;
 namespace Open_lab.Migrations
 {
     [DbContext(typeof(OpenLabDbContext))]
-    partial class OpenLabDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260419031401_Phase9_SecurityAndMonitoring")]
+    partial class Phase9_SecurityAndMonitoring
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -91,15 +94,10 @@ namespace Open_lab.Migrations
                     b.Property<string>("Note")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("ShiftId")
-                        .HasColumnType("int");
-
                     b.Property<int>("UserId")
                         .HasColumnType("int");
 
                     b.HasKey("AttendanceLogId");
-
-                    b.HasIndex("ShiftId");
 
                     b.HasIndex("UserId");
 
@@ -779,32 +777,6 @@ namespace Open_lab.Migrations
                     b.ToTable("Settings");
                 });
 
-            modelBuilder.Entity("Open_lab.Models.ShiftSchedule", b =>
-                {
-                    b.Property<int>("ShiftId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ShiftId"));
-
-                    b.Property<TimeSpan>("EndTime")
-                        .HasColumnType("time");
-
-                    b.Property<int>("GracePeriodMinutes")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<TimeSpan>("StartTime")
-                        .HasColumnType("time");
-
-                    b.HasKey("ShiftId");
-
-                    b.ToTable("ShiftSchedules");
-                });
-
             modelBuilder.Entity("Open_lab.Models.ShipmentItem", b =>
                 {
                     b.Property<int>("ShipmentItemId")
@@ -1212,17 +1184,11 @@ namespace Open_lab.Migrations
 
             modelBuilder.Entity("Open_lab.Models.AttendanceLog", b =>
                 {
-                    b.HasOne("Open_lab.Models.ShiftSchedule", "Shift")
-                        .WithMany("AttendanceLogs")
-                        .HasForeignKey("ShiftId");
-
                     b.HasOne("Open_lab.Models.User", "User")
                         .WithMany("AttendanceLogs")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Shift");
 
                     b.Navigation("User");
                 });
@@ -1720,11 +1686,6 @@ namespace Open_lab.Migrations
             modelBuilder.Entity("Open_lab.Models.SampleType", b =>
                 {
                     b.Navigation("Tests");
-                });
-
-            modelBuilder.Entity("Open_lab.Models.ShiftSchedule", b =>
-                {
-                    b.Navigation("AttendanceLogs");
                 });
 
             modelBuilder.Entity("Open_lab.Models.ShipmentManifest", b =>
