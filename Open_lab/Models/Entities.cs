@@ -329,9 +329,13 @@ namespace Open_lab.Models
         public int CollectedBy { get; set; }
         public DateTime CollectedAt { get; set; }
         public string? Status { get; set; }
+        public bool IsSeparated { get; set; }
+        public bool IsExternalSample { get; set; }
+        public int? ReceivedBy { get; set; }
 
         public VisitTest VisitTest { get; set; } = null!;
         public User CollectedByUser { get; set; } = null!;
+        public User? ReceivedByUser { get; set; }
     }
 
     public class Setting

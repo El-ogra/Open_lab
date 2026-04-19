@@ -46,7 +46,7 @@ namespace Open_lab.Services
             }).ToList();
         }
 
-        public async Task MarkCollectedAsync(int visitTestId, int userId)
+        public async Task MarkCollectedAsync(int visitTestId, int userId, bool isExternal = false, int? receivedBy = null)
         {
             var vt = await _db.VisitTests.Include(v => v.SampleCollection).FirstOrDefaultAsync(v => v.VisitTestId == visitTestId);
             if (vt == null)
@@ -61,7 +61,9 @@ namespace Open_lab.Services
                     VisitTestId = vt.VisitTestId,
                     CollectedBy = userId,
                     CollectedAt = DateTime.Now,
-                    Status = "مسحوبة"
+                    Status = "مسحوبة",
+                    IsExternalSample = isExternal,
+                    ReceivedBy = receivedBy
                 };
                 _db.SampleCollections.Add(vt.SampleCollection);
             }
@@ -70,6 +72,8 @@ namespace Open_lab.Services
                 vt.SampleCollection.CollectedBy = userId;
                 vt.SampleCollection.CollectedAt = DateTime.Now;
                 vt.SampleCollection.Status = "مسحوبة";
+                vt.SampleCollection.IsExternalSample = isExternal;
+                vt.SampleCollection.ReceivedBy = receivedBy;
             }
 
             await _db.SaveChangesAsync();

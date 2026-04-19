@@ -343,6 +343,10 @@ namespace Open_lab.Data
                 entity.HasOne(e => e.CollectedByUser)
                     .WithMany(e => e.SampleCollections)
                     .HasForeignKey(e => e.CollectedBy);
+                entity.HasOne(e => e.ReceivedByUser)
+                    .WithMany()
+                    .HasForeignKey(e => e.ReceivedBy)
+                    .OnDelete(DeleteBehavior.Restrict);
             });
 
             modelBuilder.Entity<AttendanceLog>(entity =>

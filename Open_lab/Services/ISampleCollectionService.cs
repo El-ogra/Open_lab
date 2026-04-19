@@ -8,7 +8,7 @@ namespace Open_lab.Services
     public interface ISampleCollectionService
     {
         Task<List<SampleCollectionRow>> GetRowsAsync(DateTime from, DateTime to);
-        Task MarkCollectedAsync(int visitTestId, int userId);
+        Task MarkCollectedAsync(int visitTestId, int userId, bool isExternal = false, int? receivedBy = null);
         Task MarkNotCollectedAsync(int visitTestId);
     }
 }
