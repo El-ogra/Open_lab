@@ -145,5 +145,49 @@ namespace Open_lab.Services
 
             return visits;
         }
+
+        public async Task<List<MonthlyAnalysisRow>> GetMonthlyAnalysisAsync(int year)
+        {
+            var months = Enumerable.Range(1, 12).ToList();
+            var result = new List<MonthlyAnalysisRow>();
+
+            foreach (var month in months)
+            {
+                var from = new DateTime(year, month, 1);
+                var to = from.AddMonths(1).AddDays(-1);
+
+                var visitsCount = await _db.Visits.CountAsync(v => v.VisitDate >= from && v.VisitDate <= to);
+                var testsCount = await _db.VisitTests.CountAsync(vt => vt.Visit.VisitDate >= from && vt.Visit.VisitDate <= to);
+                var revenue = await _db.Invoices.Where(i => i.Visit.VisitDate >= from && i.Visit.VisitDate <= to).SumAsync(i => (decimal?)i.NetTotal) ?? 0;
+
+                result.Add(new MonthlyAnalysisRow
+                {
+                    Month = month,
+                    MonthName = from.ToString("MMMM", new System.Globalization.CultureInfo("ar-EG")),
+                    VisitCount = visitsCount,
+                    TestCount = testsCount,
+                    Revenue = revenue
+                });
+            }
+
+            return result;
+        }
+
+        public async Task<List<TopTestRow>> GetTop10TestsAsync(DateTime from, DateTime to)
+        {
+            return await _db.VisitTests
+                .AsNoTracking()
+                .Where(vt => vt.Visit.VisitDate >= from && vt.Visit.VisitDate <= to)
+                .GroupBy(vt => vt.Test.NameReport)
+                .Select(g => new TopTestRow
+                {
+                    TestName = g.Key,
+                    DemandCount = g.Count(),
+                    TotalRevenue = g.Sum(x => x.Price)
+                })
+                .OrderByDescending(x => x.DemandCount)
+                .Take(10)
+                .ToListAsync();
+        }
     }
 }
