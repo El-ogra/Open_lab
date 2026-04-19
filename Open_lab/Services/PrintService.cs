@@ -179,6 +179,45 @@ namespace Open_lab.Services
             return Task.CompletedTask;
         }
 
+        public Task PrintCultureReportAsync(CultureReportData data)
+        {
+            if (data == null) throw new ArgumentNullException(nameof(data));
+
+            var document = CreateDocument("تقرير مزرعة وحساسية", 11);
+            document.Blocks.Add(CreateHeader("تقرير مزرعة وحساسية (Culture & Sensitivity Report)"));
+            
+            document.Blocks.Add(new Paragraph(new Run($"المريض: {data.PatientName} | Lab ID: {data.LabId}")));
+            document.Blocks.Add(new Paragraph(new Run($"تاريخ الزيارة: {data.VisitDate:yyyy-MM-dd} | المزرعة: {data.CultureName}")));
+
+            var table = new Table { CellSpacing = 0, BorderBrush = System.Windows.Media.Brushes.Black, BorderThickness = new Thickness(0, 0, 0, 1) };
+            table.Columns.Add(new TableColumn { Width = new GridLength(2, GridUnitType.Star) });
+            table.Columns.Add(new TableColumn { Width = new GridLength(1, GridUnitType.Star) });
+            table.Columns.Add(new TableColumn { Width = new GridLength(2, GridUnitType.Star) });
+
+            var headerRowGroup = new TableRowGroup();
+            var headerRow = new TableRow();
+            headerRow.Cells.Add(new TableCell(new Paragraph(new Run("المضاد الحيوي (Antibiotic)")) { FontWeight = FontWeights.Bold }));
+            headerRow.Cells.Add(new TableCell(new Paragraph(new Run("الحساسية (Sensitivity)")) { FontWeight = FontWeights.Bold }));
+            headerRow.Cells.Add(new TableCell(new Paragraph(new Run("ملاحظات (Notes)")) { FontWeight = FontWeights.Bold }));
+            headerRowGroup.Rows.Add(headerRow);
+            table.RowGroups.Add(headerRowGroup);
+
+            var bodyRowGroup = new TableRowGroup();
+            foreach (var res in data.Results)
+            {
+                var row = new TableRow();
+                row.Cells.Add(new TableCell(new Paragraph(new Run(res.AntibioticName))));
+                row.Cells.Add(new TableCell(new Paragraph(new Run(res.Sensitivity))));
+                row.Cells.Add(new TableCell(new Paragraph(new Run(res.Comment ?? "-"))));
+                bodyRowGroup.Rows.Add(row);
+            }
+            table.RowGroups.Add(bodyRowGroup);
+            document.Blocks.Add(table);
+
+            PrintDocument(document, $"CultureReport_{data.LabId}");
+            return Task.CompletedTask;
+        }
+
         private static FlowDocument CreateDocument(string title, double fontSize)
         {
             return new FlowDocument

@@ -307,6 +307,8 @@ namespace Open_lab.Models
     {
         public int AntibioticId { get; set; }
         public string Name { get; set; } = string.Empty;
+        public bool IsSafeForPregnancy { get; set; } = true;
+        public bool IsSafeForChildren { get; set; } = true;
 
         public ICollection<CultureAntibiotic> CultureAntibiotics { get; set; } = new HashSet<CultureAntibiotic>();
     }

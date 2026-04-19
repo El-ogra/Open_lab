@@ -163,6 +163,35 @@ namespace Open_lab.Services
                 .ToListAsync();
         }
 
+        public async Task<List<Antibiotic>> GetFilteredAntibioticsAsync(int visitTestId)
+        {
+            var visitTest = await _db.VisitTests
+                .AsNoTracking()
+                .Include(vt => vt.Visit)
+                .ThenInclude(v => v.Patient)
+                .FirstOrDefaultAsync(vt => vt.VisitTestId == visitTestId);
+
+            if (visitTest == null) return await GetAntibioticsAsync();
+
+            var patient = visitTest.Visit.Patient;
+            var isChild = patient.Age.HasValue && patient.Age < 12;
+            var isPregnant = patient.IsPregnant;
+
+            var query = _db.Antibiotics.AsNoTracking();
+
+            if (isPregnant)
+            {
+                query = query.Where(a => a.IsSafeForPregnancy);
+            }
+
+            if (isChild)
+            {
+                query = query.Where(a => a.IsSafeForChildren);
+            }
+
+            return await query.OrderBy(a => a.Name).ToListAsync();
+        }
+
         public async Task SaveCultureResultAsync(int visitTestId, int cultureId, IReadOnlyCollection<CultureSensitivityValue> sensitivities)
         {
             var visitTest = await _db.VisitTests

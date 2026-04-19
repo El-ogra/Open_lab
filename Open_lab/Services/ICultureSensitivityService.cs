@@ -28,6 +28,7 @@ namespace Open_lab.Services
         Task UnlinkAntibioticAsync(int cultureId, int antibioticId);
 
         Task<List<CultureVisitTestRow>> SearchCultureVisitTestsAsync(string? labId, DateTime from, DateTime to);
+        Task<List<Antibiotic>> GetFilteredAntibioticsAsync(int visitTestId);
         Task SaveCultureResultAsync(int visitTestId, int cultureId, IReadOnlyCollection<CultureSensitivityValue> sensitivities);
     }
 }
