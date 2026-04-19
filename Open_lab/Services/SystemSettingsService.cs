@@ -24,6 +24,11 @@ namespace Open_lab.Services
         private const string ReceiptFooterKey = "Receipt.Footer";
         private const string ReceiptShowLogoKey = "Receipt.ShowLogo";
         private const string ReceiptCopiesKey = "Receipt.Copies";
+        private const string PrinterPaperSizeKey = "Printer.PaperSize";
+        private const string DefaultAccountTypeKey = "Invoice.DefaultAccountType";
+        private const string MasterPasswordHashKey = "Security.MasterPasswordHash";
+        private const string MasterPasswordSaltKey = "Security.MasterPasswordSalt";
+
 
         private readonly OpenLabDbContext _db;
 
@@ -79,10 +84,12 @@ namespace Open_lab.Services
                     s.Key == PrinterReceiptKey ||
                     s.Key == PrinterBarcodeKey ||
                     s.Key == PrinterEnvelopeKey ||
-                    s.Key == ReceiptHeaderKey ||
                     s.Key == ReceiptFooterKey ||
                     s.Key == ReceiptShowLogoKey ||
-                    s.Key == ReceiptCopiesKey)
+                    s.Key == ReceiptCopiesKey ||
+                    s.Key == PrinterPaperSizeKey ||
+                    s.Key == DefaultAccountTypeKey ||
+                    s.Key == MasterPasswordHashKey)
                 .ToDictionaryAsync(s => s.Key, s => s.Value);
 
             return new SystemSettingsProfile
@@ -99,7 +106,10 @@ namespace Open_lab.Services
                 ReceiptHeaderText = GetValue(dictionary, ReceiptHeaderKey, "إيصال مختبر"),
                 ReceiptFooterText = GetValue(dictionary, ReceiptFooterKey, "شكراً لتعاملكم"),
                 ReceiptShowLogo = ParseBool(GetValue(dictionary, ReceiptShowLogoKey, "false")),
-                ReceiptCopies = ParseInt(GetValue(dictionary, ReceiptCopiesKey, "1"), 1)
+                ReceiptCopies = ParseInt(GetValue(dictionary, ReceiptCopiesKey, "1"), 1),
+                ReportPaperSize = GetValue(dictionary, PrinterPaperSizeKey, "A4"),
+                DefaultAccountType = GetValue(dictionary, DefaultAccountTypeKey, "Cash"),
+                MasterPasswordHash = dictionary.TryGetValue(MasterPasswordHashKey, out var hash) ? hash : null
             };
         }
 
@@ -118,6 +128,30 @@ namespace Open_lab.Services
             await SaveSettingAsync(ReceiptFooterKey, profile.ReceiptFooterText);
             await SaveSettingAsync(ReceiptShowLogoKey, profile.ReceiptShowLogo ? "true" : "false");
             await SaveSettingAsync(ReceiptCopiesKey, profile.ReceiptCopies.ToString(CultureInfo.InvariantCulture));
+            await SaveSettingAsync(PrinterPaperSizeKey, profile.ReportPaperSize);
+            await SaveSettingAsync(DefaultAccountTypeKey, profile.DefaultAccountType);
+
+            if (!string.IsNullOrEmpty(profile.MasterPasswordHash))
+            {
+                await SaveSettingAsync(MasterPasswordHashKey, profile.MasterPasswordHash);
+            }
+        }
+
+        public async Task<bool> VerifyMasterPasswordAsync(string password)
+        {
+            var hash = await _db.Settings.Where(s => s.Key == MasterPasswordHashKey).Select(s => s.Value).FirstOrDefaultAsync();
+            var salt = await _db.Settings.Where(s => s.Key == MasterPasswordSaltKey).Select(s => s.Value).FirstOrDefaultAsync();
+
+            // Default if none exists (admin123)
+            if (string.IsNullOrEmpty(hash))
+            {
+                if (password == "admin123") return true; 
+                return false;
+            }
+
+            if (string.IsNullOrEmpty(salt)) salt = "SYSTEM"; // Fallback
+
+            return PasswordSecurity.Verify(password, salt, hash);
         }
 
         private static string GetValue(IReadOnlyDictionary<string, string?> dictionary, string key, string fallback)
