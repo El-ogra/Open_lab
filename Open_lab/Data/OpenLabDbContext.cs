@@ -44,6 +44,9 @@ namespace Open_lab.Data
         public DbSet<CultureAntibiotic> CultureAntibiotics => Set<CultureAntibiotic>();
         public DbSet<SampleCollection> SampleCollections => Set<SampleCollection>();
         public DbSet<Setting> Settings => Set<Setting>();
+        public DbSet<MedicalHistory> MedicalHistories => Set<MedicalHistory>();
+        public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
+        public DbSet<AdditionalCharge> AdditionalCharges => Set<AdditionalCharge>();
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -337,6 +340,35 @@ namespace Open_lab.Data
             modelBuilder.Entity<Setting>(entity =>
             {
                 entity.HasKey(e => e.Key);
+            });
+
+            modelBuilder.Entity<MedicalHistory>(entity =>
+            {
+                entity.HasKey(e => e.MedicalHistoryId);
+                entity.HasOne(e => e.Patient)
+                    .WithOne(e => e.MedicalHistory)
+                    .HasForeignKey<MedicalHistory>(e => e.PatientId);
+                entity.HasIndex(e => e.PatientId).IsUnique();
+            });
+
+            modelBuilder.Entity<AuditLog>(entity =>
+            {
+                entity.HasKey(e => e.AuditLogId);
+                entity.Property(e => e.Action).IsRequired();
+                entity.Property(e => e.TableName).IsRequired();
+                entity.HasOne(e => e.User)
+                    .WithMany(e => e.AuditLogs)
+                    .HasForeignKey(e => e.UserId);
+            });
+
+            modelBuilder.Entity<AdditionalCharge>(entity =>
+            {
+                entity.HasKey(e => e.AdditionalChargeId);
+                entity.Property(e => e.Description).IsRequired();
+                entity.Property(e => e.Amount).HasPrecision(18, 2);
+                entity.HasOne(e => e.Invoice)
+                    .WithMany(e => e.AdditionalCharges)
+                    .HasForeignKey(e => e.InvoiceId);
             });
         }
     }

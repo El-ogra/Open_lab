@@ -17,6 +17,7 @@ namespace Open_lab.Models
         public ICollection<ResultValue> VerifiedResults { get; set; } = new HashSet<ResultValue>();
         public ICollection<SampleCollection> SampleCollections { get; set; } = new HashSet<SampleCollection>();
         public ICollection<AttendanceLog> AttendanceLogs { get; set; } = new HashSet<AttendanceLog>();
+        public ICollection<AuditLog> AuditLogs { get; set; } = new HashSet<AuditLog>();
     }
 
     public class AttendanceLog
@@ -62,9 +63,12 @@ namespace Open_lab.Models
         public string FullName { get; set; } = string.Empty;
         public string Gender { get; set; } = string.Empty;
         public DateTime? BirthDate { get; set; }
+        public int? Age { get; set; }
+        public bool IsPregnant { get; set; }
         public string? Phone { get; set; }
         public string? Address { get; set; }
 
+        public MedicalHistory? MedicalHistory { get; set; }
         public ICollection<Visit> Visits { get; set; } = new HashSet<Visit>();
     }
 
@@ -105,6 +109,8 @@ namespace Open_lab.Models
         public int? SampleTypeId { get; set; }
         public int? UnitId { get; set; }
         public decimal Price { get; set; }
+        public decimal? CostPrice { get; set; }
+        public decimal? PatientPrice { get; set; }
         public int TurnaroundHours { get; set; }
         public bool IsRoutine { get; set; }
         public bool IsSendOut { get; set; }
@@ -225,6 +231,7 @@ namespace Open_lab.Models
 
         public Visit Visit { get; set; } = null!;
         public ICollection<Payment> Payments { get; set; } = new HashSet<Payment>();
+        public ICollection<AdditionalCharge> AdditionalCharges { get; set; } = new HashSet<AdditionalCharge>();
     }
 
     public class Payment
@@ -322,6 +329,40 @@ namespace Open_lab.Models
         public string Key { get; set; } = string.Empty;
         public string? Value { get; set; }
     }
+
+    public class MedicalHistory
+    {
+        public int MedicalHistoryId { get; set; }
+        public int PatientId { get; set; }
+        public string? ChronicDiseases { get; set; }
+        public string? Allergies { get; set; }
+        public string? Medications { get; set; }
+        public string? Notes { get; set; }
+
+        public Patient Patient { get; set; } = null!;
+    }
+
+    public class AuditLog
+    {
+        public int AuditLogId { get; set; }
+        public int UserId { get; set; }
+        public string Action { get; set; } = string.Empty;
+        public string TableName { get; set; } = string.Empty;
+        public string? RecordId { get; set; }
+        public string? OldValues { get; set; }
+        public string? NewValues { get; set; }
+        public DateTime Timestamp { get; set; }
+
+        public User User { get; set; } = null!;
+    }
+
+    public class AdditionalCharge
+    {
+        public int AdditionalChargeId { get; set; }
+        public int InvoiceId { get; set; }
+        public string Description { get; set; } = string.Empty;
+        public decimal Amount { get; set; }
+
+        public Invoice Invoice { get; set; } = null!;
+    }
 }
-
-

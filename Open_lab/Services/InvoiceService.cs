@@ -85,6 +85,29 @@ namespace Open_lab.Services
             return payment;
         }
 
+        public async Task<Payment> EditPaymentAsync(int paymentId, decimal newAmount, int userId)
+        {
+            if (newAmount <= 0)
+            {
+                throw new ArgumentException("Amount must be greater than zero.", nameof(newAmount));
+            }
+
+            var payment = await _db.Payments.FirstOrDefaultAsync(p => p.PaymentId == paymentId);
+            if (payment == null)
+            {
+                throw new InvalidOperationException("Payment not found.");
+            }
+
+            payment.Amount = newAmount;
+            payment.UserId = userId;
+            payment.PaymentDate = DateTime.Now;
+
+            await _db.SaveChangesAsync();
+
+            await RecalculateInvoiceAsync(payment.InvoiceId, 0);
+            return payment;
+        }
+
         public async Task DeletePaymentAsync(int paymentId)
         {
             var payment = await _db.Payments.FirstOrDefaultAsync(p => p.PaymentId == paymentId);

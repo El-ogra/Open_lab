@@ -8,6 +8,7 @@ namespace Open_lab.Services
     {
         Task<Invoice> CreateOrUpdateInvoiceAsync(int visitId, decimal discount, decimal paid);
         Task<Payment> AddPaymentAsync(int invoiceId, decimal amount, int userId);
+        Task<Payment> EditPaymentAsync(int paymentId, decimal newAmount, int userId);
         Task DeletePaymentAsync(int paymentId);
         Task<List<Payment>> GetPaymentsAsync(int invoiceId);
         Task<Invoice?> GetByVisitIdAsync(int visitId);
