@@ -59,6 +59,7 @@ namespace Open_lab.Data
         public DbSet<Reagent> Reagents { get; set; } = null!;
         public DbSet<TestConsumption> TestConsumptions { get; set; } = null!;
         public DbSet<Physician> Physicians { get; set; } = null!;
+        public DbSet<SystemSetting> SystemSettings { get; set; } = null!;
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -510,6 +511,15 @@ namespace Open_lab.Data
                 entity.HasOne(e => e.Reagent)
                     .WithMany(e => e.Consumptions)
                     .HasForeignKey(e => e.ReagentId);
+            });
+
+            modelBuilder.Entity<SystemSetting>(entity =>
+            {
+                entity.HasKey(e => e.SettingId);
+                entity.HasIndex(e => e.SettingKey).IsUnique();
+                entity.Property(e => e.SettingKey).IsRequired().HasMaxLength(100);
+                entity.Property(e => e.SettingType).HasMaxLength(50);
+                entity.Property(e => e.Description).HasMaxLength(255);
             });
         }
     }

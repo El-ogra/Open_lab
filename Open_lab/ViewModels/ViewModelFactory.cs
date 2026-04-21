@@ -98,7 +98,8 @@ namespace Open_lab.ViewModels
         private IReceiptService CreateReceiptService() => new ReceiptService(_dbFactory());
         private IConstantsService CreateConstantsService() => new ConstantsService(_dbFactory());
         private IUserPreferenceService CreateUserPreferenceService() => new UserPreferenceService();
-        private IPrintService CreatePrintService() => new PrintService();
+        private ISettingsService CreateSettingsService() => new SettingsService(_dbFactory());
+        private IPrintService CreatePrintService() => new PrintService(CreateSettingsService());
         private IBarcodeService CreateBarcodeService() => new BarcodeService();
         private ICompareWithHistoryService CreateCompareWithHistoryService() => new CompareWithHistoryService(_dbFactory());
         private IGroupWorksheetService CreateGroupWorksheetService() => new GroupWorksheetService(_dbFactory());

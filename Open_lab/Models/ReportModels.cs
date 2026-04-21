@@ -23,4 +23,15 @@ namespace Open_lab.Models
         public Patient Patient { get; set; } = null!;
         public List<VisitReportData> Visits { get; set; } = new();
     }
+
+    /// <summary>
+    /// Margin settings for printed documents (in centimeters).
+    /// </summary>
+    public class MarginSettings
+    {
+        public decimal LeftMargin { get; set; }
+        public decimal RightMargin { get; set; }
+        public decimal TopMargin { get; set; } = 1; // Default 1cm
+        public decimal BottomMargin { get; set; } = 1; // Default 1cm
+    }
 }

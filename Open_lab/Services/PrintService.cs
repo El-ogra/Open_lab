@@ -13,6 +13,12 @@ namespace Open_lab.Services
     public class PrintService : IPrintService
     {
         private const string PdfPrinterName = "Microsoft Print to PDF";
+        private readonly ISettingsService _settingsService;
+
+        public PrintService(ISettingsService settingsService)
+        {
+            _settingsService = settingsService ?? throw new ArgumentNullException(nameof(settingsService));
+        }
 
         public Task PrintReceiptAsync(ReceiptData data, string? barcodeText = null)
         {
@@ -218,13 +224,19 @@ namespace Open_lab.Services
             return Task.CompletedTask;
         }
 
-        private static FlowDocument CreateDocument(string title, double fontSize)
+        private static FlowDocument CreateDocument(string title, double fontSize, double leftMarginCm = 0, double rightMarginCm = 0)
         {
+            // Convert cm to device-independent pixels (1 cm ≈ 37.8 pixels)
+            const double cmToPixels = 37.8;
+            var leftMargin = leftMarginCm * cmToPixels;
+            var rightMargin = rightMarginCm * cmToPixels;
+            var topBottomMargin = 48; // Default top/bottom margin in pixels
+
             return new FlowDocument
             {
                 FontFamily = new System.Windows.Media.FontFamily("Segoe UI"),
                 FontSize = fontSize,
-                PagePadding = new Thickness(48),
+                PagePadding = new Thickness(leftMargin, topBottomMargin, rightMargin, topBottomMargin),
                 ColumnWidth = double.PositiveInfinity,
                 Language = System.Windows.Markup.XmlLanguage.GetLanguage("ar-EG")
             };
@@ -246,6 +258,44 @@ namespace Open_lab.Services
             var writer = PrintQueue.CreateXpsDocumentWriter(queue);
             var paginator = ((IDocumentPaginatorSource)document).DocumentPaginator;
             writer.Write(paginator);
+        }
+
+        public async Task<PrintQueue> ResolvePrintQueueAsync(string documentType)
+        {
+            var server = new LocalPrintServer();
+            var queues = server.GetPrintQueues(new[]
+            {
+                EnumeratedPrintQueueTypes.Local,
+                EnumeratedPrintQueueTypes.Connections
+            }).ToList();
+
+            string? printerName = null;
+
+            // Determine which printer to use based on document type
+            switch (documentType?.ToLowerInvariant())
+            {
+                case "receipt":
+                    printerName = await _settingsService.GetReceiptPrinterAsync();
+                    break;
+                case "report":
+                    printerName = await _settingsService.GetReportPrinterAsync();
+                    break;
+                default:
+                    printerName = await _settingsService.GetDefaultPrinterAsync();
+                    break;
+            }
+
+            // If a specific printer is configured and exists, use it
+            if (!string.IsNullOrEmpty(printerName))
+            {
+                var configuredQueue = queues.FirstOrDefault(q => q.Name.Equals(printerName, StringComparison.OrdinalIgnoreCase));
+                if (configuredQueue != null)
+                    return configuredQueue;
+            }
+
+            // Fallback to PDF printer or default
+            var pdfQueue = queues.FirstOrDefault(q => q.Name.Equals(PdfPrinterName, StringComparison.OrdinalIgnoreCase));
+            return pdfQueue ?? LocalPrintServer.GetDefaultPrintQueue();
         }
 
         private static PrintQueue ResolvePrintQueue()

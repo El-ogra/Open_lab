@@ -15,6 +15,12 @@ namespace Open_lab.Services
         Task PrintWorksheetByTestAsync(DateTime from, DateTime to, IReadOnlyCollection<WorkSheetTestRow> rows);
         Task PrintTextReportAsync(string title, IReadOnlyCollection<string> lines, string? jobName = null);
         Task PrintCultureReportAsync(CultureReportData data);
+
+        /// <summary>
+        /// Resolves the appropriate print queue based on document type and system settings.
+        /// </summary>
+        /// <param name="documentType">Type of document (Receipt, Report, etc.)</param>
+        Task<System.Printing.PrintQueue> ResolvePrintQueueAsync(string documentType);
     }
 
     public class CultureReportData
