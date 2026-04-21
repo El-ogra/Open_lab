@@ -16,6 +16,8 @@ namespace Open_lab.Services
         public List<AccountsPaymentRow> Payments { get; set; } = new();
         public List<TreasuryByUserRow> ByUser { get; set; } = new();
         public List<TreasuryByReferralRow> ByReferral { get; set; } = new();
+        public List<TreasuryByBranchRow> ByBranch { get; set; } = new();
+        public List<TreasuryByDoctorRow> ByDoctor { get; set; } = new();
     }
 
     public interface IAccountsTreasuryService

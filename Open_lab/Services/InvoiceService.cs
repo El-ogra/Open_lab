@@ -130,6 +130,46 @@ namespace Open_lab.Services
                 .ToListAsync();
         }
 
+        public async Task<AdditionalCharge> AddAdditionalChargeAsync(int invoiceId, string description, decimal amount)
+        {
+            if (string.IsNullOrWhiteSpace(description))
+            {
+                throw new ArgumentException("Description is required.", nameof(description));
+            }
+
+            if (amount <= 0)
+            {
+                throw new ArgumentException("Amount must be greater than zero.", nameof(amount));
+            }
+
+            var invoice = await _db.Invoices.FirstOrDefaultAsync(i => i.InvoiceId == invoiceId);
+            if (invoice == null)
+            {
+                throw new InvalidOperationException("Invoice not found.");
+            }
+
+            var charge = new AdditionalCharge
+            {
+                InvoiceId = invoiceId,
+                Description = description.Trim(),
+                Amount = amount
+            };
+
+            _db.AdditionalCharges.Add(charge);
+            await _db.SaveChangesAsync();
+            await RecalculateInvoiceAsync(invoiceId, 0);
+            return charge;
+        }
+
+        public Task<List<AdditionalCharge>> GetAdditionalChargesAsync(int invoiceId)
+        {
+            return _db.AdditionalCharges
+                .AsNoTracking()
+                .Where(c => c.InvoiceId == invoiceId)
+                .OrderByDescending(c => c.AdditionalChargeId)
+                .ToListAsync();
+        }
+
         public Task<Invoice?> GetByVisitIdAsync(int visitId)
         {
             return _db.Invoices.AsNoTracking().FirstOrDefaultAsync(i => i.VisitId == visitId);
@@ -137,7 +177,25 @@ namespace Open_lab.Services
 
         public async Task<decimal> GetVisitTotalAsync(int visitId)
         {
-            return await _db.VisitTests.Where(vt => vt.VisitId == visitId).SumAsync(vt => vt.Price);
+            var testsTotal = await _db.VisitTests
+                .Where(vt => vt.VisitId == visitId)
+                .SumAsync(vt => vt.Price);
+
+            var invoiceId = await _db.Invoices
+                .Where(i => i.VisitId == visitId)
+                .Select(i => (int?)i.InvoiceId)
+                .FirstOrDefaultAsync();
+
+            if (!invoiceId.HasValue)
+            {
+                return testsTotal;
+            }
+
+            var chargesTotal = await _db.AdditionalCharges
+                .Where(c => c.InvoiceId == invoiceId.Value)
+                .SumAsync(c => c.Amount);
+
+            return testsTotal + chargesTotal;
         }
 
         public Task<List<Invoice>> GetPatientInvoicesByDateAsync(int patientId, DateTime from, DateTime to)

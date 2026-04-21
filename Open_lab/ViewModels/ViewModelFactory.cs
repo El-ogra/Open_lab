@@ -23,6 +23,7 @@ namespace Open_lab.ViewModels
                 NavigationTarget.PatientRegistration => new PatientRegistrationViewModel(CreatePatientService()),
                 NavigationTarget.PatientTestsSelection => new PatientTestsSelectionViewModel(CreatePatientService(), CreateVisitService(), CreateTestCatalogService(), CreateInvoiceService()),
                 NavigationTarget.PatientBilling => new PatientBillingViewModel(CreateInvoiceService()),
+                NavigationTarget.PatientBillingByDate => new PatientBillingByDateViewModel(CreateInvoiceService()),
                 NavigationTarget.ResultsEntry => new ResultsEntryViewModel(CreateResultsService()),
                 NavigationTarget.ReportViewer => new ReportViewerViewModel(CreateReportService(), CreatePrintService()),
                 NavigationTarget.PatientSearch => new PatientSearchViewModel(CreatePatientSearchService()),
@@ -36,7 +37,7 @@ namespace Open_lab.ViewModels
                 NavigationTarget.CustomGroups => new CustomGroupsViewModel(CreateTestCatalogService()),
                 NavigationTarget.Referrals => new ReferralsViewModel(CreateTestCatalogService()),
                 NavigationTarget.UsersPermissions => new UsersPermissionsViewModel(CreateUserAdminService()),
-                NavigationTarget.Statistics => new StatisticsViewModel(CreateStatisticsService(), CreatePrintService()),
+                NavigationTarget.Statistics => new StatisticsViewModel(CreateStatisticsService(), CreateUserProductivityService(), CreatePrintService()),
                 NavigationTarget.SystemSettings => new SystemSettingsViewModel(CreateSystemSettingsService()),
                 NavigationTarget.BackupRestore => new BackupRestoreViewModel(CreateBackupRestoreService()),
                 NavigationTarget.AttendanceLog => new AttendanceLogViewModel(CreateAttendanceService()),
@@ -50,9 +51,12 @@ namespace Open_lab.ViewModels
                 NavigationTarget.Constants => new ConstantsViewModel(CreateConstantsService()),
                 NavigationTarget.CompareWithHistory => new CompareWithHistoryViewModel(CreateCompareWithHistoryService(), CreatePatientService(), CreateTestCatalogService()),
                 NavigationTarget.GroupWorksheet => new GroupWorksheetViewModel(CreateGroupWorksheetService(), CreateTestCatalogService(), CreatePrintService()),
+                NavigationTarget.TestClassificationLog => new TestClassificationLogViewModel(CreateTestClassificationService(), CreatePrintService()),
                 NavigationTarget.ExternalLabManagement => new ExternalLabManagementViewModel(CreateExternalLabService(), CreateExternalSettlementService(), CreateTestCatalogService(), CreatePrintService()),
                 NavigationTarget.AttendanceReport => new AttendanceReportViewModel(CreateTardinessService(), CreateUserAdminService()),
                 NavigationTarget.ContractInvoice => new ContractInvoiceViewModel(CreateContractInvoiceService(), CreateTestCatalogService()),
+                NavigationTarget.UserActivityLog => new UserActivityLogViewModel(CreateUserActivityService()),
+                NavigationTarget.SystemUsageMonitor => new SystemUsageMonitorViewModel(CreateSystemMonitorService()),
                 _ => throw new ArgumentOutOfRangeException(nameof(target), target, "Unsupported navigation target.")
             };
         }
@@ -89,6 +93,7 @@ namespace Open_lab.ViewModels
         private ITestCatalogService CreateTestCatalogService() => new TestCatalogService(_dbFactory());
         private IUserAdminService CreateUserAdminService() => new UserAdminService(_dbFactory());
         private IStatisticsService CreateStatisticsService() => new StatisticsService(_dbFactory());
+        private IUserProductivityService CreateUserProductivityService() => new UserProductivityService(_dbFactory());
         private ISystemSettingsService CreateSystemSettingsService() => new SystemSettingsService(_dbFactory());
         private IBackupRestoreService CreateBackupRestoreService() => new BackupRestoreService(_dbFactory());
         private IAccountsTreasuryService CreateAccountsTreasuryService() => new AccountsTreasuryService(_dbFactory());
@@ -107,5 +112,8 @@ namespace Open_lab.ViewModels
         private IExternalSettlementService CreateExternalSettlementService() => new ExternalSettlementService(_dbFactory());
         private ITardinessService CreateTardinessService() => new TardinessService(_dbFactory());
         private IContractInvoiceService CreateContractInvoiceService() => new ContractInvoiceService(_dbFactory());
+        private ITestClassificationService CreateTestClassificationService() => new TestClassificationService(_dbFactory());
+        private IUserActivityService CreateUserActivityService() => new UserActivityService(_dbFactory());
+        private ISystemMonitorService CreateSystemMonitorService() => new SystemMonitorService(_dbFactory());
     }
 }

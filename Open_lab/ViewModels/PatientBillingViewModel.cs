@@ -13,8 +13,11 @@ namespace Open_lab.ViewModels
         private decimal _total;
         private decimal _discount;
         private decimal _paid;
+        private decimal _editPaymentAmount;
         private decimal _netTotal;
         private decimal _balance;
+        private decimal _newChargeAmount;
+        private string _newChargeDescription = string.Empty;
         private string _statusMessage = string.Empty;
         private InvoicePaymentRow? _selectedPayment;
 
@@ -22,11 +25,14 @@ namespace Open_lab.ViewModels
         {
             _invoiceService = invoiceService;
             Payments = new ObservableCollection<InvoicePaymentRow>();
+            AdditionalCharges = new ObservableCollection<AdditionalChargeRow>();
 
             LoadVisitCommand = new RelayCommand(async _ => await LoadVisitAsync(), _ => AppSession.HasPermission(PermissionCodes.AccountsView));
             SaveInvoiceCommand = new RelayCommand(async _ => await SaveInvoiceAsync(), _ => AppSession.HasPermission(PermissionCodes.AccountsEdit));
             AddPaymentCommand = new RelayCommand(async _ => await AddPaymentAsync(), _ => AppSession.HasPermission(PermissionCodes.AccountsEdit) && VisitId > 0);
+            EditPaymentCommand = new RelayCommand(async _ => await EditPaymentAsync(), _ => AppSession.HasPermission(PermissionCodes.AccountsEdit) && SelectedPayment != null && EditPaymentAmount > 0);
             DeletePaymentCommand = new RelayCommand(async _ => await DeletePaymentAsync(), _ => AppSession.HasPermission(PermissionCodes.AccountsEdit) && SelectedPayment != null);
+            AddChargeCommand = new RelayCommand(async _ => await AddChargeAsync(), _ => AppSession.HasPermission(PermissionCodes.AccountsEdit) && VisitId > 0 && NewChargeAmount > 0 && !string.IsNullOrWhiteSpace(NewChargeDescription));
         }
 
         public int VisitId
@@ -37,6 +43,7 @@ namespace Open_lab.ViewModels
                 if (SetProperty(ref _visitId, value))
                 {
                     (AddPaymentCommand as RelayCommand)?.RaiseCanExecuteChanged();
+                    (AddChargeCommand as RelayCommand)?.RaiseCanExecuteChanged();
                 }
             }
         }
@@ -59,6 +66,18 @@ namespace Open_lab.ViewModels
             set => SetProperty(ref _paid, value);
         }
 
+        public decimal EditPaymentAmount
+        {
+            get => _editPaymentAmount;
+            set
+            {
+                if (SetProperty(ref _editPaymentAmount, value))
+                {
+                    (EditPaymentCommand as RelayCommand)?.RaiseCanExecuteChanged();
+                }
+            }
+        }
+
         public decimal NetTotal
         {
             get => _netTotal;
@@ -71,6 +90,30 @@ namespace Open_lab.ViewModels
             private set => SetProperty(ref _balance, value);
         }
 
+        public decimal NewChargeAmount
+        {
+            get => _newChargeAmount;
+            set
+            {
+                if (SetProperty(ref _newChargeAmount, value))
+                {
+                    (AddChargeCommand as RelayCommand)?.RaiseCanExecuteChanged();
+                }
+            }
+        }
+
+        public string NewChargeDescription
+        {
+            get => _newChargeDescription;
+            set
+            {
+                if (SetProperty(ref _newChargeDescription, value))
+                {
+                    (AddChargeCommand as RelayCommand)?.RaiseCanExecuteChanged();
+                }
+            }
+        }
+
         public InvoicePaymentRow? SelectedPayment
         {
             get => _selectedPayment;
@@ -78,12 +121,15 @@ namespace Open_lab.ViewModels
             {
                 if (SetProperty(ref _selectedPayment, value))
                 {
+                    EditPaymentAmount = value?.Amount ?? 0;
+                    (EditPaymentCommand as RelayCommand)?.RaiseCanExecuteChanged();
                     (DeletePaymentCommand as RelayCommand)?.RaiseCanExecuteChanged();
                 }
             }
         }
 
         public ObservableCollection<InvoicePaymentRow> Payments { get; }
+        public ObservableCollection<AdditionalChargeRow> AdditionalCharges { get; }
 
         public string StatusMessage
         {
@@ -94,7 +140,9 @@ namespace Open_lab.ViewModels
         public ICommand LoadVisitCommand { get; }
         public ICommand SaveInvoiceCommand { get; }
         public ICommand AddPaymentCommand { get; }
+        public ICommand EditPaymentCommand { get; }
         public ICommand DeletePaymentCommand { get; }
+        public ICommand AddChargeCommand { get; }
 
         private async Task LoadVisitAsync()
         {
@@ -116,6 +164,7 @@ namespace Open_lab.ViewModels
                     NetTotal = invoice.NetTotal;
                     Balance = invoice.Balance;
                     await LoadPaymentsAsync(invoice.InvoiceId);
+                    await LoadAdditionalChargesAsync(invoice.InvoiceId);
                 }
                 else
                 {
@@ -124,6 +173,7 @@ namespace Open_lab.ViewModels
                     NetTotal = Total;
                     Balance = Total;
                     Payments.Clear();
+                    AdditionalCharges.Clear();
                 }
 
                 StatusMessage = "تم تحميل بيانات الفاتورة.";
@@ -204,6 +254,56 @@ namespace Open_lab.ViewModels
             }
         }
 
+        private async Task EditPaymentAsync()
+        {
+            if (SelectedPayment == null)
+            {
+                return;
+            }
+
+            if (EditPaymentAmount <= 0)
+            {
+                StatusMessage = "أدخل مبلغ تعديل صالح.";
+                return;
+            }
+
+            try
+            {
+                await _invoiceService.EditPaymentAsync(
+                    SelectedPayment.PaymentId,
+                    EditPaymentAmount,
+                    AppSession.UserId > 0 ? AppSession.UserId : 1);
+                await LoadVisitAsync();
+                StatusMessage = "تم تعديل الدفعة.";
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = $"خطأ: {ex.Message}";
+            }
+        }
+
+        private async Task AddChargeAsync()
+        {
+            if (VisitId <= 0)
+            {
+                return;
+            }
+
+            try
+            {
+                var invoice = await _invoiceService.CreateOrUpdateInvoiceAsync(VisitId, Discount, 0);
+                await _invoiceService.AddAdditionalChargeAsync(invoice.InvoiceId, NewChargeDescription, NewChargeAmount);
+                NewChargeDescription = string.Empty;
+                NewChargeAmount = 0;
+                await LoadVisitAsync();
+                StatusMessage = "تمت إضافة الرسوم الإضافية.";
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = $"خطأ: {ex.Message}";
+            }
+        }
+
         private async Task LoadPaymentsAsync(int invoiceId)
         {
             var items = await _invoiceService.GetPaymentsAsync(invoiceId);
@@ -216,6 +316,21 @@ namespace Open_lab.ViewModels
                     Amount = payment.Amount,
                     PaymentDate = payment.PaymentDate,
                     UserId = payment.UserId
+                });
+            }
+        }
+
+        private async Task LoadAdditionalChargesAsync(int invoiceId)
+        {
+            var charges = await _invoiceService.GetAdditionalChargesAsync(invoiceId);
+            AdditionalCharges.Clear();
+            foreach (var charge in charges)
+            {
+                AdditionalCharges.Add(new AdditionalChargeRow
+                {
+                    AdditionalChargeId = charge.AdditionalChargeId,
+                    Description = charge.Description,
+                    Amount = charge.Amount
                 });
             }
         }

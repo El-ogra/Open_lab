@@ -20,5 +20,6 @@ namespace Open_lab.Services
         Task<List<BulkClaimRow>> GetPendingInvoicesAsync(int referralId, DateTime from, DateTime to);
         Task<int> CreateContractInvoiceAsync(int referralId, string invoiceNumber, DateTime from, DateTime to);
         Task<List<Models.ContractInvoice>> GetContractInvoicesAsync(int referralId);
+        Task<Models.ContractInvoice> SettleContractInvoiceAsync(int contractInvoiceId);
     }
 }

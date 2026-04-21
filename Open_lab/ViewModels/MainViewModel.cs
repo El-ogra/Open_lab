@@ -21,6 +21,7 @@ namespace Open_lab.ViewModels
             NavigatePatientRegistrationCommand = new RelayCommand(_ => NavigateTo(NavigationTarget.PatientRegistration), _ => CanNavigate(PermissionCodes.PatientsView));
             NavigatePatientTestsCommand = new RelayCommand(_ => NavigateTo(NavigationTarget.PatientTestsSelection), _ => CanNavigate(PermissionCodes.VisitsView));
             NavigatePatientBillingCommand = new RelayCommand(_ => NavigateTo(NavigationTarget.PatientBilling), _ => CanNavigate(PermissionCodes.AccountsView));
+            NavigatePatientBillingByDateCommand = new RelayCommand(_ => NavigateTo(NavigationTarget.PatientBillingByDate), _ => CanNavigate(PermissionCodes.AccountsView));
             NavigateResultsEntryCommand = new RelayCommand(_ => NavigateTo(NavigationTarget.ResultsEntry), _ => CanNavigate(PermissionCodes.ResultsView));
             NavigateReportViewerCommand = new RelayCommand(_ => NavigateTo(NavigationTarget.ReportViewer), _ => CanNavigate(PermissionCodes.ReportsView));
 
@@ -49,9 +50,12 @@ namespace Open_lab.ViewModels
             NavigateConstantsCommand = new RelayCommand(_ => NavigateTo(NavigationTarget.Constants), _ => CanNavigate(PermissionCodes.ConstantsView));
             NavigateCompareWithHistoryCommand = new RelayCommand(_ => NavigateTo(NavigationTarget.CompareWithHistory), _ => CanNavigate(PermissionCodes.ResultsView));
             NavigateGroupWorksheetCommand = new RelayCommand(_ => NavigateTo(NavigationTarget.GroupWorksheet), _ => CanNavigate(PermissionCodes.TestsView));
+            NavigateTestClassificationLogCommand = new RelayCommand(_ => NavigateTo(NavigationTarget.TestClassificationLog), _ => CanNavigate(PermissionCodes.TestsView));
             NavigateExternalLabManagementCommand = new RelayCommand(_ => NavigateTo(NavigationTarget.ExternalLabManagement), _ => CanNavigate(PermissionCodes.TestsView));
             NavigateAttendanceReportCommand = new RelayCommand(_ => NavigateTo(NavigationTarget.AttendanceReport), _ => CanNavigate(PermissionCodes.UsersView));
             NavigateContractInvoiceCommand = new RelayCommand(_ => NavigateTo(NavigationTarget.ContractInvoice), _ => CanNavigate(PermissionCodes.AccountsView));
+            NavigateUserActivityLogCommand = new RelayCommand(_ => NavigateTo(NavigationTarget.UserActivityLog), _ => CanNavigate(PermissionCodes.UsersView));
+            NavigateSystemUsageMonitorCommand = new RelayCommand(_ => NavigateTo(NavigationTarget.SystemUsageMonitor), _ => CanNavigate(PermissionCodes.UsersView));
 
             LogoutCommand = new RelayCommand(async _ => await LogoutAsync(), _ => IsLoggedIn);
 
@@ -76,6 +80,7 @@ namespace Open_lab.ViewModels
         public ICommand NavigatePatientRegistrationCommand { get; }
         public ICommand NavigatePatientTestsCommand { get; }
         public ICommand NavigatePatientBillingCommand { get; }
+        public ICommand NavigatePatientBillingByDateCommand { get; }
         public ICommand NavigateResultsEntryCommand { get; }
         public ICommand NavigateReportViewerCommand { get; }
         public ICommand NavigatePatientSearchCommand { get; }
@@ -103,9 +108,12 @@ namespace Open_lab.ViewModels
         public ICommand NavigateConstantsCommand { get; }
         public ICommand NavigateCompareWithHistoryCommand { get; }
         public ICommand NavigateGroupWorksheetCommand { get; }
+        public ICommand NavigateTestClassificationLogCommand { get; }
         public ICommand NavigateExternalLabManagementCommand { get; }
         public ICommand NavigateAttendanceReportCommand { get; }
         public ICommand NavigateContractInvoiceCommand { get; }
+        public ICommand NavigateUserActivityLogCommand { get; }
+        public ICommand NavigateSystemUsageMonitorCommand { get; }
         public ICommand LogoutCommand { get; }
 
         private void ShowLogin()
@@ -200,6 +208,7 @@ namespace Open_lab.ViewModels
             (NavigatePatientRegistrationCommand as RelayCommand)?.RaiseCanExecuteChanged();
             (NavigatePatientTestsCommand as RelayCommand)?.RaiseCanExecuteChanged();
             (NavigatePatientBillingCommand as RelayCommand)?.RaiseCanExecuteChanged();
+            (NavigatePatientBillingByDateCommand as RelayCommand)?.RaiseCanExecuteChanged();
             (NavigateResultsEntryCommand as RelayCommand)?.RaiseCanExecuteChanged();
             (NavigateReportViewerCommand as RelayCommand)?.RaiseCanExecuteChanged();
             (NavigatePatientSearchCommand as RelayCommand)?.RaiseCanExecuteChanged();
@@ -227,9 +236,12 @@ namespace Open_lab.ViewModels
             (NavigateConstantsCommand as RelayCommand)?.RaiseCanExecuteChanged();
             (NavigateCompareWithHistoryCommand as RelayCommand)?.RaiseCanExecuteChanged();
             (NavigateGroupWorksheetCommand as RelayCommand)?.RaiseCanExecuteChanged();
+            (NavigateTestClassificationLogCommand as RelayCommand)?.RaiseCanExecuteChanged();
             (NavigateExternalLabManagementCommand as RelayCommand)?.RaiseCanExecuteChanged();
             (NavigateAttendanceReportCommand as RelayCommand)?.RaiseCanExecuteChanged();
             (NavigateContractInvoiceCommand as RelayCommand)?.RaiseCanExecuteChanged();
+            (NavigateUserActivityLogCommand as RelayCommand)?.RaiseCanExecuteChanged();
+            (NavigateSystemUsageMonitorCommand as RelayCommand)?.RaiseCanExecuteChanged();
             (LogoutCommand as RelayCommand)?.RaiseCanExecuteChanged();
         }
     }

@@ -8,6 +8,7 @@ namespace Open_lab.ViewModels
         PatientRegistration,
         PatientTestsSelection,
         PatientBilling,
+        PatientBillingByDate,
         ResultsEntry,
         ReportViewer,
         PatientSearch,
@@ -35,8 +36,11 @@ namespace Open_lab.ViewModels
         Constants,
         CompareWithHistory,
         GroupWorksheet,
+        TestClassificationLog,
         ExternalLabManagement,
         AttendanceReport,
-        ContractInvoice
+        ContractInvoice,
+        UserActivityLog,
+        SystemUsageMonitor
     }
 }

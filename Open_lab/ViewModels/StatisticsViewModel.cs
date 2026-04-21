@@ -10,6 +10,7 @@ namespace Open_lab.ViewModels
     public class StatisticsViewModel : BaseViewModel
     {
         private readonly IStatisticsService _statisticsService;
+        private readonly IUserProductivityService _userProductivityService;
         private readonly IPrintService _printService;
         private DateTime _from = DateTime.Today.AddDays(-30);
         private DateTime _to = DateTime.Today;
@@ -22,15 +23,20 @@ namespace Open_lab.ViewModels
         private decimal _totalPaid;
         private string _statusMessage = string.Empty;
 
-        public StatisticsViewModel(IStatisticsService statisticsService, IPrintService printService)
+        public StatisticsViewModel(IStatisticsService statisticsService, IUserProductivityService userProductivityService, IPrintService printService)
         {
             _statisticsService = statisticsService;
+            _userProductivityService = userProductivityService;
             _printService = printService;
 
             Genders = new ObservableCollection<string> { "الكل", "ذكر", "أنثى" };
             Referrals = new ObservableCollection<StatisticsReferralLookup>();
             ByGender = new ObservableCollection<StatisticsGenderRow>();
             ByReferral = new ObservableCollection<StatisticsReferralRow>();
+            MonthlyAnalysis = new ObservableCollection<MonthlyAnalysisRow>();
+            TopTests = new ObservableCollection<TopTestRow>();
+            YearlySamples = new ObservableCollection<YearlySampleRow>();
+            UserProductivity = new ObservableCollection<UserPerformanceRow>();
 
             LoadCommand = new RelayCommand(async _ => await LoadAsync(), _ => AppSession.HasPermission(PermissionCodes.StatisticsView));
             PrintCommand = new RelayCommand(async _ => await PrintAsync(), _ => AppSession.HasPermission(PermissionCodes.StatisticsView));
@@ -54,6 +60,10 @@ namespace Open_lab.ViewModels
         public ObservableCollection<StatisticsReferralLookup> Referrals { get; }
         public ObservableCollection<StatisticsGenderRow> ByGender { get; }
         public ObservableCollection<StatisticsReferralRow> ByReferral { get; }
+        public ObservableCollection<MonthlyAnalysisRow> MonthlyAnalysis { get; }
+        public ObservableCollection<TopTestRow> TopTests { get; }
+        public ObservableCollection<YearlySampleRow> YearlySamples { get; }
+        public ObservableCollection<UserPerformanceRow> UserProductivity { get; }
 
         public string SelectedGender
         {
@@ -151,6 +161,34 @@ namespace Open_lab.ViewModels
                 foreach (var row in snapshot.ByReferral)
                 {
                     ByReferral.Add(row);
+                }
+
+                var monthly = await _statisticsService.GetMonthlyAnalysisAsync(From.Year);
+                MonthlyAnalysis.Clear();
+                foreach (var row in monthly)
+                {
+                    MonthlyAnalysis.Add(row);
+                }
+
+                var topTests = await _statisticsService.GetTop10TestsAsync(from, to);
+                TopTests.Clear();
+                foreach (var row in topTests)
+                {
+                    TopTests.Add(row);
+                }
+
+                var yearly = await _statisticsService.GetSampleCountPerYearAsync(5);
+                YearlySamples.Clear();
+                foreach (var row in yearly)
+                {
+                    YearlySamples.Add(row);
+                }
+
+                var productivity = await _userProductivityService.GetUserPerformanceAsync(from, to);
+                UserProductivity.Clear();
+                foreach (var row in productivity)
+                {
+                    UserProductivity.Add(row);
                 }
 
                 StatusMessage = "تم تحميل الإحصائيات.";

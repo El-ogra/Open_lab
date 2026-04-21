@@ -79,6 +79,21 @@ namespace Open_lab.Services
             await _db.SaveChangesAsync();
         }
 
+        public async Task MarkSeparatedAsync(int visitTestId, string? separationType = null)
+        {
+            var sample = await _db.SampleCollections.FirstOrDefaultAsync(s => s.VisitTestId == visitTestId);
+            if (sample == null)
+            {
+                throw new InvalidOperationException("يجب تسجيل السحب أولاً قبل الفصل.");
+            }
+
+            sample.IsSeparated = true;
+            sample.Status = string.IsNullOrWhiteSpace(separationType)
+                ? "مفصولة"
+                : $"مفصولة - {separationType.Trim()}";
+            await _db.SaveChangesAsync();
+        }
+
         public async Task MarkNotCollectedAsync(int visitTestId)
         {
             var sample = await _db.SampleCollections.FirstOrDefaultAsync(s => s.VisitTestId == visitTestId);

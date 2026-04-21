@@ -34,6 +34,54 @@ namespace Open_lab.Services
             return _db.Patients.AsNoTracking().FirstOrDefaultAsync(p => p.LabId == labId.Trim());
         }
 
+        public Task<MedicalHistory?> GetMedicalHistoryAsync(int patientId)
+        {
+            if (patientId <= 0)
+            {
+                throw new ArgumentException("PatientId is required.", nameof(patientId));
+            }
+
+            return _db.MedicalHistories
+                .AsNoTracking()
+                .FirstOrDefaultAsync(m => m.PatientId == patientId);
+        }
+
+        public async Task SaveMedicalHistoryAsync(int patientId, MedicalHistory history)
+        {
+            if (patientId <= 0)
+            {
+                throw new ArgumentException("PatientId is required.", nameof(patientId));
+            }
+
+            if (history == null)
+            {
+                throw new ArgumentNullException(nameof(history));
+            }
+
+            var patientExists = await _db.Patients.AnyAsync(p => p.PatientId == patientId);
+            if (!patientExists)
+            {
+                throw new InvalidOperationException("Patient not found.");
+            }
+
+            var current = await _db.MedicalHistories.FirstOrDefaultAsync(m => m.PatientId == patientId);
+            if (current == null)
+            {
+                current = new MedicalHistory
+                {
+                    PatientId = patientId
+                };
+                _db.MedicalHistories.Add(current);
+            }
+
+            current.ChronicDiseases = string.IsNullOrWhiteSpace(history.ChronicDiseases) ? null : history.ChronicDiseases.Trim();
+            current.Allergies = string.IsNullOrWhiteSpace(history.Allergies) ? null : history.Allergies.Trim();
+            current.Medications = string.IsNullOrWhiteSpace(history.Medications) ? null : history.Medications.Trim();
+            current.Notes = string.IsNullOrWhiteSpace(history.Notes) ? null : history.Notes.Trim();
+
+            await _db.SaveChangesAsync();
+        }
+
         public Task<List<Patient>> SearchAsync(string? name, string? phone)
         {
             var query = _db.Patients.AsNoTracking().AsQueryable();

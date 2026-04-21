@@ -8,6 +8,8 @@
             <RowDefinition Height="*" />
             <RowDefinition Height="*" />
             <RowDefinition Height="*" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
         <WrapPanel Margin="0,0,0,12">
@@ -23,7 +25,7 @@
             <TextBlock Text="{Binding StatusMessage}" Margin="12,0,0,0" VerticalAlignment="Center" TextWrapping="Wrap" />
         </WrapPanel>
 
-        <UniformGrid Grid.Row="1" Columns="3" Margin="0,0,0,12">
+        <UniformGrid Grid.Row="1" Columns="6" Margin="0,0,0,12">
             <Border Margin="4" Padding="8" Background="#F4F4F4">
                 <StackPanel>
                     <TextBlock Text="إجمالي الفواتير" />
@@ -40,6 +42,24 @@
                 <StackPanel>
                     <TextBlock Text="المتبقي" />
                     <TextBlock Text="{Binding TotalBalance, StringFormat=N2}" FontWeight="Bold" />
+                </StackPanel>
+            </Border>
+            <Border Margin="4" Padding="8" Background="#F4F4F4">
+                <StackPanel>
+                    <TextBlock Text="إجمالي الخصم" />
+                    <TextBlock Text="{Binding TotalDiscount, StringFormat=N2}" FontWeight="Bold" />
+                </StackPanel>
+            </Border>
+            <Border Margin="4" Padding="8" Background="#F4F4F4">
+                <StackPanel>
+                    <TextBlock Text="إجمالي المصروفات" />
+                    <TextBlock Text="{Binding TotalExpenses, StringFormat=N2}" FontWeight="Bold" />
+                </StackPanel>
+            </Border>
+            <Border Margin="4" Padding="8" Background="#F4F4F4">
+                <StackPanel>
+                    <TextBlock Text="صافي الربح" />
+                    <TextBlock Text="{Binding NetProfit, StringFormat=N2}" FontWeight="Bold" />
                 </StackPanel>
             </Border>
         </UniformGrid>
@@ -74,6 +94,29 @@
                     <DataGridTextColumn Header="الفواتير" Binding="{Binding TotalInvoiced, StringFormat=N2}" Width="130" />
                     <DataGridTextColumn Header="المدفوع" Binding="{Binding TotalPaid, StringFormat=N2}" Width="130" />
                     <DataGridTextColumn Header="المتبقي" Binding="{Binding TotalBalance, StringFormat=N2}" Width="130" />
+                </DataGrid.Columns>
+            </DataGrid>
+        </GroupBox>
+
+        <GroupBox Grid.Row="5" Header="جرد مالي حسب الفرع" Margin="0,8,0,8">
+            <DataGrid ItemsSource="{Binding ByBranch}" AutoGenerateColumns="False">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="الفرع" Binding="{Binding BranchName}" Width="*" />
+                    <DataGridTextColumn Header="عدد الزيارات" Binding="{Binding VisitsCount}" Width="120" />
+                    <DataGridTextColumn Header="الفواتير" Binding="{Binding TotalInvoiced, StringFormat=N2}" Width="130" />
+                    <DataGridTextColumn Header="المدفوع" Binding="{Binding TotalPaid, StringFormat=N2}" Width="130" />
+                    <DataGridTextColumn Header="المتبقي" Binding="{Binding TotalBalance, StringFormat=N2}" Width="130" />
+                </DataGrid.Columns>
+            </DataGrid>
+        </GroupBox>
+
+        <GroupBox Grid.Row="6" Header="جرد مالي حسب الطبيب">
+            <DataGrid ItemsSource="{Binding ByDoctor}" AutoGenerateColumns="False">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="الطبيب" Binding="{Binding DoctorName}" Width="*" />
+                    <DataGridTextColumn Header="عدد الزيارات" Binding="{Binding VisitsCount}" Width="120" />
+                    <DataGridTextColumn Header="صافي الفواتير" Binding="{Binding TotalInvoiced, StringFormat=N2}" Width="150" />
+                    <DataGridTextColumn Header="العمولة" Binding="{Binding CommissionAmount, StringFormat=N2}" Width="130" />
                 </DataGrid.Columns>
             </DataGrid>
         </GroupBox>

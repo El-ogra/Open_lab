@@ -16,6 +16,10 @@ namespace Open_lab.ViewModels
         private DateTime? _birthDate;
         private string? _phone;
         private string? _address;
+        private string? _chronicDiseases;
+        private string? _allergies;
+        private string? _medications;
+        private string? _medicalNotes;
         private int _patientId;
         private string _statusMessage = string.Empty;
         private Patient? _selectedPatient;
@@ -83,6 +87,30 @@ namespace Open_lab.ViewModels
             set => SetProperty(ref _address, value);
         }
 
+        public string? ChronicDiseases
+        {
+            get => _chronicDiseases;
+            set => SetProperty(ref _chronicDiseases, value);
+        }
+
+        public string? Allergies
+        {
+            get => _allergies;
+            set => SetProperty(ref _allergies, value);
+        }
+
+        public string? Medications
+        {
+            get => _medications;
+            set => SetProperty(ref _medications, value);
+        }
+
+        public string? MedicalNotes
+        {
+            get => _medicalNotes;
+            set => SetProperty(ref _medicalNotes, value);
+        }
+
         public string StatusMessage
         {
             get => _statusMessage;
@@ -98,7 +126,7 @@ namespace Open_lab.ViewModels
             {
                 if (SetProperty(ref _selectedPatient, value) && value != null)
                 {
-                    LoadFromPatient(value);
+                    _ = LoadFromPatientAsync(value);
                 }
             }
         }
@@ -128,6 +156,7 @@ namespace Open_lab.ViewModels
 
                     PatientId = created.PatientId;
                     LabId = created.LabId;
+                    await SaveMedicalHistoryAsync();
                     StatusMessage = "تم إنشاء المريض بنجاح.";
                 }
                 else
@@ -143,6 +172,7 @@ namespace Open_lab.ViewModels
                         Address = Address
                     });
 
+                    await SaveMedicalHistoryAsync();
                     StatusMessage = "تم تحديث بيانات المريض.";
                 }
             }
@@ -186,7 +216,7 @@ namespace Open_lab.ViewModels
                     return;
                 }
 
-                LoadFromPatient(patient);
+                await LoadFromPatientAsync(patient);
                 StatusMessage = "تم تحميل بيانات المريض.";
             }
             catch (Exception ex)
@@ -240,11 +270,15 @@ namespace Open_lab.ViewModels
             BirthDate = null;
             Phone = null;
             Address = null;
+            ChronicDiseases = null;
+            Allergies = null;
+            Medications = null;
+            MedicalNotes = null;
             SelectedPatient = null;
             await GenerateLabIdAsync();
         }
 
-        private void LoadFromPatient(Patient patient)
+        private async Task LoadFromPatientAsync(Patient patient)
         {
             PatientId = patient.PatientId;
             LabId = patient.LabId;
@@ -253,6 +287,32 @@ namespace Open_lab.ViewModels
             BirthDate = patient.BirthDate;
             Phone = patient.Phone;
             Address = patient.Address;
+            await LoadMedicalHistoryAsync(patient.PatientId);
+        }
+
+        private async Task LoadMedicalHistoryAsync(int patientId)
+        {
+            var history = await _patientService.GetMedicalHistoryAsync(patientId);
+            ChronicDiseases = history?.ChronicDiseases;
+            Allergies = history?.Allergies;
+            Medications = history?.Medications;
+            MedicalNotes = history?.Notes;
+        }
+
+        private async Task SaveMedicalHistoryAsync()
+        {
+            if (PatientId <= 0)
+            {
+                return;
+            }
+
+            await _patientService.SaveMedicalHistoryAsync(PatientId, new MedicalHistory
+            {
+                ChronicDiseases = ChronicDiseases,
+                Allergies = Allergies,
+                Medications = Medications,
+                Notes = MedicalNotes
+            });
         }
     }
 }

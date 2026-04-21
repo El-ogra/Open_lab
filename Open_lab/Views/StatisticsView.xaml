@@ -4,87 +4,120 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d">
-    <Grid Margin="16">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
-            <RowDefinition Height="*" />
-        </Grid.RowDefinitions>
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="16">
+            <WrapPanel>
+                <TextBlock Text="من" VerticalAlignment="Center" Margin="0,0,8,0" />
+                <DatePicker SelectedDate="{Binding From}" Width="150" />
+                <TextBlock Text="إلى" VerticalAlignment="Center" Margin="12,0,8,0" />
+                <DatePicker SelectedDate="{Binding To}" Width="150" />
 
-        <WrapPanel>
-            <TextBlock Text="من" VerticalAlignment="Center" Margin="0,0,8,0" />
-            <DatePicker SelectedDate="{Binding From}" Width="150" />
-            <TextBlock Text="إلى" VerticalAlignment="Center" Margin="12,0,8,0" />
-            <DatePicker SelectedDate="{Binding To}" Width="150" />
+                <TextBlock Text="الجنس" VerticalAlignment="Center" Margin="12,0,8,0" />
+                <ComboBox Width="120" ItemsSource="{Binding Genders}" SelectedItem="{Binding SelectedGender}" />
 
-            <TextBlock Text="الجنس" VerticalAlignment="Center" Margin="12,0,8,0" />
-            <ComboBox Width="120" ItemsSource="{Binding Genders}" SelectedItem="{Binding SelectedGender}" />
+                <TextBlock Text="الجهة" VerticalAlignment="Center" Margin="12,0,8,0" />
+                <ComboBox Width="220" ItemsSource="{Binding Referrals}" SelectedItem="{Binding SelectedReferral}" DisplayMemberPath="Name" />
 
-            <TextBlock Text="الجهة" VerticalAlignment="Center" Margin="12,0,8,0" />
-            <ComboBox Width="220" ItemsSource="{Binding Referrals}" SelectedItem="{Binding SelectedReferral}" DisplayMemberPath="Name" />
+                <Button Content="تحميل" Margin="12,0,0,0" Command="{Binding LoadCommand}" />
+                <Button Content="طباعة" Margin="8,0,0,0" Command="{Binding PrintCommand}" />
+            </WrapPanel>
 
-            <Button Content="تحميل" Margin="12,0,0,0" Command="{Binding LoadCommand}" />
-            <Button Content="طباعة" Margin="8,0,0,0" Command="{Binding PrintCommand}" />
-        </WrapPanel>
+            <UniformGrid Columns="5" Margin="0,12,0,0">
+                <Border Margin="4" Padding="8" Background="#F4F4F4">
+                    <StackPanel>
+                        <TextBlock Text="عدد الزيارات" />
+                        <TextBlock Text="{Binding VisitCount}" FontWeight="Bold" />
+                    </StackPanel>
+                </Border>
+                <Border Margin="4" Padding="8" Background="#F4F4F4">
+                    <StackPanel>
+                        <TextBlock Text="عدد المرضى" />
+                        <TextBlock Text="{Binding PatientCount}" FontWeight="Bold" />
+                    </StackPanel>
+                </Border>
+                <Border Margin="4" Padding="8" Background="#F4F4F4">
+                    <StackPanel>
+                        <TextBlock Text="عدد التحاليل" />
+                        <TextBlock Text="{Binding TestCount}" FontWeight="Bold" />
+                    </StackPanel>
+                </Border>
+                <Border Margin="4" Padding="8" Background="#F4F4F4">
+                    <StackPanel>
+                        <TextBlock Text="إجمالي الفواتير" />
+                        <TextBlock Text="{Binding TotalRevenue, StringFormat=N2}" FontWeight="Bold" />
+                    </StackPanel>
+                </Border>
+                <Border Margin="4" Padding="8" Background="#F4F4F4">
+                    <StackPanel>
+                        <TextBlock Text="إجمالي المدفوع" />
+                        <TextBlock Text="{Binding TotalPaid, StringFormat=N2}" FontWeight="Bold" />
+                    </StackPanel>
+                </Border>
+            </UniformGrid>
 
-        <UniformGrid Grid.Row="1" Columns="5" Margin="0,12,0,0">
-            <Border Margin="4" Padding="8" Background="#F4F4F4">
-                <StackPanel>
-                    <TextBlock Text="عدد الزيارات" />
-                    <TextBlock Text="{Binding VisitCount}" FontWeight="Bold" />
-                </StackPanel>
-            </Border>
-            <Border Margin="4" Padding="8" Background="#F4F4F4">
-                <StackPanel>
-                    <TextBlock Text="عدد المرضى" />
-                    <TextBlock Text="{Binding PatientCount}" FontWeight="Bold" />
-                </StackPanel>
-            </Border>
-            <Border Margin="4" Padding="8" Background="#F4F4F4">
-                <StackPanel>
-                    <TextBlock Text="عدد التحاليل" />
-                    <TextBlock Text="{Binding TestCount}" FontWeight="Bold" />
-                </StackPanel>
-            </Border>
-            <Border Margin="4" Padding="8" Background="#F4F4F4">
-                <StackPanel>
-                    <TextBlock Text="إجمالي الفواتير" />
-                    <TextBlock Text="{Binding TotalRevenue, StringFormat=N2}" FontWeight="Bold" />
-                </StackPanel>
-            </Border>
-            <Border Margin="4" Padding="8" Background="#F4F4F4">
-                <StackPanel>
-                    <TextBlock Text="إجمالي المدفوع" />
-                    <TextBlock Text="{Binding TotalPaid, StringFormat=N2}" FontWeight="Bold" />
-                </StackPanel>
-            </Border>
-        </UniformGrid>
+            <TextBlock Text="{Binding StatusMessage}" Foreground="DarkGreen" Margin="0,10,0,6" TextWrapping="Wrap" />
 
-        <TextBlock Grid.Row="2" Text="{Binding StatusMessage}" Foreground="DarkGreen" Margin="0,10,0,6" TextWrapping="Wrap" />
+            <GroupBox Header="التحليل حسب الجنس" Margin="0,0,0,8">
+                <DataGrid ItemsSource="{Binding ByGender}" AutoGenerateColumns="False" Height="180">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="الجنس" Binding="{Binding Gender}" Width="*" />
+                        <DataGridTextColumn Header="عدد الزيارات" Binding="{Binding VisitsCount}" Width="140" />
+                        <DataGridTextColumn Header="عدد التحاليل" Binding="{Binding TestsCount}" Width="140" />
+                        <DataGridTextColumn Header="الإيراد" Binding="{Binding Revenue, StringFormat=N2}" Width="140" />
+                    </DataGrid.Columns>
+                </DataGrid>
+            </GroupBox>
 
-        <GroupBox Grid.Row="3" Header="التحليل حسب الجنس" Margin="0,0,0,8">
-            <DataGrid ItemsSource="{Binding ByGender}" AutoGenerateColumns="False">
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="الجنس" Binding="{Binding Gender}" Width="*" />
-                    <DataGridTextColumn Header="عدد الزيارات" Binding="{Binding VisitsCount}" Width="140" />
-                    <DataGridTextColumn Header="عدد التحاليل" Binding="{Binding TestsCount}" Width="140" />
-                    <DataGridTextColumn Header="الإيراد" Binding="{Binding Revenue, StringFormat=N2}" Width="140" />
-                </DataGrid.Columns>
-            </DataGrid>
-        </GroupBox>
+            <GroupBox Header="التحليل حسب الجهة" Margin="0,0,0,8">
+                <DataGrid ItemsSource="{Binding ByReferral}" AutoGenerateColumns="False" Height="180">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="الجهة" Binding="{Binding ReferralName}" Width="*" />
+                        <DataGridTextColumn Header="عدد الزيارات" Binding="{Binding VisitsCount}" Width="130" />
+                        <DataGridTextColumn Header="عدد التحاليل" Binding="{Binding TestsCount}" Width="130" />
+                        <DataGridTextColumn Header="الإيراد" Binding="{Binding Revenue, StringFormat=N2}" Width="130" />
+                        <DataGridTextColumn Header="المدفوع" Binding="{Binding Paid, StringFormat=N2}" Width="130" />
+                    </DataGrid.Columns>
+                </DataGrid>
+            </GroupBox>
 
-        <GroupBox Grid.Row="4" Header="التحليل حسب الجهة">
-            <DataGrid ItemsSource="{Binding ByReferral}" AutoGenerateColumns="False">
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="الجهة" Binding="{Binding ReferralName}" Width="*" />
-                    <DataGridTextColumn Header="عدد الزيارات" Binding="{Binding VisitsCount}" Width="130" />
-                    <DataGridTextColumn Header="عدد التحاليل" Binding="{Binding TestsCount}" Width="130" />
-                    <DataGridTextColumn Header="الإيراد" Binding="{Binding Revenue, StringFormat=N2}" Width="130" />
-                    <DataGridTextColumn Header="المدفوع" Binding="{Binding Paid, StringFormat=N2}" Width="130" />
-                </DataGrid.Columns>
-            </DataGrid>
-        </GroupBox>
-    </Grid>
+            <GroupBox Header="توزيع المرضى حسب الشهر" Margin="0,0,0,8">
+                <DataGrid ItemsSource="{Binding MonthlyAnalysis}" AutoGenerateColumns="False" Height="180">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="الشهر" Binding="{Binding MonthName}" Width="*" />
+                        <DataGridTextColumn Header="الزيارات" Binding="{Binding VisitCount}" Width="120" />
+                        <DataGridTextColumn Header="التحاليل" Binding="{Binding TestCount}" Width="120" />
+                        <DataGridTextColumn Header="الإيراد" Binding="{Binding Revenue, StringFormat=N2}" Width="140" />
+                    </DataGrid.Columns>
+                </DataGrid>
+            </GroupBox>
+
+            <GroupBox Header="أكثر التحاليل طلباً (Top 10)" Margin="0,0,0,8">
+                <DataGrid ItemsSource="{Binding TopTests}" AutoGenerateColumns="False" Height="180">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="التحليل" Binding="{Binding TestName}" Width="*" />
+                        <DataGridTextColumn Header="عدد الطلبات" Binding="{Binding DemandCount}" Width="130" />
+                        <DataGridTextColumn Header="الإيراد" Binding="{Binding TotalRevenue, StringFormat=N2}" Width="140" />
+                    </DataGrid.Columns>
+                </DataGrid>
+            </GroupBox>
+
+            <GroupBox Header="عدد العينات سنوياً" Margin="0,0,0,8">
+                <DataGrid ItemsSource="{Binding YearlySamples}" AutoGenerateColumns="False" Height="160">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="السنة" Binding="{Binding Year}" Width="160" />
+                        <DataGridTextColumn Header="عدد العينات" Binding="{Binding SamplesCount}" Width="200" />
+                    </DataGrid.Columns>
+                </DataGrid>
+            </GroupBox>
+
+            <GroupBox Header="تقرير إنتاجية المستخدمين" Margin="0,0,0,8">
+                <DataGrid ItemsSource="{Binding UserProductivity}" AutoGenerateColumns="False" Height="180">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="المستخدم" Binding="{Binding Username}" Width="*" />
+                        <DataGridTextColumn Header="عدد التحاليل المكتملة" Binding="{Binding CompletedTestsCount}" Width="220" />
+                    </DataGrid.Columns>
+                </DataGrid>
+            </GroupBox>
+        </StackPanel>
+    </ScrollViewer>
 </UserControl>

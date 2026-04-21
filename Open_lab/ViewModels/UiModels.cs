@@ -79,6 +79,23 @@ namespace Open_lab.ViewModels
         public decimal TotalBalance { get; set; }
     }
 
+    public class TreasuryByBranchRow
+    {
+        public string BranchName { get; set; } = string.Empty;
+        public int VisitsCount { get; set; }
+        public decimal TotalInvoiced { get; set; }
+        public decimal TotalPaid { get; set; }
+        public decimal TotalBalance { get; set; }
+    }
+
+    public class TreasuryByDoctorRow
+    {
+        public string DoctorName { get; set; } = string.Empty;
+        public int VisitsCount { get; set; }
+        public decimal TotalInvoiced { get; set; }
+        public decimal CommissionAmount { get; set; }
+    }
+
     public class StatisticsGenderRow
     {
         public string Gender { get; set; } = string.Empty;
@@ -102,6 +119,13 @@ namespace Open_lab.ViewModels
         public decimal Amount { get; set; }
         public DateTime PaymentDate { get; set; }
         public int UserId { get; set; }
+    }
+
+    public class AdditionalChargeRow
+    {
+        public int AdditionalChargeId { get; set; }
+        public string Description { get; set; } = string.Empty;
+        public decimal Amount { get; set; }
     }
 
     public class SampleCollectionRow

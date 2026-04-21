@@ -152,6 +152,12 @@ namespace Open_lab.Services
 
             _db.VisitTests.Add(visitTest);
             await _db.SaveChangesAsync();
+
+            if (test.IsSendOut)
+            {
+                await EnsureExternalQueueRegistrationAsync(visitTest.VisitTestId, visit.ReferralId);
+            }
+
             return visitTest;
         }
 
@@ -211,6 +217,24 @@ namespace Open_lab.Services
                 .FirstOrDefaultAsync();
 
             return item?.Price ?? test.Price;
+        }
+
+        private async Task EnsureExternalQueueRegistrationAsync(int visitTestId, int? referralId)
+        {
+            var exists = await _db.ExternalLabQueues.AnyAsync(q => q.VisitTestId == visitTestId);
+            if (exists)
+            {
+                return;
+            }
+
+            _db.ExternalLabQueues.Add(new ExternalLabQueue
+            {
+                VisitTestId = visitTestId,
+                ReferralId = referralId,
+                Status = "Pending",
+                DateQueued = DateTime.Now
+            });
+            await _db.SaveChangesAsync();
         }
     }
 }

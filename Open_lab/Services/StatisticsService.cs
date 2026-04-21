@@ -189,5 +189,40 @@ namespace Open_lab.Services
                 .Take(10)
                 .ToListAsync();
         }
+
+        public async Task<List<YearlySampleRow>> GetSampleCountPerYearAsync(int yearsBack = 5)
+        {
+            if (yearsBack <= 0)
+            {
+                yearsBack = 5;
+            }
+
+            var currentYear = DateTime.Today.Year;
+            var fromYear = currentYear - yearsBack + 1;
+
+            var grouped = await _db.VisitTests
+                .AsNoTracking()
+                .Where(vt => vt.Visit.VisitDate.Year >= fromYear && vt.Visit.VisitDate.Year <= currentYear)
+                .GroupBy(vt => vt.Visit.VisitDate.Year)
+                .Select(g => new YearlySampleRow
+                {
+                    Year = g.Key,
+                    SamplesCount = g.Count()
+                })
+                .ToListAsync();
+
+            var result = new List<YearlySampleRow>();
+            for (var year = fromYear; year <= currentYear; year++)
+            {
+                var row = grouped.FirstOrDefault(g => g.Year == year);
+                result.Add(new YearlySampleRow
+                {
+                    Year = year,
+                    SamplesCount = row?.SamplesCount ?? 0
+                });
+            }
+
+            return result.OrderBy(r => r.Year).ToList();
+        }
     }
 }

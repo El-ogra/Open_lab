@@ -29,6 +29,9 @@
         <DataTemplate DataType="{x:Type vm:PatientBillingViewModel}">
             <views:PatientBillingView />
         </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:PatientBillingByDateViewModel}">
+            <views:PatientBillingByDateView />
+        </DataTemplate>
         <DataTemplate DataType="{x:Type vm:ResultsEntryViewModel}">
             <views:ResultsEntryView />
         </DataTemplate>
@@ -111,6 +114,9 @@
         <DataTemplate DataType="{x:Type vm:GroupWorksheetViewModel}">
             <views:GroupWorksheetView />
         </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:TestClassificationLogViewModel}">
+            <views:TestClassificationLogView />
+        </DataTemplate>
         <DataTemplate DataType="{x:Type vm:ExternalLabManagementViewModel}">
             <views:ExternalLabManagementView />
         </DataTemplate>
@@ -119,6 +125,12 @@
         </DataTemplate>
         <DataTemplate DataType="{x:Type vm:ContractInvoiceViewModel}">
             <views:ContractInvoiceView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:UserActivityLogViewModel}">
+            <views:UserActivityLogView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:SystemUsageMonitorViewModel}">
+            <views:SystemUsageMonitorView />
         </DataTemplate>
     </Application.Resources>
 </Application>

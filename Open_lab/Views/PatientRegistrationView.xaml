@@ -33,6 +33,18 @@
             <TextBlock Text="العنوان" Margin="0,12,0,4" />
             <TextBox Text="{Binding Address, UpdateSourceTrigger=PropertyChanged}" />
 
+            <TextBlock Text="الأمراض المزمنة" Margin="0,12,0,4" />
+            <TextBox Text="{Binding ChronicDiseases, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="45" />
+
+            <TextBlock Text="الحساسيات" Margin="0,12,0,4" />
+            <TextBox Text="{Binding Allergies, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="45" />
+
+            <TextBlock Text="الأدوية الحالية" Margin="0,12,0,4" />
+            <TextBox Text="{Binding Medications, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="45" />
+
+            <TextBlock Text="ملاحظات طبية" Margin="0,12,0,4" />
+            <TextBox Text="{Binding MedicalNotes, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="60" />
+
             <StackPanel Orientation="Horizontal" Margin="0,16,0,0">
                 <Button Content="جديد" Width="80" Margin="0,0,8,0" Command="{Binding NewCommand}" />
                 <Button Content="حفظ" Width="80" Margin="0,0,8,0" Command="{Binding SaveCommand}" />

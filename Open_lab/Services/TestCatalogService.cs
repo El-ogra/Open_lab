@@ -83,6 +83,7 @@ namespace Open_lab.Services
             current.UnitId = test.UnitId;
             current.Price = test.Price;
             current.TurnaroundHours = test.TurnaroundHours;
+            current.ReportOrder = test.ReportOrder;
             current.IsRoutine = test.IsRoutine;
             current.IsSendOut = test.IsSendOut;
 

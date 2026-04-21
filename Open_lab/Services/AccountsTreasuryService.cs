@@ -24,6 +24,10 @@ namespace Open_lab.Services
                 .ThenInclude(v => v.Patient)
                 .Include(i => i.Visit)
                 .ThenInclude(v => v.Referral)
+                .Include(i => i.Visit)
+                .ThenInclude(v => v.Branch)
+                .Include(i => i.Visit)
+                .ThenInclude(v => v.Physician)
                 .Where(i => i.Visit.VisitDate >= from && i.Visit.VisitDate <= to)
                 .ToListAsync();
 
@@ -64,6 +68,35 @@ namespace Open_lab.Services
                 .OrderByDescending(r => r.TotalInvoiced)
                 .ToList();
 
+            var byBranch = invoices
+                .GroupBy(i => i.Visit.Branch?.Name ?? "الفرع الرئيسي")
+                .Select(g => new TreasuryByBranchRow
+                {
+                    BranchName = g.Key,
+                    VisitsCount = g.Select(i => i.VisitId).Distinct().Count(),
+                    TotalInvoiced = g.Sum(i => i.NetTotal),
+                    TotalPaid = g.Sum(i => i.Paid),
+                    TotalBalance = g.Sum(i => i.Balance)
+                })
+                .OrderByDescending(r => r.TotalInvoiced)
+                .ToList();
+
+            var byDoctor = invoices
+                .GroupBy(i => new
+                {
+                    DoctorName = i.Visit.Physician?.FullName ?? "بدون طبيب",
+                    CommissionPercentage = i.Visit.Physician?.CommissionPercentage ?? 0m
+                })
+                .Select(g => new TreasuryByDoctorRow
+                {
+                    DoctorName = g.Key.DoctorName,
+                    VisitsCount = g.Select(i => i.VisitId).Distinct().Count(),
+                    TotalInvoiced = g.Sum(i => i.NetTotal),
+                    CommissionAmount = g.Sum(i => i.NetTotal * (g.Key.CommissionPercentage / 100m))
+                })
+                .OrderByDescending(r => r.TotalInvoiced)
+                .ToList();
+
             var totalDiscount = invoices.Sum(i => i.Discount);
             var expenses = await _db.Expenses
                 .AsNoTracking()
@@ -92,7 +125,9 @@ namespace Open_lab.Services
                     Username = p.User?.Username
                 }).ToList(),
                 ByUser = byUser,
-                ByReferral = byReferral
+                ByReferral = byReferral,
+                ByBranch = byBranch,
+                ByDoctor = byDoctor
             };
         }
     }

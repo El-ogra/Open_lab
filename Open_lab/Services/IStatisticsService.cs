@@ -43,11 +43,18 @@ namespace Open_lab.Services
         public decimal TotalRevenue { get; init; }
     }
 
+    public sealed class YearlySampleRow
+    {
+        public int Year { get; init; }
+        public int SamplesCount { get; init; }
+    }
+
     public interface IStatisticsService
     {
         Task<List<StatisticsReferralLookup>> GetReferralsAsync();
         Task<StatisticsSnapshot> GetSnapshotAsync(DateTime from, DateTime to, string? gender, int? referralId);
         Task<List<MonthlyAnalysisRow>> GetMonthlyAnalysisAsync(int year);
         Task<List<TopTestRow>> GetTop10TestsAsync(DateTime from, DateTime to);
+        Task<List<YearlySampleRow>> GetSampleCountPerYearAsync(int yearsBack = 5);
     }
 }

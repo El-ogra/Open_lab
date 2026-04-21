@@ -22,6 +22,7 @@
                 <Button Content="تسجيل مريض" Margin="12,4" Command="{Binding NavigatePatientRegistrationCommand}" />
                 <Button Content="اختيار تحاليل" Margin="12,4" Command="{Binding NavigatePatientTestsCommand}" />
                 <Button Content="حسابات" Margin="12,4" Command="{Binding NavigatePatientBillingCommand}" />
+                <Button Content="كشف حساب المريض" Margin="12,4" Command="{Binding NavigatePatientBillingByDateCommand}" />
                 <Button Content="إدخال نتائج" Margin="12,4" Command="{Binding NavigateResultsEntryCommand}" />
                 <Button Content="التقارير" Margin="12,4" Command="{Binding NavigateReportViewerCommand}" />
                 <Button Content="تقرير مجمّع" Margin="12,4" Command="{Binding NavigateCombinedReportCommand}" />
@@ -38,6 +39,7 @@
                 <Button Content="بالمرضى" Margin="12,4" Command="{Binding NavigateWorkSheetByPatientCommand}" />
                 <Button Content="بالتحاليل" Margin="12,4" Command="{Binding NavigateWorkSheetByTestCommand}" />
                 <Button Content="بالمجموعة" Margin="12,4" Command="{Binding NavigateGroupWorksheetCommand}" />
+                <Button Content="تصنيف التحاليل" Margin="12,4" Command="{Binding NavigateTestClassificationLogCommand}" />
 
                 <TextBlock Text="الكتالوج" Foreground="White" Margin="16,12,16,4" />
                 <Button Content="تعريف التحاليل" Margin="12,4" Command="{Binding NavigateTestCatalogCommand}" />
@@ -57,6 +59,8 @@
 
                 <TextBlock Text="الإدارة" Foreground="White" Margin="16,12,16,4" />
                 <Button Content="المستخدمون والصلاحيات" Margin="12,4" Command="{Binding NavigateUsersPermissionsCommand}" />
+                <Button Content="سجل نشاط المستخدمين" Margin="12,4" Command="{Binding NavigateUserActivityLogCommand}" />
+                <Button Content="مراقبة استخدام النظام" Margin="12,4" Command="{Binding NavigateSystemUsageMonitorCommand}" />
                 <Button Content="تقرير الحضور" Margin="12,4" Command="{Binding NavigateAttendanceReportCommand}" />
                 <Button Content="الإحصائيات" Margin="12,4" Command="{Binding NavigateStatisticsCommand}" />
                 <Button Content="إعدادات النظام" Margin="12,4" Command="{Binding NavigateSystemSettingsCommand}" />

@@ -16,6 +16,9 @@ namespace Open_lab.ViewModels
         private decimal _totalInvoiced;
         private decimal _totalPaid;
         private decimal _totalBalance;
+        private decimal _totalDiscount;
+        private decimal _totalExpenses;
+        private decimal _netProfit;
         private string _statusMessage = string.Empty;
 
         public AccountsTreasuryViewModel(IAccountsTreasuryService accountsTreasuryService, IPrintService printService)
@@ -25,6 +28,8 @@ namespace Open_lab.ViewModels
             Payments = new ObservableCollection<AccountsPaymentRow>();
             ByUser = new ObservableCollection<TreasuryByUserRow>();
             ByReferral = new ObservableCollection<TreasuryByReferralRow>();
+            ByBranch = new ObservableCollection<TreasuryByBranchRow>();
+            ByDoctor = new ObservableCollection<TreasuryByDoctorRow>();
             LoadCommand = new RelayCommand(async _ => await LoadAsync(), _ => AppSession.HasPermission(PermissionCodes.AccountsView));
             DailyCommand = new RelayCommand(async _ => await LoadDailyAsync(), _ => AppSession.HasPermission(PermissionCodes.AccountsView));
             WeeklyCommand = new RelayCommand(async _ => await LoadWeeklyAsync(), _ => AppSession.HasPermission(PermissionCodes.AccountsView));
@@ -63,9 +68,29 @@ namespace Open_lab.ViewModels
             private set => SetProperty(ref _totalBalance, value);
         }
 
+        public decimal TotalDiscount
+        {
+            get => _totalDiscount;
+            private set => SetProperty(ref _totalDiscount, value);
+        }
+
+        public decimal TotalExpenses
+        {
+            get => _totalExpenses;
+            private set => SetProperty(ref _totalExpenses, value);
+        }
+
+        public decimal NetProfit
+        {
+            get => _netProfit;
+            private set => SetProperty(ref _netProfit, value);
+        }
+
         public ObservableCollection<AccountsPaymentRow> Payments { get; }
         public ObservableCollection<TreasuryByUserRow> ByUser { get; }
         public ObservableCollection<TreasuryByReferralRow> ByReferral { get; }
+        public ObservableCollection<TreasuryByBranchRow> ByBranch { get; }
+        public ObservableCollection<TreasuryByDoctorRow> ByDoctor { get; }
 
         public string StatusMessage
         {
@@ -90,6 +115,9 @@ namespace Open_lab.ViewModels
                 TotalInvoiced = snapshot.TotalInvoiced;
                 TotalPaid = snapshot.TotalPaid;
                 TotalBalance = snapshot.TotalBalance;
+                TotalDiscount = snapshot.TotalDiscount;
+                TotalExpenses = snapshot.TotalExpenses;
+                NetProfit = snapshot.NetProfit;
 
                 Payments.Clear();
                 foreach (var payment in snapshot.Payments)
@@ -107,6 +135,18 @@ namespace Open_lab.ViewModels
                 foreach (var row in snapshot.ByReferral)
                 {
                     ByReferral.Add(row);
+                }
+
+                ByBranch.Clear();
+                foreach (var row in snapshot.ByBranch)
+                {
+                    ByBranch.Add(row);
+                }
+
+                ByDoctor.Clear();
+                foreach (var row in snapshot.ByDoctor)
+                {
+                    ByDoctor.Add(row);
                 }
 
                 StatusMessage = "تم تحميل بيانات الخزينة.";
@@ -151,6 +191,9 @@ namespace Open_lab.ViewModels
                     $"إجمالي الفواتير: {TotalInvoiced.ToString("N2", CultureInfo.CurrentCulture)}",
                     $"إجمالي المدفوع: {TotalPaid.ToString("N2", CultureInfo.CurrentCulture)}",
                     $"إجمالي المتبقي: {TotalBalance.ToString("N2", CultureInfo.CurrentCulture)}",
+                    $"إجمالي الخصم: {TotalDiscount.ToString("N2", CultureInfo.CurrentCulture)}",
+                    $"إجمالي المصروفات: {TotalExpenses.ToString("N2", CultureInfo.CurrentCulture)}",
+                    $"صافي الربح: {NetProfit.ToString("N2", CultureInfo.CurrentCulture)}",
                     "",
                     "تفصيل حسب المستخدم:"
                 };
@@ -165,6 +208,20 @@ namespace Open_lab.ViewModels
                 foreach (var row in ByReferral)
                 {
                     lines.Add($"- {row.ReferralName}: زيارات {row.VisitsCount}, فواتير {row.TotalInvoiced:N2}, مدفوع {row.TotalPaid:N2}, متبقي {row.TotalBalance:N2}");
+                }
+
+                lines.Add("");
+                lines.Add("تفصيل حسب الفرع:");
+                foreach (var row in ByBranch)
+                {
+                    lines.Add($"- {row.BranchName}: زيارات {row.VisitsCount}, فواتير {row.TotalInvoiced:N2}, مدفوع {row.TotalPaid:N2}, متبقي {row.TotalBalance:N2}");
+                }
+
+                lines.Add("");
+                lines.Add("تفصيل حسب الطبيب:");
+                foreach (var row in ByDoctor)
+                {
+                    lines.Add($"- {row.DoctorName}: زيارات {row.VisitsCount}, صافي {row.TotalInvoiced:N2}, عمولة {row.CommissionAmount:N2}");
                 }
 
                 await _printService.PrintTextReportAsync("تقرير الخزينة", lines, "TreasuryReport");

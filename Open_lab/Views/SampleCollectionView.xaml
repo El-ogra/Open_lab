@@ -19,6 +19,10 @@
 
         <StackPanel Orientation="Horizontal" Grid.Row="1" Margin="0,0,0,12">
             <Button Content="تعليم مسحوبة" Command="{Binding MarkCollectedCommand}" />
+            <Button Content="تعليم مسحوبة (خارج المعمل)" Margin="8,0,0,0" Command="{Binding MarkExternalCollectedCommand}" />
+            <TextBlock Text="نوع الفصل" VerticalAlignment="Center" Margin="12,0,8,0" />
+            <TextBox Width="140" Text="{Binding SeparationType, UpdateSourceTrigger=PropertyChanged}" />
+            <Button Content="تسجيل الفصل" Margin="8,0,0,0" Command="{Binding MarkSeparatedCommand}" />
             <Button Content="تعليم غير مسحوبة" Margin="8,0,0,0" Command="{Binding MarkNotCollectedCommand}" />
         </StackPanel>
 

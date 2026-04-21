@@ -32,6 +32,7 @@ namespace Open_lab.ViewModels
             LoadPendingCommand = new RelayCommand(async _ => await LoadPendingAsync(), _ => SelectedReferralId.HasValue);
             CreateInvoiceCommand = new RelayCommand(async _ => await CreateInvoiceAsync(), _ => CanCreateInvoice());
             LoadHistoryCommand = new RelayCommand(async _ => await LoadHistoryAsync(), _ => SelectedReferralId.HasValue);
+            SettleSelectedCommand = new RelayCommand(async _ => await SettleSelectedAsync(), _ => SelectedContractInvoice != null && !SelectedContractInvoice.IsPaid);
 
             _ = LoadReferralsAsync();
         }
@@ -83,7 +84,13 @@ namespace Open_lab.ViewModels
         public ContractInvoice? SelectedContractInvoice
         {
             get => _selectedContractInvoice;
-            set => SetProperty(ref _selectedContractInvoice, value);
+            set
+            {
+                if (SetProperty(ref _selectedContractInvoice, value))
+                {
+                    (SettleSelectedCommand as RelayCommand)?.RaiseCanExecuteChanged();
+                }
+            }
         }
 
         public string StatusMessage
@@ -100,6 +107,7 @@ namespace Open_lab.ViewModels
         public ICommand LoadPendingCommand { get; }
         public ICommand CreateInvoiceCommand { get; }
         public ICommand LoadHistoryCommand { get; }
+        public ICommand SettleSelectedCommand { get; }
 
         private bool CanCreateInvoice()
         {
@@ -183,6 +191,25 @@ namespace Open_lab.ViewModels
                     ContractInvoices.Add(invoice);
                 }
                 StatusMessage = $"تم تحميل {ContractInvoices.Count} فاتورة تعاقد سابقة.";
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = $"خطأ: {ex.Message}";
+            }
+        }
+
+        private async Task SettleSelectedAsync()
+        {
+            if (SelectedContractInvoice == null)
+            {
+                return;
+            }
+
+            try
+            {
+                await _contractInvoiceService.SettleContractInvoiceAsync(SelectedContractInvoice.ContractInvoiceId);
+                StatusMessage = "تم تسوية فاتورة التعاقد المحددة.";
+                await LoadHistoryAsync();
             }
             catch (Exception ex)
             {

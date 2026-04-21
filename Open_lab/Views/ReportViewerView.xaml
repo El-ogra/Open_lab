@@ -46,6 +46,13 @@
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
             </GroupBox>
+
+            <GroupBox Header="معاينة قبل الطباعة" Margin="0,12,0,0">
+                <FlowDocumentScrollViewer VerticalScrollBarVisibility="Auto"
+                                          IsToolBarVisible="False"
+                                          Document="{Binding PreviewDocument}"
+                                          Height="300" />
+            </GroupBox>
         </StackPanel>
     </Grid>
 </UserControl>

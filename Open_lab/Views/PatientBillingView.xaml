@@ -16,8 +16,10 @@
                 <TextBlock Text="{Binding Total}" />
                 <TextBlock Text="الخصم" />
                 <TextBox Text="{Binding Discount, UpdateSourceTrigger=PropertyChanged}" />
-                <TextBlock Text="المبلغ (للإضافة)" />
+                <TextBlock Text="مبلغ دفعة جديدة" />
                 <TextBox Text="{Binding Paid, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBlock Text="مبلغ تعديل الدفعة المحددة" />
+                <TextBox Text="{Binding EditPaymentAmount, UpdateSourceTrigger=PropertyChanged}" />
                 <TextBlock Text="الصافي" />
                 <TextBlock Text="{Binding NetTotal}" />
                 <TextBlock Text="المتبقي" />
@@ -27,6 +29,7 @@
             <StackPanel Orientation="Horizontal" Margin="0,16,0,0">
                 <Button Content="حفظ الفاتورة" Margin="0,0,8,0" Command="{Binding SaveInvoiceCommand}" />
                 <Button Content="تسجيل دفعة" Margin="0,0,8,0" Command="{Binding AddPaymentCommand}" />
+                <Button Content="تعديل الدفعة المحددة" Margin="0,0,8,0" Command="{Binding EditPaymentCommand}" />
                 <Button Content="حذف دفعة محددة" Command="{Binding DeletePaymentCommand}" />
             </StackPanel>
 
@@ -39,6 +42,25 @@
                     <DataGridTextColumn Header="المستخدم" Binding="{Binding UserId}" Width="100" />
                 </DataGrid.Columns>
             </DataGrid>
+
+            <GroupBox Header="إضافة رسوم إضافية" Margin="0,16,0,0">
+                <StackPanel Margin="8">
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                        <TextBlock Text="الوصف" VerticalAlignment="Center" Margin="0,0,8,0" />
+                        <TextBox Width="260" Text="{Binding NewChargeDescription, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBlock Text="المبلغ" VerticalAlignment="Center" Margin="12,0,8,0" />
+                        <TextBox Width="120" Text="{Binding NewChargeAmount, UpdateSourceTrigger=PropertyChanged}" />
+                        <Button Content="إضافة الرسوم" Margin="12,0,0,0" Command="{Binding AddChargeCommand}" />
+                    </StackPanel>
+                    <DataGrid ItemsSource="{Binding AdditionalCharges}" AutoGenerateColumns="False" Height="120">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="رقم الرسوم" Binding="{Binding AdditionalChargeId}" Width="100" />
+                            <DataGridTextColumn Header="الوصف" Binding="{Binding Description}" Width="*" />
+                            <DataGridTextColumn Header="المبلغ" Binding="{Binding Amount}" Width="120" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </StackPanel>
+            </GroupBox>
 
             <TextBlock Text="{Binding StatusMessage}" Foreground="DarkGreen" Margin="0,12,0,0" />
         </StackPanel>

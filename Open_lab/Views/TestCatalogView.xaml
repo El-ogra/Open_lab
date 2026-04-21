@@ -22,6 +22,8 @@
             <TextBox Text="{Binding Price, UpdateSourceTrigger=PropertyChanged}" />
             <TextBlock Text="زمن التنفيذ" Margin="0,12,0,4" />
             <TextBox Text="{Binding TurnaroundHours, UpdateSourceTrigger=PropertyChanged}" />
+            <TextBlock Text="ترتيب التقرير" Margin="0,12,0,4" />
+            <TextBox Text="{Binding ReportOrder, UpdateSourceTrigger=PropertyChanged}" />
             <TextBlock Text="المجموعة" Margin="0,12,0,4" />
             <ComboBox ItemsSource="{Binding Groups}" SelectedItem="{Binding SelectedGroup}" DisplayMemberPath="GroupName" />
             <TextBlock Text="نوع العينة" Margin="0,12,0,4" />
@@ -50,6 +52,7 @@
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="الكود" Binding="{Binding Code}" Width="120" />
                     <DataGridTextColumn Header="اسم التقرير" Binding="{Binding NameReport}" Width="*" />
+                    <DataGridTextColumn Header="ترتيب التقرير" Binding="{Binding ReportOrder}" Width="120" />
                     <DataGridTextColumn Header="السعر" Binding="{Binding Price}" Width="100" />
                 </DataGrid.Columns>
             </DataGrid>

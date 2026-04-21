@@ -19,6 +19,7 @@ namespace Open_lab.ViewModels
         private string _nameReceipt = string.Empty;
         private decimal _price;
         private int _turnaroundHours;
+        private int _reportOrder;
         private bool _isRoutine;
         private bool _isSendOut;
         private TestGroup? _selectedGroup;
@@ -98,6 +99,12 @@ namespace Open_lab.ViewModels
         {
             get => _turnaroundHours;
             set => SetProperty(ref _turnaroundHours, value);
+        }
+
+        public int ReportOrder
+        {
+            get => _reportOrder;
+            set => SetProperty(ref _reportOrder, value);
         }
 
         public bool IsRoutine
@@ -200,6 +207,7 @@ namespace Open_lab.ViewModels
             NameReceipt = SelectedTest.NameReceipt;
             Price = SelectedTest.Price;
             TurnaroundHours = SelectedTest.TurnaroundHours;
+            ReportOrder = SelectedTest.ReportOrder;
             IsRoutine = SelectedTest.IsRoutine;
             IsSendOut = SelectedTest.IsSendOut;
 
@@ -222,6 +230,7 @@ namespace Open_lab.ViewModels
                         NameReceipt = NameReceipt,
                         Price = Price,
                         TurnaroundHours = TurnaroundHours,
+                        ReportOrder = ReportOrder,
                         IsRoutine = IsRoutine,
                         IsSendOut = IsSendOut,
                         GroupId = SelectedGroup?.GroupId,
@@ -240,6 +249,7 @@ namespace Open_lab.ViewModels
                     SelectedTest.NameReceipt = NameReceipt;
                     SelectedTest.Price = Price;
                     SelectedTest.TurnaroundHours = TurnaroundHours;
+                    SelectedTest.ReportOrder = ReportOrder;
                     SelectedTest.IsRoutine = IsRoutine;
                     SelectedTest.IsSendOut = IsSendOut;
                     SelectedTest.GroupId = SelectedGroup?.GroupId;
@@ -304,6 +314,7 @@ namespace Open_lab.ViewModels
             NameReceipt = string.Empty;
             Price = 0;
             TurnaroundHours = 0;
+            ReportOrder = 0;
             IsRoutine = false;
             IsSendOut = false;
             SelectedGroup = null;

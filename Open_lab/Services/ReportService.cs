@@ -42,6 +42,8 @@ namespace Open_lab.Services
                 .AsNoTracking()
                 .Include(vt => vt.Test)
                 .Where(vt => vt.VisitId == visitId)
+                .OrderBy(vt => vt.Test.ReportOrder)
+                .ThenBy(vt => vt.Test.NameReport)
                 .ToListAsync();
 
             foreach (var vt in visitTests)

@@ -88,5 +88,18 @@ namespace Open_lab.Services
                 .OrderByDescending(c => c.DateTo)
                 .ToListAsync();
         }
+
+        public async Task<ContractInvoice> SettleContractInvoiceAsync(int contractInvoiceId)
+        {
+            var invoice = await _db.ContractInvoices.FirstOrDefaultAsync(c => c.ContractInvoiceId == contractInvoiceId);
+            if (invoice == null)
+            {
+                throw new InvalidOperationException("فاتورة التعاقد غير موجودة.");
+            }
+
+            invoice.IsPaid = true;
+            await _db.SaveChangesAsync();
+            return invoice;
+        }
     }
 }
