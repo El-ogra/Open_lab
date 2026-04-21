@@ -81,6 +81,9 @@ namespace Open_lab.Data
             }
 
             optionsBuilder.UseSqlServer(connectionString);
+            
+            // Add audit interceptor for automatic logging
+            optionsBuilder.AddInterceptors(new AuditInterceptor());
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
