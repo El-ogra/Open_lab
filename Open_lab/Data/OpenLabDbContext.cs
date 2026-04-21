@@ -76,7 +76,8 @@ namespace Open_lab.Data
 
             if (string.IsNullOrWhiteSpace(connectionString))
             {
-                connectionString = "Server=.\\SQLEXPRESS;Database=OpenLab;User ID=sa;Password=og2026ra;TrustServerCertificate=True;MultipleActiveResultSets=True;Encrypt=False;Connect Timeout=30";
+                var dbPassword = Environment.GetEnvironmentVariable("OPENLAB_DB_PASSWORD") ?? "og2026ra";
+                connectionString = $"Server=.\\SQLEXPRESS;Database=OpenLab;User ID=sa;Password={dbPassword};TrustServerCertificate=True;MultipleActiveResultSets=True;Encrypt=False;Connect Timeout=30";
             }
 
             optionsBuilder.UseSqlServer(connectionString);

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Open_lab.Data;
@@ -133,6 +134,9 @@ namespace Open_lab.Services
 
             if (!string.IsNullOrEmpty(profile.MasterPasswordHash))
             {
+                // Generate a new salt for the master password
+                var newSalt = GenerateSecureSalt();
+                await SaveSettingAsync(MasterPasswordSaltKey, newSalt);
                 await SaveSettingAsync(MasterPasswordHashKey, profile.MasterPasswordHash);
             }
         }
@@ -149,14 +153,48 @@ namespace Open_lab.Services
                 return false;
             }
 
-            if (string.IsNullOrEmpty(salt)) salt = "SYSTEM"; // Fallback
+            if (string.IsNullOrEmpty(salt)) salt = GenerateSecureSalt(); // Generate secure random salt
 
             return PasswordSecurity.Verify(password, salt, hash);
+        }
+
+        /// <summary>
+        /// Sets a new master password with a secure randomly generated salt.
+        /// </summary>
+        /// <param name="newPassword">The new master password to set</param>
+        /// <returns>True if password was set successfully</returns>
+        public async Task<bool> SetMasterPasswordAsync(string newPassword)
+        {
+            if (string.IsNullOrEmpty(newPassword))
+                return false;
+
+            // Generate a new secure salt for this password
+            var newSalt = GenerateSecureSalt();
+            var newHash = PasswordSecurity.ComputeSha256(newPassword, newSalt);
+
+            // Save both salt and hash
+            await SaveSettingAsync(MasterPasswordSaltKey, newSalt);
+            await SaveSettingAsync(MasterPasswordHashKey, newHash);
+
+            return true;
         }
 
         private static string GetValue(IReadOnlyDictionary<string, string?> dictionary, string key, string fallback)
         {
             return dictionary.TryGetValue(key, out var value) && !string.IsNullOrWhiteSpace(value) ? value : fallback;
+        }
+
+        /// <summary>
+        /// Generates a cryptographically secure random salt string.
+        /// </summary>
+        /// <returns>Base64 encoded random salt (32 bytes)</returns>
+        private static string GenerateSecureSalt()
+        {
+            const int saltLength = 32;
+            var salt = new byte[saltLength];
+            using var rng = RandomNumberGenerator.Create();
+            rng.GetBytes(salt);
+            return Convert.ToBase64String(salt);
         }
 
         private static double ParseDouble(string raw, double fallback)
