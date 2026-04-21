@@ -161,4 +161,10 @@ namespace Open_lab.ViewModels
         public bool IsReadyForDelivery { get; set; }
         public bool IsDelivered { get; set; }
     }
+
+    public class ReferralItem
+    {
+        public int ReferralId { get; set; }
+        public string Name { get; set; } = string.Empty;
+    }
 }

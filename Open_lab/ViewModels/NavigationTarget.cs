@@ -32,7 +32,11 @@ namespace Open_lab.ViewModels
         ReceiptPrinting,
         CombinedReport,
         BlankReport,
-        Constants
+        Constants,
+        CompareWithHistory,
+        GroupWorksheet,
+        ExternalLabManagement,
+        AttendanceReport,
+        ContractInvoice
     }
 }
-

@@ -6,9 +6,6 @@
         mc:Ignorable="d"
         Title="Open_lab" Height="700" Width="1100"
         DataContext="{StaticResource MainViewModel}">
-    <Window.Resources>
-        <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
-    </Window.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" />
@@ -35,10 +32,12 @@
                 <TextBlock Text="بحث وتاريخ" Foreground="White" Margin="16,12,16,4" />
                 <Button Content="بحث مريض" Margin="12,4" Command="{Binding NavigatePatientSearchCommand}" />
                 <Button Content="تاريخ مرضي" Margin="12,4" Command="{Binding NavigatePatientHistoryCommand}" />
+                <Button Content="مقارنة مع التاريخ" Margin="12,4" Command="{Binding NavigateCompareWithHistoryCommand}" />
 
                 <TextBlock Text="ورقة العمل" Foreground="White" Margin="16,12,16,4" />
                 <Button Content="بالمرضى" Margin="12,4" Command="{Binding NavigateWorkSheetByPatientCommand}" />
                 <Button Content="بالتحاليل" Margin="12,4" Command="{Binding NavigateWorkSheetByTestCommand}" />
+                <Button Content="بالمجموعة" Margin="12,4" Command="{Binding NavigateGroupWorksheetCommand}" />
 
                 <TextBlock Text="الكتالوج" Foreground="White" Margin="16,12,16,4" />
                 <Button Content="تعريف التحاليل" Margin="12,4" Command="{Binding NavigateTestCatalogCommand}" />
@@ -53,9 +52,12 @@
                 <Button Content="الخزينة" Margin="12,4" Command="{Binding NavigateAccountsTreasuryCommand}" />
                 <Button Content="تسليم النتائج" Margin="12,4" Command="{Binding NavigateDeliveryCommand}" />
                 <Button Content="سحب العينات" Margin="12,4" Command="{Binding NavigateSampleCollectionCommand}" />
+                <Button Content="إدارة المعامل الخارجية" Margin="12,4" Command="{Binding NavigateExternalLabManagementCommand}" />
+                <Button Content="فواتير التعاقد" Margin="12,4" Command="{Binding NavigateContractInvoiceCommand}" />
 
                 <TextBlock Text="الإدارة" Foreground="White" Margin="16,12,16,4" />
                 <Button Content="المستخدمون والصلاحيات" Margin="12,4" Command="{Binding NavigateUsersPermissionsCommand}" />
+                <Button Content="تقرير الحضور" Margin="12,4" Command="{Binding NavigateAttendanceReportCommand}" />
                 <Button Content="الإحصائيات" Margin="12,4" Command="{Binding NavigateStatisticsCommand}" />
                 <Button Content="إعدادات النظام" Margin="12,4" Command="{Binding NavigateSystemSettingsCommand}" />
                 <Button Content="نسخ احتياطي واستعادة" Margin="12,4" Command="{Binding NavigateBackupRestoreCommand}" />

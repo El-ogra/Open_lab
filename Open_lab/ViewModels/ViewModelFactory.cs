@@ -48,6 +48,11 @@ namespace Open_lab.ViewModels
                 NavigationTarget.CombinedReport => new CombinedReportViewModel(CreateReportService()),
                 NavigationTarget.BlankReport => new BlankReportViewModel(CreateReportService()),
                 NavigationTarget.Constants => new ConstantsViewModel(CreateConstantsService()),
+                NavigationTarget.CompareWithHistory => new CompareWithHistoryViewModel(CreateCompareWithHistoryService(), CreatePatientService(), CreateTestCatalogService()),
+                NavigationTarget.GroupWorksheet => new GroupWorksheetViewModel(CreateGroupWorksheetService(), CreateTestCatalogService(), CreatePrintService()),
+                NavigationTarget.ExternalLabManagement => new ExternalLabManagementViewModel(CreateExternalLabService(), CreateExternalSettlementService(), CreateTestCatalogService(), CreatePrintService()),
+                NavigationTarget.AttendanceReport => new AttendanceReportViewModel(CreateTardinessService(), CreateUserAdminService()),
+                NavigationTarget.ContractInvoice => new ContractInvoiceViewModel(CreateContractInvoiceService(), CreateTestCatalogService()),
                 _ => throw new ArgumentOutOfRangeException(nameof(target), target, "Unsupported navigation target.")
             };
         }
@@ -95,5 +100,11 @@ namespace Open_lab.ViewModels
         private IUserPreferenceService CreateUserPreferenceService() => new UserPreferenceService();
         private IPrintService CreatePrintService() => new PrintService();
         private IBarcodeService CreateBarcodeService() => new BarcodeService();
+        private ICompareWithHistoryService CreateCompareWithHistoryService() => new CompareWithHistoryService(_dbFactory());
+        private IGroupWorksheetService CreateGroupWorksheetService() => new GroupWorksheetService(_dbFactory());
+        private IExternalLabService CreateExternalLabService() => new ExternalLabService(_dbFactory());
+        private IExternalSettlementService CreateExternalSettlementService() => new ExternalSettlementService(_dbFactory());
+        private ITardinessService CreateTardinessService() => new TardinessService(_dbFactory());
+        private IContractInvoiceService CreateContractInvoiceService() => new ContractInvoiceService(_dbFactory());
     }
 }

@@ -7,6 +7,10 @@
     <Application.Resources>
         <vm:MainViewModel x:Key="MainViewModel" />
 
+        <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
+        <vm:InverseBooleanConverter x:Key="InverseBooleanConverter" />
+        <vm:InverseBoolToVisibilityConverter x:Key="InverseBoolToVisibilityConverter" />
+
         <DataTemplate DataType="{x:Type vm:LoginViewModel}">
             <views:LoginView />
         </DataTemplate>
@@ -100,6 +104,21 @@
         </DataTemplate>
         <DataTemplate DataType="{x:Type vm:ConstantsViewModel}">
             <views:ConstantsView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:CompareWithHistoryViewModel}">
+            <views:CompareWithHistoryView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:GroupWorksheetViewModel}">
+            <views:GroupWorksheetView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:ExternalLabManagementViewModel}">
+            <views:ExternalLabManagementView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:AttendanceReportViewModel}">
+            <views:AttendanceReportView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:ContractInvoiceViewModel}">
+            <views:ContractInvoiceView />
         </DataTemplate>
     </Application.Resources>
 </Application>

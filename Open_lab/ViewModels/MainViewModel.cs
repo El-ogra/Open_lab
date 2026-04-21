@@ -47,6 +47,11 @@ namespace Open_lab.ViewModels
             NavigateCombinedReportCommand = new RelayCommand(_ => NavigateTo(NavigationTarget.CombinedReport), _ => CanNavigate(PermissionCodes.ReportsView));
             NavigateBlankReportCommand = new RelayCommand(_ => NavigateTo(NavigationTarget.BlankReport), _ => CanNavigate(PermissionCodes.ReportsView));
             NavigateConstantsCommand = new RelayCommand(_ => NavigateTo(NavigationTarget.Constants), _ => CanNavigate(PermissionCodes.ConstantsView));
+            NavigateCompareWithHistoryCommand = new RelayCommand(_ => NavigateTo(NavigationTarget.CompareWithHistory), _ => CanNavigate(PermissionCodes.ResultsView));
+            NavigateGroupWorksheetCommand = new RelayCommand(_ => NavigateTo(NavigationTarget.GroupWorksheet), _ => CanNavigate(PermissionCodes.TestsView));
+            NavigateExternalLabManagementCommand = new RelayCommand(_ => NavigateTo(NavigationTarget.ExternalLabManagement), _ => CanNavigate(PermissionCodes.TestsView));
+            NavigateAttendanceReportCommand = new RelayCommand(_ => NavigateTo(NavigationTarget.AttendanceReport), _ => CanNavigate(PermissionCodes.UsersView));
+            NavigateContractInvoiceCommand = new RelayCommand(_ => NavigateTo(NavigationTarget.ContractInvoice), _ => CanNavigate(PermissionCodes.AccountsView));
 
             LogoutCommand = new RelayCommand(async _ => await LogoutAsync(), _ => IsLoggedIn);
 
@@ -96,6 +101,11 @@ namespace Open_lab.ViewModels
         public ICommand NavigateCombinedReportCommand { get; }
         public ICommand NavigateBlankReportCommand { get; }
         public ICommand NavigateConstantsCommand { get; }
+        public ICommand NavigateCompareWithHistoryCommand { get; }
+        public ICommand NavigateGroupWorksheetCommand { get; }
+        public ICommand NavigateExternalLabManagementCommand { get; }
+        public ICommand NavigateAttendanceReportCommand { get; }
+        public ICommand NavigateContractInvoiceCommand { get; }
         public ICommand LogoutCommand { get; }
 
         private void ShowLogin()
@@ -215,6 +225,11 @@ namespace Open_lab.ViewModels
             (NavigateCombinedReportCommand as RelayCommand)?.RaiseCanExecuteChanged();
             (NavigateBlankReportCommand as RelayCommand)?.RaiseCanExecuteChanged();
             (NavigateConstantsCommand as RelayCommand)?.RaiseCanExecuteChanged();
+            (NavigateCompareWithHistoryCommand as RelayCommand)?.RaiseCanExecuteChanged();
+            (NavigateGroupWorksheetCommand as RelayCommand)?.RaiseCanExecuteChanged();
+            (NavigateExternalLabManagementCommand as RelayCommand)?.RaiseCanExecuteChanged();
+            (NavigateAttendanceReportCommand as RelayCommand)?.RaiseCanExecuteChanged();
+            (NavigateContractInvoiceCommand as RelayCommand)?.RaiseCanExecuteChanged();
             (LogoutCommand as RelayCommand)?.RaiseCanExecuteChanged();
         }
     }
