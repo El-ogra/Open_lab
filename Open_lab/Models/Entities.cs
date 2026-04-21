@@ -93,11 +93,13 @@ namespace Open_lab.Models
         public DateTime VisitDate { get; set; }
         public string? AccountType { get; set; }
         public int? ReferralId { get; set; }
+        public int? PhysicianId { get; set; }
         public string? Status { get; set; }
         public int? BranchId { get; set; }
 
         public Patient Patient { get; set; } = null!;
         public Referral? Referral { get; set; }
+        public Physician? Physician { get; set; }
         public Branch? Branch { get; set; }
         public ICollection<VisitTest> VisitTests { get; set; } = new HashSet<VisitTest>();
         public Invoice? Invoice { get; set; }
@@ -214,6 +216,16 @@ namespace Open_lab.Models
         public int TestId { get; set; }
         public string CommentText { get; set; } = string.Empty;
         public bool IsDefault { get; set; }
+
+        /// <summary>
+        /// Comment to display when the test value is below the low threshold.
+        /// </summary>
+        public string? LowComment { get; set; }
+
+        /// <summary>
+        /// Comment to display when the test value is above the high threshold.
+        /// </summary>
+        public string? HighComment { get; set; }
 
         public Test Test { get; set; } = null!;
     }

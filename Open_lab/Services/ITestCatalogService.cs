@@ -51,5 +51,11 @@ namespace Open_lab.Services
         Task<Referral> CreateReferralAsync(Referral referral);
         Task<List<Referral>> GetReferralsAsync();
         Task DeleteReferralAsync(int referralId);
+
+        Task<Physician> CreatePhysicianAsync(Physician physician);
+        Task<List<Physician>> GetPhysiciansAsync();
+        Task<Physician?> GetPhysicianByIdAsync(int physicianId);
+        Task UpdatePhysicianAsync(Physician physician);
+        Task DeletePhysicianAsync(int physicianId);
     }
 }

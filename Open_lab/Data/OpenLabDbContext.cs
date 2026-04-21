@@ -58,6 +58,7 @@ namespace Open_lab.Data
         public DbSet<ExternalLabSettlement> ExternalLabSettlements { get; set; } = null!;
         public DbSet<Reagent> Reagents { get; set; } = null!;
         public DbSet<TestConsumption> TestConsumptions { get; set; } = null!;
+        public DbSet<Physician> Physicians { get; set; } = null!;
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

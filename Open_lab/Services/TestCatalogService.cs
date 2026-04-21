@@ -578,6 +578,106 @@ namespace Open_lab.Services
             await _db.SaveChangesAsync();
         }
 
+        public async Task<Physician> CreatePhysicianAsync(Physician physician)
+        {
+            if (physician == null || string.IsNullOrWhiteSpace(physician.FullName))
+            {
+                throw new ArgumentException("Physician full name is required.", nameof(physician));
+            }
+
+            physician.FullName = physician.FullName.Trim();
+            physician.Phone = string.IsNullOrWhiteSpace(physician.Phone) ? null : physician.Phone.Trim();
+            physician.Specialty = string.IsNullOrWhiteSpace(physician.Specialty) ? null : physician.Specialty.Trim();
+            physician.Address = string.IsNullOrWhiteSpace(physician.Address) ? null : physician.Address.Trim();
+
+            if (physician.CommissionPercentage.HasValue && physician.CommissionPercentage.Value < 0)
+            {
+                throw new ArgumentException("Commission percentage cannot be negative.", nameof(physician));
+            }
+
+            var duplicate = await _db.Physicians.AnyAsync(p => p.FullName == physician.FullName && p.Phone == physician.Phone);
+            if (duplicate)
+            {
+                throw new InvalidOperationException("Physician already exists.");
+            }
+
+            _db.Physicians.Add(physician);
+            await _db.SaveChangesAsync();
+            return physician;
+        }
+
+        public async Task<List<Physician>> GetPhysiciansAsync()
+        {
+            return await _db.Physicians.AsNoTracking()
+                .Include(p => p.PriceList)
+                .OrderBy(p => p.FullName)
+                .ToListAsync();
+        }
+
+        public async Task<Physician?> GetPhysicianByIdAsync(int physicianId)
+        {
+            return await _db.Physicians.AsNoTracking()
+                .Include(p => p.PriceList)
+                .FirstOrDefaultAsync(p => p.PhysicianId == physicianId);
+        }
+
+        public async Task UpdatePhysicianAsync(Physician physician)
+        {
+            if (physician == null)
+            {
+                throw new ArgumentNullException(nameof(physician));
+            }
+
+            if (string.IsNullOrWhiteSpace(physician.FullName))
+            {
+                throw new ArgumentException("Physician full name is required.", nameof(physician));
+            }
+
+            physician.FullName = physician.FullName.Trim();
+            physician.Phone = string.IsNullOrWhiteSpace(physician.Phone) ? null : physician.Phone.Trim();
+            physician.Specialty = string.IsNullOrWhiteSpace(physician.Specialty) ? null : physician.Specialty.Trim();
+            physician.Address = string.IsNullOrWhiteSpace(physician.Address) ? null : physician.Address.Trim();
+
+            if (physician.CommissionPercentage.HasValue && physician.CommissionPercentage.Value < 0)
+            {
+                throw new ArgumentException("Commission percentage cannot be negative.", nameof(physician));
+            }
+
+            var current = await _db.Physicians.FirstOrDefaultAsync(p => p.PhysicianId == physician.PhysicianId);
+            if (current == null)
+            {
+                throw new InvalidOperationException("Physician not found.");
+            }
+
+            current.FullName = physician.FullName;
+            current.Phone = physician.Phone;
+            current.Specialty = physician.Specialty;
+            current.Address = physician.Address;
+            current.IsActive = physician.IsActive;
+            current.PriceListId = physician.PriceListId;
+            current.CommissionPercentage = physician.CommissionPercentage;
+
+            await _db.SaveChangesAsync();
+        }
+
+        public async Task DeletePhysicianAsync(int physicianId)
+        {
+            var physician = await _db.Physicians.FirstOrDefaultAsync(p => p.PhysicianId == physicianId);
+            if (physician == null)
+            {
+                return;
+            }
+
+            var inUse = await _db.Visits.AnyAsync(v => v.PhysicianId == physicianId);
+            if (inUse)
+            {
+                throw new InvalidOperationException("Cannot delete physician that is assigned to visits.");
+            }
+
+            _db.Physicians.Remove(physician);
+            await _db.SaveChangesAsync();
+        }
+
         private static void NormalizeTest(Test test)
         {
             test.Code = test.Code?.Trim() ?? string.Empty;

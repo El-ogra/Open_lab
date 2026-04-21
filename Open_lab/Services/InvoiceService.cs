@@ -176,5 +176,51 @@ namespace Open_lab.Services
             invoice.Status = invoice.Balance == 0 ? "Paid" : "Partial";
             await _db.SaveChangesAsync();
         }
+
+        public async Task<decimal> CalculateReferralDiscountAsync(int referralId, decimal totalAmount)
+        {
+            if (totalAmount < 0)
+            {
+                throw new ArgumentException("Total amount cannot be negative.", nameof(totalAmount));
+            }
+
+            var referral = await _db.Referrals.FirstOrDefaultAsync(r => r.ReferralId == referralId);
+            if (referral == null)
+            {
+                return 0;
+            }
+
+            var discountPercentage = referral.DiscountPercentage;
+            if (discountPercentage <= 0)
+            {
+                return 0;
+            }
+
+            var discountAmount = totalAmount * (discountPercentage / 100);
+            return Math.Round(discountAmount, 2);
+        }
+
+        public async Task<decimal> CalculateReferralCommissionAsync(int referralId, decimal totalAmount)
+        {
+            if (totalAmount < 0)
+            {
+                throw new ArgumentException("Total amount cannot be negative.", nameof(totalAmount));
+            }
+
+            var referral = await _db.Referrals.FirstOrDefaultAsync(r => r.ReferralId == referralId);
+            if (referral == null)
+            {
+                return 0;
+            }
+
+            var commissionPercentage = referral.CommissionPercentage;
+            if (commissionPercentage <= 0)
+            {
+                return 0;
+            }
+
+            var commissionAmount = totalAmount * (commissionPercentage / 100);
+            return Math.Round(commissionAmount, 2);
+        }
     }
 }
