@@ -27,13 +27,14 @@ namespace Open_lab.Tests.Services
         }
 
         [Fact]
-        public async Task GetPunctualityReportAsync_Should_Calculate_Delay_And_Overtime()
+        public async Task GetPunctualityReportAsync_Should_Calculate_Delay_And_Overtime_LogicGuard()
         {
+            // Refactored to Logic Guard - verifies precise delay and overtime calculations
             var shift = new ShiftSchedule { Name = "Day", StartTime = new TimeSpan(8, 0, 0), EndTime = new TimeSpan(16, 0, 0), GracePeriodMinutes = 5 };
             _db.ShiftSchedules.Add(shift);
             await _db.SaveChangesAsync();
 
-            var user = new User { Username = "u1" };
+            var user = new User { Username = "u1", FullName = "User One" };
             _db.Users.Add(user);
             await _db.SaveChangesAsync();
 
@@ -44,10 +45,15 @@ namespace Open_lab.Tests.Services
             await _db.SaveChangesAsync();
 
             var report = await _service.GetPunctualityReportAsync(DateTime.Today.AddDays(-1), DateTime.Today.AddDays(1));
+            
+            // Assert - Logic Guard: Verify report structure and calculations
             report.Should().ContainSingle();
             var row = report[0];
+            row.ShiftName.Should().Be("Day");
             row.DelayMinutes.Should().BeGreaterThan(0);
+            row.DelayMinutes.Should().Be(10, "Should be exactly 10 minutes late (outside grace period)");
             row.OvertimeMinutes.Should().BeGreaterThan(0);
+            row.OvertimeMinutes.Should().Be(60, "Should be exactly 60 minutes overtime");
         }
     }
 }

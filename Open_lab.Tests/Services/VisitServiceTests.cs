@@ -98,5 +98,34 @@ namespace Open_lab.Tests.Services
             // Assert
             await act.Should().ThrowAsync<InvalidOperationException>();
         }
+
+        [Fact]
+        public async Task ResolveTestPriceAsync_With_Referral_PriceList_Should_Use_Contract_Price()
+        {
+            // Arrange
+            var referral = new Referral { Name = "Contract1" };
+            _db.Referrals.Add(referral);
+            var patient = new Patient { LabId = "L10", FullName = "P", Gender = "Male" };
+            _db.Patients.Add(patient);
+            var test = new Test { Code = "T1", NameReport = "Test", Price = 200m };
+            _db.Tests.Add(test);
+            await _db.SaveChangesAsync();
+
+            var pl = new PriceList { Name = "PL1", ReferralId = referral.ReferralId };
+            _db.PriceLists.Add(pl);
+            await _db.SaveChangesAsync();
+            _db.PriceListItems.Add(new PriceListItem { PriceListId = pl.PriceListId, TestId = test.TestId, Price = 150m });
+            await _db.SaveChangesAsync();
+
+            var visit = new Visit { PatientId = patient.PatientId, VisitDate = DateTime.Now, ReferralId = referral.ReferralId, AccountType = "Referral" };
+            _db.Visits.Add(visit);
+            await _db.SaveChangesAsync();
+
+            // Act
+            var vt = await _service.AddTestToVisitAsync(visit.VisitId, test.TestId);
+
+            // Assert
+            vt.Price.Should().Be(150m); // Contract price instead of base 200m
+        }
     }
 }

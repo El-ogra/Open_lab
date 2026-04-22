@@ -138,5 +138,42 @@ namespace Open_lab.Tests.Services
             var right = await _service.GetRightMarginAsync();
             right.Should().Be(1.1m);
         }
+
+        [Fact]
+        public async Task HeaderFooter_Settings_Should_Work()
+        {
+            // 13.3 Configure Header/Footer
+            await _service.SetSettingAsync("Print.Header", "Lab Name");
+            await _service.SetSettingAsync("Print.Footer", "Page {0}");
+            
+            var header = await _service.GetStringAsync("Print.Header");
+            var footer = await _service.GetStringAsync("Print.Footer");
+            
+            header.Should().Be("Lab Name");
+            footer.Should().Be("Page {0}");
+        }
+
+        [Fact]
+        public async Task DefaultAccountType_Setting_Should_Work()
+        {
+            // 13.4 Set Default Account Type
+            await _service.SetSettingAsync("Visit.DefaultAccountType", "Referral");
+            var type = await _service.GetStringAsync("Visit.DefaultAccountType");
+            type.Should().Be("Referral");
+        }
+
+        [Fact]
+        public async Task InvoiceSettings_Should_Work()
+        {
+            // 13.6 Set Invoice Settings
+            await _service.SetSettingAsync("Invoice.ShowLogo", true);
+            await _service.SetSettingAsync("Invoice.Currency", "EGP");
+            
+            var showLogo = await _service.GetBoolAsync("Invoice.ShowLogo");
+            var currency = await _service.GetStringAsync("Invoice.Currency");
+            
+            showLogo.Should().BeTrue();
+            currency.Should().Be("EGP");
+        }
     }
 }

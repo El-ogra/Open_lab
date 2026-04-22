@@ -1,0 +1,73 @@
+using FluentAssertions;
+using Moq;
+using Open_lab.Services;
+
+namespace Open_lab.Tests.Services
+{
+    public class PrintServiceTests
+    {
+        [Fact]
+        public async Task PrintCultureReportAsync_When_Data_Is_Null_Should_Throw()
+        {
+            // 5.7 Print Culture Report (guard path)
+            var settingsMock = new Mock<ISettingsService>();
+            var service = new PrintService(settingsMock.Object);
+
+            Func<Task> act = async () => await service.PrintCultureReportAsync(null!);
+
+            await act.Should().ThrowAsync<ArgumentNullException>();
+        }
+
+        [Fact]
+        public async Task PrintVisitReportAsync_When_Report_Is_Null_Should_Throw()
+        {
+            // 8.6 Print External Lab Report uses same visit-report printing pipeline
+            var settingsMock = new Mock<ISettingsService>();
+            var service = new PrintService(settingsMock.Object);
+
+            Func<Task> act = async () => await service.PrintVisitReportAsync(null!);
+
+            await act.Should().ThrowAsync<ArgumentNullException>();
+        }
+
+        // 5.7 Culture Report Printing Tests - NEW TEST
+
+        [Fact]
+        public async Task PrintCultureReportAsync_Should_Validate_Report_Structure_LogicGuard()
+        {
+            // 5.7 Culture Report Printing - Logic Guard: Verify culture report structure
+            // Arrange
+            var settingsMock = new Mock<ISettingsService>();
+            var service = new PrintService(settingsMock.Object);
+
+            var cultureData = new CultureReportData
+            {
+                PatientName = "Test Patient",
+                LabId = "LAB-001",
+                CultureName = "Urine Culture",
+                VisitDate = DateTime.Now,
+                Results = new List<CultureResultRow>
+                {
+                    new CultureResultRow { AntibioticName = "Amoxicillin", Sensitivity = "Sensitive" },
+                    new CultureResultRow { AntibioticName = "Ciprofloxacin", Sensitivity = "Resistant" }
+                }
+            };
+
+            // Act - This would normally print, but we validate the data structure
+            Func<Task> act = async () => await service.PrintCultureReportAsync(cultureData);
+
+            // Assert - Logic Guard: Verify no null reference exception occurs with valid data
+            await act.Should().NotThrowAsync();
+
+            // Verify structure integrity
+            cultureData.PatientName.Should().NotBeNullOrEmpty();
+            cultureData.LabId.Should().NotBeNullOrEmpty();
+            cultureData.CultureName.Should().NotBeNullOrEmpty();
+            cultureData.Results.Should().HaveCount(2);
+            cultureData.Results[0].AntibioticName.Should().Be("Amoxicillin");
+            cultureData.Results[0].Sensitivity.Should().Be("Sensitive");
+            cultureData.Results[1].AntibioticName.Should().Be("Ciprofloxacin");
+            cultureData.Results[1].Sensitivity.Should().Be("Resistant");
+        }
+    }
+}

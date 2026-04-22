@@ -69,17 +69,73 @@ namespace Open_lab.Tests.Services
         }
 
         [Fact]
-        public async Task AssignSingleRoleAsync_Should_Assign()
+        public async Task AssignSingleRoleAsync_Should_Assign_And_Remove_Old_Roles()
         {
+            // Refactored to Logic Guard - verifies single role assignment and removal of old roles
             var user = new User { Username = "u1" };
-            var role = new Role { RoleName = "r1" };
+            var role1 = new Role { RoleName = "r1" };
+            var role2 = new Role { RoleName = "r2" };
             _db.Users.Add(user);
-            _db.Roles.Add(role);
+            _db.Roles.AddRange(role1, role2);
             await _db.SaveChangesAsync();
 
-            await _service.AssignSingleRoleAsync(user.UserId, role.RoleId);
+            // Pre-assign role2 to test removal
+            _db.UserRoles.Add(new UserRole { UserId = user.UserId, RoleId = role2.RoleId });
+            await _db.SaveChangesAsync();
+
+            // Act
+            await _service.AssignSingleRoleAsync(user.UserId, role1.RoleId);
+
+            // Assert - Logic Guard: Verify only role1 is assigned, role2 is removed
             var links = await _db.UserRoles.Where(ur => ur.UserId == user.UserId).ToListAsync();
-            links.Should().ContainSingle().Which.RoleId.Should().Be(role.RoleId);
+            links.Should().ContainSingle();
+            links[0].UserId.Should().Be(user.UserId);
+            links[0].RoleId.Should().Be(role1.RoleId);
+        }
+
+        [Fact]
+        public async Task UpdateUserAsync_Should_Update_Fields_And_Hash_New_Password()
+        {
+            // Arrange
+            var user = new User { Username = "old", FullName = "Old" };
+            _db.Users.Add(user);
+            await _db.SaveChangesAsync();
+
+            user.FullName = "New Name";
+            user.Username = "newname";
+
+            // Act
+            await _service.UpdateUserAsync(user, "newpass123");
+
+            // Assert
+            var updated = await _db.Users.FindAsync(user.UserId);
+            updated!.FullName.Should().Be("New Name");
+            updated.Username.Should().Be("newname");
+            PasswordSecurity.Verify("newpass123", updated.Salt, updated.PasswordHash).Should().BeTrue();
+        }
+
+        [Fact]
+        public async Task SaveRolePermissionsAsync_Should_Replace_Existing_Permissions_Completely()
+        {
+            // Refactored to Logic Guard - verifies complete replacement including removal of old permissions
+            var role = new Role { RoleName = "TestRole" };
+            _db.Roles.Add(role);
+            await _db.SaveChangesAsync();
+            _db.RolePermissions.Add(new RolePermission { RoleId = role.RoleId, PermissionCode = "OldCode1" });
+            _db.RolePermissions.Add(new RolePermission { RoleId = role.RoleId, PermissionCode = "OldCode2" });
+            await _db.SaveChangesAsync();
+
+            // Act
+            await _service.SaveRolePermissionsAsync(role.RoleId, new[] { "NewCode1", "NewCode2", "NewCode3" });
+
+            // Assert - Logic Guard: Verify old permissions are removed and new ones are added
+            var current = await _db.RolePermissions.Where(rp => rp.RoleId == role.RoleId).ToListAsync();
+            current.Should().HaveCount(3);
+            current.Should().Contain(rp => rp.PermissionCode == "NewCode1");
+            current.Should().Contain(rp => rp.PermissionCode == "NewCode2");
+            current.Should().Contain(rp => rp.PermissionCode == "NewCode3");
+            current.Should().NotContain(rp => rp.PermissionCode == "OldCode1");
+            current.Should().NotContain(rp => rp.PermissionCode == "OldCode2");
         }
     }
 }

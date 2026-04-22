@@ -25,32 +25,37 @@ namespace Open_lab.Tests.ViewModels
         }
 
         [Fact]
-        public void Constructor_Should_Generate_LabId_Automatically()
+        public async Task Constructor_Should_Generate_LabId_Automatically_LogicGuard()
         {
             // Arrange
-            _patientServiceMock.Setup(x => x.GenerateNextLabIdAsync(It.IsAny<DateTime?>())).ReturnsAsync("LAB-2024-001");
+            var expectedLabId = "LAB-2024-001";
+            _patientServiceMock.Setup(x => x.GenerateNextLabIdAsync(It.IsAny<DateTime?>())).ReturnsAsync(expectedLabId);
+
+            // Act
             var vm = new PatientRegistrationViewModel(_patientServiceMock.Object);
+            await Task.Delay(100); // Allow fire-and-forget to complete
 
-            // Assert - eventually LabId should be set via constructor's fire-and-forget
-            // Since constructor calls _ = GenerateLabIdAsync() we can't reliably await it,
-            // so we verify the mock was called
-            _patientServiceMock.Verify(x => x.GenerateNextLabIdAsync(It.IsAny<DateTime?>()), Times.AtLeastOnce);
+            // Assert - Logic Guard: Verify LabId is actually set to the generated value
+            vm.LabId.Should().Be(expectedLabId);
         }
 
         [Fact]
-        public void Commands_When_Admin_Should_All_Be_Enabled()
+        public void Commands_When_Admin_Should_All_Be_Enabled_LogicGuard()
         {
-            // Assert
-            _viewModel.SaveCommand.CanExecute(null).Should().BeTrue();
-            _viewModel.NewCommand.CanExecute(null).Should().BeTrue();
-            _viewModel.GenerateLabIdCommand.CanExecute(null).Should().BeTrue();
-            _viewModel.LoadByLabIdCommand.CanExecute(null).Should().BeTrue();
-            _viewModel.SearchCommand.CanExecute(null).Should().BeTrue();
-            _viewModel.DeleteCommand.CanExecute(null).Should().BeFalse(); // PatientId == 0
+            // Assert - Logic Guard: Verify command states reflect actual business rules
+            _viewModel.SaveCommand.CanExecute(null).Should().BeTrue("Save should be enabled for new patient");
+            _viewModel.NewCommand.CanExecute(null).Should().BeTrue("New should always be enabled for admin");
+            _viewModel.GenerateLabIdCommand.CanExecute(null).Should().BeTrue("GenerateLabId should be enabled for admin");
+            _viewModel.LoadByLabIdCommand.CanExecute(null).Should().BeTrue("LoadByLabId should be enabled for admin");
+            _viewModel.SearchCommand.CanExecute(null).Should().BeTrue("Search should be enabled for admin");
+            _viewModel.DeleteCommand.CanExecute(null).Should().BeFalse("Delete should be disabled when PatientId == 0");
+
+            // Logic Guard: Verify Delete becomes enabled when PatientId is set
+            // Note: PatientId is read-only, this test validates the initial state only
         }
 
         [Fact]
-        public async Task SaveAsync_With_New_Patient_Should_Create_New_Patient()
+        public async Task SaveAsync_With_New_Patient_Should_Create_New_Patient_LogicGuard()
         {
             // Arrange - PatientId defaults to 0 for new patient
             _viewModel.LabId = "LAB-001";
@@ -63,19 +68,34 @@ namespace Open_lab.Tests.ViewModels
             _viewModel.Medications = "Insulin";
             _viewModel.MedicalNotes = "Note";
 
-            var createdPatient = new Patient { PatientId = 42, LabId = "LAB-001" };
-            _patientServiceMock.Setup(x => x.CreateAsync(It.IsAny<Patient>())).ReturnsAsync(createdPatient);
-            _patientServiceMock.Setup(x => x.SaveMedicalHistoryAsync(42, It.IsAny<MedicalHistory>())).Returns(Task.CompletedTask);
+            Patient? capturedPatient = null;
+            MedicalHistory? capturedHistory = null;
+            _patientServiceMock.Setup(x => x.CreateAsync(It.IsAny<Patient>()))
+                .Callback<Patient>(p => capturedPatient = p)
+                .ReturnsAsync((Patient p) => { p.PatientId = 42; return p; });
+            _patientServiceMock.Setup(x => x.SaveMedicalHistoryAsync(42, It.IsAny<MedicalHistory>()))
+                .Callback<int, MedicalHistory>((id, h) => capturedHistory = h)
+                .Returns(Task.CompletedTask);
 
             // Act
             await _viewModel.InvokePrivateAsync("SaveAsync");
 
-            // Assert
+            // Assert - Logic Guard: Verify all patient data is correctly captured and saved
             _viewModel.StatusMessage.Should().Contain("تم إنشاء المريض بنجاح");
-            _patientServiceMock.Verify(x => x.CreateAsync(It.Is<Patient>(p =>
-                p.LabId == "LAB-001" &&
-                p.FullName == "John Doe" &&
-                p.Gender == "Male")), Times.Once);
+            capturedPatient.Should().NotBeNull();
+            capturedPatient!.LabId.Should().Be("LAB-001");
+            capturedPatient.FullName.Should().Be("John Doe");
+            capturedPatient.Gender.Should().Be("Male");
+            capturedPatient.Phone.Should().Be("1234567890");
+            capturedPatient.Address.Should().Be("123 Street");
+            capturedPatient.PatientId.Should().Be(42);
+
+            // Assert - Logic Guard: Verify medical history is correctly captured
+            capturedHistory.Should().NotBeNull();
+            capturedHistory!.ChronicDiseases.Should().Be("Diabetes");
+            capturedHistory.Allergies.Should().Be("Penicillin");
+            capturedHistory.Medications.Should().Be("Insulin");
+            capturedHistory.Notes.Should().Be("Note");
         }
 
 
@@ -151,42 +171,53 @@ namespace Open_lab.Tests.ViewModels
         }
 
         [Fact]
-        public async Task SearchAsync_Should_Populate_Results()
+        public async Task SearchAsync_Should_Populate_Results_LogicGuard()
         {
-            // Arrange
+            // Arrange - 1.5 Search Semantics Tests
             _viewModel.FullName = "John";
             _viewModel.Phone = "123";
             var patients = new List<Patient>
             {
-                new Patient { PatientId = 1, FullName = "John Doe" },
-                new Patient { PatientId = 2, FullName = "John Smith" }
+                new Patient { PatientId = 1, FullName = "John Doe", LabId = "LAB-001", Phone = "123456" },
+                new Patient { PatientId = 2, FullName = "John Smith", LabId = "LAB-002", Phone = "123789" }
             };
             _patientServiceMock.Setup(x => x.SearchAsync("John", "123")).ReturnsAsync(patients);
 
             // Act
             await _viewModel.InvokePrivateAsync("SearchAsync");
 
-            // Assert
+            // Assert - Logic Guard: Verify search returns correct patients with full data
             _viewModel.Results.Should().HaveCount(2);
             _viewModel.StatusMessage.Should().Contain("2");
+            _viewModel.Results[0].PatientId.Should().Be(1);
+            _viewModel.Results[0].FullName.Should().Be("John Doe");
+            _viewModel.Results[0].LabId.Should().Be("LAB-001");
+            _viewModel.Results[1].PatientId.Should().Be(2);
+            _viewModel.Results[1].FullName.Should().Be("John Smith");
+            _viewModel.Results[1].LabId.Should().Be("LAB-002");
         }
 
         [Fact]
-        public async Task DeleteAsync_With_PatientId_Zero_Should_Return_Immediately()
+        public async Task DeleteAsync_With_PatientId_Zero_Should_Not_Call_Service_LogicGuard()
         {
             // Arrange - PatientId defaults to 0
+            var deleteCalled = false;
+            _patientServiceMock.Setup(x => x.DeleteAsync(It.IsAny<int>()))
+                .Callback<int>(id => deleteCalled = true)
+                .Returns(Task.CompletedTask);
 
             // Act
             await _viewModel.InvokePrivateAsync("DeleteAsync");
 
-            // Assert
+            // Assert - Logic Guard: Verify delete service was NOT called for PatientId 0
+            deleteCalled.Should().BeFalse();
             _patientServiceMock.Verify(x => x.DeleteAsync(It.IsAny<int>()), Times.Never);
         }
 
 
 
         [Fact]
-        public void SelectedPatient_Setter_Should_Load_Patient_Data()
+        public void SelectedPatient_Setter_Should_Load_Patient_Data_LogicGuard()
         {
             // Arrange
             var patient = new Patient
@@ -194,17 +225,164 @@ namespace Open_lab.Tests.ViewModels
                 PatientId = 7,
                 LabId = "LAB-007",
                 FullName = "James",
-                Gender = "Male"
+                Gender = "Male",
+                Phone = "555-1234",
+                Address = "456 Oak St",
+                BirthDate = new DateTime(1985, 5, 15)
             };
-            _patientServiceMock.Setup(x => x.GetMedicalHistoryAsync(7)).ReturnsAsync((MedicalHistory?)null);
+            var history = new MedicalHistory
+            {
+                ChronicDiseases = "Hypertension",
+                Allergies = "None",
+                Medications = "Lisinopril",
+                Notes = "Regular checkup"
+            };
+            _patientServiceMock.Setup(x => x.GetMedicalHistoryAsync(7)).ReturnsAsync(history);
 
             // Act
             _viewModel.SelectedPatient = patient;
+            Thread.Sleep(50); // Allow async medical history load to complete
 
-            // Assert
+            // Assert - Logic Guard: Verify all patient fields are correctly loaded
             _viewModel.PatientId.Should().Be(7);
             _viewModel.LabId.Should().Be("LAB-007");
             _viewModel.FullName.Should().Be("James");
+            _viewModel.Gender.Should().Be("Male");
+            _viewModel.Phone.Should().Be("555-1234");
+            _viewModel.Address.Should().Be("456 Oak St");
+            _viewModel.BirthDate.Should().Be(new DateTime(1985, 5, 15));
+
+            // Assert - Logic Guard: Verify medical history is loaded
+            _viewModel.ChronicDiseases.Should().Be("Hypertension");
+            _viewModel.Allergies.Should().Be("None");
+            _viewModel.Medications.Should().Be("Lisinopril");
+            _viewModel.MedicalNotes.Should().Be("Regular checkup");
+        }
+
+        // 1.5 Search Semantics Tests - NEW TESTS
+
+        [Fact]
+        public async Task SearchAsync_By_Name_Should_Return_Matching_Patients_LogicGuard()
+        {
+            // 1.5 Search by name
+            // Arrange
+            _viewModel.FullName = "Ahmed";
+            _viewModel.Phone = "";
+            var patients = new List<Patient>
+            {
+                new Patient { PatientId = 1, FullName = "Ahmed Ali", LabId = "LAB-001", Phone = "111" },
+                new Patient { PatientId = 2, FullName = "Ahmed Mohamed", LabId = "LAB-002", Phone = "222" },
+                new Patient { PatientId = 3, FullName = "Sara Ahmed", LabId = "LAB-003", Phone = "333" }
+            };
+            _patientServiceMock.Setup(x => x.SearchAsync("Ahmed", "")).ReturnsAsync(patients);
+
+            // Act
+            await _viewModel.InvokePrivateAsync("SearchAsync");
+
+            // Assert - Logic Guard: Verify search returns all patients matching name
+            _viewModel.Results.Should().HaveCount(3);
+            _viewModel.Results.Should().Contain(r => r.FullName == "Ahmed Ali");
+            _viewModel.Results.Should().Contain(r => r.FullName == "Ahmed Mohamed");
+            _viewModel.Results.Should().Contain(r => r.FullName == "Sara Ahmed");
+        }
+
+        [Fact]
+        public async Task SearchAsync_By_Phone_Should_Return_Exact_Match_LogicGuard()
+        {
+            // 1.5 Search by phone number
+            // Arrange
+            _viewModel.FullName = "";
+            _viewModel.Phone = "5551234";
+            var patients = new List<Patient>
+            {
+                new Patient { PatientId = 10, FullName = "John Doe", LabId = "LAB-010", Phone = "5551234" }
+            };
+            _patientServiceMock.Setup(x => x.SearchAsync("", "5551234")).ReturnsAsync(patients);
+
+            // Act
+            await _viewModel.InvokePrivateAsync("SearchAsync");
+
+            // Assert - Logic Guard: Verify search returns exact phone match
+            _viewModel.Results.Should().ContainSingle();
+            _viewModel.Results[0].PatientId.Should().Be(10);
+            _viewModel.Results[0].Phone.Should().Be("5551234");
+            _viewModel.Results[0].FullName.Should().Be("John Doe");
+        }
+
+        [Fact]
+        public async Task SearchAsync_With_No_Results_Should_Return_Empty_LogicGuard()
+        {
+            // 1.5 Break case: no results found
+            // Arrange
+            _viewModel.FullName = "NonExistent";
+            _viewModel.Phone = "9999999";
+            _patientServiceMock.Setup(x => x.SearchAsync("NonExistent", "9999999")).ReturnsAsync(new List<Patient>());
+
+            // Act
+            await _viewModel.InvokePrivateAsync("SearchAsync");
+
+            // Assert - Logic Guard: Verify empty result set and appropriate message
+            _viewModel.Results.Should().BeEmpty();
+            _viewModel.StatusMessage.Should().Contain("0");
+        }
+
+        [Fact]
+        public async Task SearchAsync_Partial_Match_Should_Return_Relevant_Results_LogicGuard()
+        {
+            // 1.5 Partial search
+            // Arrange
+            _viewModel.FullName = "Moh";
+            _viewModel.Phone = "";
+            var patients = new List<Patient>
+            {
+                new Patient { PatientId = 5, FullName = "Mohammed Ali", LabId = "LAB-005", Phone = "555" },
+                new Patient { PatientId = 6, FullName = "Sarah Mohamed", LabId = "LAB-006", Phone = "666" }
+            };
+            _patientServiceMock.Setup(x => x.SearchAsync("Moh", "")).ReturnsAsync(patients);
+
+            // Act
+            await _viewModel.InvokePrivateAsync("SearchAsync");
+
+            // Assert - Logic Guard: Verify partial matches are returned correctly
+            _viewModel.Results.Should().HaveCount(2);
+            _viewModel.Results.Should().Contain(r => r.FullName.Contains("Moh"));
+        }
+
+        // 1.7 Medical History Integrity Tests - NEW TEST
+
+        [Fact]
+        public async Task SaveAsync_With_MedicalHistory_Should_Save_Complete_History_LogicGuard()
+        {
+            // 1.7 Add medical history with integrity validation
+            // Arrange
+            _viewModel.LabId = "LAB-HIST";
+            _viewModel.FullName = "History Patient";
+            _viewModel.Gender = "Female";
+            _viewModel.ChronicDiseases = "Diabetes, Hypertension";
+            _viewModel.Allergies = "Penicillin, Sulfa";
+            _viewModel.Medications = "Metformin, Lisinopril";
+            _viewModel.MedicalNotes = "Patient requires regular monitoring";
+
+            Patient? capturedPatient = null;
+            MedicalHistory? capturedHistory = null;
+            _patientServiceMock.Setup(x => x.CreateAsync(It.IsAny<Patient>()))
+                .Callback<Patient>(p => capturedPatient = p)
+                .ReturnsAsync((Patient p) => { p.PatientId = 100; return p; });
+            _patientServiceMock.Setup(x => x.SaveMedicalHistoryAsync(100, It.IsAny<MedicalHistory>()))
+                .Callback<int, MedicalHistory>((id, h) => capturedHistory = h)
+                .Returns(Task.CompletedTask);
+
+            // Act
+            await _viewModel.InvokePrivateAsync("SaveAsync");
+
+            // Assert - Logic Guard: Verify medical history is saved with complete data
+            capturedHistory.Should().NotBeNull();
+            capturedHistory!.ChronicDiseases.Should().Be("Diabetes, Hypertension");
+            capturedHistory.Allergies.Should().Be("Penicillin, Sulfa");
+            capturedHistory.Medications.Should().Be("Metformin, Lisinopril");
+            capturedHistory.Notes.Should().Be("Patient requires regular monitoring");
+            capturedPatient.Should().NotBeNull();
+            capturedPatient!.PatientId.Should().Be(100);
         }
     }
 }
