@@ -1,7 +1,7 @@
 using System;
 using System.Collections.ObjectModel;
+using System.Text;
 using System.Threading.Tasks;
-using System.Windows.Documents;
 using System.Windows.Input;
 using Open_lab.Models;
 using Open_lab.Services;
@@ -15,7 +15,7 @@ namespace Open_lab.ViewModels
         private int _visitId;
         private string _statusMessage = string.Empty;
         private VisitReportData? _report;
-        private FlowDocument? _previewDocument;
+        private string _previewContent = string.Empty;
 
         public ReportViewerViewModel(IReportService reportService, IPrintService printService)
         {
@@ -54,10 +54,10 @@ namespace Open_lab.ViewModels
 
         public ObservableCollection<VisitTestReportItem> Tests { get; }
 
-        public FlowDocument? PreviewDocument
+        public string PreviewContent
         {
-            get => _previewDocument;
-            private set => SetProperty(ref _previewDocument, value);
+            get => _previewContent;
+            private set => SetProperty(ref _previewContent, value);
         }
 
         public ICommand LoadReportCommand { get; }
@@ -87,7 +87,7 @@ namespace Open_lab.ViewModels
                 {
                     Tests.Add(item);
                 }
-                PreviewDocument = BuildPreviewDocument(report);
+                PreviewContent = BuildPreviewContent(report);
 
                 StatusMessage = "تم تحميل التقرير.";
             }
@@ -117,30 +117,17 @@ namespace Open_lab.ViewModels
             }
         }
 
-        private static FlowDocument BuildPreviewDocument(VisitReportData report)
+        private static string BuildPreviewContent(VisitReportData report)
         {
-            var document = new FlowDocument
-            {
-                FontSize = 12,
-                PagePadding = new System.Windows.Thickness(20)
-            };
-
-            document.Blocks.Add(new Paragraph(new Run("معاينة التقرير"))
-            {
-                FontSize = 18,
-                FontWeight = System.Windows.FontWeights.Bold
-            });
-
-            document.Blocks.Add(new Paragraph(new Run($"المريض: {report.Patient.FullName}")));
-            document.Blocks.Add(new Paragraph(new Run($"رقم الزيارة: {report.Visit.VisitId} | التاريخ: {report.Visit.VisitDate:yyyy-MM-dd HH:mm}")));
-            document.Blocks.Add(new Paragraph(new Run(" ")));
+            var builder = new StringBuilder();
+            builder.AppendLine("معاينة التقرير");
+            builder.AppendLine($"المريض: {report.Patient.FullName}");
+            builder.AppendLine($"رقم الزيارة: {report.Visit.VisitId} | التاريخ: {report.Visit.VisitDate:yyyy-MM-dd HH:mm}");
+            builder.AppendLine();
 
             foreach (var test in report.Tests)
             {
-                document.Blocks.Add(new Paragraph(new Run(test.Test.NameReport))
-                {
-                    FontWeight = System.Windows.FontWeights.Bold
-                });
+                builder.AppendLine(test.Test.NameReport);
 
                 foreach (var result in test.Results)
                 {
@@ -150,14 +137,11 @@ namespace Open_lab.ViewModels
                         line += $" ({result.Flag})";
                     }
 
-                    document.Blocks.Add(new Paragraph(new Run(line))
-                    {
-                        Margin = new System.Windows.Thickness(16, 0, 0, 0)
-                    });
+                    builder.AppendLine($"  {line}");
                 }
             }
 
-            return document;
+            return builder.ToString();
         }
     }
 }

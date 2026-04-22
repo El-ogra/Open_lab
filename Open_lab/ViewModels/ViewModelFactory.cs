@@ -1,67 +1,64 @@
 using System;
-using Open_lab.Data;
-using Open_lab.Services;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Open_lab.ViewModels
 {
     public class ViewModelFactory : IViewModelFactory
     {
-        private readonly Func<OpenLabDbContext> _dbFactory;
+        private readonly IServiceProvider _serviceProvider;
 
-        public ViewModelFactory(Func<OpenLabDbContext>? dbFactory = null)
+        public ViewModelFactory(IServiceProvider serviceProvider)
         {
-            _dbFactory = dbFactory ?? (() => new OpenLabDbContextFactory().CreateDbContext(Array.Empty<string>()));
+            _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
         }
 
         public BaseViewModel Create(NavigationTarget target, Action? onLoginSuccess = null)
         {
             return target switch
             {
-                NavigationTarget.Home => new HomeViewModel(),
+                NavigationTarget.Home => CreateViewModel<HomeViewModel>(),
                 NavigationTarget.Login => CreateLoginViewModel(onLoginSuccess),
-                NavigationTarget.Dashboard => new DashboardViewModel(CreateDashboardService()),
-                NavigationTarget.PatientRegistration => new PatientRegistrationViewModel(CreatePatientService()),
-                NavigationTarget.PatientTestsSelection => new PatientTestsSelectionViewModel(CreatePatientService(), CreateVisitService(), CreateTestCatalogService(), CreateInvoiceService()),
-                NavigationTarget.PatientBilling => new PatientBillingViewModel(CreateInvoiceService()),
-                NavigationTarget.PatientBillingByDate => new PatientBillingByDateViewModel(CreateInvoiceService()),
-                NavigationTarget.ResultsEntry => new ResultsEntryViewModel(CreateResultsService()),
-                NavigationTarget.ReportViewer => new ReportViewerViewModel(CreateReportService(), CreatePrintService()),
-                NavigationTarget.PatientSearch => new PatientSearchViewModel(CreatePatientSearchService()),
-                NavigationTarget.PatientHistory => new PatientHistoryViewModel(CreatePatientService(), CreateReportService(), CreatePrintService()),
-                NavigationTarget.WorkSheetByPatient => new WorkSheetByPatientViewModel(CreateWorksheetService(), CreatePrintService()),
-                NavigationTarget.WorkSheetByTest => new WorkSheetByTestViewModel(CreateWorksheetService(), CreatePrintService()),
-                NavigationTarget.TestCatalog => new TestCatalogViewModel(CreateTestCatalogService(), CreateBarcodeService()),
-                NavigationTarget.ReferenceRanges => new ReferenceRangesViewModel(CreateTestCatalogService()),
-                NavigationTarget.TestComments => new TestCommentsViewModel(CreateTestCatalogService()),
-                NavigationTarget.PriceLists => new PriceListsViewModel(CreateTestCatalogService(), CreatePrintService()),
-                NavigationTarget.CustomGroups => new CustomGroupsViewModel(CreateTestCatalogService()),
-                NavigationTarget.Referrals => new ReferralsViewModel(CreateTestCatalogService()),
-                NavigationTarget.UsersPermissions => new UsersPermissionsViewModel(CreateUserAdminService()),
-                NavigationTarget.Statistics => new StatisticsViewModel(CreateStatisticsService(), CreateUserProductivityService(), CreatePrintService()),
-                NavigationTarget.SystemSettings => new SystemSettingsViewModel(CreateSystemSettingsService()),
-                NavigationTarget.BackupRestore => new BackupRestoreViewModel(CreateBackupRestoreService()),
-                NavigationTarget.AttendanceLog => new AttendanceLogViewModel(CreateAttendanceService()),
-                NavigationTarget.AccountsTreasury => new AccountsTreasuryViewModel(CreateAccountsTreasuryService(), CreatePrintService()),
-                NavigationTarget.Delivery => new DeliveryViewModel(CreateDeliveryService()),
-                NavigationTarget.SampleCollection => new SampleCollectionViewModel(CreateSampleCollectionService()),
-                NavigationTarget.CultureSensitivity => new CultureSensitivityViewModel(CreateCultureSensitivityService()),
-                NavigationTarget.ReceiptPrinting => new ReceiptPrintingViewModel(CreateReceiptService(), CreatePrintService(), CreateBarcodeService()),
-                NavigationTarget.CombinedReport => new CombinedReportViewModel(CreateReportService()),
-                NavigationTarget.BlankReport => new BlankReportViewModel(CreateReportService()),
-                NavigationTarget.Constants => new ConstantsViewModel(CreateConstantsService()),
-                NavigationTarget.CompareWithHistory => new CompareWithHistoryViewModel(CreateCompareWithHistoryService(), CreatePatientService(), CreateTestCatalogService()),
-                NavigationTarget.GroupWorksheet => new GroupWorksheetViewModel(CreateGroupWorksheetService(), CreateTestCatalogService(), CreatePrintService()),
-                NavigationTarget.TestClassificationLog => new TestClassificationLogViewModel(CreateTestClassificationService(), CreatePrintService()),
-                NavigationTarget.ExternalLabManagement => new ExternalLabManagementViewModel(CreateExternalLabService(), CreateExternalSettlementService(), CreateTestCatalogService(), CreatePrintService()),
-                NavigationTarget.AttendanceReport => new AttendanceReportViewModel(CreateTardinessService(), CreateUserAdminService()),
-                NavigationTarget.ContractInvoice => new ContractInvoiceViewModel(CreateContractInvoiceService(), CreateTestCatalogService()),
-                NavigationTarget.UserActivityLog => new UserActivityLogViewModel(CreateUserActivityService()),
-                NavigationTarget.SystemUsageMonitor => new SystemUsageMonitorViewModel(CreateSystemMonitorService()),
+                NavigationTarget.Dashboard => CreateViewModel<DashboardViewModel>(),
+                NavigationTarget.PatientRegistration => CreateViewModel<PatientRegistrationViewModel>(),
+                NavigationTarget.PatientTestsSelection => CreateViewModel<PatientTestsSelectionViewModel>(),
+                NavigationTarget.PatientBilling => CreateViewModel<PatientBillingViewModel>(),
+                NavigationTarget.PatientBillingByDate => CreateViewModel<PatientBillingByDateViewModel>(),
+                NavigationTarget.ResultsEntry => CreateViewModel<ResultsEntryViewModel>(),
+                NavigationTarget.ReportViewer => CreateViewModel<ReportViewerViewModel>(),
+                NavigationTarget.PatientSearch => CreateViewModel<PatientSearchViewModel>(),
+                NavigationTarget.PatientHistory => CreateViewModel<PatientHistoryViewModel>(),
+                NavigationTarget.WorkSheetByPatient => CreateViewModel<WorkSheetByPatientViewModel>(),
+                NavigationTarget.WorkSheetByTest => CreateViewModel<WorkSheetByTestViewModel>(),
+                NavigationTarget.TestCatalog => CreateViewModel<TestCatalogViewModel>(),
+                NavigationTarget.ReferenceRanges => CreateViewModel<ReferenceRangesViewModel>(),
+                NavigationTarget.TestComments => CreateViewModel<TestCommentsViewModel>(),
+                NavigationTarget.PriceLists => CreateViewModel<PriceListsViewModel>(),
+                NavigationTarget.CustomGroups => CreateViewModel<CustomGroupsViewModel>(),
+                NavigationTarget.Referrals => CreateViewModel<ReferralsViewModel>(),
+                NavigationTarget.UsersPermissions => CreateViewModel<UsersPermissionsViewModel>(),
+                NavigationTarget.Statistics => CreateViewModel<StatisticsViewModel>(),
+                NavigationTarget.SystemSettings => CreateViewModel<SystemSettingsViewModel>(),
+                NavigationTarget.BackupRestore => CreateViewModel<BackupRestoreViewModel>(),
+                NavigationTarget.AttendanceLog => CreateViewModel<AttendanceLogViewModel>(),
+                NavigationTarget.AccountsTreasury => CreateViewModel<AccountsTreasuryViewModel>(),
+                NavigationTarget.Delivery => CreateViewModel<DeliveryViewModel>(),
+                NavigationTarget.SampleCollection => CreateViewModel<SampleCollectionViewModel>(),
+                NavigationTarget.CultureSensitivity => CreateViewModel<CultureSensitivityViewModel>(),
+                NavigationTarget.ReceiptPrinting => CreateViewModel<ReceiptPrintingViewModel>(),
+                NavigationTarget.CombinedReport => CreateViewModel<CombinedReportViewModel>(),
+                NavigationTarget.BlankReport => CreateViewModel<BlankReportViewModel>(),
+                NavigationTarget.Constants => CreateViewModel<ConstantsViewModel>(),
+                NavigationTarget.CompareWithHistory => CreateViewModel<CompareWithHistoryViewModel>(),
+                NavigationTarget.GroupWorksheet => CreateViewModel<GroupWorksheetViewModel>(),
+                NavigationTarget.TestClassificationLog => CreateViewModel<TestClassificationLogViewModel>(),
+                NavigationTarget.ExternalLabManagement => CreateViewModel<ExternalLabManagementViewModel>(),
+                NavigationTarget.AttendanceReport => CreateViewModel<AttendanceReportViewModel>(),
+                NavigationTarget.ContractInvoice => CreateViewModel<ContractInvoiceViewModel>(),
+                NavigationTarget.UserActivityLog => CreateViewModel<UserActivityLogViewModel>(),
+                NavigationTarget.SystemUsageMonitor => CreateViewModel<SystemUsageMonitorViewModel>(),
                 _ => throw new ArgumentOutOfRangeException(nameof(target), target, "Unsupported navigation target.")
             };
         }
-
-        public IAttendanceService CreateAttendanceService() => new AttendanceService(_dbFactory());
 
         private BaseViewModel CreateLoginViewModel(Action? onLoginSuccess)
         {
@@ -70,50 +67,10 @@ namespace Open_lab.ViewModels
                 throw new InvalidOperationException("Login navigation requires a success callback.");
             }
 
-            return new LoginViewModel(
-                CreateAuthService(),
-                CreateAuthorizationService(),
-                CreateAdminSetupService(),
-                CreateAttendanceService(),
-                CreateUserPreferenceService(),
-                onLoginSuccess);
+            return ActivatorUtilities.CreateInstance<LoginViewModel>(_serviceProvider, onLoginSuccess);
         }
 
-        private IAuthService CreateAuthService() => new AuthService(_dbFactory());
-        private IAuthorizationService CreateAuthorizationService() => new AuthorizationService(_dbFactory());
-        private IAdminSetupService CreateAdminSetupService() => new AdminSetupService(_dbFactory());
-        private IDashboardService CreateDashboardService() => new DashboardService(_dbFactory());
-        private IPatientService CreatePatientService() => new PatientService(_dbFactory());
-        private IVisitService CreateVisitService() => new VisitService(_dbFactory());
-        private IInvoiceService CreateInvoiceService() => new InvoiceService(_dbFactory());
-        private IResultsService CreateResultsService() => new ResultsService(_dbFactory());
-        private IReportService CreateReportService() => new ReportService(_dbFactory());
-        private IPatientSearchService CreatePatientSearchService() => new PatientSearchService(_dbFactory());
-        private IWorksheetService CreateWorksheetService() => new WorksheetService(_dbFactory());
-        private ITestCatalogService CreateTestCatalogService() => new TestCatalogService(_dbFactory());
-        private IUserAdminService CreateUserAdminService() => new UserAdminService(_dbFactory());
-        private IStatisticsService CreateStatisticsService() => new StatisticsService(_dbFactory());
-        private IUserProductivityService CreateUserProductivityService() => new UserProductivityService(_dbFactory());
-        private ISystemSettingsService CreateSystemSettingsService() => new SystemSettingsService(_dbFactory());
-        private IBackupRestoreService CreateBackupRestoreService() => new BackupRestoreService(_dbFactory());
-        private IAccountsTreasuryService CreateAccountsTreasuryService() => new AccountsTreasuryService(_dbFactory());
-        private IDeliveryService CreateDeliveryService() => new DeliveryService(_dbFactory());
-        private ISampleCollectionService CreateSampleCollectionService() => new SampleCollectionService(_dbFactory());
-        private ICultureSensitivityService CreateCultureSensitivityService() => new CultureSensitivityService(_dbFactory());
-        private IReceiptService CreateReceiptService() => new ReceiptService(_dbFactory());
-        private IConstantsService CreateConstantsService() => new ConstantsService(_dbFactory());
-        private IUserPreferenceService CreateUserPreferenceService() => new UserPreferenceService();
-        private ISettingsService CreateSettingsService() => new SettingsService(_dbFactory());
-        private IPrintService CreatePrintService() => new PrintService(CreateSettingsService());
-        private IBarcodeService CreateBarcodeService() => new BarcodeService();
-        private ICompareWithHistoryService CreateCompareWithHistoryService() => new CompareWithHistoryService(_dbFactory());
-        private IGroupWorksheetService CreateGroupWorksheetService() => new GroupWorksheetService(_dbFactory());
-        private IExternalLabService CreateExternalLabService() => new ExternalLabService(_dbFactory());
-        private IExternalSettlementService CreateExternalSettlementService() => new ExternalSettlementService(_dbFactory());
-        private ITardinessService CreateTardinessService() => new TardinessService(_dbFactory());
-        private IContractInvoiceService CreateContractInvoiceService() => new ContractInvoiceService(_dbFactory());
-        private ITestClassificationService CreateTestClassificationService() => new TestClassificationService(_dbFactory());
-        private IUserActivityService CreateUserActivityService() => new UserActivityService(_dbFactory());
-        private ISystemMonitorService CreateSystemMonitorService() => new SystemMonitorService(_dbFactory());
+        private TViewModel CreateViewModel<TViewModel>() where TViewModel : BaseViewModel
+            => ActivatorUtilities.CreateInstance<TViewModel>(_serviceProvider);
     }
 }

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
@@ -62,6 +63,43 @@ namespace Open_lab.Services
                 });
             }
 
+            return report;
+        }
+
+        public async Task<VisitReportData?> GetCompositeReportAsync(int visitId, IReadOnlyCollection<int>? orderedVisitTestIds = null)
+        {
+            var report = await GetVisitReportAsync(visitId);
+            if (report == null)
+            {
+                return null;
+            }
+
+            if (orderedVisitTestIds == null || orderedVisitTestIds.Count == 0)
+            {
+                return report;
+            }
+
+            var ordered = orderedVisitTestIds.ToList();
+            var lookup = report.Tests.ToDictionary(t => t.VisitTest.VisitTestId, t => t);
+            var composite = new List<VisitTestReportItem>();
+
+            foreach (var visitTestId in ordered)
+            {
+                if (lookup.TryGetValue(visitTestId, out var item))
+                {
+                    composite.Add(item);
+                }
+            }
+
+            foreach (var item in report.Tests)
+            {
+                if (!composite.Any(c => c.VisitTest.VisitTestId == item.VisitTest.VisitTestId))
+                {
+                    composite.Add(item);
+                }
+            }
+
+            report.Tests = composite;
             return report;
         }
 

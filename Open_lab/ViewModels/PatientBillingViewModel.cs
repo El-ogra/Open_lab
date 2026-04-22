@@ -33,6 +33,7 @@ namespace Open_lab.ViewModels
             EditPaymentCommand = new RelayCommand(async _ => await EditPaymentAsync(), _ => AppSession.HasPermission(PermissionCodes.AccountsEdit) && SelectedPayment != null && EditPaymentAmount > 0);
             DeletePaymentCommand = new RelayCommand(async _ => await DeletePaymentAsync(), _ => AppSession.HasPermission(PermissionCodes.AccountsEdit) && SelectedPayment != null);
             AddChargeCommand = new RelayCommand(async _ => await AddChargeAsync(), _ => AppSession.HasPermission(PermissionCodes.AccountsEdit) && VisitId > 0 && NewChargeAmount > 0 && !string.IsNullOrWhiteSpace(NewChargeDescription));
+            SettleAccountCommand = new RelayCommand(async _ => await SettleAccountAsync(), _ => AppSession.HasPermission(PermissionCodes.AccountsEdit) && VisitId > 0);
         }
 
         public int VisitId
@@ -44,6 +45,7 @@ namespace Open_lab.ViewModels
                 {
                     (AddPaymentCommand as RelayCommand)?.RaiseCanExecuteChanged();
                     (AddChargeCommand as RelayCommand)?.RaiseCanExecuteChanged();
+                    (SettleAccountCommand as RelayCommand)?.RaiseCanExecuteChanged();
                 }
             }
         }
@@ -143,6 +145,7 @@ namespace Open_lab.ViewModels
         public ICommand EditPaymentCommand { get; }
         public ICommand DeletePaymentCommand { get; }
         public ICommand AddChargeCommand { get; }
+        public ICommand SettleAccountCommand { get; }
 
         private async Task LoadVisitAsync()
         {
@@ -297,6 +300,27 @@ namespace Open_lab.ViewModels
                 NewChargeAmount = 0;
                 await LoadVisitAsync();
                 StatusMessage = "تمت إضافة الرسوم الإضافية.";
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = $"خطأ: {ex.Message}";
+            }
+        }
+
+        private async Task SettleAccountAsync()
+        {
+            if (VisitId <= 0)
+            {
+                return;
+            }
+
+            try
+            {
+                var invoice = await _invoiceService.SettleAccountAsync(VisitId);
+                Total = invoice.Total;
+                NetTotal = invoice.NetTotal;
+                Balance = invoice.Balance;
+                StatusMessage = "تمت تصفية الحساب وإغلاقه بنجاح.";
             }
             catch (Exception ex)
             {

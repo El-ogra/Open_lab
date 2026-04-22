@@ -192,6 +192,23 @@ namespace Open_lab.Services
             return await query.OrderBy(a => a.Name).ToListAsync();
         }
 
+        public string ClassifySensitivity(string? rawSensitivity)
+        {
+            if (string.IsNullOrWhiteSpace(rawSensitivity))
+            {
+                return string.Empty;
+            }
+
+            var normalized = rawSensitivity.Trim().ToUpperInvariant();
+            return normalized switch
+            {
+                "S" or "SENSITIVE" or "حساس" => "Sensitive",
+                "I" or "INTERMEDIATE" or "متوسط" => "Intermediate",
+                "R" or "RESISTANT" or "مقاوم" => "Resistant",
+                _ => rawSensitivity.Trim()
+            };
+        }
+
         public async Task SaveCultureResultAsync(int visitTestId, int cultureId, IReadOnlyCollection<CultureSensitivityValue> sensitivities)
         {
             var visitTest = await _db.VisitTests
@@ -225,7 +242,8 @@ namespace Open_lab.Services
                 }
 
                 var parameter = await EnsureParameterAsync(visitTest.TestId, antibiotic.Name);
-                await UpsertResultValueAsync(visitTestId, parameter.ParameterId, item.Sensitivity.Trim(), item.Comment);
+                var classified = ClassifySensitivity(item.Sensitivity);
+                await UpsertResultValueAsync(visitTestId, parameter.ParameterId, classified, item.Comment);
             }
 
             visitTest.Status = "InProgress";

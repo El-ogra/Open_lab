@@ -161,6 +161,55 @@ namespace Open_lab.Services
             return visitTest;
         }
 
+        public async Task<List<VisitTest>> AddCustomGroupToVisitAsync(int visitId, int customGroupId)
+        {
+            var visit = await _db.Visits.FirstOrDefaultAsync(v => v.VisitId == visitId);
+            if (visit == null)
+            {
+                throw new InvalidOperationException("Visit not found.");
+            }
+
+            if (string.Equals(visit.Status, VisitStatusClosed, StringComparison.OrdinalIgnoreCase))
+            {
+                throw new InvalidOperationException("Closed visits cannot accept new tests.");
+            }
+
+            var customGroup = await _db.CustomGroups
+                .AsNoTracking()
+                .FirstOrDefaultAsync(g => g.CustomGroupId == customGroupId);
+            if (customGroup == null)
+            {
+                throw new InvalidOperationException("Custom group not found.");
+            }
+
+            var groupTestIds = await _db.CustomGroupItems
+                .AsNoTracking()
+                .Where(i => i.CustomGroupId == customGroupId)
+                .Select(i => i.TestId)
+                .Distinct()
+                .ToListAsync();
+
+            if (groupTestIds.Count == 0)
+            {
+                throw new InvalidOperationException("Custom group has no tests.");
+            }
+
+            var added = new List<VisitTest>();
+            foreach (var testId in groupTestIds)
+            {
+                var existsInVisit = await _db.VisitTests.AnyAsync(vt => vt.VisitId == visitId && vt.TestId == testId);
+                if (existsInVisit)
+                {
+                    continue;
+                }
+
+                var visitTest = await AddTestToVisitAsync(visitId, testId);
+                added.Add(visitTest);
+            }
+
+            return added;
+        }
+
         public async Task RemoveVisitTestAsync(int visitTestId)
         {
             var visitTest = await _db.VisitTests

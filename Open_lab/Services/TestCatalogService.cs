@@ -560,6 +560,58 @@ namespace Open_lab.Services
             return _db.Referrals.AsNoTracking().OrderBy(r => r.Name).ToListAsync();
         }
 
+        public async Task UpdateReferralAsync(Referral referral)
+        {
+            if (referral == null)
+            {
+                throw new ArgumentNullException(nameof(referral));
+            }
+
+            if (string.IsNullOrWhiteSpace(referral.Name) || string.IsNullOrWhiteSpace(referral.ReferralType))
+            {
+                throw new ArgumentException("Referral name and type are required.", nameof(referral));
+            }
+
+            referral.Name = referral.Name.Trim();
+            referral.ReferralType = referral.ReferralType.Trim();
+            referral.Phone = string.IsNullOrWhiteSpace(referral.Phone) ? null : referral.Phone.Trim();
+            referral.City = string.IsNullOrWhiteSpace(referral.City) ? null : referral.City.Trim();
+
+            if (referral.DiscountPercentage < 0 || referral.DiscountPercentage > 100)
+            {
+                throw new ArgumentException("Discount percentage must be between 0 and 100.", nameof(referral));
+            }
+
+            if (referral.CommissionPercentage < 0 || referral.CommissionPercentage > 100)
+            {
+                throw new ArgumentException("Commission percentage must be between 0 and 100.", nameof(referral));
+            }
+
+            var current = await _db.Referrals.FirstOrDefaultAsync(r => r.ReferralId == referral.ReferralId);
+            if (current == null)
+            {
+                throw new InvalidOperationException("Referral not found.");
+            }
+
+            var duplicate = await _db.Referrals.AnyAsync(r =>
+                r.ReferralId != referral.ReferralId &&
+                r.Name == referral.Name &&
+                r.ReferralType == referral.ReferralType);
+            if (duplicate)
+            {
+                throw new InvalidOperationException("Referral already exists.");
+            }
+
+            current.Name = referral.Name;
+            current.ReferralType = referral.ReferralType;
+            current.Phone = referral.Phone;
+            current.City = referral.City;
+            current.DiscountPercentage = referral.DiscountPercentage;
+            current.CommissionPercentage = referral.CommissionPercentage;
+
+            await _db.SaveChangesAsync();
+        }
+
         public async Task DeleteReferralAsync(int referralId)
         {
             var referral = await _db.Referrals.FirstOrDefaultAsync(r => r.ReferralId == referralId);

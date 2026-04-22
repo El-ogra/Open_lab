@@ -13,6 +13,7 @@ namespace Open_lab.ViewModels
         private static readonly string[] SensitivityOptions = { "", "S", "I", "R" };
 
         private readonly ICultureSensitivityService _service;
+        private readonly IPrintService? _printService;
         private Culture? _selectedCulture;
         private Antibiotic? _selectedAntibiotic;
         private CultureAntibiotic? _selectedLink;
@@ -24,9 +25,10 @@ namespace Open_lab.ViewModels
         private DateTime _dateTo = DateTime.Today;
         private CultureVisitTestRow? _selectedVisitTest;
 
-        public CultureSensitivityViewModel(ICultureSensitivityService service)
+        public CultureSensitivityViewModel(ICultureSensitivityService service, IPrintService? printService = null)
         {
             _service = service;
+            _printService = printService;
             Cultures = new ObservableCollection<Culture>();
             Antibiotics = new ObservableCollection<Antibiotic>();
             LinkedAntibiotics = new ObservableCollection<CultureAntibiotic>();
@@ -44,6 +46,7 @@ namespace Open_lab.ViewModels
 
             LoadVisitTestsCommand = new RelayCommand(async _ => await LoadVisitTestsAsync(), _ => AppSession.HasPermission(PermissionCodes.ResultsView));
             SaveResultCommand = new RelayCommand(async _ => await SaveResultAsync(), _ => AppSession.HasPermission(PermissionCodes.ResultsEdit) && SelectedVisitTest != null && SelectedCulture != null);
+            PrintCultureReportCommand = new RelayCommand(async _ => await PrintCultureReportAsync(), _ => _printService != null && SelectedVisitTest != null && SelectedCulture != null);
 
             _ = LoadAsync();
         }
@@ -67,6 +70,7 @@ namespace Open_lab.ViewModels
                     (DeleteCultureCommand as RelayCommand)?.RaiseCanExecuteChanged();
                     (LinkCommand as RelayCommand)?.RaiseCanExecuteChanged();
                     (SaveResultCommand as RelayCommand)?.RaiseCanExecuteChanged();
+                    (PrintCultureReportCommand as RelayCommand)?.RaiseCanExecuteChanged();
                 }
             }
         }
@@ -104,6 +108,7 @@ namespace Open_lab.ViewModels
                 if (SetProperty(ref _selectedVisitTest, value))
                 {
                     (SaveResultCommand as RelayCommand)?.RaiseCanExecuteChanged();
+                    (PrintCultureReportCommand as RelayCommand)?.RaiseCanExecuteChanged();
                 }
             }
         }
@@ -153,6 +158,7 @@ namespace Open_lab.ViewModels
         public ICommand UnlinkCommand { get; }
         public ICommand LoadVisitTestsCommand { get; }
         public ICommand SaveResultCommand { get; }
+        public ICommand PrintCultureReportCommand { get; }
 
         private async Task LoadAsync()
         {
@@ -386,7 +392,7 @@ namespace Open_lab.ViewModels
                     .Select(r => new CultureSensitivityValue
                     {
                         AntibioticId = r.AntibioticId,
-                        Sensitivity = r.Sensitivity,
+                        Sensitivity = _service.ClassifySensitivity(r.Sensitivity),
                         Comment = r.Comment
                     })
                     .ToList();
@@ -394,6 +400,43 @@ namespace Open_lab.ViewModels
                 await _service.SaveCultureResultAsync(SelectedVisitTest.VisitTestId, SelectedCulture.CultureId, values);
                 StatusMessage = "تم حفظ نتيجة المزرعة وربطها بالزيارة بنجاح.";
                 await LoadVisitTestsAsync();
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = $"خطأ: {ex.Message}";
+            }
+        }
+
+        private async Task PrintCultureReportAsync()
+        {
+            if (_printService == null || SelectedVisitTest == null || SelectedCulture == null)
+            {
+                StatusMessage = "بيانات الطباعة غير مكتملة.";
+                return;
+            }
+
+            try
+            {
+                var data = new CultureReportData
+                {
+                    VisitId = SelectedVisitTest.VisitId,
+                    PatientName = SelectedVisitTest.PatientName,
+                    LabId = SelectedVisitTest.LabId,
+                    CultureName = SelectedCulture.Name,
+                    VisitDate = SelectedVisitTest.VisitDate,
+                    Results = ResultRows
+                        .Where(r => !string.IsNullOrWhiteSpace(r.Sensitivity))
+                        .Select(r => new CultureResultRow
+                        {
+                            AntibioticName = r.AntibioticName,
+                            Sensitivity = _service.ClassifySensitivity(r.Sensitivity),
+                            Comment = r.Comment
+                        })
+                        .ToList()
+                };
+
+                await _printService.PrintCultureReportAsync(data);
+                StatusMessage = "تم إرسال تقرير المزرعة للطباعة.";
             }
             catch (Exception ex)
             {

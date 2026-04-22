@@ -2,11 +2,8 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="clr-namespace:Open_lab.ViewModels"
-             xmlns:views="clr-namespace:Open_lab.Views"
-             StartupUri="Views/MainWindow.xaml">
+             xmlns:views="clr-namespace:Open_lab.Views">
     <Application.Resources>
-        <vm:MainViewModel x:Key="MainViewModel" />
-
         <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
         <vm:InverseBooleanConverter x:Key="InverseBooleanConverter" />
         <vm:InverseBoolToVisibilityConverter x:Key="InverseBoolToVisibilityConverter" />

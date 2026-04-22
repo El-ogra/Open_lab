@@ -9,21 +9,27 @@ namespace Open_lab.ViewModels
     public class SampleCollectionViewModel : BaseViewModel
     {
         private readonly ISampleCollectionService _sampleCollectionService;
+        private readonly ISampleTrackingService? _sampleTrackingService;
         private DateTime _dateFrom = DateTime.Today;
         private DateTime _dateTo = DateTime.Today;
         private string _separationType = "Centrifuge";
         private SampleCollectionRow? _selectedRow;
+        private string _selectedSampleStatus = string.Empty;
         private string _statusMessage = string.Empty;
 
-        public SampleCollectionViewModel(ISampleCollectionService sampleCollectionService)
+        public SampleCollectionViewModel(
+            ISampleCollectionService sampleCollectionService,
+            ISampleTrackingService? sampleTrackingService = null)
         {
             _sampleCollectionService = sampleCollectionService;
+            _sampleTrackingService = sampleTrackingService;
             Items = new ObservableCollection<SampleCollectionRow>();
             LoadCommand = new RelayCommand(async _ => await LoadAsync(), _ => AppSession.HasPermission(PermissionCodes.TestsView));
             MarkCollectedCommand = new RelayCommand(async _ => await MarkCollectedAsync(), _ => AppSession.HasPermission(PermissionCodes.TestsEdit) && SelectedRow != null);
             MarkExternalCollectedCommand = new RelayCommand(async _ => await MarkExternalCollectedAsync(), _ => AppSession.HasPermission(PermissionCodes.TestsEdit) && SelectedRow != null);
             MarkSeparatedCommand = new RelayCommand(async _ => await MarkSeparatedAsync(), _ => AppSession.HasPermission(PermissionCodes.TestsEdit) && SelectedRow != null);
             MarkNotCollectedCommand = new RelayCommand(async _ => await MarkNotCollectedAsync(), _ => AppSession.HasPermission(PermissionCodes.TestsEdit) && SelectedRow != null);
+            RefreshSampleStatusCommand = new RelayCommand(async _ => await RefreshSampleStatusAsync(), _ => SelectedRow != null && _sampleTrackingService != null);
         }
 
         public DateTime DateFrom
@@ -57,8 +63,16 @@ namespace Open_lab.ViewModels
                     (MarkExternalCollectedCommand as RelayCommand)?.RaiseCanExecuteChanged();
                     (MarkSeparatedCommand as RelayCommand)?.RaiseCanExecuteChanged();
                     (MarkNotCollectedCommand as RelayCommand)?.RaiseCanExecuteChanged();
+                    (RefreshSampleStatusCommand as RelayCommand)?.RaiseCanExecuteChanged();
+                    _ = RefreshSampleStatusAsync();
                 }
             }
+        }
+
+        public string SelectedSampleStatus
+        {
+            get => _selectedSampleStatus;
+            private set => SetProperty(ref _selectedSampleStatus, value);
         }
 
         public string StatusMessage
@@ -72,6 +86,7 @@ namespace Open_lab.ViewModels
         public ICommand MarkExternalCollectedCommand { get; }
         public ICommand MarkSeparatedCommand { get; }
         public ICommand MarkNotCollectedCommand { get; }
+        public ICommand RefreshSampleStatusCommand { get; }
 
         private async Task LoadAsync()
         {
@@ -88,10 +103,38 @@ namespace Open_lab.ViewModels
                 }
 
                 StatusMessage = "تم تحميل " + Items.Count + " تحليل.";
+                SelectedSampleStatus = string.Empty;
             }
             catch (Exception ex)
             {
                 StatusMessage = "خطأ: " + ex.Message;
+            }
+        }
+
+        private async Task RefreshSampleStatusAsync()
+        {
+            if (_sampleTrackingService == null || SelectedRow == null)
+            {
+                SelectedSampleStatus = string.Empty;
+                return;
+            }
+
+            try
+            {
+                var sample = await _sampleTrackingService.GetSampleStatusAsync(SelectedRow.VisitTestId);
+                if (sample == null)
+                {
+                    SelectedSampleStatus = "لا يوجد سجل تتبع لهذه العينة.";
+                    return;
+                }
+
+                var separation = sample.IsSeparated ? "مفصولة" : "غير مفصولة";
+                var status = string.IsNullOrWhiteSpace(sample.Status) ? "غير محدد" : sample.Status;
+                SelectedSampleStatus = $"الحالة: {status} | الفصل: {separation}";
+            }
+            catch (Exception ex)
+            {
+                SelectedSampleStatus = "خطأ تتبع: " + ex.Message;
             }
         }
 

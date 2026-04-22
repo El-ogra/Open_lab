@@ -105,5 +105,75 @@ namespace Open_lab.Services
                 await _db.SaveChangesAsync();
             }
         }
+
+        public async Task EnterExternalLabResultAsync(int queueId, string resultValue, string? comment = null, string? externalRef = null)
+        {
+            if (string.IsNullOrWhiteSpace(resultValue))
+            {
+                throw new ArgumentException("Result value is required.", nameof(resultValue));
+            }
+
+            var queueItem = await _db.ExternalLabQueues
+                .Include(q => q.VisitTest)
+                .ThenInclude(vt => vt.Test)
+                .FirstOrDefaultAsync(q => q.QueueId == queueId);
+
+            if (queueItem == null)
+            {
+                throw new InvalidOperationException("External queue item not found.");
+            }
+
+            var visitTest = queueItem.VisitTest;
+            var parameter = await _db.TestParameters
+                .FirstOrDefaultAsync(p => p.TestId == visitTest.TestId && p.Name == "External Lab Result");
+
+            if (parameter == null)
+            {
+                var maxOrder = await _db.TestParameters
+                    .Where(p => p.TestId == visitTest.TestId)
+                    .Select(p => (int?)p.OrderNo)
+                    .MaxAsync() ?? 0;
+
+                parameter = new TestParameter
+                {
+                    TestId = visitTest.TestId,
+                    Name = "External Lab Result",
+                    OrderNo = maxOrder + 1
+                };
+                _db.TestParameters.Add(parameter);
+                await _db.SaveChangesAsync();
+            }
+
+            var existingResult = await _db.ResultValues
+                .FirstOrDefaultAsync(r => r.VisitTestId == visitTest.VisitTestId && r.ParameterId == parameter.ParameterId);
+
+            if (existingResult == null)
+            {
+                _db.ResultValues.Add(new ResultValue
+                {
+                    VisitTestId = visitTest.VisitTestId,
+                    ParameterId = parameter.ParameterId,
+                    Value = resultValue.Trim(),
+                    Comment = comment
+                });
+            }
+            else
+            {
+                existingResult.Value = resultValue.Trim();
+                existingResult.Comment = comment;
+                existingResult.Flag = null;
+                existingResult.VerifiedAt = null;
+                existingResult.VerifiedBy = null;
+            }
+
+            visitTest.Status = "InProgress";
+            queueItem.Status = "ResultReceived";
+            if (!string.IsNullOrWhiteSpace(externalRef))
+            {
+                queueItem.ExternalReference = externalRef.Trim();
+            }
+
+            await _db.SaveChangesAsync();
+        }
     }
 }

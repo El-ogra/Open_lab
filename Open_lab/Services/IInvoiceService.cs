@@ -17,6 +17,7 @@ namespace Open_lab.Services
         Task<decimal> GetVisitTotalAsync(int visitId);
         Task<List<Invoice>> GetPatientInvoicesByDateAsync(int patientId, DateTime from, DateTime to);
         Task<List<Payment>> GetPatientPaymentsByDateAsync(int patientId, DateTime from, DateTime to);
+        Task<Invoice> SettleAccountAsync(int visitId);
 
         /// <summary>
         /// Calculates the discount amount based on referral discount percentage.

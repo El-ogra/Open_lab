@@ -26,6 +26,11 @@ namespace Open_lab.ViewModels
         private string _receiptFooterText = "شكراً لتعاملكم";
         private bool _receiptShowLogo;
         private int _receiptCopies = 1;
+        private string _reportPaperSize = "A4";
+        private string _defaultAccountType = "Cash";
+        private string _currentMasterPassword = string.Empty;
+        private string _newMasterPassword = string.Empty;
+        private string _confirmMasterPassword = string.Empty;
         private string _statusMessage = string.Empty;
 
         public SystemSettingsViewModel(ISystemSettingsService settingsService)
@@ -37,6 +42,7 @@ namespace Open_lab.ViewModels
             ReloadCommand = new RelayCommand(async _ => await LoadAsync(), _ => AppSession.HasPermission(PermissionCodes.SettingsView));
             SaveRawSettingCommand = new RelayCommand(async _ => await SaveRawSettingAsync(), _ => AppSession.HasPermission(PermissionCodes.SettingsEdit));
             DeleteRawSettingCommand = new RelayCommand(async _ => await DeleteRawSettingAsync(), _ => AppSession.HasPermission(PermissionCodes.SettingsEdit) && SelectedSetting != null);
+            ChangeMasterPasswordCommand = new RelayCommand(async _ => await ChangeMasterPasswordAsync(), _ => AppSession.HasPermission(PermissionCodes.SettingsEdit));
 
             _ = LoadAsync();
         }
@@ -121,6 +127,36 @@ namespace Open_lab.ViewModels
             set => SetProperty(ref _receiptCopies, value);
         }
 
+        public string ReportPaperSize
+        {
+            get => _reportPaperSize;
+            set => SetProperty(ref _reportPaperSize, value);
+        }
+
+        public string DefaultAccountType
+        {
+            get => _defaultAccountType;
+            set => SetProperty(ref _defaultAccountType, value);
+        }
+
+        public string CurrentMasterPassword
+        {
+            get => _currentMasterPassword;
+            set => SetProperty(ref _currentMasterPassword, value);
+        }
+
+        public string NewMasterPassword
+        {
+            get => _newMasterPassword;
+            set => SetProperty(ref _newMasterPassword, value);
+        }
+
+        public string ConfirmMasterPassword
+        {
+            get => _confirmMasterPassword;
+            set => SetProperty(ref _confirmMasterPassword, value);
+        }
+
         public Setting? SelectedSetting
         {
             get => _selectedSetting;
@@ -161,6 +197,7 @@ namespace Open_lab.ViewModels
         public ICommand ReloadCommand { get; }
         public ICommand SaveRawSettingCommand { get; }
         public ICommand DeleteRawSettingCommand { get; }
+        public ICommand ChangeMasterPasswordCommand { get; }
 
         private async Task LoadAsync()
         {
@@ -180,6 +217,8 @@ namespace Open_lab.ViewModels
                 ReceiptFooterText = profile.ReceiptFooterText;
                 ReceiptShowLogo = profile.ReceiptShowLogo;
                 ReceiptCopies = profile.ReceiptCopies;
+                ReportPaperSize = profile.ReportPaperSize;
+                DefaultAccountType = profile.DefaultAccountType;
 
                 var items = await _settingsService.GetSettingsAsync();
                 Settings.Clear();
@@ -217,7 +256,9 @@ namespace Open_lab.ViewModels
                     ReceiptHeaderText = ReceiptHeaderText,
                     ReceiptFooterText = ReceiptFooterText,
                     ReceiptShowLogo = ReceiptShowLogo,
-                    ReceiptCopies = ReceiptCopies
+                    ReceiptCopies = ReceiptCopies,
+                    ReportPaperSize = ReportPaperSize,
+                    DefaultAccountType = DefaultAccountType
                 });
 
                 await LoadAsync();
@@ -262,6 +303,53 @@ namespace Open_lab.ViewModels
                 await LoadAsync();
                 SelectedSetting = null;
                 StatusMessage = "تم حذف الإعداد المتقدم.";
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = "خطأ: " + ex.Message;
+            }
+        }
+
+        private async Task ChangeMasterPasswordAsync()
+        {
+            if (string.IsNullOrWhiteSpace(CurrentMasterPassword))
+            {
+                StatusMessage = "أدخل كلمة المرور الحالية.";
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(NewMasterPassword))
+            {
+                StatusMessage = "أدخل كلمة المرور الجديدة.";
+                return;
+            }
+
+            if (!string.Equals(NewMasterPassword, ConfirmMasterPassword, StringComparison.Ordinal))
+            {
+                StatusMessage = "تأكيد كلمة المرور غير مطابق.";
+                return;
+            }
+
+            try
+            {
+                var isValid = await _settingsService.VerifyMasterPasswordAsync(CurrentMasterPassword);
+                if (!isValid)
+                {
+                    StatusMessage = "كلمة المرور الحالية غير صحيحة.";
+                    return;
+                }
+
+                var changed = await _settingsService.SetMasterPasswordAsync(NewMasterPassword);
+                if (!changed)
+                {
+                    StatusMessage = "تعذر تحديث كلمة المرور.";
+                    return;
+                }
+
+                CurrentMasterPassword = string.Empty;
+                NewMasterPassword = string.Empty;
+                ConfirmMasterPassword = string.Empty;
+                StatusMessage = "تم تحديث كلمة مرور النظام.";
             }
             catch (Exception ex)
             {

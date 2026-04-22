@@ -217,6 +217,37 @@ namespace Open_lab.Services
                 .ToListAsync();
         }
 
+        public async Task<Invoice> SettleAccountAsync(int visitId)
+        {
+            var invoice = await _db.Invoices
+                .Include(i => i.Visit)
+                .FirstOrDefaultAsync(i => i.VisitId == visitId);
+
+            if (invoice == null)
+            {
+                throw new InvalidOperationException("Invoice not found for this visit.");
+            }
+
+            await RecalculateInvoiceAsync(invoice.InvoiceId, 0);
+            invoice = await _db.Invoices
+                .Include(i => i.Visit)
+                .FirstAsync(i => i.InvoiceId == invoice.InvoiceId);
+
+            if (invoice.Balance > 0)
+            {
+                throw new InvalidOperationException("Cannot settle account with remaining balance.");
+            }
+
+            invoice.Status = "Settled";
+            if (invoice.Visit != null)
+            {
+                invoice.Visit.Status = "Closed";
+            }
+
+            await _db.SaveChangesAsync();
+            return invoice;
+        }
+
         private async Task RecalculateInvoiceAsync(int invoiceId, decimal manualPaid)
         {
             var invoice = await _db.Invoices.FirstAsync(i => i.InvoiceId == invoiceId);

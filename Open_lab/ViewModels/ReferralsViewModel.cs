@@ -14,6 +14,8 @@ namespace Open_lab.ViewModels
         private string _type = string.Empty;
         private string? _phone;
         private string? _city;
+        private decimal _discountPercentage;
+        private decimal _commissionPercentage;
         private Referral? _selectedReferral;
         private string _statusMessage = string.Empty;
 
@@ -43,6 +45,8 @@ namespace Open_lab.ViewModels
                         Type = value.ReferralType;
                         Phone = value.Phone;
                         City = value.City;
+                        DiscountPercentage = value.DiscountPercentage;
+                        CommissionPercentage = value.CommissionPercentage;
                     }
                     (DeleteCommand as RelayCommand)?.RaiseCanExecuteChanged();
                 }
@@ -71,6 +75,18 @@ namespace Open_lab.ViewModels
         {
             get => _city;
             set => SetProperty(ref _city, value);
+        }
+
+        public decimal DiscountPercentage
+        {
+            get => _discountPercentage;
+            set => SetProperty(ref _discountPercentage, value);
+        }
+
+        public decimal CommissionPercentage
+        {
+            get => _commissionPercentage;
+            set => SetProperty(ref _commissionPercentage, value);
         }
 
         public string StatusMessage
@@ -102,16 +118,41 @@ namespace Open_lab.ViewModels
 
             try
             {
-                var referral = await _testCatalogService.CreateReferralAsync(new Referral
+                if (DiscountPercentage < 0 || DiscountPercentage > 100)
                 {
+                    StatusMessage = "نسبة الخصم يجب أن تكون بين 0 و 100.";
+                    return;
+                }
+
+                if (CommissionPercentage < 0 || CommissionPercentage > 100)
+                {
+                    StatusMessage = "نسبة العمولة يجب أن تكون بين 0 و 100.";
+                    return;
+                }
+
+                var model = new Referral
+                {
+                    ReferralId = SelectedReferral?.ReferralId ?? 0,
                     Name = Name,
                     ReferralType = Type,
                     Phone = Phone,
-                    City = City
-                });
+                    City = City,
+                    DiscountPercentage = DiscountPercentage,
+                    CommissionPercentage = CommissionPercentage
+                };
 
-                Referrals.Add(referral);
-                StatusMessage = "تم حفظ الجهة.";
+                if (model.ReferralId == 0)
+                {
+                    var created = await _testCatalogService.CreateReferralAsync(model);
+                    Referrals.Add(created);
+                    StatusMessage = "تم حفظ الجهة.";
+                }
+                else
+                {
+                    await _testCatalogService.UpdateReferralAsync(model);
+                    await LoadAsync();
+                    StatusMessage = "تم تحديث بيانات الجهة.";
+                }
             }
             catch (Exception ex)
             {

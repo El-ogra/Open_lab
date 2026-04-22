@@ -85,7 +85,7 @@ namespace Open_lab.ViewModels
 
             try
             {
-                var report = await _reportService.GetVisitReportAsync(VisitId);
+                var report = await _reportService.GetCompositeReportAsync(VisitId);
                 if (report == null)
                 {
                     StatusMessage = "لم يتم العثور على تقرير.";

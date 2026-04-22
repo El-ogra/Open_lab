@@ -13,6 +13,7 @@ namespace Open_lab.Services
         Task UpdateAsync(Visit visit);
         Task DeleteAsync(int visitId);
         Task<VisitTest> AddTestToVisitAsync(int visitId, int testId, decimal? overridePrice = null);
+        Task<List<VisitTest>> AddCustomGroupToVisitAsync(int visitId, int customGroupId);
         Task RemoveVisitTestAsync(int visitTestId);
     }
 }

@@ -9,6 +9,7 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
@@ -22,6 +23,7 @@
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
@@ -62,6 +64,17 @@
                     <TextBox Width="90" Text="{Binding ReceiptCopies, UpdateSourceTrigger=PropertyChanged}" Margin="0,4,8,4" />
                     <CheckBox Content="إظهار الشعار" IsChecked="{Binding ReceiptShowLogo}" VerticalAlignment="Center" />
                 </StackPanel>
+
+                <TextBlock Grid.Row="6" Grid.Column="0" Text="حجم الورق" Margin="0,4" VerticalAlignment="Center" />
+                <ComboBox Grid.Row="6" Grid.Column="1" SelectedValue="{Binding ReportPaperSize}" SelectedValuePath="Content" Margin="0,4">
+                    <ComboBoxItem Content="A4" />
+                    <ComboBoxItem Content="A5" />
+                </ComboBox>
+                <TextBlock Grid.Row="6" Grid.Column="2" Text="نوع الحساب الافتراضي" Margin="10,4,0,4" VerticalAlignment="Center" />
+                <ComboBox Grid.Row="6" Grid.Column="3" SelectedValue="{Binding DefaultAccountType}" SelectedValuePath="Content" Margin="0,4">
+                    <ComboBoxItem Content="Cash" />
+                    <ComboBoxItem Content="Credit" />
+                </ComboBox>
             </Grid>
         </GroupBox>
 
@@ -70,7 +83,31 @@
             <Button Content="إعادة تحميل" Margin="8,0,0,0" Command="{Binding ReloadCommand}" />
         </StackPanel>
 
-        <GroupBox Grid.Row="2" Header="إعدادات متقدمة (Key/Value)" Margin="0,0,0,8">
+        <GroupBox Grid.Row="2" Header="تغيير كلمة مرور النظام" Margin="0,0,0,8">
+            <Grid Margin="8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="180" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="180" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <TextBlock Grid.Row="0" Grid.Column="0" Text="كلمة المرور الحالية" Margin="0,4" VerticalAlignment="Center" />
+                <PasswordBox Grid.Row="0" Grid.Column="1" Margin="0,4" PasswordChanged="CurrentPasswordBox_OnPasswordChanged" />
+                <TextBlock Grid.Row="0" Grid.Column="2" Text="كلمة المرور الجديدة" Margin="10,4,0,4" VerticalAlignment="Center" />
+                <PasswordBox Grid.Row="0" Grid.Column="3" Margin="0,4" PasswordChanged="NewPasswordBox_OnPasswordChanged" />
+
+                <TextBlock Grid.Row="1" Grid.Column="0" Text="تأكيد كلمة المرور" Margin="0,4" VerticalAlignment="Center" />
+                <PasswordBox Grid.Row="1" Grid.Column="1" Margin="0,4" PasswordChanged="ConfirmPasswordBox_OnPasswordChanged" />
+                <Button Grid.Row="1" Grid.Column="3" Content="تحديث كلمة المرور" HorizontalAlignment="Left" Width="140" Margin="0,4" Command="{Binding ChangeMasterPasswordCommand}" />
+            </Grid>
+        </GroupBox>
+
+        <GroupBox Grid.Row="3" Header="إعدادات متقدمة (Key/Value)" Margin="0,0,0,8">
             <StackPanel Orientation="Horizontal" Margin="8">
                 <TextBlock Text="المفتاح" VerticalAlignment="Center" Margin="0,0,8,0" />
                 <TextBox Text="{Binding Key, UpdateSourceTrigger=PropertyChanged}" Width="200" />
@@ -81,13 +118,14 @@
             </StackPanel>
         </GroupBox>
 
-        <DataGrid Grid.Row="3" ItemsSource="{Binding Settings}" SelectedItem="{Binding SelectedSetting}" AutoGenerateColumns="False">
+        <DataGrid Grid.Row="4" ItemsSource="{Binding Settings}" SelectedItem="{Binding SelectedSetting}" AutoGenerateColumns="False">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="المفتاح" Binding="{Binding Key}" Width="220" />
                 <DataGridTextColumn Header="القيمة" Binding="{Binding Value}" Width="*" />
             </DataGrid.Columns>
         </DataGrid>
 
-        <TextBlock Grid.Row="4" Text="{Binding StatusMessage}" Foreground="DarkGreen" Margin="0,10,0,0" TextWrapping="Wrap" />
+        <TextBlock Grid.Row="5" Text="{Binding StatusMessage}" Foreground="DarkGreen" Margin="0,10,0,0" TextWrapping="Wrap" />
     </Grid>
 </UserControl>
+

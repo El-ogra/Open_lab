@@ -12,5 +12,6 @@ namespace Open_lab.Services
         Task<ShipmentManifest> CreateManifestAsync(int referralId, List<int> queueIds, string? courierNotes = null);
         Task<List<ShipmentManifest>> GetAllManifestsAsync();
         Task UpdateQueueStatusAsync(int queueId, string status, string? externalRef = null);
+        Task EnterExternalLabResultAsync(int queueId, string resultValue, string? comment = null, string? externalRef = null);
     }
 }

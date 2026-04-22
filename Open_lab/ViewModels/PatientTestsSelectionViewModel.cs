@@ -361,25 +361,8 @@ namespace Open_lab.ViewModels
 
             try
             {
-                var groupItems = await _testCatalogService.GetCustomGroupItemsAsync(SelectedCustomGroup.CustomGroupId);
-                if (groupItems.Count == 0)
-                {
-                    StatusMessage = "المجموعة المختارة لا تحتوي تحاليل.";
-                    return;
-                }
-
-                var added = 0;
-                foreach (var item in groupItems)
-                {
-                    try
-                    {
-                        await _visitService.AddTestToVisitAsync(VisitId, item.TestId);
-                        added++;
-                    }
-                    catch (InvalidOperationException)
-                    {
-                    }
-                }
+                var addedItems = await _visitService.AddCustomGroupToVisitAsync(VisitId, SelectedCustomGroup.CustomGroupId);
+                var added = addedItems.Count;
 
                 await LoadVisitTestsAsync();
                 await SyncInvoiceAsync();

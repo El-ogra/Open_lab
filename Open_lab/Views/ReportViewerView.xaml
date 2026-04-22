@@ -48,10 +48,12 @@
             </GroupBox>
 
             <GroupBox Header="معاينة قبل الطباعة" Margin="0,12,0,0">
-                <FlowDocumentScrollViewer VerticalScrollBarVisibility="Auto"
-                                          IsToolBarVisible="False"
-                                          Document="{Binding PreviewDocument}"
-                                          Height="300" />
+                <TextBox Text="{Binding PreviewContent}"
+                         Height="300"
+                         IsReadOnly="True"
+                         TextWrapping="Wrap"
+                         VerticalScrollBarVisibility="Auto"
+                         HorizontalScrollBarVisibility="Auto" />
             </GroupBox>
         </StackPanel>
     </Grid>

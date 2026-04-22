@@ -48,7 +48,7 @@ namespace Open_lab.Tests.ViewModels
             _viewModel.Tests[0].Results[0].Parameter.Should().NotBeNull();
             _viewModel.Tests[0].Results[0].Parameter.Name.Should().Be("Param");
 
-            _viewModel.PreviewDocument.Should().NotBeNull();
+            _viewModel.PreviewContent.Should().Contain("معاينة التقرير");
             _viewModel.StatusMessage.Should().Contain("تم تحميل التقرير");
         }
 

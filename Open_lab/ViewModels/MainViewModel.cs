@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Open_lab.Services;
@@ -8,13 +9,18 @@ namespace Open_lab.ViewModels
     public class MainViewModel : BaseViewModel
     {
         private readonly INavigationService _navigationService;
-        private readonly IViewModelFactory _viewModelFactory;
+        private readonly IAttendanceService _attendanceService;
+        private readonly IMainWindowLayoutService _windowLayoutService;
         private bool _isLoggedIn;
 
-        public MainViewModel()
+        public MainViewModel(
+            INavigationService navigationService,
+            IAttendanceService attendanceService,
+            IMainWindowLayoutService windowLayoutService)
         {
-            _viewModelFactory = new ViewModelFactory();
-            _navigationService = new NavigationService(_viewModelFactory);
+            _navigationService = navigationService ?? throw new System.ArgumentNullException(nameof(navigationService));
+            _attendanceService = attendanceService ?? throw new System.ArgumentNullException(nameof(attendanceService));
+            _windowLayoutService = windowLayoutService ?? throw new System.ArgumentNullException(nameof(windowLayoutService));
             _navigationService.PropertyChanged += OnNavigationServicePropertyChanged;
 
             NavigateDashboardCommand = new RelayCommand(_ => NavigateTo(NavigationTarget.Dashboard), _ => IsLoggedIn);
@@ -120,19 +126,7 @@ namespace Open_lab.ViewModels
         {
             AppSession.Clear();
             IsLoggedIn = false;
-            
-            var window = System.Windows.Application.Current.MainWindow;
-            if (window != null)
-            {
-                window.Width = 400;
-                window.Height = 550;
-                window.ResizeMode = System.Windows.ResizeMode.NoResize;
-                
-                double screenWidth = System.Windows.SystemParameters.PrimaryScreenWidth;
-                double screenHeight = System.Windows.SystemParameters.PrimaryScreenHeight;
-                window.Left = (screenWidth - window.Width) / 2;
-                window.Top = (screenHeight - window.Height) / 2;
-            }
+            _windowLayoutService.ApplyLoginLayout();
 
             _navigationService.Navigate(NavigationTarget.Login, () => _ = OnLoginSuccessAsync());
         }
@@ -140,19 +134,7 @@ namespace Open_lab.ViewModels
         private async Task OnLoginSuccessAsync()
         {
             IsLoggedIn = true;
-            
-            var window = System.Windows.Application.Current.MainWindow;
-            if (window != null)
-            {
-                window.Width = 1100;
-                window.Height = 700;
-                window.ResizeMode = System.Windows.ResizeMode.CanResize;
-                
-                double screenWidth = System.Windows.SystemParameters.PrimaryScreenWidth;
-                double screenHeight = System.Windows.SystemParameters.PrimaryScreenHeight;
-                window.Left = (screenWidth - window.Width) / 2;
-                window.Top = (screenHeight - window.Height) / 2;
-            }
+            _windowLayoutService.ApplyAppLayout();
 
             NavigateTo(NavigationTarget.Dashboard);
             await Task.CompletedTask;
@@ -183,10 +165,11 @@ namespace Open_lab.ViewModels
 
             try
             {
-                await _viewModelFactory.CreateAttendanceService().CloseAsync(AppSession.AttendanceLogId);
+                await _attendanceService.CloseAsync(AppSession.AttendanceLogId);
             }
-            catch
+            catch (System.Exception ex)
             {
+                Debug.WriteLine($"Failed to close attendance log {AppSession.AttendanceLogId}: {ex}");
             }
             finally
             {

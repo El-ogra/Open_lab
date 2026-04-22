@@ -29,6 +29,7 @@ namespace Open_lab.Services
 
         Task<List<CultureVisitTestRow>> SearchCultureVisitTestsAsync(string? labId, DateTime from, DateTime to);
         Task<List<Antibiotic>> GetFilteredAntibioticsAsync(int visitTestId);
+        string ClassifySensitivity(string? rawSensitivity);
         Task SaveCultureResultAsync(int visitTestId, int cultureId, IReadOnlyCollection<CultureSensitivityValue> sensitivities);
     }
 }

@@ -12,7 +12,7 @@ namespace Open_lab.Services
         public double ReportMarginBottom { get; init; } = 1.5;
         public string ReportPrimaryColor { get; init; } = "#2B2B2B";
         public string ReportPrinterName { get; init; } = "Microsoft Print to PDF";
-        public string ReportPaperSize { get; init; } = "A4"; // A4, A5
+        public string ReportPaperSize { get; init; } = "A4";
         public string ReceiptPrinterName { get; init; } = "Microsoft Print to PDF";
         public string BarcodePrinterName { get; init; } = "Microsoft Print to PDF";
         public string EnvelopePrinterName { get; init; } = "Microsoft Print to PDF";
@@ -20,7 +20,7 @@ namespace Open_lab.Services
         public string ReceiptFooterText { get; init; } = "شكراً لتعاملكم";
         public bool ReceiptShowLogo { get; init; } = false;
         public int ReceiptCopies { get; init; } = 1;
-        public string DefaultAccountType { get; init; } = "Cash"; // Cash, Credit
+        public string DefaultAccountType { get; init; } = "Cash";
         public string? MasterPasswordHash { get; init; }
     }
 
@@ -32,5 +32,6 @@ namespace Open_lab.Services
         Task<SystemSettingsProfile> GetProfileAsync();
         Task SaveProfileAsync(SystemSettingsProfile profile);
         Task<bool> VerifyMasterPasswordAsync(string password);
+        Task<bool> SetMasterPasswordAsync(string newPassword);
     }
 }

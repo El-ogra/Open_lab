@@ -14,19 +14,29 @@ namespace Open_lab.ViewModels
         private readonly IExternalSettlementService _externalSettlementService;
         private readonly ITestCatalogService _testCatalogService;
         private readonly IPrintService _printService;
+        private readonly IReportService _reportService;
         private string _statusMessage = string.Empty;
         private ExternalLabQueue? _selectedQueueItem;
         private ShipmentManifest? _selectedManifest;
         private int? _selectedReferralId;
         private decimal _settlementAmount;
         private string? _settlementNote;
+        private string _externalResultValue = string.Empty;
+        private string? _externalResultComment;
+        private string? _externalReference;
 
-        public ExternalLabManagementViewModel(IExternalLabService externalLabService, IExternalSettlementService externalSettlementService, ITestCatalogService testCatalogService, IPrintService printService)
+        public ExternalLabManagementViewModel(
+            IExternalLabService externalLabService,
+            IExternalSettlementService externalSettlementService,
+            ITestCatalogService testCatalogService,
+            IPrintService printService,
+            IReportService reportService)
         {
             _externalLabService = externalLabService;
             _externalSettlementService = externalSettlementService;
             _testCatalogService = testCatalogService;
             _printService = printService;
+            _reportService = reportService;
             PendingQueue = new ObservableCollection<ExternalLabQueueRow>();
             Manifests = new ObservableCollection<ShipmentManifest>();
             Referrals = new ObservableCollection<ReferralItem>();
@@ -40,6 +50,8 @@ namespace Open_lab.ViewModels
             UpdateStatusCommand = new RelayCommand(async _ => await UpdateStatusAsync(), _ => SelectedQueueItem != null);
             LoadSettlementCommand = new RelayCommand(async _ => await LoadSettlementAsync(), _ => SelectedReferralId.HasValue);
             CreateSettlementCommand = new RelayCommand(async _ => await CreateSettlementAsync(), _ => SelectedReferralId.HasValue && SettlementAmount > 0);
+            EnterExternalResultCommand = new RelayCommand(async _ => await EnterExternalResultAsync(), _ => SelectedQueueItem != null && !string.IsNullOrWhiteSpace(ExternalResultValue));
+            PrintExternalReportCommand = new RelayCommand(async _ => await PrintExternalReportAsync(), _ => SelectedQueueItem != null);
 
             _ = LoadReferralsAsync();
             _ = LoadQueueAsync();
@@ -84,6 +96,30 @@ namespace Open_lab.ViewModels
             set => SetProperty(ref _settlementNote, value);
         }
 
+        public string ExternalResultValue
+        {
+            get => _externalResultValue;
+            set
+            {
+                if (SetProperty(ref _externalResultValue, value))
+                {
+                    (EnterExternalResultCommand as RelayCommand)?.RaiseCanExecuteChanged();
+                }
+            }
+        }
+
+        public string? ExternalResultComment
+        {
+            get => _externalResultComment;
+            set => SetProperty(ref _externalResultComment, value);
+        }
+
+        public string? ExternalReference
+        {
+            get => _externalReference;
+            set => SetProperty(ref _externalReference, value);
+        }
+
         public ExternalLabQueue? SelectedQueueItem
         {
             get => _selectedQueueItem;
@@ -91,7 +127,10 @@ namespace Open_lab.ViewModels
             {
                 if (SetProperty(ref _selectedQueueItem, value))
                 {
+                    ExternalReference = value?.ExternalReference;
                     (UpdateStatusCommand as RelayCommand)?.RaiseCanExecuteChanged();
+                    (EnterExternalResultCommand as RelayCommand)?.RaiseCanExecuteChanged();
+                    (PrintExternalReportCommand as RelayCommand)?.RaiseCanExecuteChanged();
                 }
             }
         }
@@ -115,6 +154,8 @@ namespace Open_lab.ViewModels
         public ICommand UpdateStatusCommand { get; }
         public ICommand LoadSettlementCommand { get; }
         public ICommand CreateSettlementCommand { get; }
+        public ICommand EnterExternalResultCommand { get; }
+        public ICommand PrintExternalReportCommand { get; }
 
         private async Task LoadReferralsAsync()
         {
@@ -260,6 +301,64 @@ namespace Open_lab.ViewModels
                 SettlementAmount = 0;
                 SettlementNote = null;
                 await LoadSettlementAsync();
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = $"خطأ: {ex.Message}";
+            }
+        }
+
+        private async Task EnterExternalResultAsync()
+        {
+            if (SelectedQueueItem == null || string.IsNullOrWhiteSpace(ExternalResultValue))
+            {
+                return;
+            }
+
+            try
+            {
+                await _externalLabService.EnterExternalLabResultAsync(
+                    SelectedQueueItem.QueueId,
+                    ExternalResultValue,
+                    ExternalResultComment,
+                    ExternalReference);
+
+                StatusMessage = "تم إدخال نتيجة المعمل الخارجي بنجاح.";
+                ExternalResultValue = string.Empty;
+                ExternalResultComment = null;
+                await LoadQueueAsync();
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = $"خطأ: {ex.Message}";
+            }
+        }
+
+        private async Task PrintExternalReportAsync()
+        {
+            if (SelectedQueueItem == null)
+            {
+                return;
+            }
+
+            try
+            {
+                var visitId = SelectedQueueItem.VisitTest?.VisitId ?? 0;
+                if (visitId <= 0)
+                {
+                    StatusMessage = "لا يمكن تحديد الزيارة المرتبطة.";
+                    return;
+                }
+
+                var report = await _reportService.GetVisitReportAsync(visitId);
+                if (report == null)
+                {
+                    StatusMessage = "لم يتم العثور على تقرير للطباعة.";
+                    return;
+                }
+
+                await _printService.PrintVisitReportAsync(report, true);
+                StatusMessage = "تم إرسال تقرير المعمل الخارجي للطباعة.";
             }
             catch (Exception ex)
             {
