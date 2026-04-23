@@ -1,7 +1,7 @@
 using System.Windows;
 using System.Windows.Controls;
 
-namespace Open_lab.Views.Behaviors
+namespace Open_lab.Behaviors
 {
     public static class PasswordBoxAssistant
     {

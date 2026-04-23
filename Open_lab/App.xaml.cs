@@ -4,7 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Open_lab.Data;
 using Open_lab.Services;
 using Open_lab.ViewModels;
-using Open_lab.Views;
+using Open_lab.Shell;
 
 namespace Open_lab
 {
@@ -18,7 +18,7 @@ namespace Open_lab
 
             _serviceProvider = ConfigureServices();
 
-            var mainWindow = new MainWindow
+            var mainWindow = new ShellWindow
             {
                 DataContext = _serviceProvider.GetRequiredService<MainViewModel>()
             };
