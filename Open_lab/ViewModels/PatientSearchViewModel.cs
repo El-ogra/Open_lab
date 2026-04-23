@@ -15,6 +15,7 @@ namespace Open_lab.ViewModels
         private string _labId = string.Empty;
         private string _statusMessage = string.Empty;
         private Patient? _selectedPatient;
+        private DateTime? _date;
 
         public PatientSearchViewModel(IPatientSearchService patientSearchService)
         {
@@ -40,6 +41,12 @@ namespace Open_lab.ViewModels
         {
             get => _labId;
             set => SetProperty(ref _labId, value);
+        }
+
+        public DateTime? Date
+        {
+            get => _date;
+            set => SetProperty(ref _date, value);
         }
 
         public string StatusMessage
@@ -69,7 +76,7 @@ namespace Open_lab.ViewModels
         {
             try
             {
-                var results = await _patientSearchService.SearchPatientsAsync(Name, Phone, LabId);
+                var results = await _patientSearchService.SearchPatientsAsync(Name, Phone, LabId, Date);
                 Patients.Clear();
                 foreach (var patient in results)
                 {

@@ -28,7 +28,16 @@ namespace Open_lab.Tests.Infrastructure
             if (result is Task<T> task)
                 return task;
 
-            throw new InvalidOperationException($"Method '{methodName}' did not return Task<{typeof(T).Name}>.");
+            throw new System.InvalidOperationException($"Method '{methodName}' did not return Task<{typeof(T).Name}>.");
+        }
+
+        public static void InvokePrivate(this object instance, string methodName, params object?[] parameters)
+        {
+            var method = instance.GetType().GetMethod(methodName, BindingFlags.NonPublic | BindingFlags.Instance);
+            if (method == null)
+                throw new TargetException($"Method '{methodName}' not found on type '{instance.GetType().Name}'.");
+
+            method.Invoke(instance, parameters);
         }
     }
 }

@@ -181,7 +181,7 @@ namespace Open_lab.Tests.ViewModels
                 new Patient { PatientId = 1, FullName = "John Doe", LabId = "LAB-001", Phone = "123456" },
                 new Patient { PatientId = 2, FullName = "John Smith", LabId = "LAB-002", Phone = "123789" }
             };
-            _patientServiceMock.Setup(x => x.SearchAsync("John", "123")).ReturnsAsync(patients);
+            _patientServiceMock.Setup(x => x.SearchAsync("John", "123", It.IsAny<DateTime?>(), It.IsAny<string>())).ReturnsAsync(patients);
 
             // Act
             await _viewModel.InvokePrivateAsync("SearchAsync");
@@ -274,7 +274,7 @@ namespace Open_lab.Tests.ViewModels
                 new Patient { PatientId = 2, FullName = "Ahmed Mohamed", LabId = "LAB-002", Phone = "222" },
                 new Patient { PatientId = 3, FullName = "Sara Ahmed", LabId = "LAB-003", Phone = "333" }
             };
-            _patientServiceMock.Setup(x => x.SearchAsync("Ahmed", "")).ReturnsAsync(patients);
+            _patientServiceMock.Setup(x => x.SearchAsync("Ahmed", "", It.IsAny<DateTime?>(), It.IsAny<string>())).ReturnsAsync(patients);
 
             // Act
             await _viewModel.InvokePrivateAsync("SearchAsync");
@@ -297,7 +297,7 @@ namespace Open_lab.Tests.ViewModels
             {
                 new Patient { PatientId = 10, FullName = "John Doe", LabId = "LAB-010", Phone = "5551234" }
             };
-            _patientServiceMock.Setup(x => x.SearchAsync("", "5551234")).ReturnsAsync(patients);
+            _patientServiceMock.Setup(x => x.SearchAsync("", "5551234", It.IsAny<DateTime?>(), It.IsAny<string>())).ReturnsAsync(patients);
 
             // Act
             await _viewModel.InvokePrivateAsync("SearchAsync");
@@ -316,7 +316,7 @@ namespace Open_lab.Tests.ViewModels
             // Arrange
             _viewModel.FullName = "NonExistent";
             _viewModel.Phone = "9999999";
-            _patientServiceMock.Setup(x => x.SearchAsync("NonExistent", "9999999")).ReturnsAsync(new List<Patient>());
+            _patientServiceMock.Setup(x => x.SearchAsync("NonExistent", "9999999", It.IsAny<DateTime?>(), It.IsAny<string>())).ReturnsAsync(new List<Patient>());
 
             // Act
             await _viewModel.InvokePrivateAsync("SearchAsync");
@@ -338,7 +338,7 @@ namespace Open_lab.Tests.ViewModels
                 new Patient { PatientId = 5, FullName = "Mohammed Ali", LabId = "LAB-005", Phone = "555" },
                 new Patient { PatientId = 6, FullName = "Sarah Mohamed", LabId = "LAB-006", Phone = "666" }
             };
-            _patientServiceMock.Setup(x => x.SearchAsync("Moh", "")).ReturnsAsync(patients);
+            _patientServiceMock.Setup(x => x.SearchAsync("Moh", "", It.IsAny<DateTime?>(), It.IsAny<string>())).ReturnsAsync(patients);
 
             // Act
             await _viewModel.InvokePrivateAsync("SearchAsync");
@@ -377,12 +377,57 @@ namespace Open_lab.Tests.ViewModels
 
             // Assert - Logic Guard: Verify medical history is saved with complete data
             capturedHistory.Should().NotBeNull();
+            capturedHistory.Should().NotBeNull();
             capturedHistory!.ChronicDiseases.Should().Be("Diabetes, Hypertension");
             capturedHistory.Allergies.Should().Be("Penicillin, Sulfa");
             capturedHistory.Medications.Should().Be("Metformin, Lisinopril");
             capturedHistory.Notes.Should().Be("Patient requires regular monitoring");
             capturedPatient.Should().NotBeNull();
             capturedPatient!.PatientId.Should().Be(100);
+        }
+
+        [Fact]
+        public async Task SaveAsync_With_Existing_Patient_Should_Update_Patient_LogicGuard()
+        {
+            // 1.2 Edit patient data
+            // Arrange - Set PatientId > 0 to trigger UpdateAsync
+            _viewModel.InvokePrivate("set_PatientId", 500);
+            _viewModel.LabId = "LAB-500";
+            _viewModel.FullName = "Updated Name";
+            _viewModel.Gender = "Male";
+
+            Patient? capturedPatient = null;
+            _patientServiceMock.Setup(x => x.UpdateAsync(It.IsAny<Patient>()))
+                .Callback<Patient>(p => capturedPatient = p)
+                .Returns(Task.CompletedTask);
+            _patientServiceMock.Setup(x => x.SaveMedicalHistoryAsync(500, It.IsAny<MedicalHistory>()))
+                .Returns(Task.CompletedTask);
+
+            // Act
+            await _viewModel.InvokePrivateAsync("SaveAsync");
+
+            // Assert - Logic Guard: Verify UpdateAsync was called instead of CreateAsync
+            _viewModel.StatusMessage.Should().Contain("تم تحديث بيانات المريض");
+            _patientServiceMock.Verify(x => x.UpdateAsync(It.IsAny<Patient>()), Times.Once);
+            _patientServiceMock.Verify(x => x.CreateAsync(It.IsAny<Patient>()), Times.Never);
+            capturedPatient.Should().NotBeNull();
+            capturedPatient!.FullName.Should().Be("Updated Name");
+        }
+
+        [Fact]
+        public async Task SaveAsync_When_No_FullName_Should_Show_Error_LogicGuard()
+        {
+            // 1.1 Validation
+            // Arrange
+            _viewModel.LabId = "LAB-001";
+            _viewModel.FullName = "";
+
+            // Act
+            await _viewModel.InvokePrivateAsync("SaveAsync");
+
+            // Assert
+            _viewModel.StatusMessage.Should().Contain("يرجى إدخال اسم المريض");
+            _patientServiceMock.Verify(x => x.CreateAsync(It.IsAny<Patient>()), Times.Never);
         }
     }
 }

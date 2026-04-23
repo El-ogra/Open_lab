@@ -142,6 +142,12 @@ namespace Open_lab.ViewModels
         {
             try
             {
+                if (string.IsNullOrWhiteSpace(FullName))
+                {
+                    StatusMessage = "خطأ: يرجى إدخال اسم المريض.";
+                    return;
+                }
+
                 if (PatientId == 0)
                 {
                     var created = await _patientService.CreateAsync(new Patient

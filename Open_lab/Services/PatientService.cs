@@ -82,7 +82,7 @@ namespace Open_lab.Services
             await _db.SaveChangesAsync();
         }
 
-        public Task<List<Patient>> SearchAsync(string? name, string? phone)
+        public Task<List<Patient>> SearchAsync(string? name, string? phone, DateTime? date = null, string? labId = null)
         {
             var query = _db.Patients.AsNoTracking().AsQueryable();
 
@@ -98,6 +98,18 @@ namespace Open_lab.Services
                 query = query.Where(p => p.Phone != null && p.Phone.Contains(phoneTerm));
             }
 
+            if (!string.IsNullOrWhiteSpace(labId))
+            {
+                var idTerm = labId.Trim();
+                query = query.Where(p => p.LabId.Contains(idTerm));
+            }
+
+            if (date.HasValue)
+            {
+                var searchDate = date.Value.Date;
+                query = query.Where(p => p.Visits.Any(v => v.VisitDate.Date == searchDate));
+            }
+
             return query.OrderBy(p => p.FullName).ToListAsync();
         }
 
@@ -105,7 +117,6 @@ namespace Open_lab.Services
         {
             var date = (forDate ?? DateTime.Today).Date;
             var prefix = date.ToString("yyyyMMdd", CultureInfo.InvariantCulture);
-
             var latestForDay = await _db.Patients
                 .AsNoTracking()
                 .Where(p => p.LabId.StartsWith(prefix))

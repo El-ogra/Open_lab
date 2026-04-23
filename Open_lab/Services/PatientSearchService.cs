@@ -16,7 +16,7 @@ namespace Open_lab.Services
             _db = db;
         }
 
-        public async Task<List<Patient>> SearchPatientsAsync(string? name, string? phone, string? labId)
+        public async Task<List<Patient>> SearchPatientsAsync(string? name, string? phone, string? labId, DateTime? date = null)
         {
             var query = _db.Patients.AsNoTracking().AsQueryable();
 
@@ -33,6 +33,12 @@ namespace Open_lab.Services
             if (!string.IsNullOrWhiteSpace(labId))
             {
                 query = query.Where(p => p.LabId == labId);
+            }
+
+            if (date.HasValue)
+            {
+                var searchDate = date.Value.Date;
+                query = query.Where(p => p.Visits.Any(v => v.VisitDate.Date == searchDate));
             }
 
             return await query.OrderBy(p => p.FullName).ToListAsync();

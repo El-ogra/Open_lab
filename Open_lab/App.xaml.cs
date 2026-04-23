@@ -37,7 +37,15 @@ namespace Open_lab
         {
             var services = new ServiceCollection();
 
-            services.AddTransient<OpenLabDbContext>(_ => new OpenLabDbContextFactory().CreateDbContext(System.Array.Empty<string>()));
+            services.AddTransient<OpenLabDbContext>(_ => 
+            {
+                var context = new OpenLabDbContextFactory().CreateDbContext(System.Array.Empty<string>());
+                if (AppSession.UserId > 0)
+                {
+                    context.CurrentUserId = AppSession.UserId;
+                }
+                return context;
+            });
 
             RegisterServicesByConvention(services);
 

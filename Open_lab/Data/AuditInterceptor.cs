@@ -40,11 +40,17 @@ namespace Open_lab.Data
             var auditEntries = OnBeforeSaveChanges(context);
             if (auditEntries == null || auditEntries.Count == 0) return;
 
+            int userId = _currentUserId ?? 1;
+            if (context is OpenLabDbContext openLabContext && openLabContext.CurrentUserId.HasValue)
+            {
+                userId = openLabContext.CurrentUserId.Value;
+            }
+
             foreach (var auditEntry in auditEntries)
             {
                 var auditLog = new AuditLog
                 {
-                    UserId = _currentUserId ?? 1, // Default to admin user if not specified
+                    UserId = userId, // Use dynamic user ID
                     Action = auditEntry.Action,
                     TableName = auditEntry.TableName,
                     RecordId = auditEntry.KeyValues?.FirstOrDefault().Value?.ToString() ?? "",

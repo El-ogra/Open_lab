@@ -16,6 +16,8 @@ namespace Open_lab.Data
         {
         }
 
+        public int? CurrentUserId { get; set; }
+
         public DbSet<User> Users => Set<User>();
         public DbSet<AttendanceLog> AttendanceLogs => Set<AttendanceLog>();
         public DbSet<ShiftSchedule> ShiftSchedules => Set<ShiftSchedule>();

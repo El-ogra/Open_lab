@@ -6,7 +6,7 @@ namespace Open_lab.Services
 {
     public interface IPatientSearchService
     {
-        Task<List<Patient>> SearchPatientsAsync(string? name, string? phone, string? labId);
+        Task<List<Patient>> SearchPatientsAsync(string? name, string? phone, string? labId, DateTime? date = null);
         Task<List<Visit>> GetPatientVisitsAsync(int patientId);
     }
 }
