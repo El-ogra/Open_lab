@@ -15,7 +15,14 @@ namespace Open_lab.Models
     {
         public VisitTest VisitTest { get; set; } = null!;
         public Test Test { get; set; } = null!;
-        public List<ResultValue> Results { get; set; } = new();
+        public List<ResultValueReportItem> Results { get; set; } = new();
+    }
+
+    public class ResultValueReportItem
+    {
+        public ResultValue Result { get; set; } = null!;
+        public string? PreviousValue { get; set; }
+        public DateTime? PreviousDate { get; set; }
     }
 
     public class PatientHistoryReportData

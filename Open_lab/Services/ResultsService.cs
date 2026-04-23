@@ -82,6 +82,20 @@ namespace Open_lab.Services
             }
             else
             {
+                // Logic for Function 4.3 (Audit Trail for edits)
+                if (existing.Value != value)
+                {
+                    _db.AuditLogs.Add(new AuditLog
+                    {
+                        UserId = 1, // System default or should be passed from session
+                        Action = "EDIT_RESULT",
+                        TableName = "ResultValues",
+                        RecordId = $"{visitTestId}-{parameterId}",
+                        Timestamp = DateTime.UtcNow,
+                        NewValues = $"Old: {existing.Value} | New: {value} | Reason: Manual Edit"
+                    });
+                }
+
                 existing.Value = value;
                 existing.Flag = flag;
                 existing.Comment = comment;
@@ -151,6 +165,75 @@ namespace Open_lab.Services
 
             visitTest.Status = "InProgress";
             await _db.SaveChangesAsync();
+        }
+
+        public async Task LogVisitReportPrintedAsync(int visitId, int userId)
+        {
+            _db.AuditLogs.Add(new AuditLog
+            {
+                UserId = userId,
+                Action = "PRINT_REPORT",
+                TableName = "Visits",
+                RecordId = visitId.ToString(),
+                Timestamp = DateTime.UtcNow,
+                NewValues = "Visit report generated and printed."
+            });
+            await _db.SaveChangesAsync();
+        }
+
+        public async Task<ReferenceRangeResult> ValidateResultAsync(int testId, string value, string gender, int age)
+        {
+            var result = new ReferenceRangeResult { OriginalValue = value };
+
+            if (decimal.TryParse(value, out decimal numericValue))
+            {
+                result.NumericValue = numericValue;
+
+                // 4.1 Automated Range Comparison
+                var range = await _db.TestReferenceRanges
+                    .Where(r => r.TestId == testId)
+                    .Where(r => r.Gender == null || r.Gender == gender)
+                    .Where(r => (r.AgeFrom == null || age >= r.AgeFrom) && (r.AgeTo == null || age <= r.AgeTo))
+                    .OrderByDescending(r => r.Gender != null) // Prefer specific gender over null
+                    .FirstOrDefaultAsync();
+
+                if (range != null)
+                {
+                    result.LowThreshold = range.LowValue;
+                    result.HighThreshold = range.HighValue;
+
+                    if (range.LowValue.HasValue && numericValue < range.LowValue.Value)
+                    {
+                        result.IsLow = true;
+                        result.Flag = "L";
+                    }
+                    else if (range.HighValue.HasValue && numericValue > range.HighValue.Value)
+                    {
+                        result.IsHigh = true;
+                        result.Flag = "H";
+                    }
+                    else
+                    {
+                        result.IsNormal = true;
+                        result.Flag = null;
+                    }
+                }
+            }
+
+            // 4.1 Automated Comments (High/Low)
+            var comment = await _db.TestComments
+                .Where(c => c.TestId == testId)
+                .OrderByDescending(c => c.IsDefault)
+                .FirstOrDefaultAsync();
+
+            if (comment != null)
+            {
+                result.DefaultComment = comment.CommentText;
+                result.LowComment = comment.LowComment;
+                result.HighComment = comment.HighComment;
+            }
+
+            return result;
         }
     }
 }

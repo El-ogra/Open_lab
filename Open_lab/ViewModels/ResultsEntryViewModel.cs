@@ -80,6 +80,8 @@ namespace Open_lab.ViewModels
                         VisitTestId = vt.VisitTestId,
                         TestId = vt.TestId,
                         PatientName = vt.Visit.Patient.FullName,
+                        PatientGender = vt.Visit.Patient.Gender,
+                        PatientAge = vt.Visit.Patient.Age ?? 0,
                         TestName = vt.Test.NameReport,
                         VisitDate = vt.Visit.VisitDate,
                         Status = vt.Status
@@ -110,19 +112,45 @@ namespace Open_lab.ViewModels
                 foreach (var param in parameters)
                 {
                     var existing = results.FirstOrDefault(r => r.ParameterId == param.ParameterId);
-                    ResultItems.Add(new ResultEntryItem
+                    var item = new ResultEntryItem
                     {
                         ParameterId = param.ParameterId,
                         ParameterName = param.Name,
                         Value = existing?.Value,
                         Flag = existing?.Flag,
-                        Comment = existing?.Comment
-                    });
+                        Comment = existing?.Comment,
+                        OnValueChanged = async i => await AutoValidateResultAsync(i)
+                    };
+                    ResultItems.Add(item);
                 }
             }
             catch (Exception ex)
             {
                 StatusMessage = $"خطأ: {ex.Message}";
+            }
+        }
+
+        private async Task AutoValidateResultAsync(ResultEntryItem item)
+        {
+            if (SelectedVisitTest == null || string.IsNullOrWhiteSpace(item.Value))
+            {
+                return;
+            }
+
+            try
+            {
+                var validation = await _resultsService.ValidateResultAsync(
+                    SelectedVisitTest.TestId, 
+                    item.Value, 
+                    SelectedVisitTest.PatientGender, 
+                    SelectedVisitTest.PatientAge);
+
+                item.Flag = validation.Flag;
+                item.Comment = validation.RecommendedComment;
+            }
+            catch
+            {
+                // Silent fail for auto-validation to not disturb user typing
             }
         }
 

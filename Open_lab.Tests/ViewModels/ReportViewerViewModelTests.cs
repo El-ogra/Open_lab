@@ -11,13 +11,15 @@ namespace Open_lab.Tests.ViewModels
     {
         private readonly Mock<IReportService> _reportServiceMock;
         private readonly Mock<IPrintService> _printServiceMock;
+        private readonly Mock<IResultsService> _resultsServiceMock;
         private readonly ReportViewerViewModel _viewModel;
 
         public ReportViewerViewModelTests()
         {
             _reportServiceMock = new Mock<IReportService>();
             _printServiceMock = new Mock<IPrintService>();
-            _viewModel = new ReportViewerViewModel(_reportServiceMock.Object, _printServiceMock.Object);
+            _resultsServiceMock = new Mock<IResultsService>();
+            _viewModel = new ReportViewerViewModel(_reportServiceMock.Object, _printServiceMock.Object, _resultsServiceMock.Object);
         }
 
         [Fact]
@@ -44,9 +46,9 @@ namespace Open_lab.Tests.ViewModels
             _viewModel.Tests[0].Test.NameReport.Should().Be("External Test");
             _viewModel.Tests[0].Test.IsSendOut.Should().BeFalse();
             _viewModel.Tests[0].Results.Should().HaveCount(1);
-            _viewModel.Tests[0].Results[0].Value.Should().Be("12");
-            _viewModel.Tests[0].Results[0].Parameter.Should().NotBeNull();
-            _viewModel.Tests[0].Results[0].Parameter.Name.Should().Be("Param");
+            _viewModel.Tests[0].Results[0].Result.Value.Should().Be("12");
+            _viewModel.Tests[0].Results[0].Result.Parameter.Should().NotBeNull();
+            _viewModel.Tests[0].Results[0].Result.Parameter.Name.Should().Be("Param");
 
             _viewModel.PreviewContent.Should().Contain("معاينة التقرير");
             _viewModel.StatusMessage.Should().Contain("تم تحميل التقرير");
@@ -84,6 +86,9 @@ namespace Open_lab.Tests.ViewModels
             capturedReport.Tests[0].Test.NameReport.Should().Be("External Test");
             capturedReport.Tests[0].Test.IsSendOut.Should().BeTrue();
             capturedPreview.Should().Be(false);
+
+            // Verify Audit Logging (Function 4.7)
+            _resultsServiceMock.Verify(x => x.LogVisitReportPrintedAsync(20, It.IsAny<int>()), Times.Once);
         }
 
         private static VisitReportData BuildReport(int visitId, bool isSendOut)
@@ -105,7 +110,7 @@ namespace Open_lab.Tests.ViewModels
                     {
                         VisitTest = visitTest,
                         Test = test,
-                        Results = new List<ResultValue> { result }
+                        Results = new List<ResultValueReportItem> { new ResultValueReportItem { Result = result } }
                     }
                 }
             };

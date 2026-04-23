@@ -74,9 +74,17 @@ namespace Open_lab.Services
                     continue;
                 }
 
-                foreach (var result in test.Results)
+                foreach (var resultItem in test.Results)
                 {
-                    document.Blocks.Add(new Paragraph(new Run($"- {result.Parameter.Name}: {result.Value} {result.Flag}")));
+                    var result = resultItem.Result;
+                    var resultText = $"- {result.Parameter.Name}: {result.Value ?? "-"} {result.Flag}";
+                    
+                    if (!string.IsNullOrWhiteSpace(resultItem.PreviousValue))
+                    {
+                        resultText += $" [Prev: {resultItem.PreviousValue} on {resultItem.PreviousDate:yyyy-MM-dd}]";
+                    }
+
+                    document.Blocks.Add(new Paragraph(new Run(resultText)));
                 }
             }
 

@@ -55,11 +55,33 @@ namespace Open_lab.Services
                     .Where(rv => rv.VisitTestId == vt.VisitTestId)
                     .ToListAsync();
 
+                var reportResults = new List<ResultValueReportItem>();
+                foreach (var rv in results)
+                {
+                    // Function 4.9: History Comparison
+                    var previousResult = await _db.ResultValues
+                        .AsNoTracking()
+                        .Include(p => p.VisitTest)
+                        .ThenInclude(p => p.Visit)
+                        .Where(p => p.VisitTest.Visit.PatientId == visit.PatientId)
+                        .Where(p => p.ParameterId == rv.ParameterId)
+                        .Where(p => p.VisitTest.Visit.VisitDate < visit.VisitDate)
+                        .OrderByDescending(p => p.VisitTest.Visit.VisitDate)
+                        .FirstOrDefaultAsync();
+
+                    reportResults.Add(new ResultValueReportItem
+                    {
+                        Result = rv,
+                        PreviousValue = previousResult?.Value,
+                        PreviousDate = previousResult?.VisitTest?.Visit?.VisitDate
+                    });
+                }
+
                 report.Tests.Add(new VisitTestReportItem
                 {
                     VisitTest = vt,
                     Test = vt.Test,
-                    Results = results
+                    Results = reportResults
                 });
             }
 

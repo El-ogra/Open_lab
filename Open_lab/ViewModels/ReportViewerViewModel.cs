@@ -12,15 +12,17 @@ namespace Open_lab.ViewModels
     {
         private readonly IReportService _reportService;
         private readonly IPrintService _printService;
+        private readonly IResultsService _resultsService;
         private int _visitId;
         private string _statusMessage = string.Empty;
         private VisitReportData? _report;
         private string _previewContent = string.Empty;
 
-        public ReportViewerViewModel(IReportService reportService, IPrintService printService)
+        public ReportViewerViewModel(IReportService reportService, IPrintService printService, IResultsService resultsService)
         {
             _reportService = reportService;
             _printService = printService;
+            _resultsService = resultsService;
             Tests = new ObservableCollection<VisitTestReportItem>();
             LoadReportCommand = new RelayCommand(async _ => await LoadReportAsync());
             PrintCommand = new RelayCommand(async _ => await PrintAsync(false), _ => Report != null);
@@ -107,9 +109,11 @@ namespace Open_lab.ViewModels
             try
             {
                 await _printService.PrintVisitReportAsync(Report, isReprint);
+                await _resultsService.LogVisitReportPrintedAsync(Report.Visit.VisitId, AppSession.UserId > 0 ? AppSession.UserId : 1);
+                
                 StatusMessage = isReprint
-                    ? "تم إرسال إعادة الطباعة إلى Microsoft Print to PDF."
-                    : "تم إرسال التقرير للطباعة عبر Microsoft Print to PDF.";
+                    ? "تم إرسال إعادة الطباعة إلى Microsoft Print to PDF وتوثيقها."
+                    : "تم إرسال التقرير للطباعة وتوثيقها في سجل المريض.";
             }
             catch (Exception ex)
             {
@@ -129,12 +133,18 @@ namespace Open_lab.ViewModels
             {
                 builder.AppendLine(test.Test.NameReport);
 
-                foreach (var result in test.Results)
+                foreach (var resultItem in test.Results)
                 {
+                    var result = resultItem.Result;
                     var line = $"{result.Parameter.Name}: {result.Value ?? "-"}";
                     if (!string.IsNullOrWhiteSpace(result.Flag))
                     {
                         line += $" ({result.Flag})";
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(resultItem.PreviousValue))
+                    {
+                        line += $" [السابق: {resultItem.PreviousValue} بتاريخ {resultItem.PreviousDate:yyyy-MM-dd}]";
                     }
 
                     builder.AppendLine($"  {line}");

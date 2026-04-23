@@ -455,5 +455,70 @@ namespace Open_lab.Tests.Services
             lowResult.Flag.Should().Be("L");
             lowResult.Comment.Should().Be("Low glucose");
         }
+        [Fact]
+        public async Task Function_4_1_Automated_Intelligence_Full_Verification()
+        {
+            // Requirement 4.1: Automated Range Comparison and Suggested Comments
+            var patient = new Patient { PatientId = 1, Gender = "Female", Age = 25 };
+            _db.Patients.Add(patient);
+
+            var testId = 101;
+            _db.Tests.Add(new Test { TestId = testId, Code = "HEM", NameReport = "Hemoglobin", NameReceipt = "HEM" });
+            
+            // Add Range: 12-16 normal for female
+            _db.TestReferenceRanges.Add(new TestReferenceRange { TestId = testId, Gender = "Female", LowValue = 12m, HighValue = 16m });
+            
+            // Add Comments
+            _db.TestComments.Add(new TestComment { TestId = testId, CommentText = "Sample Normal", LowComment = "Anemia Risk", HighComment = "Polycythemia Risk", IsDefault = true });
+            
+            await _db.SaveChangesAsync();
+
+            // Act - Validate Low Value (10)
+            var lowResult = await _service.ValidateResultAsync(testId, "10", "Female", 25);
+            lowResult.Flag.Should().Be("L");
+            lowResult.RecommendedComment.Should().Be("Anemia Risk");
+
+            // Act - Validate High Value (18)
+            var highResult = await _service.ValidateResultAsync(testId, "18", "Female", 25);
+            highResult.Flag.Should().Be("H");
+            highResult.RecommendedComment.Should().Be("Polycythemia Risk");
+        }
+
+        [Fact]
+        public async Task Function_4_3_Audit_Trail_Integrity_Verification()
+        {
+            // Requirement 4.3: Secure audit trail for result modifications
+            var vtId = 5;
+            var pId = 20;
+            _db.VisitTests.Add(new VisitTest { VisitTestId = vtId, VisitId = 10, TestId = 10 });
+            _db.ResultValues.Add(new ResultValue { VisitTestId = vtId, ParameterId = pId, Value = "Initial" });
+            await _db.SaveChangesAsync();
+
+            // Act - Modify results
+            await _service.SaveResultAsync(vtId, pId, "Modified", "H", "Reason X");
+
+            // Assert
+            var log = await _db.AuditLogs.OrderByDescending(l => l.Timestamp).FirstOrDefaultAsync();
+            log.Should().NotBeNull();
+            log!.Action.Should().Be("EDIT_RESULT");
+            log.NewValues.Should().Contain("Initial");
+            log.NewValues.Should().Contain("Modified");
+        }
+
+        [Fact]
+        public async Task Function_4_7_Print_Audit_Logging_Verification()
+        {
+            // Requirement 4.7: Log report printing actions
+            var visitId = 70;
+            var userId = 5;
+
+            // Act
+            await _service.LogVisitReportPrintedAsync(visitId, userId);
+
+            // Assert
+            var log = await _db.AuditLogs.FirstOrDefaultAsync(l => l.Action == "PRINT_REPORT" && l.RecordId == "70");
+            log.Should().NotBeNull();
+            log!.UserId.Should().Be(userId);
+        }
     }
 }

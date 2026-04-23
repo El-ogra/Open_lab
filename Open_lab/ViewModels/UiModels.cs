@@ -15,18 +15,47 @@ namespace Open_lab.ViewModels
         public int VisitTestId { get; set; }
         public int TestId { get; set; }
         public string PatientName { get; set; } = string.Empty;
+        public string PatientGender { get; set; } = "Male";
+        public int PatientAge { get; set; }
         public string TestName { get; set; } = string.Empty;
         public DateTime VisitDate { get; set; }
         public string? Status { get; set; }
     }
 
-    public class ResultEntryItem
+    public class ResultEntryItem : BaseViewModel
     {
+        private string? _value;
+        private string? _flag;
+        private string? _comment;
+
         public int ParameterId { get; set; }
         public string ParameterName { get; set; } = string.Empty;
-        public string? Value { get; set; }
-        public string? Flag { get; set; }
-        public string? Comment { get; set; }
+        
+        public Action<ResultEntryItem>? OnValueChanged { get; set; }
+
+        public string? Value
+        {
+            get => _value;
+            set
+            {
+                if (SetProperty(ref _value, value))
+                {
+                    OnValueChanged?.Invoke(this);
+                }
+            }
+        }
+
+        public string? Flag
+        {
+            get => _flag;
+            set => SetProperty(ref _flag, value);
+        }
+
+        public string? Comment
+        {
+            get => _comment;
+            set => SetProperty(ref _comment, value);
+        }
     }
 
     public class WorkSheetPatientRow
