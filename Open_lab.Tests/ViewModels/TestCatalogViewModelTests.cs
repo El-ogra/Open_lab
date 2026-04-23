@@ -106,6 +106,32 @@ namespace Open_lab.Tests.ViewModels
         }
 
         [Fact]
+        public async Task SaveAsync_With_OutsourceData_Should_Persist_Pricing_LogicGuard()
+        {
+            // 3.9 Outsourced - Logic Guard: Verify pricing fields are sent to service
+            // Arrange
+            _viewModel.SelectedTest = null;
+            _viewModel.Code = "OUT";
+            _viewModel.IsSendOut = true;
+            _viewModel.CostPrice = 25.5m;
+            _viewModel.PatientPrice = 60.0m;
+
+            _testCatalogServiceMock.Setup(x => x.CreateTestAsync(It.IsAny<Test>()))
+                .ReturnsAsync((Test t) => { t.TestId = 77; return t; });
+
+            // Act
+            await _viewModel.InvokePrivateAsync("SaveAsync");
+
+            // Assert
+            _testCatalogServiceMock.Verify(x => x.CreateTestAsync(It.Is<Test>(t =>
+                t.Code == "OUT" &&
+                t.IsSendOut == true &&
+                t.CostPrice == 25.5m &&
+                t.PatientPrice == 60.0m
+            )), Times.Once);
+        }
+
+        [Fact]
         public async Task DeleteAsync_With_Null_SelectedTest_Should_Do_Nothing()
         {
             _viewModel.SelectedTest = null;
@@ -140,6 +166,8 @@ namespace Open_lab.Tests.ViewModels
             _viewModel.Code.Should().BeEmpty();
             _viewModel.NameReport.Should().BeEmpty();
             _viewModel.Price.Should().Be(0);
+            _viewModel.CostPrice.Should().BeNull();
+            _viewModel.PatientPrice.Should().BeNull();
         }
     }
 }

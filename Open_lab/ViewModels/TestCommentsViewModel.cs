@@ -13,6 +13,8 @@ namespace Open_lab.ViewModels
         private Test? _selectedTest;
         private TestComment? _selectedComment;
         private string _commentText = string.Empty;
+        private string? _lowComment;
+        private string? _highComment;
         private bool _isDefault;
         private string _statusMessage = string.Empty;
 
@@ -54,7 +56,16 @@ namespace Open_lab.ViewModels
                     if (value != null)
                     {
                         CommentText = value.CommentText;
+                        LowComment = value.LowComment;
+                        HighComment = value.HighComment;
                         IsDefault = value.IsDefault;
+                    }
+                    else
+                    {
+                        CommentText = string.Empty;
+                        LowComment = null;
+                        HighComment = null;
+                        IsDefault = false;
                     }
                     (DeleteCommand as RelayCommand)?.RaiseCanExecuteChanged();
                 }
@@ -65,6 +76,18 @@ namespace Open_lab.ViewModels
         {
             get => _commentText;
             set => SetProperty(ref _commentText, value);
+        }
+
+        public string? LowComment
+        {
+            get => _lowComment;
+            set => SetProperty(ref _lowComment, value);
+        }
+
+        public string? HighComment
+        {
+            get => _highComment;
+            set => SetProperty(ref _highComment, value);
         }
 
         public bool IsDefault
@@ -124,6 +147,8 @@ namespace Open_lab.ViewModels
                     {
                         TestId = SelectedTest.TestId,
                         CommentText = CommentText,
+                        LowComment = LowComment,
+                        HighComment = HighComment,
                         IsDefault = IsDefault
                     });
 
@@ -136,6 +161,8 @@ namespace Open_lab.ViewModels
                         CommentId = SelectedComment.CommentId,
                         TestId = SelectedComment.TestId,
                         CommentText = CommentText,
+                        LowComment = LowComment,
+                        HighComment = HighComment,
                         IsDefault = IsDefault
                     });
                 }

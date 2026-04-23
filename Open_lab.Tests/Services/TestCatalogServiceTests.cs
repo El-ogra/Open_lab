@@ -389,5 +389,18 @@ namespace Open_lab.Tests.Services
             saved!.LowValue.Should().Be(7.0m);
             saved.HighValue.Should().Be(7.0m);
         }
+
+        [Fact]
+        public async Task CreateTestAsync_NegativeTurnaround_Should_Throw()
+        {
+            // Arrange
+            var test = new Test { Code = "NEG2", NameReport = "N", NameReceipt = "N", Price = 10m, TurnaroundHours = -1 };
+
+            // Act
+            Func<Task> act = async () => await _service.CreateTestAsync(test);
+
+            // Assert
+            await act.Should().ThrowAsync<ArgumentException>().WithMessage("*Turnaround hours*");
+        }
     }
 }

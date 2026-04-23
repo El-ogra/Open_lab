@@ -22,6 +22,8 @@ namespace Open_lab.ViewModels
         private int _reportOrder;
         private bool _isRoutine;
         private bool _isSendOut;
+        private decimal? _costPrice;
+        private decimal? _patientPrice;
         private TestGroup? _selectedGroup;
         private SampleType? _selectedSampleType;
         private Unit? _selectedUnit;
@@ -119,6 +121,18 @@ namespace Open_lab.ViewModels
             set => SetProperty(ref _isSendOut, value);
         }
 
+        public decimal? CostPrice
+        {
+            get => _costPrice;
+            set => SetProperty(ref _costPrice, value);
+        }
+
+        public decimal? PatientPrice
+        {
+            get => _patientPrice;
+            set => SetProperty(ref _patientPrice, value);
+        }
+
         public TestGroup? SelectedGroup
         {
             get => _selectedGroup;
@@ -210,6 +224,8 @@ namespace Open_lab.ViewModels
             ReportOrder = SelectedTest.ReportOrder;
             IsRoutine = SelectedTest.IsRoutine;
             IsSendOut = SelectedTest.IsSendOut;
+            CostPrice = SelectedTest.CostPrice;
+            PatientPrice = SelectedTest.PatientPrice;
 
             SelectedGroup = Groups.FirstOrDefault(g => g.GroupId == SelectedTest.GroupId);
             SelectedSampleType = SampleTypes.FirstOrDefault(s => s.SampleTypeId == SelectedTest.SampleTypeId);
@@ -233,6 +249,8 @@ namespace Open_lab.ViewModels
                         ReportOrder = ReportOrder,
                         IsRoutine = IsRoutine,
                         IsSendOut = IsSendOut,
+                        CostPrice = CostPrice,
+                        PatientPrice = PatientPrice,
                         GroupId = SelectedGroup?.GroupId,
                         SampleTypeId = SelectedSampleType?.SampleTypeId,
                         UnitId = SelectedUnit?.UnitId
@@ -252,6 +270,8 @@ namespace Open_lab.ViewModels
                     SelectedTest.ReportOrder = ReportOrder;
                     SelectedTest.IsRoutine = IsRoutine;
                     SelectedTest.IsSendOut = IsSendOut;
+                    SelectedTest.CostPrice = CostPrice;
+                    SelectedTest.PatientPrice = PatientPrice;
                     SelectedTest.GroupId = SelectedGroup?.GroupId;
                     SelectedTest.SampleTypeId = SelectedSampleType?.SampleTypeId;
                     SelectedTest.UnitId = SelectedUnit?.UnitId;
@@ -317,6 +337,8 @@ namespace Open_lab.ViewModels
             ReportOrder = 0;
             IsRoutine = false;
             IsSendOut = false;
+            CostPrice = null;
+            PatientPrice = null;
             SelectedGroup = null;
             SelectedSampleType = null;
             SelectedUnit = null;
