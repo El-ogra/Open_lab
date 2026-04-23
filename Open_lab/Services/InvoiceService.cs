@@ -106,6 +106,17 @@ namespace Open_lab.Services
             payment.UserId = userId;
             payment.PaymentDate = DateTime.Now;
 
+            // Log modification (Function 2.5)
+            _db.AuditLogs.Add(new AuditLog
+            {
+                UserId = userId,
+                Action = "EDIT_PAYMENT",
+                TableName = "Payments",
+                RecordId = paymentId.ToString(),
+                Timestamp = DateTime.UtcNow,
+                NewValues = $"New Amount: {newAmount} | Reason: {reason ?? "No reason provided"}"
+            });
+
             await _db.SaveChangesAsync();
 
             await RecalculateInvoiceAsync(payment.InvoiceId, 0);
@@ -121,6 +132,18 @@ namespace Open_lab.Services
             }
 
             var invoiceId = payment.InvoiceId;
+
+            // Log deletion (Function 2.6)
+            _db.AuditLogs.Add(new AuditLog
+            {
+                UserId = 1, // System default or should be passed from VM
+                Action = "DELETE_PAYMENT",
+                TableName = "Payments",
+                RecordId = paymentId.ToString(),
+                Timestamp = DateTime.UtcNow,
+                NewValues = $"Deleted Amount: {payment.Amount} | Reason: {reason ?? "No reason provided"}"
+            });
+
             _db.Payments.Remove(payment);
             await _db.SaveChangesAsync();
             await RecalculateInvoiceAsync(invoiceId, 0);

@@ -164,6 +164,12 @@ namespace Open_lab.Tests.Services
             updatedPayment.Should().NotBeNull();
             updatedPayment!.Amount.Should().Be(120m);
             updatedPayment.UserId.Should().Be(2);
+
+            // Audit Trail Verification (Function 2.5)
+            var log = await _db.AuditLogs.FirstOrDefaultAsync(l => l.Action == "EDIT_PAYMENT" && l.RecordId == payment.PaymentId.ToString());
+            log.Should().NotBeNull();
+            log!.NewValues.Should().Contain("Test Reason");
+            log.UserId.Should().Be(2);
         }
 
         [Fact]
@@ -436,6 +442,12 @@ namespace Open_lab.Tests.Services
             // Side effect: Verify payment deleted
             var deleted = await _db.Payments.FindAsync(payment.PaymentId);
             deleted.Should().BeNull();
+
+            // Audit Trail Verification (Function 2.6)
+            var log = await _db.AuditLogs.FirstOrDefaultAsync(l => l.Action == "DELETE_PAYMENT" && l.RecordId == payment.PaymentId.ToString());
+            log.Should().NotBeNull();
+            log!.NewValues.Should().Contain("Audit Reason");
+            log.NewValues.Should().Contain("100"); // Amount deleted
         }
 
         [Fact]
