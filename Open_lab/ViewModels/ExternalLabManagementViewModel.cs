@@ -21,6 +21,7 @@ namespace Open_lab.ViewModels
         private int? _selectedReferralId;
         private decimal _settlementAmount;
         private string? _settlementNote;
+        private decimal _totalProfit;
         private string _externalResultValue = string.Empty;
         private string? _externalResultComment;
         private string? _externalReference;
@@ -118,6 +119,12 @@ namespace Open_lab.ViewModels
         {
             get => _externalReference;
             set => SetProperty(ref _externalReference, value);
+        }
+
+        public decimal TotalProfit
+        {
+            get => _totalProfit;
+            private set => SetProperty(ref _totalProfit, value);
         }
 
         public ExternalLabQueue? SelectedQueueItem
@@ -281,7 +288,9 @@ namespace Open_lab.ViewModels
                     SettlementHistory.Add(settlement);
                 }
 
-                StatusMessage = $"الرصيد المعلق: {pendingBalance:N2} | عدد التسويات: {SettlementHistory.Count}";
+                TotalProfit = await _externalSettlementService.GetTotalProfitAsync(SelectedReferralId.Value);
+
+                StatusMessage = $"الرصيد المعلق: {pendingBalance:N2} | الربح المحقق: {TotalProfit:N2} | عدد التسويات: {SettlementHistory.Count}";
             }
             catch (Exception ex)
             {

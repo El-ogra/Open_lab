@@ -19,6 +19,7 @@ namespace Open_lab.ViewModels
         private decimal _totalDiscount;
         private decimal _totalExpenses;
         private decimal _netProfit;
+        private int? _selectedBranchId;
         private string _statusMessage = string.Empty;
 
         public AccountsTreasuryViewModel(IAccountsTreasuryService accountsTreasuryService, IPrintService printService)
@@ -86,6 +87,12 @@ namespace Open_lab.ViewModels
             private set => SetProperty(ref _netProfit, value);
         }
 
+        public int? SelectedBranchId
+        {
+            get => _selectedBranchId;
+            set => SetProperty(ref _selectedBranchId, value);
+        }
+
         public ObservableCollection<AccountsPaymentRow> Payments { get; }
         public ObservableCollection<TreasuryByUserRow> ByUser { get; }
         public ObservableCollection<TreasuryByReferralRow> ByReferral { get; }
@@ -110,7 +117,7 @@ namespace Open_lab.ViewModels
             {
                 var from = DateFrom.Date;
                 var to = DateTo.Date.AddDays(1).AddSeconds(-1);
-                var snapshot = await _accountsTreasuryService.GetSnapshotAsync(from, to);
+                var snapshot = await _accountsTreasuryService.GetSnapshotAsync(from, to, SelectedBranchId);
 
                 TotalInvoiced = snapshot.TotalInvoiced;
                 TotalPaid = snapshot.TotalPaid;

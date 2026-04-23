@@ -60,5 +60,17 @@ namespace Open_lab.Services
                 .OrderByDescending(s => s.SettlementDate)
                 .ToListAsync();
         }
+
+        public async Task<decimal> GetTotalProfitAsync(int referralId)
+        {
+            var tests = await _db.ExternalLabQueues
+                .Include(q => q.VisitTest)
+                .ThenInclude(vt => vt.Test)
+                .Where(q => q.ReferralId == referralId && (q.Status == "Shipped" || q.Status == "Received"))
+                .ToListAsync();
+
+            // Profit = PatientPrice (what patient paid) - CostPrice (what we pay external lab)
+            return tests.Sum(q => (q.VisitTest.Price) - (q.VisitTest.Test.CostPrice ?? 0));
+        }
     }
 }

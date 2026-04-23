@@ -22,6 +22,6 @@ namespace Open_lab.Services
 
     public interface IAccountsTreasuryService
     {
-        Task<AccountsTreasurySnapshot> GetSnapshotAsync(DateTime from, DateTime to);
+        Task<AccountsTreasurySnapshot> GetSnapshotAsync(DateTime from, DateTime to, int? branchId = null);
     }
 }

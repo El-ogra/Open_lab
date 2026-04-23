@@ -19,6 +19,7 @@ namespace Open_lab.ViewModels
         private decimal _newChargeAmount;
         private string _newChargeDescription = string.Empty;
         private string _statusMessage = string.Empty;
+        private string _reason = "Financial modification";
         private InvoicePaymentRow? _selectedPayment;
 
         public PatientBillingViewModel(IInvoiceService invoiceService)
@@ -34,6 +35,7 @@ namespace Open_lab.ViewModels
             DeletePaymentCommand = new RelayCommand(async _ => await DeletePaymentAsync(), _ => AppSession.HasPermission(PermissionCodes.AccountsEdit) && SelectedPayment != null);
             AddChargeCommand = new RelayCommand(async _ => await AddChargeAsync(), _ => AppSession.HasPermission(PermissionCodes.AccountsEdit) && VisitId > 0 && NewChargeAmount > 0 && !string.IsNullOrWhiteSpace(NewChargeDescription));
             SettleAccountCommand = new RelayCommand(async _ => await SettleAccountAsync(), _ => AppSession.HasPermission(PermissionCodes.AccountsEdit) && VisitId > 0);
+            PrintInvoiceCommand = new RelayCommand(async _ => await PrintInvoiceAsync(), _ => AppSession.HasPermission(PermissionCodes.AccountsView) && VisitId > 0);
         }
 
         public int VisitId
@@ -133,6 +135,12 @@ namespace Open_lab.ViewModels
         public ObservableCollection<InvoicePaymentRow> Payments { get; }
         public ObservableCollection<AdditionalChargeRow> AdditionalCharges { get; }
 
+        public string Reason
+        {
+            get => _reason;
+            set => SetProperty(ref _reason, value);
+        }
+
         public string StatusMessage
         {
             get => _statusMessage;
@@ -146,6 +154,7 @@ namespace Open_lab.ViewModels
         public ICommand DeletePaymentCommand { get; }
         public ICommand AddChargeCommand { get; }
         public ICommand SettleAccountCommand { get; }
+        public ICommand PrintInvoiceCommand { get; }
 
         private async Task LoadVisitAsync()
         {
@@ -247,7 +256,7 @@ namespace Open_lab.ViewModels
 
             try
             {
-                await _invoiceService.DeletePaymentAsync(SelectedPayment.PaymentId);
+                await _invoiceService.DeletePaymentAsync(SelectedPayment.PaymentId, Reason);
                 await LoadVisitAsync();
                 StatusMessage = "تم حذف الدفعة.";
             }
@@ -275,7 +284,8 @@ namespace Open_lab.ViewModels
                 await _invoiceService.EditPaymentAsync(
                     SelectedPayment.PaymentId,
                     EditPaymentAmount,
-                    AppSession.UserId > 0 ? AppSession.UserId : 1);
+                    AppSession.UserId > 0 ? AppSession.UserId : 1,
+                    Reason);
                 await LoadVisitAsync();
                 StatusMessage = "تم تعديل الدفعة.";
             }
@@ -356,6 +366,25 @@ namespace Open_lab.ViewModels
                     Description = charge.Description,
                     Amount = charge.Amount
                 });
+            }
+        }
+
+        private async Task PrintInvoiceAsync()
+        {
+            if (VisitId <= 0) return;
+
+            try
+            {
+                var invoice = await _invoiceService.GetByVisitIdAsync(VisitId);
+                if (invoice != null)
+                {
+                    await _invoiceService.LogInvoicePrintedAsync(invoice.InvoiceId, AppSession.UserId > 0 ? AppSession.UserId : 1);
+                    StatusMessage = "تم تسجيل عملية الطباعة برمجياً.";
+                }
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = $"خطأ: {ex.Message}";
             }
         }
     }

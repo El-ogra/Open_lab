@@ -16,9 +16,9 @@ namespace Open_lab.Services
             _db = db;
         }
 
-        public async Task<AccountsTreasurySnapshot> GetSnapshotAsync(DateTime from, DateTime to)
+        public async Task<AccountsTreasurySnapshot> GetSnapshotAsync(DateTime from, DateTime to, int? branchId = null)
         {
-            var invoices = await _db.Invoices
+            var invoicesQuery = _db.Invoices
                 .AsNoTracking()
                 .Include(i => i.Visit)
                 .ThenInclude(v => v.Patient)
@@ -28,10 +28,16 @@ namespace Open_lab.Services
                 .ThenInclude(v => v.Branch)
                 .Include(i => i.Visit)
                 .ThenInclude(v => v.Physician)
-                .Where(i => i.Visit.VisitDate >= from && i.Visit.VisitDate <= to)
-                .ToListAsync();
+                .Where(i => i.Visit.VisitDate >= from && i.Visit.VisitDate <= to);
 
-            var payments = await _db.Payments
+            if (branchId.HasValue)
+            {
+                invoicesQuery = invoicesQuery.Where(i => i.Visit.BranchId == branchId.Value);
+            }
+
+            var invoices = await invoicesQuery.ToListAsync();
+
+            var paymentsQuery = _db.Payments
                 .AsNoTracking()
                 .Include(p => p.Invoice)
                 .ThenInclude(i => i.Visit)
@@ -40,9 +46,14 @@ namespace Open_lab.Services
                 .ThenInclude(i => i.Visit)
                 .ThenInclude(v => v.Referral)
                 .Include(p => p.User)
-                .Where(p => p.PaymentDate >= from && p.PaymentDate <= to)
-                .OrderByDescending(p => p.PaymentDate)
-                .ToListAsync();
+                .Where(p => p.PaymentDate >= from && p.PaymentDate <= to);
+
+            if (branchId.HasValue)
+            {
+                paymentsQuery = paymentsQuery.Where(p => p.Invoice.Visit.BranchId == branchId.Value);
+            }
+
+            var payments = await paymentsQuery.OrderByDescending(p => p.PaymentDate).ToListAsync();
 
             var byUser = payments
                 .GroupBy(p => string.IsNullOrWhiteSpace(p.User?.Username) ? "غير محدد" : p.User!.Username)
@@ -98,10 +109,14 @@ namespace Open_lab.Services
                 .ToList();
 
             var totalDiscount = invoices.Sum(i => i.Discount);
-            var expenses = await _db.Expenses
+            var expensesQuery = _db.Expenses
                 .AsNoTracking()
-                .Where(e => e.Date >= from && e.Date <= to)
-                .ToListAsync();
+                .Where(e => e.Date >= from && e.Date <= to);
+            
+            // In a real system, expenses might also be branch-specific if the Expense model had a BranchId.
+            // Currently, we'll keep them overall or assume they are branch-neutral for now.
+            
+            var expenses = await expensesQuery.ToListAsync();
             var totalExpenses = expenses.Sum(e => e.Amount);
 
             var totalPaid = invoices.Sum(i => i.Paid);

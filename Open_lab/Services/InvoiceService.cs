@@ -36,6 +36,10 @@ namespace Open_lab.Services
             }
 
             var total = await GetVisitTotalAsync(visitId);
+            if (discount > total)
+            {
+                throw new InvalidOperationException("الخصم لا يمكن أن يتجاوز إجمالي الفاتورة (قاعدة BR-ACC-004).");
+            }
             var netTotal = Math.Max(0, total - discount);
 
             var invoice = await _db.Invoices.FirstOrDefaultAsync(i => i.VisitId == visitId);
@@ -85,7 +89,7 @@ namespace Open_lab.Services
             return payment;
         }
 
-        public async Task<Payment> EditPaymentAsync(int paymentId, decimal newAmount, int userId)
+        public async Task<Payment> EditPaymentAsync(int paymentId, decimal newAmount, int userId, string? reason = null)
         {
             if (newAmount <= 0)
             {
@@ -108,7 +112,7 @@ namespace Open_lab.Services
             return payment;
         }
 
-        public async Task DeletePaymentAsync(int paymentId)
+        public async Task DeletePaymentAsync(int paymentId, string? reason = null)
         {
             var payment = await _db.Payments.FirstOrDefaultAsync(p => p.PaymentId == paymentId);
             if (payment == null)
@@ -310,6 +314,22 @@ namespace Open_lab.Services
 
             var commissionAmount = totalAmount * (commissionPercentage / 100);
             return Math.Round(commissionAmount, 2);
+        }
+
+        public async Task LogInvoicePrintedAsync(int invoiceId, int userId)
+        {
+            var log = new AuditLog
+            {
+                UserId = userId,
+                Action = "Print",
+                TableName = "Invoice",
+                RecordId = invoiceId.ToString(),
+                Timestamp = DateTime.UtcNow,
+                NewValues = "Invoice printed for patient."
+            };
+
+            _db.AuditLogs.Add(log);
+            await _db.SaveChangesAsync();
         }
     }
 }

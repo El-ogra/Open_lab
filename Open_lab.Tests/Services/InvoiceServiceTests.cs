@@ -147,7 +147,7 @@ namespace Open_lab.Tests.Services
             await _db.SaveChangesAsync();
 
             // Act
-            var edited = await _service.EditPaymentAsync(payment.PaymentId, 120m, 2);
+            var edited = await _service.EditPaymentAsync(payment.PaymentId, 120m, 2, "Test Reason");
 
             // Assert - Logic Guard: Verify payment update and invoice recalculation
             edited.Amount.Should().Be(120m);
@@ -301,7 +301,7 @@ namespace Open_lab.Tests.Services
         }
 
         [Fact]
-        public async Task CreateOrUpdateInvoiceAsync_DiscountExceedsTotal_Should_Cap_At_Zero()
+        public async Task CreateOrUpdateInvoiceAsync_DiscountExceedsTotal_Should_Throw_LogicGuard()
         {
             // Arrange
             var patient = new Patient { LabId = "LC1", FullName = "P", Gender = "Male" };
@@ -316,12 +316,10 @@ namespace Open_lab.Tests.Services
             await _db.SaveChangesAsync();
 
             // Act
-            var invoice = await _service.CreateOrUpdateInvoiceAsync(visit.VisitId, 150m, 0m);
+            Func<Task> act = async () => await _service.CreateOrUpdateInvoiceAsync(visit.VisitId, 150m, 0m);
 
-            // Assert - NetTotal should be capped at 0, not negative
-            invoice.Total.Should().Be(100m);
-            invoice.Discount.Should().Be(150m);
-            invoice.NetTotal.Should().Be(0m);
+            // Assert - Function 2.2 / BR-ACC-004
+            await act.Should().ThrowAsync<InvalidOperationException>().WithMessage("*الخصم لا يمكن أن يتجاوز إجمالي الفاتورة*");
         }
 
         [Fact]
@@ -427,7 +425,7 @@ namespace Open_lab.Tests.Services
             await _db.SaveChangesAsync();
 
             // Act
-            await _service.DeletePaymentAsync(payment.PaymentId);
+            await _service.DeletePaymentAsync(payment.PaymentId, "Audit Reason");
 
             // Assert - Logic Guard: Verify balance recalculated correctly
             var updated = await _db.Invoices.FindAsync(invoice.InvoiceId);
@@ -444,7 +442,7 @@ namespace Open_lab.Tests.Services
         public async Task DeletePaymentAsync_NonExistent_Should_Return_Without_Throwing()
         {
             // Act - The service may not throw for non-existent payment
-            await _service.DeletePaymentAsync(99999);
+            await _service.DeletePaymentAsync(99999, "Reason");
 
             // Assert - Just verify no exception is thrown
             true.Should().BeTrue();
@@ -488,6 +486,22 @@ namespace Open_lab.Tests.Services
 
             // Assert
             await act.Should().ThrowAsync<ArgumentException>();
+        }
+
+        [Fact]
+        public async Task LogInvoicePrintedAsync_Should_Create_AuditLog_Entry()
+        {
+            // Arrange
+            var invoiceId = 100;
+            var userId = 1;
+
+            // Act
+            await _service.LogInvoicePrintedAsync(invoiceId, userId);
+
+            // Assert
+            var log = await _db.AuditLogs.FirstOrDefaultAsync(l => l.TableName == "Invoice" && l.Action == "Print" && l.RecordId == "100");
+            log.Should().NotBeNull();
+            log!.UserId.Should().Be(userId);
         }
     }
 }

@@ -8,8 +8,8 @@ namespace Open_lab.Services
     {
         Task<Invoice> CreateOrUpdateInvoiceAsync(int visitId, decimal discount, decimal paid);
         Task<Payment> AddPaymentAsync(int invoiceId, decimal amount, int userId);
-        Task<Payment> EditPaymentAsync(int paymentId, decimal newAmount, int userId);
-        Task DeletePaymentAsync(int paymentId);
+        Task<Payment> EditPaymentAsync(int paymentId, decimal newAmount, int userId, string? reason = null);
+        Task DeletePaymentAsync(int paymentId, string? reason = null);
         Task<List<Payment>> GetPaymentsAsync(int invoiceId);
         Task<AdditionalCharge> AddAdditionalChargeAsync(int invoiceId, string description, decimal amount);
         Task<List<AdditionalCharge>> GetAdditionalChargesAsync(int invoiceId);
@@ -28,5 +28,10 @@ namespace Open_lab.Services
         /// Calculates the commission amount based on referral commission percentage.
         /// </summary>
         Task<decimal> CalculateReferralCommissionAsync(int referralId, decimal totalAmount);
+        
+        /// <summary>
+        /// Logs that an invoice has been printed to the audit trail.
+        /// </summary>
+        Task LogInvoicePrintedAsync(int invoiceId, int userId);
     }
 }

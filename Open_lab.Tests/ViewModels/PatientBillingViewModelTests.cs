@@ -95,7 +95,7 @@ namespace Open_lab.Tests.ViewModels
         public async Task DeletePaymentAsync_With_Null_SelectedPayment_Should_Return()
         {
             await _viewModel.InvokePrivateAsync("DeletePaymentAsync");
-            _invoiceServiceMock.Verify(x => x.DeletePaymentAsync(It.IsAny<int>()), Times.Never);
+            _invoiceServiceMock.Verify(x => x.DeletePaymentAsync(It.IsAny<int>(), It.IsAny<string?>()), Times.Never);
         }
 
         [Fact]
@@ -104,7 +104,7 @@ namespace Open_lab.Tests.ViewModels
             _viewModel.SelectedPayment = new InvoicePaymentRow { PaymentId = 3 };
             _viewModel.VisitId = 10;
             var invoice = new Invoice { InvoiceId = 100 };
-            _invoiceServiceMock.Setup(x => x.DeletePaymentAsync(3)).Returns(Task.CompletedTask);
+            _invoiceServiceMock.Setup(x => x.DeletePaymentAsync(3, It.IsAny<string?>())).Returns(Task.CompletedTask);
             _invoiceServiceMock.Setup(x => x.GetVisitTotalAsync(10)).ReturnsAsync(500);
             _invoiceServiceMock.Setup(x => x.GetByVisitIdAsync(10)).ReturnsAsync(invoice);
             _invoiceServiceMock.Setup(x => x.GetPaymentsAsync(100)).ReturnsAsync(new List<Payment>());
@@ -112,7 +112,7 @@ namespace Open_lab.Tests.ViewModels
 
             await _viewModel.InvokePrivateAsync("DeletePaymentAsync");
 
-            _invoiceServiceMock.Verify(x => x.DeletePaymentAsync(3), Times.Once);
+            _invoiceServiceMock.Verify(x => x.DeletePaymentAsync(3, It.IsAny<string?>()), Times.Once);
             _viewModel.StatusMessage.Should().Contain("تم حذف الدفعة");
         }
 

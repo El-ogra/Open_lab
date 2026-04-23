@@ -137,7 +137,7 @@ namespace Open_lab.Tests.Services
             // 2.x Finance
             AddRange(list, 2, 1, 9, typeof(Invoice), typeof(InvoiceService), typeof(PatientBillingViewModel));
             Add(list, 2, 10, typeof(Invoice), typeof(AccountsTreasuryService), typeof(AccountsTreasuryViewModel));
-            Add(list, 2, 11, typeof(Branch), typeof(StatisticsService), typeof(AccountsTreasuryViewModel));
+            Add(list, 2, 11, typeof(Branch), typeof(AccountsTreasuryService), typeof(AccountsTreasuryViewModel));
             Add(list, 2, 12, typeof(Physician), typeof(AccountsTreasuryService), typeof(AccountsTreasuryViewModel));
             Add(list, 2, 13, typeof(ExternalLabSettlement), typeof(ExternalSettlementService), typeof(ExternalLabManagementViewModel));
 
