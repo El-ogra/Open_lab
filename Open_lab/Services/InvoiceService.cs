@@ -61,7 +61,7 @@ namespace Open_lab.Services
             return invoice;
         }
 
-        public async Task<Payment> AddPaymentAsync(int invoiceId, decimal amount, int userId)
+        public async Task<Payment> AddPaymentAsync(int invoiceId, decimal amount, string paymentMethod, int userId)
         {
             var invoice = await _db.Invoices.FirstOrDefaultAsync(i => i.InvoiceId == invoiceId);
             if (invoice == null)
@@ -74,10 +74,16 @@ namespace Open_lab.Services
                 throw new ArgumentException("Amount must be greater than zero.", nameof(amount));
             }
 
+            if (string.IsNullOrWhiteSpace(paymentMethod))
+            {
+                throw new ArgumentException("Payment method is required.", nameof(paymentMethod));
+            }
+
             var payment = new Payment
             {
                 InvoiceId = invoiceId,
                 Amount = amount,
+                PaymentMethod = paymentMethod.Trim(),
                 PaymentDate = DateTime.Now,
                 UserId = userId
             };
@@ -89,17 +95,31 @@ namespace Open_lab.Services
             return payment;
         }
 
-        public async Task<Payment> EditPaymentAsync(int paymentId, decimal newAmount, int userId, string? reason = null)
+        public async Task<Payment> EditPaymentAsync(int paymentId, decimal newAmount, int userId, string reason)
         {
             if (newAmount <= 0)
             {
                 throw new ArgumentException("Amount must be greater than zero.", nameof(newAmount));
             }
 
+            if (string.IsNullOrWhiteSpace(reason))
+            {
+                throw new ArgumentException("Reason is required.", nameof(reason));
+            }
+
             var payment = await _db.Payments.FirstOrDefaultAsync(p => p.PaymentId == paymentId);
             if (payment == null)
             {
                 throw new InvalidOperationException("Payment not found.");
+            }
+
+            var invoice = await _db.Invoices
+                .Include(i => i.Visit)
+                .FirstOrDefaultAsync(i => i.InvoiceId == payment.InvoiceId);
+            if (invoice != null && (string.Equals(invoice.Status, "Settled", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(invoice.Visit?.Status, "Closed", StringComparison.OrdinalIgnoreCase)))
+            {
+                throw new InvalidOperationException("Cannot edit payment after account settlement.");
             }
 
             payment.Amount = newAmount;
@@ -114,7 +134,7 @@ namespace Open_lab.Services
                 TableName = "Payments",
                 RecordId = paymentId.ToString(),
                 Timestamp = DateTime.UtcNow,
-                NewValues = $"New Amount: {newAmount} | Reason: {reason ?? "No reason provided"}"
+                NewValues = $"New Amount: {newAmount} | Reason: {reason.Trim()}"
             });
 
             await _db.SaveChangesAsync();
@@ -123,12 +143,26 @@ namespace Open_lab.Services
             return payment;
         }
 
-        public async Task DeletePaymentAsync(int paymentId, string? reason = null)
+        public async Task DeletePaymentAsync(int paymentId, int userId, string reason)
         {
+            if (string.IsNullOrWhiteSpace(reason))
+            {
+                throw new ArgumentException("Reason is required.", nameof(reason));
+            }
+
             var payment = await _db.Payments.FirstOrDefaultAsync(p => p.PaymentId == paymentId);
             if (payment == null)
             {
                 return;
+            }
+
+            var invoice = await _db.Invoices
+                .Include(i => i.Visit)
+                .FirstOrDefaultAsync(i => i.InvoiceId == payment.InvoiceId);
+            if (invoice != null && (string.Equals(invoice.Status, "Settled", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(invoice.Visit?.Status, "Closed", StringComparison.OrdinalIgnoreCase)))
+            {
+                throw new InvalidOperationException("Cannot delete payment after account settlement.");
             }
 
             var invoiceId = payment.InvoiceId;
@@ -136,12 +170,12 @@ namespace Open_lab.Services
             // Log deletion (Function 2.6)
             _db.AuditLogs.Add(new AuditLog
             {
-                UserId = 1, // System default or should be passed from VM
+                UserId = userId,
                 Action = "DELETE_PAYMENT",
                 TableName = "Payments",
                 RecordId = paymentId.ToString(),
                 Timestamp = DateTime.UtcNow,
-                NewValues = $"Deleted Amount: {payment.Amount} | Reason: {reason ?? "No reason provided"}"
+                NewValues = $"Deleted Amount: {payment.Amount} | Method: {payment.PaymentMethod} | Reason: {reason.Trim()}"
             });
 
             _db.Payments.Remove(payment);

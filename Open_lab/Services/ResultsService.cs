@@ -103,12 +103,28 @@ namespace Open_lab.Services
                 existing.VerifiedAt = null;
             }
 
-            if (!string.Equals(visitTest.Status, "InProgress", StringComparison.OrdinalIgnoreCase))
-            {
-                visitTest.Status = "InProgress";
-            }
-
             await _db.SaveChangesAsync();
+
+            var parameterIds = await _db.TestParameters
+                .Where(p => p.TestId == visitTest.TestId)
+                .Select(p => p.ParameterId)
+                .ToListAsync();
+
+            var savedResults = await _db.ResultValues
+                .Where(rv => rv.VisitTestId == visitTestId)
+                .ToListAsync();
+
+            var isCompleted = parameterIds.Count == 0
+                ? savedResults.Any(r => !string.IsNullOrWhiteSpace(r.Value))
+                : parameterIds.All(pid =>
+                    savedResults.Any(r => r.ParameterId == pid && !string.IsNullOrWhiteSpace(r.Value)));
+
+            var newStatus = isCompleted ? "Completed" : "InProgress";
+            if (!string.Equals(visitTest.Status, newStatus, StringComparison.OrdinalIgnoreCase))
+            {
+                visitTest.Status = newStatus;
+                await _db.SaveChangesAsync();
+            }
         }
 
         public async Task VerifyVisitTestAsync(int visitTestId, int verifiedByUserId)

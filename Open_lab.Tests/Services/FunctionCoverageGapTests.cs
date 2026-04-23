@@ -70,8 +70,8 @@ namespace Open_lab.Tests.Services
             invoice.Discount.Should().Be(20m);
             invoice.NetTotal.Should().Be(180m);
 
-            var payment = await invoiceService.AddPaymentAsync(invoice.InvoiceId, 50m, userId: 1);
-            await invoiceService.EditPaymentAsync(payment.PaymentId, 70m, userId: 2);
+            var payment = await invoiceService.AddPaymentAsync(invoice.InvoiceId, 50m, paymentMethod: "Cash", userId: 1);
+            await invoiceService.EditPaymentAsync(payment.PaymentId, 70m, userId: 2, reason: "Correction");
 
             var updated = await _db.Payments.FindAsync(payment.PaymentId);
             updated!.Amount.Should().Be(70m);
@@ -140,7 +140,7 @@ namespace Open_lab.Tests.Services
 
             await resultsService.SaveResultAsync(visitTest.VisitTestId, param.ParameterId, "5.5", "N", "ok");
             var saved = await _db.VisitTests.FindAsync(visitTest.VisitTestId);
-            saved!.Status.Should().Be("InProgress");
+            saved!.Status.Should().Be("Completed");
 
             var report = await reportService.GetVisitReportAsync(visit.VisitId);
             report.Should().NotBeNull();
@@ -153,7 +153,14 @@ namespace Open_lab.Tests.Services
             // 5.1, 5.2, 5.3, 5.6
             var service = new CultureSensitivityService(_db);
 
-            var culture = await service.CreateCultureAsync(new Culture { Name = "Urine Culture" });
+            var culture = await service.CreateCultureAsync(new Culture
+            {
+                Name = "Urine Culture",
+                SampleType = "Urine",
+                IsolatedOrganism = "E. coli",
+                GrowthConditions = "Aerobic",
+                ColonyCount = 140
+            });
             var antibiotic = await service.CreateAntibioticAsync(new Antibiotic { Name = "AB-1", IsSafeForChildren = true });
             await service.LinkAntibioticAsync(culture.CultureId, antibiotic.AntibioticId);
 
@@ -175,7 +182,7 @@ namespace Open_lab.Tests.Services
 
             await service.SaveCultureResultAsync(visitTest.VisitTestId, culture.CultureId, new List<CultureSensitivityValue>
             {
-                new CultureSensitivityValue { AntibioticId = antibiotic.AntibioticId, Sensitivity = "Sensitive", Comment = "good" }
+                new CultureSensitivityValue { AntibioticId = antibiotic.AntibioticId, Sensitivity = "S", Comment = "good" }
             });
 
             var filtered = await service.GetFilteredAntibioticsAsync(visitTest.VisitTestId);

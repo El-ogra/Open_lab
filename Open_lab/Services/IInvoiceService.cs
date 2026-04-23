@@ -7,9 +7,9 @@ namespace Open_lab.Services
     public interface IInvoiceService
     {
         Task<Invoice> CreateOrUpdateInvoiceAsync(int visitId, decimal discount, decimal paid);
-        Task<Payment> AddPaymentAsync(int invoiceId, decimal amount, int userId);
-        Task<Payment> EditPaymentAsync(int paymentId, decimal newAmount, int userId, string? reason = null);
-        Task DeletePaymentAsync(int paymentId, string? reason = null);
+        Task<Payment> AddPaymentAsync(int invoiceId, decimal amount, string paymentMethod, int userId);
+        Task<Payment> EditPaymentAsync(int paymentId, decimal newAmount, int userId, string reason);
+        Task DeletePaymentAsync(int paymentId, int userId, string reason);
         Task<List<Payment>> GetPaymentsAsync(int invoiceId);
         Task<AdditionalCharge> AddAdditionalChargeAsync(int invoiceId, string description, decimal amount);
         Task<List<AdditionalCharge>> GetAdditionalChargesAsync(int invoiceId);

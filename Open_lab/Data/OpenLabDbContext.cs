@@ -288,6 +288,7 @@ namespace Open_lab.Data
             {
                 entity.HasKey(e => e.PaymentId);
                 entity.Property(e => e.Amount).HasPrecision(18, 2);
+                entity.Property(e => e.PaymentMethod).IsRequired().HasMaxLength(50);
                 entity.HasOne(e => e.Invoice)
                     .WithMany(e => e.Payments)
                     .HasForeignKey(e => e.InvoiceId);
@@ -342,6 +343,9 @@ namespace Open_lab.Data
             {
                 entity.HasKey(e => e.CultureId);
                 entity.Property(e => e.Name).IsRequired();
+                entity.Property(e => e.SampleType).IsRequired();
+                entity.Property(e => e.IsolatedOrganism).IsRequired();
+                entity.Property(e => e.GrowthConditions).IsRequired();
             });
 
             modelBuilder.Entity<Antibiotic>(entity =>

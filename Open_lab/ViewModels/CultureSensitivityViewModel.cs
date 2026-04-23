@@ -18,7 +18,13 @@ namespace Open_lab.ViewModels
         private Antibiotic? _selectedAntibiotic;
         private CultureAntibiotic? _selectedLink;
         private string _newCultureName = string.Empty;
+        private string _newCultureSampleType = string.Empty;
+        private string _newCultureOrganism = string.Empty;
+        private string _newCultureConditions = string.Empty;
+        private int _newCultureColonyCount = 1;
         private string _newAntibioticName = string.Empty;
+        private bool _newAntibioticSafeForPregnancy = true;
+        private bool _newAntibioticSafeForChildren = true;
         private string _statusMessage = string.Empty;
         private string _labIdFilter = string.Empty;
         private DateTime _dateFrom = DateTime.Today;
@@ -107,6 +113,7 @@ namespace Open_lab.ViewModels
             {
                 if (SetProperty(ref _selectedVisitTest, value))
                 {
+                    _ = BuildResultRowsAsync();
                     (SaveResultCommand as RelayCommand)?.RaiseCanExecuteChanged();
                     (PrintCultureReportCommand as RelayCommand)?.RaiseCanExecuteChanged();
                 }
@@ -141,6 +148,42 @@ namespace Open_lab.ViewModels
         {
             get => _newAntibioticName;
             set => SetProperty(ref _newAntibioticName, value);
+        }
+
+        public string NewCultureSampleType
+        {
+            get => _newCultureSampleType;
+            set => SetProperty(ref _newCultureSampleType, value);
+        }
+
+        public string NewCultureOrganism
+        {
+            get => _newCultureOrganism;
+            set => SetProperty(ref _newCultureOrganism, value);
+        }
+
+        public string NewCultureConditions
+        {
+            get => _newCultureConditions;
+            set => SetProperty(ref _newCultureConditions, value);
+        }
+
+        public int NewCultureColonyCount
+        {
+            get => _newCultureColonyCount;
+            set => SetProperty(ref _newCultureColonyCount, value);
+        }
+
+        public bool NewAntibioticSafeForPregnancy
+        {
+            get => _newAntibioticSafeForPregnancy;
+            set => SetProperty(ref _newAntibioticSafeForPregnancy, value);
+        }
+
+        public bool NewAntibioticSafeForChildren
+        {
+            get => _newAntibioticSafeForChildren;
+            set => SetProperty(ref _newAntibioticSafeForChildren, value);
         }
 
         public string StatusMessage
@@ -218,6 +261,13 @@ namespace Open_lab.ViewModels
             }
 
             var links = await _service.GetCultureAntibioticsAsync(SelectedCulture.CultureId);
+            if (SelectedVisitTest != null)
+            {
+                var allowed = await _service.GetFilteredAntibioticsAsync(SelectedVisitTest.VisitTestId);
+                var allowedIds = allowed.Select(a => a.AntibioticId).ToHashSet();
+                links = links.Where(link => allowedIds.Contains(link.AntibioticId)).ToList();
+            }
+
             foreach (var link in links)
             {
                 ResultRows.Add(new CultureSensitivityRow
@@ -237,12 +287,43 @@ namespace Open_lab.ViewModels
                 StatusMessage = "أدخل اسم المزرعة.";
                 return;
             }
+            if (string.IsNullOrWhiteSpace(NewCultureSampleType))
+            {
+                StatusMessage = "أدخل نوع العينة.";
+                return;
+            }
+            if (string.IsNullOrWhiteSpace(NewCultureOrganism))
+            {
+                StatusMessage = "أدخل الكائن الدقيق المعزول.";
+                return;
+            }
+            if (string.IsNullOrWhiteSpace(NewCultureConditions))
+            {
+                StatusMessage = "أدخل ظروف النمو.";
+                return;
+            }
+            if (NewCultureColonyCount <= 0)
+            {
+                StatusMessage = "عدد المستعمرات يجب أن يكون أكبر من صفر.";
+                return;
+            }
 
             try
             {
-                var culture = await _service.CreateCultureAsync(new Culture { Name = NewCultureName });
+                var culture = await _service.CreateCultureAsync(new Culture
+                {
+                    Name = NewCultureName,
+                    SampleType = NewCultureSampleType,
+                    IsolatedOrganism = NewCultureOrganism,
+                    GrowthConditions = NewCultureConditions,
+                    ColonyCount = NewCultureColonyCount
+                });
                 Cultures.Add(culture);
                 NewCultureName = string.Empty;
+                NewCultureSampleType = string.Empty;
+                NewCultureOrganism = string.Empty;
+                NewCultureConditions = string.Empty;
+                NewCultureColonyCount = 1;
                 StatusMessage = "تم إضافة المزرعة.";
             }
             catch (Exception ex)
@@ -283,9 +364,16 @@ namespace Open_lab.ViewModels
 
             try
             {
-                var antibiotic = await _service.CreateAntibioticAsync(new Antibiotic { Name = NewAntibioticName });
+                var antibiotic = await _service.CreateAntibioticAsync(new Antibiotic
+                {
+                    Name = NewAntibioticName,
+                    IsSafeForPregnancy = NewAntibioticSafeForPregnancy,
+                    IsSafeForChildren = NewAntibioticSafeForChildren
+                });
                 Antibiotics.Add(antibiotic);
                 NewAntibioticName = string.Empty;
+                NewAntibioticSafeForPregnancy = true;
+                NewAntibioticSafeForChildren = true;
                 StatusMessage = "تم إضافة المضاد الحيوي.";
             }
             catch (Exception ex)

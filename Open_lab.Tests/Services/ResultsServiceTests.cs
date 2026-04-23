@@ -56,7 +56,7 @@ namespace Open_lab.Tests.Services
             results.Should().HaveCount(1);
             var updatedVt = await _db.VisitTests.FindAsync(vt.VisitTestId);
             updatedVt.Should().NotBeNull();
-            updatedVt!.Status.Should().Be("InProgress");
+            updatedVt!.Status.Should().Be("Completed");
         }
 
         [Fact]
@@ -303,7 +303,7 @@ namespace Open_lab.Tests.Services
         }
 
         [Fact]
-        public async Task SaveResultAsync_Should_Set_Status_To_InProgress()
+        public async Task SaveResultAsync_Should_Set_Status_To_Completed_When_Result_Is_Present()
         {
             // Arrange
             var patient = new Patient { LabId = "L7", FullName = "P7", Gender = "Male" };
@@ -328,7 +328,7 @@ namespace Open_lab.Tests.Services
             // Assert
             var updated = await _db.VisitTests.FindAsync(vt.VisitTestId);
             updated.Should().NotBeNull();
-            updated!.Status.Should().Be("InProgress");
+            updated!.Status.Should().Be("Completed");
         }
 
         [Fact]

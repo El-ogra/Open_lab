@@ -29,8 +29,27 @@ namespace Open_lab.Services
             {
                 throw new ArgumentException("اسم المزرعة مطلوب.", nameof(culture));
             }
+            if (string.IsNullOrWhiteSpace(culture.SampleType))
+            {
+                throw new ArgumentException("نوع العينة مطلوب.", nameof(culture));
+            }
+            if (string.IsNullOrWhiteSpace(culture.IsolatedOrganism))
+            {
+                throw new ArgumentException("الكائن الدقيق المعزول مطلوب.", nameof(culture));
+            }
+            if (string.IsNullOrWhiteSpace(culture.GrowthConditions))
+            {
+                throw new ArgumentException("ظروف النمو مطلوبة.", nameof(culture));
+            }
+            if (culture.ColonyCount <= 0)
+            {
+                throw new ArgumentException("عدد المستعمرات يجب أن يكون أكبر من صفر.", nameof(culture));
+            }
 
             culture.Name = culture.Name.Trim();
+            culture.SampleType = culture.SampleType.Trim();
+            culture.IsolatedOrganism = culture.IsolatedOrganism.Trim();
+            culture.GrowthConditions = culture.GrowthConditions.Trim();
             var duplicate = await _db.Cultures.AnyAsync(c => c.Name == culture.Name);
             if (duplicate)
             {
@@ -202,10 +221,10 @@ namespace Open_lab.Services
             var normalized = rawSensitivity.Trim().ToUpperInvariant();
             return normalized switch
             {
-                "S" or "SENSITIVE" or "حساس" => "Sensitive",
-                "I" or "INTERMEDIATE" or "متوسط" => "Intermediate",
-                "R" or "RESISTANT" or "مقاوم" => "Resistant",
-                _ => rawSensitivity.Trim()
+                "S" or "SENSITIVE" or "حساس" => "S",
+                "I" or "INTERMEDIATE" or "متوسط" => "I",
+                "R" or "RESISTANT" or "مقاوم" => "R",
+                _ => throw new InvalidOperationException("قيمة الحساسية غير مدعومة. استخدم S أو I أو R.")
             };
         }
 
@@ -231,7 +250,7 @@ namespace Open_lab.Services
             }
 
             var cultureParameter = await EnsureParameterAsync(visitTest.TestId, "Culture");
-            await UpsertResultValueAsync(visitTestId, cultureParameter.ParameterId, culture.Name, null);
+            await UpsertResultValueAsync(visitTestId, cultureParameter.ParameterId, BuildCultureValue(culture), null);
 
             foreach (var item in sensitivities.Where(s => !string.IsNullOrWhiteSpace(s.Sensitivity)))
             {
@@ -295,6 +314,11 @@ namespace Open_lab.Services
             existing.Flag = null;
             existing.VerifiedAt = null;
             existing.VerifiedBy = null;
+        }
+
+        private static string BuildCultureValue(Culture culture)
+        {
+            return $"{culture.Name} | Sample: {culture.SampleType} | Organism: {culture.IsolatedOrganism} | Conditions: {culture.GrowthConditions} | Colonies: {culture.ColonyCount}";
         }
     }
 }

@@ -67,7 +67,7 @@ namespace Open_lab.Tests.Services
             await _db.SaveChangesAsync();
 
             // Act
-            Func<Task> act = async () => await _service.AddPaymentAsync(invoice.InvoiceId, 0m, 1);
+            Func<Task> act = async () => await _service.AddPaymentAsync(invoice.InvoiceId, 0m, "Cash", 1);
 
             // Assert - Logic Guard: Verify invoice state remains unchanged after invalid payment attempt
             await act.Should().ThrowAsync<ArgumentException>();
@@ -75,6 +75,18 @@ namespace Open_lab.Tests.Services
             unchanged.Should().NotBeNull();
             unchanged!.Paid.Should().Be(0m);
             unchanged.Balance.Should().Be(100m);
+        }
+
+        [Fact]
+        public async Task AddPaymentAsync_Without_PaymentMethod_Should_Throw()
+        {
+            var invoice = new Invoice { VisitId = 1, Total = 100m, Discount = 0m, NetTotal = 100m, Paid = 0m, Balance = 100m };
+            _db.Invoices.Add(invoice);
+            await _db.SaveChangesAsync();
+
+            Func<Task> act = async () => await _service.AddPaymentAsync(invoice.InvoiceId, 10m, "", 1);
+
+            await act.Should().ThrowAsync<ArgumentException>().WithMessage("*Payment method is required*");
         }
 
         [Fact]
@@ -170,6 +182,21 @@ namespace Open_lab.Tests.Services
             log.Should().NotBeNull();
             log!.NewValues.Should().Contain("Test Reason");
             log.UserId.Should().Be(2);
+        }
+
+        [Fact]
+        public async Task EditPaymentAsync_Without_Reason_Should_Throw()
+        {
+            var invoice = new Invoice { VisitId = 1, Total = 200m, Discount = 0m, NetTotal = 200m, Paid = 50m, Balance = 150m };
+            _db.Invoices.Add(invoice);
+            await _db.SaveChangesAsync();
+            var payment = new Payment { InvoiceId = invoice.InvoiceId, Amount = 50m, PaymentMethod = "Cash", UserId = 1, PaymentDate = DateTime.Now };
+            _db.Payments.Add(payment);
+            await _db.SaveChangesAsync();
+
+            Func<Task> act = async () => await _service.EditPaymentAsync(payment.PaymentId, 80m, 2, " ");
+
+            await act.Should().ThrowAsync<ArgumentException>().WithMessage("*Reason is required*");
         }
 
         [Fact]
@@ -384,7 +411,7 @@ namespace Open_lab.Tests.Services
             await _db.SaveChangesAsync();
 
             // Act
-            await _service.AddPaymentAsync(invoice.InvoiceId, 100m, 1);
+            await _service.AddPaymentAsync(invoice.InvoiceId, 100m, "Cash", 1);
 
             // Assert - Logic Guard: Verify balance becomes zero
             var updated = await _db.Invoices.FindAsync(invoice.InvoiceId);
@@ -408,7 +435,7 @@ namespace Open_lab.Tests.Services
             await _db.SaveChangesAsync();
 
             // Act
-            await _service.AddPaymentAsync(invoice.InvoiceId, 50m, 1);
+            await _service.AddPaymentAsync(invoice.InvoiceId, 50m, "Cash", 1);
 
             // Assert - Logic Guard: Verify partial payment calculation
             var updated = await _db.Invoices.FindAsync(invoice.InvoiceId);
@@ -431,7 +458,7 @@ namespace Open_lab.Tests.Services
             await _db.SaveChangesAsync();
 
             // Act
-            await _service.DeletePaymentAsync(payment.PaymentId, "Audit Reason");
+            await _service.DeletePaymentAsync(payment.PaymentId, 1, "Audit Reason");
 
             // Assert - Logic Guard: Verify balance recalculated correctly
             var updated = await _db.Invoices.FindAsync(invoice.InvoiceId);
@@ -454,10 +481,25 @@ namespace Open_lab.Tests.Services
         public async Task DeletePaymentAsync_NonExistent_Should_Return_Without_Throwing()
         {
             // Act - The service may not throw for non-existent payment
-            await _service.DeletePaymentAsync(99999, "Reason");
+            await _service.DeletePaymentAsync(99999, 1, "Reason");
 
             // Assert - Just verify no exception is thrown
             true.Should().BeTrue();
+        }
+
+        [Fact]
+        public async Task DeletePaymentAsync_Without_Reason_Should_Throw()
+        {
+            var invoice = new Invoice { VisitId = 1, Total = 200m, Discount = 0m, NetTotal = 200m, Paid = 100m, Balance = 100m };
+            _db.Invoices.Add(invoice);
+            await _db.SaveChangesAsync();
+            var payment = new Payment { InvoiceId = invoice.InvoiceId, Amount = 100m, PaymentMethod = "Card", UserId = 1, PaymentDate = DateTime.Now };
+            _db.Payments.Add(payment);
+            await _db.SaveChangesAsync();
+
+            Func<Task> act = async () => await _service.DeletePaymentAsync(payment.PaymentId, 1, "");
+
+            await act.Should().ThrowAsync<ArgumentException>().WithMessage("*Reason is required*");
         }
 
         // 2.7 - Additional Charges - Financial Integrity Tests

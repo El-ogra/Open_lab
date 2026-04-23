@@ -299,6 +299,7 @@ namespace Open_lab.Models
         public int PaymentId { get; set; }
         public int InvoiceId { get; set; }
         public decimal Amount { get; set; }
+        public string PaymentMethod { get; set; } = string.Empty;
         public DateTime PaymentDate { get; set; }
         public int UserId { get; set; }
         public int? BranchId { get; set; }
@@ -353,6 +354,10 @@ namespace Open_lab.Models
     {
         public int CultureId { get; set; }
         public string Name { get; set; } = string.Empty;
+        public string SampleType { get; set; } = string.Empty;
+        public string IsolatedOrganism { get; set; } = string.Empty;
+        public string GrowthConditions { get; set; } = string.Empty;
+        public int ColonyCount { get; set; }
 
         public ICollection<CultureAntibiotic> CultureAntibiotics { get; set; } = new HashSet<CultureAntibiotic>();
     }

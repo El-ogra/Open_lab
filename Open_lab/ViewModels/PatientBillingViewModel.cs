@@ -20,6 +20,7 @@ namespace Open_lab.ViewModels
         private string _newChargeDescription = string.Empty;
         private string _statusMessage = string.Empty;
         private string _reason = "Financial modification";
+        private string _paymentMethod = "Cash";
         private InvoicePaymentRow? _selectedPayment;
 
         public PatientBillingViewModel(IInvoiceService invoiceService)
@@ -141,6 +142,12 @@ namespace Open_lab.ViewModels
             set => SetProperty(ref _reason, value);
         }
 
+        public string PaymentMethod
+        {
+            get => _paymentMethod;
+            set => SetProperty(ref _paymentMethod, value);
+        }
+
         public string StatusMessage
         {
             get => _statusMessage;
@@ -236,7 +243,11 @@ namespace Open_lab.ViewModels
             try
             {
                 var invoice = await _invoiceService.CreateOrUpdateInvoiceAsync(VisitId, Discount, 0);
-                await _invoiceService.AddPaymentAsync(invoice.InvoiceId, Paid, AppSession.UserId > 0 ? AppSession.UserId : 1);
+                await _invoiceService.AddPaymentAsync(
+                    invoice.InvoiceId,
+                    Paid,
+                    PaymentMethod,
+                    AppSession.UserId > 0 ? AppSession.UserId : 1);
                 Paid = 0;
                 await LoadVisitAsync();
                 StatusMessage = "تم تسجيل الدفعة.";
@@ -256,7 +267,10 @@ namespace Open_lab.ViewModels
 
             try
             {
-                await _invoiceService.DeletePaymentAsync(SelectedPayment.PaymentId, Reason);
+                await _invoiceService.DeletePaymentAsync(
+                    SelectedPayment.PaymentId,
+                    AppSession.UserId > 0 ? AppSession.UserId : 1,
+                    Reason);
                 await LoadVisitAsync();
                 StatusMessage = "تم حذف الدفعة.";
             }
@@ -344,13 +358,14 @@ namespace Open_lab.ViewModels
             Payments.Clear();
             foreach (var payment in items)
             {
-                Payments.Add(new InvoicePaymentRow
-                {
-                    PaymentId = payment.PaymentId,
-                    Amount = payment.Amount,
-                    PaymentDate = payment.PaymentDate,
-                    UserId = payment.UserId
-                });
+                    Payments.Add(new InvoicePaymentRow
+                    {
+                        PaymentId = payment.PaymentId,
+                        Amount = payment.Amount,
+                        PaymentMethod = payment.PaymentMethod,
+                        PaymentDate = payment.PaymentDate,
+                        UserId = payment.UserId
+                    });
             }
         }
 
