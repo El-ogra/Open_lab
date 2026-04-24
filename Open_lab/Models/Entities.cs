@@ -17,6 +17,7 @@ namespace Open_lab.Models
         public ICollection<ResultValue> VerifiedResults { get; set; } = new HashSet<ResultValue>();
         public ICollection<SampleCollection> SampleCollections { get; set; } = new HashSet<SampleCollection>();
         public ICollection<AttendanceLog> AttendanceLogs { get; set; } = new HashSet<AttendanceLog>();
+        public ICollection<AttendanceDayStatus> AttendanceDayStatuses { get; set; } = new HashSet<AttendanceDayStatus>();
         public ICollection<AuditLog> AuditLogs { get; set; } = new HashSet<AuditLog>();
     }
 
@@ -32,6 +33,30 @@ namespace Open_lab.Models
 
         public User User { get; set; } = null!;
         public ShiftSchedule? Shift { get; set; }
+        public ICollection<AttendanceBreak> Breaks { get; set; } = new HashSet<AttendanceBreak>();
+    }
+
+    public class AttendanceBreak
+    {
+        public int BreakId { get; set; }
+        public int AttendanceLogId { get; set; }
+        public DateTime StartAt { get; set; }
+        public DateTime? EndAt { get; set; }
+        public string Type { get; set; } = "Rest"; // Rest, Permission, Task, etc.
+        public string? Note { get; set; }
+
+        public AttendanceLog AttendanceLog { get; set; } = null!;
+    }
+
+    public class AttendanceDayStatus
+    {
+        public int DayStatusId { get; set; }
+        public int UserId { get; set; }
+        public DateTime Date { get; set; } // date-only semantics (store as Date with time 00:00)
+        public string Status { get; set; } = "Present"; // Present, Absent, Vacation, Holiday, SickLeave, etc.
+        public string? Note { get; set; }
+
+        public User User { get; set; } = null!;
     }
 
     public class ShiftSchedule

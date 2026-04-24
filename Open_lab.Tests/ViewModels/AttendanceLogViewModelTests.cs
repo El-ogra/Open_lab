@@ -33,7 +33,8 @@ namespace Open_lab.Tests.ViewModels
                         AttendanceLogId = 5,
                         LoginAt = DateTime.Today.AddHours(8),
                         LogoutAt = DateTime.Today.AddHours(16).AddMinutes(30),
-                        User = new User { Username = "tech1", FullName = "Tech One" }
+                        User = new User { Username = "tech1", FullName = "Tech One" },
+                        Breaks = new List<AttendanceBreak>()
                     }
                 });
 

@@ -20,6 +20,8 @@ namespace Open_lab.Data
 
         public DbSet<User> Users => Set<User>();
         public DbSet<AttendanceLog> AttendanceLogs => Set<AttendanceLog>();
+        public DbSet<AttendanceBreak> AttendanceBreaks => Set<AttendanceBreak>();
+        public DbSet<AttendanceDayStatus> AttendanceDayStatuses => Set<AttendanceDayStatus>();
         public DbSet<ShiftSchedule> ShiftSchedules => Set<ShiftSchedule>();
         public DbSet<Role> Roles => Set<Role>();
         public DbSet<RolePermission> RolePermissions => Set<RolePermission>();
@@ -390,6 +392,26 @@ namespace Open_lab.Data
                 entity.HasOne(e => e.Shift)
                     .WithMany(e => e.AttendanceLogs)
                     .HasForeignKey(e => e.ShiftId);
+            });
+
+            modelBuilder.Entity<AttendanceBreak>(entity =>
+            {
+                entity.HasKey(e => e.BreakId);
+                entity.Property(e => e.Type).IsRequired().HasMaxLength(30);
+                entity.HasOne(e => e.AttendanceLog)
+                    .WithMany(e => e.Breaks)
+                    .HasForeignKey(e => e.AttendanceLogId);
+                entity.HasIndex(e => new { e.AttendanceLogId, e.StartAt });
+            });
+
+            modelBuilder.Entity<AttendanceDayStatus>(entity =>
+            {
+                entity.HasKey(e => e.DayStatusId);
+                entity.Property(e => e.Status).IsRequired().HasMaxLength(30);
+                entity.HasOne(e => e.User)
+                    .WithMany(e => e.AttendanceDayStatuses)
+                    .HasForeignKey(e => e.UserId);
+                entity.HasIndex(e => new { e.UserId, e.Date }).IsUnique();
             });
 
             modelBuilder.Entity<ShiftSchedule>(entity =>
