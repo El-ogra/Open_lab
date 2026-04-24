@@ -1,6 +1,8 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
+using Microsoft.EntityFrameworkCore;
 using Open_lab.Models;
 using Open_lab.Services;
 using Open_lab.Tests.Infrastructure;
@@ -32,6 +34,11 @@ namespace Open_lab.Tests.Services
             await _service.SetSettingAsync("Key1", "Value1", "desc");
             var value = await _service.GetStringAsync("Key1");
             value.Should().Be("Value1");
+
+            var row = await _db.SystemSettings.SingleAsync(s => s.SettingKey == "Key1");
+            row.SettingType.Should().Be("String");
+            row.Description.Should().Be("desc");
+            row.SettingValue.Should().Be("Value1");
         }
 
         [Fact]
@@ -55,6 +62,9 @@ namespace Open_lab.Tests.Services
             await _service.SetSettingAsync("BadInt", "notint");
             var v = await _service.GetIntAsync("BadInt", 7);
             v.Should().Be(7);
+
+            var raw = await _service.GetStringAsync("BadInt");
+            raw.Should().Be("notint");
         }
 
         [Fact]
@@ -63,6 +73,9 @@ namespace Open_lab.Tests.Services
             await _service.SetSettingAsync("DKey", 1.23m);
             var v = await _service.GetDecimalAsync("DKey", 0);
             v.Should().Be(1.23m);
+
+            var row = await _db.SystemSettings.SingleAsync(s => s.SettingKey == "DKey");
+            row.SettingType.Should().Be("Decimal");
         }
 
         [Fact]
@@ -71,6 +84,10 @@ namespace Open_lab.Tests.Services
             await _service.SetSettingAsync("BKey", true);
             var v = await _service.GetBoolAsync("BKey", false);
             v.Should().BeTrue();
+
+            var row = await _db.SystemSettings.SingleAsync(s => s.SettingKey == "BKey");
+            row.SettingType.Should().Be("Bool");
+            row.SettingValue.Should().Be("True");
         }
 
         private class SampleDto { public string? Name { get; set; } public int Age { get; set; } }
@@ -103,6 +120,9 @@ namespace Open_lab.Tests.Services
             await _service.DeleteSettingAsync("KDel");
             var after = await _service.GetStringAsync("KDel", null);
             after.Should().BeNull();
+
+            var exists = await _db.SystemSettings.AnyAsync(s => s.SettingKey == "KDel");
+            exists.Should().BeFalse();
         }
 
         [Fact]
@@ -121,6 +141,11 @@ namespace Open_lab.Tests.Services
             await _service.SetReportPrinterAsync("Report1");
             var rp = await _service.GetReportPrinterAsync();
             rp.Should().Be("Report1");
+
+            var rows = await _db.SystemSettings
+                .Where(s => s.SettingKey == "Printer.Default" || s.SettingKey == "Printer.Receipt" || s.SettingKey == "Printer.Report")
+                .ToListAsync();
+            rows.Should().HaveCount(3);
         }
 
         [Fact]
@@ -137,6 +162,11 @@ namespace Open_lab.Tests.Services
             await _service.SetRightMarginAsync(1.1m);
             var right = await _service.GetRightMarginAsync();
             right.Should().Be(1.1m);
+
+            var leftRaw = await _service.GetStringAsync("Margin.Left");
+            var rightRaw = await _service.GetStringAsync("Margin.Right");
+            leftRaw.Should().Be("2.5");
+            rightRaw.Should().Be("1.1");
         }
 
         [Fact]
@@ -151,6 +181,11 @@ namespace Open_lab.Tests.Services
             
             header.Should().Be("Lab Name");
             footer.Should().Be("Page {0}");
+
+            var headerRow = await _db.SystemSettings.SingleAsync(s => s.SettingKey == "Print.Header");
+            var footerRow = await _db.SystemSettings.SingleAsync(s => s.SettingKey == "Print.Footer");
+            headerRow.SettingType.Should().Be("String");
+            footerRow.SettingType.Should().Be("String");
         }
 
         [Fact]
@@ -160,6 +195,9 @@ namespace Open_lab.Tests.Services
             await _service.SetSettingAsync("Visit.DefaultAccountType", "Referral");
             var type = await _service.GetStringAsync("Visit.DefaultAccountType");
             type.Should().Be("Referral");
+
+            var row = await _db.SystemSettings.SingleAsync(s => s.SettingKey == "Visit.DefaultAccountType");
+            row.SettingValue.Should().Be("Referral");
         }
 
         [Fact]
@@ -174,6 +212,12 @@ namespace Open_lab.Tests.Services
             
             showLogo.Should().BeTrue();
             currency.Should().Be("EGP");
+
+            var logoType = await _db.SystemSettings
+                .Where(s => s.SettingKey == "Invoice.ShowLogo")
+                .Select(s => s.SettingType)
+                .SingleAsync();
+            logoType.Should().Be("Bool");
         }
     }
 }

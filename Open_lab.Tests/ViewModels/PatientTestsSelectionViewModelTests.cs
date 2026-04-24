@@ -43,14 +43,19 @@ namespace Open_lab.Tests.ViewModels
             _viewModel.LabId = "LAB-001";
             var patient = new Patient { PatientId = 10, FullName = "Alice", LabId = "LAB-001" };
             _patientServiceMock.Setup(service => service.GetByLabIdAsync("LAB-001")).ReturnsAsync(patient);
+            _visitServiceMock.Setup(service => service.GetByPatientIdAsync(10)).ReturnsAsync(new List<Visit>());
+            _testCatalogServiceMock.Setup(service => service.GetReferralsAsync()).ReturnsAsync(new List<Referral>());
+            _testCatalogServiceMock.Setup(service => service.GetAllTestsAsync()).ReturnsAsync(new List<Test>());
+            _testCatalogServiceMock.Setup(service => service.GetCustomGroupsAsync()).ReturnsAsync(new List<CustomGroup>());
 
             // Act
-            _viewModel.LoadPatientCommand.Execute(null);
-            await Task.Delay(50);
+            await _viewModel.InvokePrivateAsync("LoadPatientAsync");
 
             // Assert
             _viewModel.PatientId.Should().Be(10);
             _viewModel.PatientName.Should().Be("Alice");
+            _viewModel.StatusMessage.Should().Contain("تم تحميل");
+            _patientServiceMock.Verify(service => service.GetByLabIdAsync("LAB-001"), Times.Once);
         }
 
         [Fact]
@@ -64,13 +69,16 @@ namespace Open_lab.Tests.ViewModels
             var visitTest = new VisitTest { VisitTestId = 1, VisitId = 100, TestId = 1, Price = 50m, Test = test };
             _visitServiceMock.Setup(service => service.AddTestToVisitAsync(100, 1, It.IsAny<decimal?>())).ReturnsAsync(visitTest);
             _visitServiceMock.Setup(service => service.GetVisitTestsAsync(100)).ReturnsAsync(new List<VisitTest> { visitTest });
+            _invoiceServiceMock.Setup(i => i.CreateOrUpdateInvoiceAsync(100, It.IsAny<decimal>(), It.IsAny<decimal>()))
+                .ReturnsAsync(new Invoice { InvoiceId = 1, VisitId = 100, Total = 50, Discount = 0, NetTotal = 50, Paid = 0, Balance = 50 });
 
             // Act
-            _viewModel.AddTestCommand.Execute(null);
-            await Task.Delay(50);
+            await _viewModel.InvokePrivateAsync("AddTestAsync");
 
             // Assert
             _viewModel.SelectedTests.Should().Contain(t => t.VisitTestId == 1);
+            _viewModel.SelectedTests.Should().HaveCount(1);
+            _viewModel.StatusMessage.Should().Contain("تمت إضافة");
             _invoiceServiceMock.Verify(i => i.CreateOrUpdateInvoiceAsync(100, It.IsAny<decimal>(), It.IsAny<decimal>()), Times.AtLeastOnce);
         }
 
@@ -84,13 +92,17 @@ namespace Open_lab.Tests.ViewModels
             _viewModel.SelectedVisitTest = item;
 
             _visitServiceMock.Setup(service => service.RemoveVisitTestAsync(200)).Returns(Task.CompletedTask);
+            _visitServiceMock.Setup(service => service.GetVisitTestsAsync(100)).ReturnsAsync(new List<VisitTest>());
+            _invoiceServiceMock.Setup(i => i.CreateOrUpdateInvoiceAsync(100, It.IsAny<decimal>(), It.IsAny<decimal>()))
+                .ReturnsAsync(new Invoice { InvoiceId = 2, VisitId = 100, Total = 0, Discount = 0, NetTotal = 0, Paid = 0, Balance = 0 });
 
             // Act
-            _viewModel.RemoveTestCommand.Execute(null);
-            await Task.Delay(50);
+            await _viewModel.InvokePrivateAsync("RemoveTestAsync");
 
             // Assert
             _viewModel.SelectedTests.Should().NotContain(item);
+            _viewModel.StatusMessage.Should().Contain("تم حذف");
+            _visitServiceMock.Verify(service => service.RemoveVisitTestAsync(200), Times.Once);
         }
 
         [Fact]
@@ -101,15 +113,20 @@ namespace Open_lab.Tests.ViewModels
             var group = new CustomGroup { CustomGroupId = 5, Name = "Basic Profile" };
             _viewModel.SelectedCustomGroup = group;
 
-            _visitServiceMock.Setup(service => service.AddCustomGroupToVisitAsync(100, 5)).ReturnsAsync(new List<VisitTest>());
-            _visitServiceMock.Setup(service => service.GetVisitTestsAsync(100)).ReturnsAsync(new List<VisitTest>());
+            _visitServiceMock.Setup(service => service.AddCustomGroupToVisitAsync(100, 5))
+                .ReturnsAsync(new List<VisitTest> { new VisitTest { VisitTestId = 9, VisitId = 100, TestId = 8, Price = 20m } });
+            _visitServiceMock.Setup(service => service.GetVisitTestsAsync(100))
+                .ReturnsAsync(new List<VisitTest> { new VisitTest { VisitTestId = 9, VisitId = 100, TestId = 8, Price = 20m, Test = new Test { NameReport = "T" } } });
+            _invoiceServiceMock.Setup(i => i.CreateOrUpdateInvoiceAsync(100, It.IsAny<decimal>(), It.IsAny<decimal>()))
+                .ReturnsAsync(new Invoice { InvoiceId = 3, VisitId = 100, Total = 20, Discount = 0, NetTotal = 20, Paid = 0, Balance = 20 });
 
             // Act
-            _viewModel.AddCustomGroupCommand.Execute(null);
-            await Task.Delay(50);
+            await _viewModel.InvokePrivateAsync("AddCustomGroupAsync");
 
             // Assert
             _visitServiceMock.Verify(v => v.AddCustomGroupToVisitAsync(100, 5), Times.Once);
+            _viewModel.SelectedTests.Should().HaveCount(1);
+            _viewModel.StatusMessage.Should().Contain("المجموعة");
         }
     }
 }

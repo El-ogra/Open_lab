@@ -49,6 +49,11 @@ namespace Open_lab.Tests.Services
             // Assert
             vt.Should().NotBeNull();
             vt.Price.Should().Be(100m);
+            vt.Status.Should().Be("Pending");
+            var persisted = await _db.VisitTests.SingleAsync(x => x.VisitTestId == vt.VisitTestId);
+            persisted.VisitId.Should().Be(visit.VisitId);
+            persisted.TestId.Should().Be(test.TestId);
+            persisted.Price.Should().Be(100m);
         }
 
         [Fact]
@@ -110,6 +115,8 @@ namespace Open_lab.Tests.Services
 
             // Assert
             await act.Should().ThrowAsync<InvalidOperationException>();
+            var count = await _db.VisitTests.CountAsync(v => v.VisitId == visit.VisitId && v.TestId == test.TestId);
+            count.Should().Be(1);
         }
 
         [Fact]
@@ -133,6 +140,8 @@ namespace Open_lab.Tests.Services
 
             // Assert
             await act.Should().ThrowAsync<InvalidOperationException>();
+            var stillExists = await _db.VisitTests.AnyAsync(v => v.VisitTestId == vt.VisitTestId);
+            stillExists.Should().BeTrue();
         }
 
         [Fact]
@@ -202,6 +211,11 @@ namespace Open_lab.Tests.Services
 
             created.AccountType.Should().Be("Referral");
             created.ReferralId.Should().Be(referral.ReferralId);
+            created.Status.Should().Be("Open");
+
+            var persisted = await _db.Visits.SingleAsync(v => v.VisitId == created.VisitId);
+            persisted.PatientId.Should().Be(patient.PatientId);
+            persisted.ReferralId.Should().Be(referral.ReferralId);
         }
     }
 }

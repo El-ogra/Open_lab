@@ -63,6 +63,8 @@ namespace Open_lab.Tests.Services
 
             // Act & Assert
             AppSession.HasPermission(PermissionCodes.PatientsView).Should().BeFalse();
+            AppSession.HasPermission(PermissionCodes.TestsEdit).Should().BeFalse();
+            AppSession.HasPermission("Any.Random.Permission").Should().BeFalse();
         }
 
         [Fact]
