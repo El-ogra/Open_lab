@@ -85,6 +85,7 @@ namespace Open_lab.Services
                     s.Key == PrinterReceiptKey ||
                     s.Key == PrinterBarcodeKey ||
                     s.Key == PrinterEnvelopeKey ||
+                    s.Key == ReceiptHeaderKey ||
                     s.Key == ReceiptFooterKey ||
                     s.Key == ReceiptShowLogoKey ||
                     s.Key == ReceiptCopiesKey ||

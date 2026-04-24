@@ -402,5 +402,64 @@ namespace Open_lab.Tests.Services
             // Assert
             await act.Should().ThrowAsync<ArgumentException>().WithMessage("*Turnaround hours*");
         }
+
+        [Fact]
+        public async Task CreateReferralAsync_Should_Create_Entity_For_Module12_1()
+        {
+            var referral = new Referral
+            {
+                Name = "Insurance A",
+                ReferralType = "Insurance",
+                Phone = "0100000000",
+                City = "Cairo"
+            };
+
+            var created = await _service.CreateReferralAsync(referral);
+
+            created.ReferralId.Should().BeGreaterThan(0);
+            var saved = await _db.Referrals.FindAsync(created.ReferralId);
+            saved.Should().NotBeNull();
+            saved!.Name.Should().Be("Insurance A");
+            saved.ReferralType.Should().Be("Insurance");
+        }
+
+        [Fact]
+        public async Task UpdateReferralAsync_Should_Set_Discount_And_Commission_For_Module12_3_12_4()
+        {
+            var referral = new Referral { Name = "Company A", ReferralType = "Company" };
+            _db.Referrals.Add(referral);
+            await _db.SaveChangesAsync();
+
+            referral.DiscountPercentage = 12.5m;
+            referral.CommissionPercentage = 7.5m;
+            referral.Phone = "0123456789";
+            referral.City = "Giza";
+
+            await _service.UpdateReferralAsync(referral);
+
+            var saved = await _db.Referrals.FindAsync(referral.ReferralId);
+            saved.Should().NotBeNull();
+            saved!.DiscountPercentage.Should().Be(12.5m);
+            saved.CommissionPercentage.Should().Be(7.5m);
+            saved.Phone.Should().Be("0123456789");
+            saved.City.Should().Be("Giza");
+        }
+
+        [Fact]
+        public async Task UpdateReferralAsync_Invalid_Discount_Or_Commission_Should_Throw()
+        {
+            var referral = new Referral { Name = "Company B", ReferralType = "Company" };
+            _db.Referrals.Add(referral);
+            await _db.SaveChangesAsync();
+
+            referral.DiscountPercentage = 150m;
+            Func<Task> discountAct = async () => await _service.UpdateReferralAsync(referral);
+            await discountAct.Should().ThrowAsync<ArgumentException>().WithMessage("*Discount percentage*");
+
+            referral.DiscountPercentage = 10m;
+            referral.CommissionPercentage = -1m;
+            Func<Task> commissionAct = async () => await _service.UpdateReferralAsync(referral);
+            await commissionAct.Should().ThrowAsync<ArgumentException>().WithMessage("*Commission percentage*");
+        }
     }
 }

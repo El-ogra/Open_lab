@@ -163,5 +163,45 @@ namespace Open_lab.Tests.Services
             // Assert
             vt.Price.Should().Be(150m); // Contract price instead of base 200m
         }
+
+        [Fact]
+        public async Task CreateAsync_With_Referral_Account_And_No_Referral_Should_Throw()
+        {
+            var patient = new Patient { LabId = "L-AR1", FullName = "Referral Patient", Gender = "Male" };
+            _db.Patients.Add(patient);
+            await _db.SaveChangesAsync();
+
+            Func<Task> act = async () => await _service.CreateAsync(new Visit
+            {
+                PatientId = patient.PatientId,
+                VisitDate = DateTime.Now,
+                AccountType = "Referral",
+                ReferralId = null
+            });
+
+            await act.Should().ThrowAsync<InvalidOperationException>()
+                .WithMessage("*requires a referral*");
+        }
+
+        [Fact]
+        public async Task CreateAsync_With_Referral_Account_Should_Persist_Referral_Binding()
+        {
+            var patient = new Patient { LabId = "L-AR2", FullName = "Referral Patient 2", Gender = "Female" };
+            var referral = new Referral { Name = "Insurance-X", ReferralType = "Insurance" };
+            _db.Patients.Add(patient);
+            _db.Referrals.Add(referral);
+            await _db.SaveChangesAsync();
+
+            var created = await _service.CreateAsync(new Visit
+            {
+                PatientId = patient.PatientId,
+                VisitDate = DateTime.Today,
+                AccountType = "Referral",
+                ReferralId = referral.ReferralId
+            });
+
+            created.AccountType.Should().Be("Referral");
+            created.ReferralId.Should().Be(referral.ReferralId);
+        }
     }
 }

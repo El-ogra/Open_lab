@@ -60,5 +60,16 @@ namespace Open_lab.Tests.Services
             hash!.Value.Should().NotBeNullOrWhiteSpace();
             salt!.Value.Should().NotBeNullOrWhiteSpace();
         }
+
+        [Fact]
+        public async Task GetProfileAsync_Should_Read_ReceiptHeader_From_Settings_For_Module13_3()
+        {
+            _db.Settings.Add(new Setting { Key = "Receipt.Header", Value = "مختبر ألف" });
+            await _db.SaveChangesAsync();
+
+            var profile = await _service.GetProfileAsync();
+
+            profile.ReceiptHeaderText.Should().Be("مختبر ألف");
+        }
     }
 }

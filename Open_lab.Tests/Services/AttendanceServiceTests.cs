@@ -130,5 +130,38 @@ namespace Open_lab.Tests.Services
             updatedLog.UserId.Should().Be(user.UserId);
             updatedLog.ShiftId.Should().Be(shift.ShiftId);
         }
+
+        [Fact]
+        public async Task ClockOutAsync_When_No_Open_Log_Should_Return_Null()
+        {
+            var result = await _service.ClockOutAsync(userId: 9999);
+            result.Should().BeNull();
+        }
+
+        [Fact]
+        public async Task GetDailyWorkingSummaryAsync_Should_Subtract_Break_Minutes()
+        {
+            var user = new User { Username = "summary-user", FullName = "Summary User" };
+            _db.Users.Add(user);
+            await _db.SaveChangesAsync();
+
+            var loginAt = DateTime.Today.AddHours(8);
+            var logoutAt = DateTime.Today.AddHours(16);
+
+            var log = await _service.ClockInAsync(user.UserId, loginAt);
+            await _service.StartBreakAsync(user.UserId, at: DateTime.Today.AddHours(12));
+            await _service.EndBreakAsync(user.UserId, at: DateTime.Today.AddHours(12).AddMinutes(30));
+            await _service.ClockOutAsync(user.UserId, logoutAt);
+
+            var summary = await _service.GetDailyWorkingSummaryAsync(user.UserId, DateTime.Today, now: DateTime.Today.AddHours(18));
+
+            summary.UserId.Should().Be(user.UserId);
+            summary.GrossMinutes.Should().Be(480);
+            summary.BreakMinutes.Should().Be(30);
+            summary.NetMinutes.Should().Be(450);
+            summary.HasOpenLog.Should().BeFalse();
+            summary.FirstLoginAt.Should().Be(loginAt);
+            summary.LastLogoutAt.Should().Be(logoutAt);
+        }
     }
 }
