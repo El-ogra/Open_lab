@@ -1,0 +1,64 @@
+using System;
+using System.Linq;
+using System.Threading.Tasks;
+using FluentAssertions;
+using Open_lab.Models;
+using Open_lab.Services;
+using Open_lab.Tests.Infrastructure;
+using Xunit;
+
+namespace Open_lab.Tests.Services
+{
+    public class TestClassificationServiceTests : IDisposable
+    {
+        private readonly Open_lab.Data.OpenLabDbContext _db;
+        private readonly TestClassificationService _service;
+        private readonly string _dbName = Guid.NewGuid().ToString();
+
+        public TestClassificationServiceTests()
+        {
+            _db = InMemoryDbContextFactory.Create(_dbName);
+            _service = new TestClassificationService(_db);
+        }
+
+        public void Dispose()
+        {
+            _db.Database.EnsureDeleted();
+            _db.Dispose();
+        }
+
+        [Fact]
+        public async Task GetConsumptionReportAsync_Should_Aggregate_Consumption_Per_Reagent()
+        {
+            var reagent = new Reagent { Name = "R1", Unit = "ml", CurrentStock = 1000m };
+            var test1 = new Test { Code = "T1", NameReport = "CBC", Price = 10m };
+            var test2 = new Test { Code = "T2", NameReport = "GLU", Price = 15m };
+            _db.Reagents.Add(reagent);
+            _db.Tests.AddRange(test1, test2);
+            await _db.SaveChangesAsync();
+
+            _db.TestConsumptions.AddRange(
+                new TestConsumption { TestId = test1.TestId, ReagentId = reagent.ReagentId, AmountPerTest = 5m },
+                new TestConsumption { TestId = test2.TestId, ReagentId = reagent.ReagentId, AmountPerTest = 2m });
+
+            var visit = new Visit { PatientId = 1, VisitDate = DateTime.Today };
+            _db.Visits.Add(visit);
+            await _db.SaveChangesAsync();
+
+            _db.VisitTests.AddRange(
+                new VisitTest { VisitId = visit.VisitId, TestId = test1.TestId, Price = 10m },
+                new VisitTest { VisitId = visit.VisitId, TestId = test1.TestId, Price = 10m },
+                new VisitTest { VisitId = visit.VisitId, TestId = test2.TestId, Price = 15m });
+            await _db.SaveChangesAsync();
+
+            var report = await _service.GetConsumptionReportAsync(DateTime.Today.AddDays(-1), DateTime.Today.AddDays(1));
+
+            report.Should().ContainSingle();
+            var row = report.Single();
+            row.ReagentName.Should().Be("R1");
+            row.Unit.Should().Be("ml");
+            row.TotalConsumed.Should().Be(12m);
+            row.TestCount.Should().Be(3);
+        }
+    }
+}

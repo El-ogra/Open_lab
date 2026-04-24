@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using System.Collections.Specialized;
 using Open_lab.Models;
 using Open_lab.Services;
 
@@ -43,6 +44,7 @@ namespace Open_lab.ViewModels
             Referrals = new ObservableCollection<ReferralItem>();
             SettlementHistory = new ObservableCollection<ExternalLabSettlement>();
             SelectedQueueIds = new ObservableCollection<int>();
+            SelectedQueueIds.CollectionChanged += OnSelectedQueueIdsChanged;
 
             LoadReferralsCommand = new RelayCommand(async _ => await LoadReferralsAsync());
             LoadQueueCommand = new RelayCommand(async _ => await LoadQueueAsync());
@@ -194,6 +196,8 @@ namespace Open_lab.ViewModels
                     {
                         QueueId = item.QueueId,
                         VisitTestId = item.VisitTestId,
+                        VisitTest = item.VisitTest!,
+                        Referral = item.Referral,
                         PatientName = item.VisitTest?.Visit?.Patient?.FullName ?? "-",
                         TestName = item.VisitTest?.Test?.NameReport ?? "-",
                         Status = item.Status,
@@ -235,10 +239,10 @@ namespace Open_lab.ViewModels
             {
                 var queueIds = SelectedQueueIds.ToList();
                 var manifest = await _externalLabService.CreateManifestAsync(SelectedReferralId.Value, queueIds);
-                StatusMessage = $"تم إنشاء بوليصة الشحن رقم: {manifest.ManifestNumber}";
                 await LoadQueueAsync();
                 await LoadManifestsAsync();
                 SelectedQueueIds.Clear();
+                StatusMessage = $"تم إنشاء بوليصة الشحن رقم: {manifest.ManifestNumber}";
             }
             catch (Exception ex)
             {
@@ -263,8 +267,8 @@ namespace Open_lab.ViewModels
                 };
 
                 await _externalLabService.UpdateQueueStatusAsync(SelectedQueueItem.QueueId, newStatus);
-                StatusMessage = $"تم تحديث الحالة إلى: {newStatus}";
                 await LoadQueueAsync();
+                StatusMessage = $"تم تحديث الحالة إلى: {newStatus}";
             }
             catch (Exception ex)
             {
@@ -306,10 +310,10 @@ namespace Open_lab.ViewModels
             try
             {
                 var settlement = await _externalSettlementService.CreateSettlementAsync(SelectedReferralId.Value, SettlementAmount, SettlementNote);
-                StatusMessage = $"تم إنشاء تسوية بمبلغ: {settlement.AmountPaid:N2} | الرصيد المتبقي: {settlement.Balance:N2}";
                 SettlementAmount = 0;
                 SettlementNote = null;
                 await LoadSettlementAsync();
+                StatusMessage = $"تم إنشاء تسوية بمبلغ: {settlement.AmountPaid:N2} | الرصيد المتبقي: {settlement.Balance:N2}";
             }
             catch (Exception ex)
             {
@@ -332,10 +336,10 @@ namespace Open_lab.ViewModels
                     ExternalResultComment,
                     ExternalReference);
 
-                StatusMessage = "تم إدخال نتيجة المعمل الخارجي بنجاح.";
                 ExternalResultValue = string.Empty;
                 ExternalResultComment = null;
                 await LoadQueueAsync();
+                StatusMessage = "تم إدخال نتيجة المعمل الخارجي بنجاح.";
             }
             catch (Exception ex)
             {
@@ -373,6 +377,11 @@ namespace Open_lab.ViewModels
             {
                 StatusMessage = $"خطأ: {ex.Message}";
             }
+        }
+
+        private void OnSelectedQueueIdsChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            (CreateManifestCommand as RelayCommand)?.RaiseCanExecuteChanged();
         }
     }
 

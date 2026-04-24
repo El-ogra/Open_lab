@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using FluentAssertions;
+using Microsoft.EntityFrameworkCore;
 using Open_lab.Models;
 using Open_lab.Services;
 using Open_lab.Tests.Infrastructure;
@@ -48,6 +49,41 @@ namespace Open_lab.Tests.Services
             // Assert
             vt.Should().NotBeNull();
             vt.Price.Should().Be(100m);
+        }
+
+        [Fact]
+        public async Task AddTestToVisitAsync_SendOutTest_Should_Register_ExternalQueue()
+        {
+            var patient = new Patient { LabId = "L-EXT", FullName = "Patient", Gender = "Male" };
+            var referral = new Referral { Name = "Ref Lab", ReferralType = "ExternalLab" };
+            _db.Patients.Add(patient);
+            _db.Referrals.Add(referral);
+            await _db.SaveChangesAsync();
+
+            var visit = new Visit
+            {
+                PatientId = patient.PatientId,
+                VisitDate = DateTime.Now,
+                ReferralId = referral.ReferralId,
+                AccountType = "Referral"
+            };
+            _db.Visits.Add(visit);
+
+            var test = new Test
+            {
+                Code = "EXT1",
+                NameReport = "Send Out Test",
+                Price = 75m,
+                IsSendOut = true
+            };
+            _db.Tests.Add(test);
+            await _db.SaveChangesAsync();
+
+            var visitTest = await _service.AddTestToVisitAsync(visit.VisitId, test.TestId);
+
+            var queue = await _db.ExternalLabQueues.SingleAsync(q => q.VisitTestId == visitTest.VisitTestId);
+            queue.ReferralId.Should().Be(referral.ReferralId);
+            queue.Status.Should().Be("Pending");
         }
 
         [Fact]
