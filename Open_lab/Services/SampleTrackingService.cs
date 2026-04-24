@@ -31,6 +31,7 @@ namespace Open_lab.Services
             if (sample != null)
             {
                 sample.IsSeparated = isSeparated;
+                sample.Status = isSeparated ? "مفصولة" : "مسحوبة";
                 await _db.SaveChangesAsync();
             }
         }

@@ -19,10 +19,12 @@ namespace Open_lab.Services
 
         public async Task<AttendanceLog> CreateLoginAsync(int userId, string? note)
         {
+            var now = DateTime.Now;
             var log = new AttendanceLog
             {
                 UserId = userId,
-                LoginAt = DateTime.Now,
+                LoginAt = now,
+                LastActivityAt = now,
                 Note = note
             };
 
@@ -39,7 +41,9 @@ namespace Open_lab.Services
                 return;
             }
 
-            log.LogoutAt = DateTime.Now;
+            var now = DateTime.Now;
+            log.LogoutAt = now;
+            log.LastActivityAt = now;
             await _db.SaveChangesAsync();
         }
 

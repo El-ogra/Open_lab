@@ -71,6 +71,15 @@ namespace Open_lab.Tests.Services
         }
 
         [Fact]
+        public async Task AddToQueueAsync_When_VisitTest_Is_Missing_Should_Throw()
+        {
+            Func<Task> act = async () => await _service.AddToQueueAsync(404, 1);
+
+            await act.Should().ThrowAsync<InvalidOperationException>()
+                .WithMessage("Visit test not found.");
+        }
+
+        [Fact]
         public async Task CreateManifestAsync_Should_Create_Manifest_And_Items()
         {
             var patient = new Patient { LabId = "LM1", FullName = "P2", Gender = "Female" };
@@ -163,6 +172,41 @@ namespace Open_lab.Tests.Services
         }
 
         [Fact]
+        public async Task GetPendingQueueAsync_Should_Include_Referral_Details()
+        {
+            var patient = new Patient { FullName = "P", LabId = "L", Gender = "Male" };
+            var referral = new Referral { Name = "Ref Lab", ReferralType = "ExternalLab" };
+            var test = new Test { Code = "TX", NameReport = "External Test", Price = 10m };
+            _db.Patients.Add(patient);
+            _db.Referrals.Add(referral);
+            _db.Tests.Add(test);
+            await _db.SaveChangesAsync();
+
+            var visit = new Visit { PatientId = patient.PatientId, VisitDate = DateTime.Now, ReferralId = referral.ReferralId };
+            _db.Visits.Add(visit);
+            await _db.SaveChangesAsync();
+
+            var visitTest = new VisitTest { VisitId = visit.VisitId, TestId = test.TestId, Price = 10m };
+            _db.VisitTests.Add(visitTest);
+            await _db.SaveChangesAsync();
+
+            _db.ExternalLabQueues.Add(new ExternalLabQueue
+            {
+                VisitTestId = visitTest.VisitTestId,
+                ReferralId = referral.ReferralId,
+                Status = "Pending",
+                DateQueued = DateTime.Now
+            });
+            await _db.SaveChangesAsync();
+
+            var queue = await _service.GetPendingQueueAsync();
+
+            queue.Should().ContainSingle();
+            queue[0].Referral.Should().NotBeNull();
+            queue[0].Referral!.Name.Should().Be("Ref Lab");
+        }
+
+        [Fact]
         public async Task UpdateQueueStatusAsync_Should_Save_External_Result_Reference()
         {
             // 8.5 Enter External Lab Result
@@ -176,6 +220,97 @@ namespace Open_lab.Tests.Services
             updated.Should().NotBeNull();
             updated!.Status.Should().Be("Received");
             updated.ExternalReference.Should().Be("EXT-RESULT-001");
+        }
+
+        [Fact]
+        public async Task EnterExternalLabResultAsync_Should_Create_Result_And_Update_Queue_State()
+        {
+            var patient = new Patient { LabId = "LR1", FullName = "P", Gender = "Male" };
+            var test = new Test { Code = "EXT-R", NameReport = "External Result Test", Price = 25m };
+            _db.Patients.Add(patient);
+            _db.Tests.Add(test);
+            await _db.SaveChangesAsync();
+
+            var visit = new Visit { PatientId = patient.PatientId, VisitDate = DateTime.Now };
+            _db.Visits.Add(visit);
+            await _db.SaveChangesAsync();
+
+            var visitTest = new VisitTest { VisitId = visit.VisitId, TestId = test.TestId, Price = 25m, Status = "Pending" };
+            _db.VisitTests.Add(visitTest);
+            await _db.SaveChangesAsync();
+
+            var queue = new ExternalLabQueue
+            {
+                VisitTestId = visitTest.VisitTestId,
+                Status = "Sent",
+                DateQueued = DateTime.Now
+            };
+            _db.ExternalLabQueues.Add(queue);
+            await _db.SaveChangesAsync();
+
+            await _service.EnterExternalLabResultAsync(queue.QueueId, "Positive", "verified by ref lab", "EXT-77");
+
+            var parameter = await _db.TestParameters.SingleAsync(p => p.TestId == test.TestId && p.Name == "External Lab Result");
+            var result = await _db.ResultValues.SingleAsync(r => r.VisitTestId == visitTest.VisitTestId && r.ParameterId == parameter.ParameterId);
+            var updatedQueue = await _db.ExternalLabQueues.SingleAsync(q => q.QueueId == queue.QueueId);
+            var updatedVisitTest = await _db.VisitTests.SingleAsync(vt => vt.VisitTestId == visitTest.VisitTestId);
+
+            result.Value.Should().Be("Positive");
+            result.Comment.Should().Be("verified by ref lab");
+            updatedQueue.Status.Should().Be("ResultReceived");
+            updatedQueue.ExternalReference.Should().Be("EXT-77");
+            updatedVisitTest.Status.Should().Be("InProgress");
+        }
+
+        [Fact]
+        public async Task EnterExternalLabResultAsync_Should_Update_Existing_Result_Without_Duplicating()
+        {
+            var patient = new Patient { LabId = "LR2", FullName = "P2", Gender = "Female" };
+            var test = new Test { Code = "EXT-U", NameReport = "External Update", Price = 20m };
+            _db.Patients.Add(patient);
+            _db.Tests.Add(test);
+            await _db.SaveChangesAsync();
+
+            var visit = new Visit { PatientId = patient.PatientId, VisitDate = DateTime.Now };
+            _db.Visits.Add(visit);
+            await _db.SaveChangesAsync();
+
+            var visitTest = new VisitTest { VisitId = visit.VisitId, TestId = test.TestId, Price = 20m };
+            _db.VisitTests.Add(visitTest);
+
+            var parameter = new TestParameter { TestId = test.TestId, Name = "External Lab Result", OrderNo = 1 };
+            _db.TestParameters.Add(parameter);
+            await _db.SaveChangesAsync();
+
+            _db.ResultValues.Add(new ResultValue
+            {
+                VisitTestId = visitTest.VisitTestId,
+                ParameterId = parameter.ParameterId,
+                Value = "Old",
+                Comment = "old comment",
+                Flag = "H",
+                VerifiedAt = DateTime.Now,
+                VerifiedBy = 12
+            });
+
+            var queue = new ExternalLabQueue
+            {
+                VisitTestId = visitTest.VisitTestId,
+                Status = "Received",
+                DateQueued = DateTime.Now
+            };
+            _db.ExternalLabQueues.Add(queue);
+            await _db.SaveChangesAsync();
+
+            await _service.EnterExternalLabResultAsync(queue.QueueId, "Updated", "new comment");
+
+            var results = await _db.ResultValues.Where(r => r.VisitTestId == visitTest.VisitTestId).ToListAsync();
+            results.Should().ContainSingle();
+            results[0].Value.Should().Be("Updated");
+            results[0].Comment.Should().Be("new comment");
+            results[0].Flag.Should().BeNull();
+            results[0].VerifiedAt.Should().BeNull();
+            results[0].VerifiedBy.Should().BeNull();
         }
 
         // 8.6 External Lab Report Tests - NEW TEST

@@ -45,12 +45,14 @@ namespace Open_lab.Tests.Services
             log.UserId.Should().Be(user.UserId);
             log.Note.Should().Be("Test login note");
             log.LoginAt.Should().BeCloseTo(DateTime.Now, TimeSpan.FromSeconds(5));
+            log.LastActivityAt.Should().BeCloseTo(log.LoginAt, TimeSpan.FromSeconds(1));
             log.LogoutAt.Should().BeNull("Logout should be null for new login");
             
             // Assert - Logic Guard: Verify log is persisted in database
             var savedLog = await _db.AttendanceLogs.FindAsync(log.AttendanceLogId);
             savedLog.Should().NotBeNull();
             savedLog!.UserId.Should().Be(user.UserId);
+            savedLog.LastActivityAt.Should().BeCloseTo(savedLog.LoginAt, TimeSpan.FromSeconds(1));
         }
 
         [Fact]
@@ -61,6 +63,7 @@ namespace Open_lab.Tests.Services
             var updated = await _db.AttendanceLogs.FindAsync(created.AttendanceLogId);
             updated.Should().NotBeNull();
             updated!.LogoutAt.Should().NotBeNull();
+            updated.LastActivityAt.Should().BeCloseTo(updated.LogoutAt!.Value, TimeSpan.FromSeconds(1));
         }
 
         [Fact]

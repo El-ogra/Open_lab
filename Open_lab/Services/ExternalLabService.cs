@@ -19,6 +19,12 @@ namespace Open_lab.Services
 
         public async Task<ExternalLabQueue> AddToQueueAsync(int visitTestId, int? referralId = null)
         {
+            var visitTestExists = await _db.VisitTests.AnyAsync(vt => vt.VisitTestId == visitTestId);
+            if (!visitTestExists)
+            {
+                throw new InvalidOperationException("Visit test not found.");
+            }
+
             var existing = await _db.ExternalLabQueues.FirstOrDefaultAsync(q => q.VisitTestId == visitTestId);
             if (existing != null) return existing;
 
@@ -43,6 +49,7 @@ namespace Open_lab.Services
                 .Include(q => q.VisitTest)
                 .ThenInclude(vt => vt.Visit)
                 .ThenInclude(v => v.Patient)
+                .Include(q => q.Referral)
                 .Where(q => q.Status == "Pending")
                 .OrderBy(q => q.DateQueued)
                 .ToListAsync();
