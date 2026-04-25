@@ -120,6 +120,63 @@ namespace Open_lab.Tests.Services
         }
 
         [Fact]
+        public async Task AddTestToVisitAsync_Visit_Not_Found_Should_Throw()
+        {
+            // Arrange - FAILURE test for AddTestToVisitAsync when visit not found
+            var test = new Test { Code = "T1", NameReport = "Test", Price = 100m };
+            _db.Tests.Add(test);
+            await _db.SaveChangesAsync();
+
+            // Act
+            Func<Task> act = async () => await _service.AddTestToVisitAsync(99999, test.TestId);
+
+            // Assert
+            await act.Should().ThrowAsync<InvalidOperationException>().WithMessage("*Visit not found*");
+        }
+
+        [Fact]
+        public async Task AddTestToVisitAsync_Visit_Closed_Should_Throw()
+        {
+            // Arrange - FAILURE test for AddTestToVisitAsync when visit is closed
+            var patient = new Patient { LabId = "L1", FullName = "P", Gender = "Male" };
+            _db.Patients.Add(patient);
+            await _db.SaveChangesAsync();
+
+            var visit = new Visit { PatientId = patient.PatientId, VisitDate = DateTime.Now, Status = "Closed" };
+            _db.Visits.Add(visit);
+            await _db.SaveChangesAsync();
+
+            var test = new Test { Code = "T1", NameReport = "Test", Price = 100m };
+            _db.Tests.Add(test);
+            await _db.SaveChangesAsync();
+
+            // Act
+            Func<Task> act = async () => await _service.AddTestToVisitAsync(visit.VisitId, test.TestId);
+
+            // Assert
+            await act.Should().ThrowAsync<InvalidOperationException>().WithMessage("*Closed visits cannot accept new tests*");
+        }
+
+        [Fact]
+        public async Task AddTestToVisitAsync_Test_Not_Found_Should_Throw()
+        {
+            // Arrange - FAILURE test for AddTestToVisitAsync when test not found
+            var patient = new Patient { LabId = "L1", FullName = "P", Gender = "Male" };
+            _db.Patients.Add(patient);
+            await _db.SaveChangesAsync();
+
+            var visit = new Visit { PatientId = patient.PatientId, VisitDate = DateTime.Now };
+            _db.Visits.Add(visit);
+            await _db.SaveChangesAsync();
+
+            // Act
+            Func<Task> act = async () => await _service.AddTestToVisitAsync(visit.VisitId, 99999);
+
+            // Assert
+            await act.Should().ThrowAsync<InvalidOperationException>().WithMessage("*Test not found*");
+        }
+
+        [Fact]
         public async Task RemoveVisitTestAsync_Verified_Should_Throw()
         {
             // Arrange
@@ -142,6 +199,51 @@ namespace Open_lab.Tests.Services
             await act.Should().ThrowAsync<InvalidOperationException>();
             var stillExists = await _db.VisitTests.AnyAsync(v => v.VisitTestId == vt.VisitTestId);
             stillExists.Should().BeTrue();
+        }
+
+        [Fact]
+        public async Task RemoveVisitTestAsync_Visit_Closed_Should_Throw()
+        {
+            // Arrange - FAILURE test for RemoveVisitTestAsync when visit is closed
+            var patient = new Patient { LabId = "L1", FullName = "P", Gender = "Male" };
+            _db.Patients.Add(patient);
+            await _db.SaveChangesAsync();
+
+            var visit = new Visit { PatientId = patient.PatientId, VisitDate = DateTime.Now, Status = "Closed" };
+            _db.Visits.Add(visit);
+            await _db.SaveChangesAsync();
+
+            var vt = new VisitTest { VisitId = visit.VisitId, TestId = 1, Price = 50m, Status = "Pending" };
+            _db.VisitTests.Add(vt);
+            await _db.SaveChangesAsync();
+
+            // Act
+            Func<Task> act = async () => await _service.RemoveVisitTestAsync(vt.VisitTestId);
+
+            // Assert
+            await act.Should().ThrowAsync<InvalidOperationException>().WithMessage("*Closed visits cannot remove tests*");
+            var stillExists = await _db.VisitTests.AnyAsync(v => v.VisitTestId == vt.VisitTestId);
+            stillExists.Should().BeTrue();
+        }
+
+        [Fact]
+        public async Task RemoveVisitTestAsync_VisitTest_Not_Found_Should_Not_Throw()
+        {
+            // Arrange - FAILURE test for RemoveVisitTestAsync when visit test not found
+            var patient = new Patient { LabId = "L1", FullName = "P", Gender = "Male" };
+            _db.Patients.Add(patient);
+            await _db.SaveChangesAsync();
+
+            var visit = new Visit { PatientId = patient.PatientId, VisitDate = DateTime.Now };
+            _db.Visits.Add(visit);
+            await _db.SaveChangesAsync();
+
+            // Act
+            await _service.RemoveVisitTestAsync(99999);
+
+            // Assert - Should not throw, method returns silently
+            var count = await _db.VisitTests.CountAsync();
+            count.Should().Be(0);
         }
 
         [Fact]
@@ -216,6 +318,86 @@ namespace Open_lab.Tests.Services
             var persisted = await _db.Visits.SingleAsync(v => v.VisitId == created.VisitId);
             persisted.PatientId.Should().Be(patient.PatientId);
             persisted.ReferralId.Should().Be(referral.ReferralId);
+        }
+
+        [Fact]
+        public async Task AddCustomGroupToVisitAsync_Visit_Not_Found_Should_Throw()
+        {
+            // Arrange - FAILURE test for AddCustomGroupToVisitAsync when visit not found
+            var group = new CustomGroup { CustomGroupId = 1, Name = "Group" };
+            _db.CustomGroups.Add(group);
+            await _db.SaveChangesAsync();
+
+            // Act
+            Func<Task> act = async () => await _service.AddCustomGroupToVisitAsync(99999, 1);
+
+            // Assert
+            await act.Should().ThrowAsync<InvalidOperationException>().WithMessage("*Visit not found*");
+        }
+
+        [Fact]
+        public async Task AddCustomGroupToVisitAsync_Visit_Closed_Should_Throw()
+        {
+            // Arrange - FAILURE test for AddCustomGroupToVisitAsync when visit is closed
+            var patient = new Patient { LabId = "L1", FullName = "P", Gender = "Male" };
+            _db.Patients.Add(patient);
+            await _db.SaveChangesAsync();
+
+            var visit = new Visit { PatientId = patient.PatientId, VisitDate = DateTime.Now, Status = "Closed" };
+            _db.Visits.Add(visit);
+            await _db.SaveChangesAsync();
+
+            var group = new CustomGroup { CustomGroupId = 1, Name = "Group" };
+            _db.CustomGroups.Add(group);
+            await _db.SaveChangesAsync();
+
+            // Act
+            Func<Task> act = async () => await _service.AddCustomGroupToVisitAsync(visit.VisitId, 1);
+
+            // Assert
+            await act.Should().ThrowAsync<InvalidOperationException>().WithMessage("*Closed visits cannot accept new tests*");
+        }
+
+        [Fact]
+        public async Task AddCustomGroupToVisitAsync_CustomGroup_Not_Found_Should_Throw()
+        {
+            // Arrange - FAILURE test for AddCustomGroupToVisitAsync when custom group not found
+            var patient = new Patient { LabId = "L1", FullName = "P", Gender = "Male" };
+            _db.Patients.Add(patient);
+            await _db.SaveChangesAsync();
+
+            var visit = new Visit { PatientId = patient.PatientId, VisitDate = DateTime.Now };
+            _db.Visits.Add(visit);
+            await _db.SaveChangesAsync();
+
+            // Act
+            Func<Task> act = async () => await _service.AddCustomGroupToVisitAsync(visit.VisitId, 99999);
+
+            // Assert
+            await act.Should().ThrowAsync<InvalidOperationException>().WithMessage("*Custom group not found*");
+        }
+
+        [Fact]
+        public async Task AddCustomGroupToVisitAsync_CustomGroup_Has_No_Tests_Should_Throw()
+        {
+            // Arrange - FAILURE test for AddCustomGroupToVisitAsync when custom group has no tests
+            var patient = new Patient { LabId = "L1", FullName = "P", Gender = "Male" };
+            _db.Patients.Add(patient);
+            await _db.SaveChangesAsync();
+
+            var visit = new Visit { PatientId = patient.PatientId, VisitDate = DateTime.Now };
+            _db.Visits.Add(visit);
+            await _db.SaveChangesAsync();
+
+            var group = new CustomGroup { CustomGroupId = 1, Name = "Empty Group" };
+            _db.CustomGroups.Add(group);
+            await _db.SaveChangesAsync();
+
+            // Act
+            Func<Task> act = async () => await _service.AddCustomGroupToVisitAsync(visit.VisitId, 1);
+
+            // Assert
+            await act.Should().ThrowAsync<InvalidOperationException>().WithMessage("*Custom group has no tests*");
         }
     }
 }

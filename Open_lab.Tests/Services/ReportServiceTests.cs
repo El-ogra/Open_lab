@@ -115,5 +115,40 @@ namespace Open_lab.Tests.Services
             gluResult.PreviousValue.Should().Be("95");
             gluResult.PreviousDate.Should().NotBeNull();
         }
+
+        [Fact]
+        public async Task GetPatientHistoryAsync_Patient_Not_Found_Should_Throw()
+        {
+            // Arrange - FAILURE test for GetPatientHistoryAsync when patient not found
+            // Act
+            Func<Task> act = async () => await _service.GetPatientHistoryAsync(99999, null, null);
+
+            // Assert
+            await act.Should().ThrowAsync<InvalidOperationException>().WithMessage("*Patient not found*");
+        }
+
+        [Fact]
+        public async Task GetPatientHistoryAsync_From_Greater_Than_To_Should_Return_Empty()
+        {
+            // Arrange - FAILURE test for GetPatientHistoryAsync when From > To
+            var patient = new Patient { PatientId = 100, FullName = "Test Patient" };
+            _db.Patients.Add(patient);
+            await _db.SaveChangesAsync();
+
+            var visit = new Visit { PatientId = 100, VisitDate = DateTime.Now };
+            _db.Visits.Add(visit);
+            await _db.SaveChangesAsync();
+
+            var from = DateTime.Now.AddDays(10);
+            var to = DateTime.Now.AddDays(-10);
+
+            // Act
+            var result = await _service.GetPatientHistoryAsync(100, from, to);
+
+            // Assert
+            result.Should().NotBeNull();
+            result.Patient.FullName.Should().Be("Test Patient");
+            result.Visits.Should().BeEmpty();
+        }
     }
 }

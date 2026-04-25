@@ -83,6 +83,38 @@ namespace Open_lab.Tests.ViewModels
         }
 
         [Fact]
+        public async Task AddTestCommand_When_Service_Throws_Should_Set_Error_StatusMessage()
+        {
+            // Arrange - FAILURE test for AddTestCommand
+            _viewModel.InvokePrivate("set_VisitId", 100);
+            var test = new Test { TestId = 1, Code = "GLU", Price = 50m };
+            _viewModel.SelectedAvailableTest = test;
+            _visitServiceMock.Setup(service => service.AddTestToVisitAsync(100, 1, It.IsAny<decimal?>()))
+                .ThrowsAsync(new Exception("Service Error"));
+
+            // Act
+            await _viewModel.InvokePrivateAsync("AddTestAsync");
+
+            // Assert
+            _viewModel.StatusMessage.Should().Contain("خطأ");
+            _visitServiceMock.Verify(service => service.AddTestToVisitAsync(100, 1, It.IsAny<decimal?>()), Times.Once);
+        }
+
+        [Fact]
+        public async Task AddTestCommand_When_SelectedAvailableTest_Null_Should_Not_Call_Service_LogicGuard()
+        {
+            // Arrange - FAILURE test for AddTestCommand with null test
+            _viewModel.InvokePrivate("set_VisitId", 100);
+            _viewModel.SelectedAvailableTest = null;
+
+            // Act
+            await _viewModel.InvokePrivateAsync("AddTestAsync");
+
+            // Assert
+            _visitServiceMock.Verify(service => service.AddTestToVisitAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<decimal?>()), Times.Never);
+        }
+
+        [Fact]
         public async Task RemoveTestCommand_Should_Remove_Test_LogicGuard()
         {
             // Arrange - 1.4 Delete test
@@ -103,6 +135,39 @@ namespace Open_lab.Tests.ViewModels
             _viewModel.SelectedTests.Should().NotContain(item);
             _viewModel.StatusMessage.Should().Contain("تم حذف");
             _visitServiceMock.Verify(service => service.RemoveVisitTestAsync(200), Times.Once);
+        }
+
+        [Fact]
+        public async Task RemoveTestCommand_When_Service_Throws_Should_Set_Error_StatusMessage()
+        {
+            // Arrange - FAILURE test for RemoveTestCommand
+            _viewModel.InvokePrivate("set_VisitId", 100);
+            var item = new SelectedTestItem { VisitTestId = 200, TestName = "Test" };
+            _viewModel.SelectedTests.Add(item);
+            _viewModel.SelectedVisitTest = item;
+            _visitServiceMock.Setup(service => service.RemoveVisitTestAsync(200))
+                .ThrowsAsync(new Exception("Service Error"));
+
+            // Act
+            await _viewModel.InvokePrivateAsync("RemoveTestAsync");
+
+            // Assert
+            _viewModel.StatusMessage.Should().Contain("خطأ");
+            _visitServiceMock.Verify(service => service.RemoveVisitTestAsync(200), Times.Once);
+        }
+
+        [Fact]
+        public async Task RemoveTestCommand_When_SelectedVisitTest_Null_Should_Not_Call_Service_LogicGuard()
+        {
+            // Arrange - FAILURE test for RemoveTestCommand with null selection
+            _viewModel.InvokePrivate("set_VisitId", 100);
+            _viewModel.SelectedVisitTest = null;
+
+            // Act
+            await _viewModel.InvokePrivateAsync("RemoveTestAsync");
+
+            // Assert
+            _visitServiceMock.Verify(service => service.RemoveVisitTestAsync(It.IsAny<int>()), Times.Never);
         }
 
         [Fact]
@@ -127,6 +192,38 @@ namespace Open_lab.Tests.ViewModels
             _visitServiceMock.Verify(v => v.AddCustomGroupToVisitAsync(100, 5), Times.Once);
             _viewModel.SelectedTests.Should().HaveCount(1);
             _viewModel.StatusMessage.Should().Contain("المجموعة");
+        }
+
+        [Fact]
+        public async Task AddCustomGroupCommand_When_Service_Throws_Should_Set_Error_StatusMessage()
+        {
+            // Arrange - FAILURE test for AddCustomGroupCommand
+            _viewModel.InvokePrivate("set_VisitId", 100);
+            var group = new CustomGroup { CustomGroupId = 5, Name = "Basic Profile" };
+            _viewModel.SelectedCustomGroup = group;
+            _visitServiceMock.Setup(service => service.AddCustomGroupToVisitAsync(100, 5))
+                .ThrowsAsync(new Exception("Service Error"));
+
+            // Act
+            await _viewModel.InvokePrivateAsync("AddCustomGroupAsync");
+
+            // Assert
+            _viewModel.StatusMessage.Should().Contain("خطأ");
+            _visitServiceMock.Verify(v => v.AddCustomGroupToVisitAsync(100, 5), Times.Once);
+        }
+
+        [Fact]
+        public async Task AddCustomGroupCommand_When_SelectedCustomGroup_Null_Should_Not_Call_Service_LogicGuard()
+        {
+            // Arrange - FAILURE test for AddCustomGroupCommand with null group
+            _viewModel.InvokePrivate("set_VisitId", 100);
+            _viewModel.SelectedCustomGroup = null;
+
+            // Act
+            await _viewModel.InvokePrivateAsync("AddCustomGroupAsync");
+
+            // Assert
+            _visitServiceMock.Verify(v => v.AddCustomGroupToVisitAsync(It.IsAny<int>(), It.IsAny<int>()), Times.Never);
         }
     }
 }

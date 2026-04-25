@@ -66,5 +66,37 @@ namespace Open_lab.Tests.ViewModels
             _viewModel.StatusMessage.Should().Contain("لم يتم العثور");
             _viewModel.Visits.Should().BeEmpty();
         }
+
+        [Fact]
+        public async Task LoadHistoryAsync_When_ReportService_Throws_Should_Set_Error()
+        {
+            // Arrange - FAILURE test for LoadHistoryCommand
+            _viewModel.LabId = "LAB-001";
+            var patient = new Patient { PatientId = 1, FullName = "John", LabId = "LAB-001" };
+            _patientServiceMock.Setup(s => s.GetByLabIdAsync("LAB-001")).ReturnsAsync(patient);
+            _reportServiceMock.Setup(r => r.GetPatientHistoryAsync(1, It.IsAny<DateTime?>(), It.IsAny<DateTime?>()))
+                .ThrowsAsync(new Exception("Report Error"));
+
+            // Act
+            _viewModel.LoadHistoryCommand.Execute(null);
+            await Task.Delay(50);
+
+            // Assert
+            _viewModel.StatusMessage.Should().Contain("خطأ");
+        }
+
+        [Fact]
+        public async Task LoadHistoryAsync_When_LabId_Empty_Should_Set_Error()
+        {
+            // Arrange - FAILURE test for LoadHistoryCommand with empty LabId
+            _viewModel.LabId = "";
+
+            // Act
+            _viewModel.LoadHistoryCommand.Execute(null);
+            await Task.Delay(50);
+
+            // Assert
+            _viewModel.StatusMessage.Should().Contain("يرجى إدخال Lab ID");
+        }
     }
 }
