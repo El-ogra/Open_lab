@@ -16,6 +16,7 @@ namespace Open_lab.ViewModels
         private SampleCollectionRow? _selectedRow;
         private string _selectedSampleStatus = string.Empty;
         private string _statusMessage = string.Empty;
+        private bool _isLoading;
 
         public SampleCollectionViewModel(
             ISampleCollectionService sampleCollectionService,
@@ -81,6 +82,12 @@ namespace Open_lab.ViewModels
             private set => SetProperty(ref _statusMessage, value);
         }
 
+        public bool IsLoading
+        {
+            get => _isLoading;
+            private set => SetProperty(ref _isLoading, value);
+        }
+
         public ICommand LoadCommand { get; }
         public ICommand MarkCollectedCommand { get; }
         public ICommand MarkExternalCollectedCommand { get; }
@@ -90,6 +97,7 @@ namespace Open_lab.ViewModels
 
         private async Task LoadAsync()
         {
+            IsLoading = true;
             try
             {
                 var from = DateFrom.Date;
@@ -109,6 +117,10 @@ namespace Open_lab.ViewModels
             {
                 StatusMessage = "خطأ: " + ex.Message;
             }
+            finally
+            {
+                IsLoading = false;
+            }
         }
 
         private async Task RefreshSampleStatusAsync()
@@ -119,6 +131,7 @@ namespace Open_lab.ViewModels
                 return;
             }
 
+            IsLoading = true;
             try
             {
                 var sample = await _sampleTrackingService.GetSampleStatusAsync(SelectedRow.VisitTestId);
@@ -136,6 +149,10 @@ namespace Open_lab.ViewModels
             {
                 SelectedSampleStatus = "خطأ تتبع: " + ex.Message;
             }
+            finally
+            {
+                IsLoading = false;
+            }
         }
 
         private async Task MarkCollectedAsync()
@@ -151,15 +168,20 @@ namespace Open_lab.ViewModels
                 return;
             }
 
+            IsLoading = true;
             try
             {
                 await _sampleCollectionService.MarkCollectedAsync(SelectedRow.VisitTestId, AppSession.UserId);
-                StatusMessage = "تم تحديث حالة العينة.";
                 await LoadAsync();
+                StatusMessage = "تم تحديث حالة العينة.";
             }
             catch (Exception ex)
             {
                 StatusMessage = "خطأ: " + ex.Message;
+            }
+            finally
+            {
+                IsLoading = false;
             }
         }
 
@@ -176,15 +198,20 @@ namespace Open_lab.ViewModels
                 return;
             }
 
+            IsLoading = true;
             try
             {
                 await _sampleCollectionService.MarkCollectedAsync(SelectedRow.VisitTestId, AppSession.UserId, true, AppSession.UserId);
-                StatusMessage = "تم تعليم العينة كخارجية.";
                 await LoadAsync();
+                StatusMessage = "تم تعليم العينة كخارجية.";
             }
             catch (Exception ex)
             {
                 StatusMessage = "خطأ: " + ex.Message;
+            }
+            finally
+            {
+                IsLoading = false;
             }
         }
 
@@ -195,15 +222,20 @@ namespace Open_lab.ViewModels
                 return;
             }
 
+            IsLoading = true;
             try
             {
                 await _sampleCollectionService.MarkSeparatedAsync(SelectedRow.VisitTestId, SeparationType);
-                StatusMessage = "تم تسجيل فصل العينة.";
                 await LoadAsync();
+                StatusMessage = "تم تسجيل فصل العينة.";
             }
             catch (Exception ex)
             {
                 StatusMessage = "خطأ: " + ex.Message;
+            }
+            finally
+            {
+                IsLoading = false;
             }
         }
 
@@ -214,15 +246,20 @@ namespace Open_lab.ViewModels
                 return;
             }
 
+            IsLoading = true;
             try
             {
                 await _sampleCollectionService.MarkNotCollectedAsync(SelectedRow.VisitTestId);
-                StatusMessage = "تم تحديث الحالة.";
                 await LoadAsync();
+                StatusMessage = "تم تحديث الحالة.";
             }
             catch (Exception ex)
             {
                 StatusMessage = "خطأ: " + ex.Message;
+            }
+            finally
+            {
+                IsLoading = false;
             }
         }
     }

@@ -28,12 +28,14 @@ namespace Open_lab.Services
         public async Task UpdateSeparationStatusAsync(int visitTestId, bool isSeparated)
         {
             var sample = await _db.SampleCollections.FirstOrDefaultAsync(sc => sc.VisitTestId == visitTestId);
-            if (sample != null)
+            if (sample == null)
             {
-                sample.IsSeparated = isSeparated;
-                sample.Status = isSeparated ? "مفصولة" : "مسحوبة";
-                await _db.SaveChangesAsync();
+                throw new InvalidOperationException("لم يتم العثور على سجل العينة المطلوب.");
             }
+
+            sample.IsSeparated = isSeparated;
+            sample.Status = isSeparated ? "مفصولة" : "مسحوبة";
+            await _db.SaveChangesAsync();
         }
 
         public Task<List<SampleCollection>> GetPendingTrackingSamplesAsync()
