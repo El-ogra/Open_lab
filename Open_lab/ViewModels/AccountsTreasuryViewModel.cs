@@ -21,6 +21,7 @@ namespace Open_lab.ViewModels
         private decimal _netProfit;
         private int? _selectedBranchId;
         private string _statusMessage = string.Empty;
+        private bool _isLoading;
 
         public AccountsTreasuryViewModel(IAccountsTreasuryService accountsTreasuryService, IPrintService printService)
         {
@@ -93,6 +94,12 @@ namespace Open_lab.ViewModels
             set => SetProperty(ref _selectedBranchId, value);
         }
 
+        public bool IsLoading
+        {
+            get => _isLoading;
+            private set => SetProperty(ref _isLoading, value);
+        }
+
         public ObservableCollection<AccountsPaymentRow> Payments { get; }
         public ObservableCollection<TreasuryByUserRow> ByUser { get; }
         public ObservableCollection<TreasuryByReferralRow> ByReferral { get; }
@@ -113,6 +120,7 @@ namespace Open_lab.ViewModels
 
         private async Task LoadAsync()
         {
+            IsLoading = true;
             try
             {
                 var from = DateFrom.Date;
@@ -162,6 +170,10 @@ namespace Open_lab.ViewModels
             {
                 StatusMessage = "خطأ: " + ex.Message;
             }
+            finally
+            {
+                IsLoading = false;
+            }
         }
 
         private async Task LoadDailyAsync()
@@ -190,6 +202,7 @@ namespace Open_lab.ViewModels
 
         private async Task PrintAsync()
         {
+            IsLoading = true;
             try
             {
                 var lines = new ObservableCollection<string>
@@ -237,6 +250,10 @@ namespace Open_lab.ViewModels
             catch (Exception ex)
             {
                 StatusMessage = "خطأ: " + ex.Message;
+            }
+            finally
+            {
+                IsLoading = false;
             }
         }
     }

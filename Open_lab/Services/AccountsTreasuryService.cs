@@ -18,6 +18,11 @@ namespace Open_lab.Services
 
         public async Task<AccountsTreasurySnapshot> GetSnapshotAsync(DateTime from, DateTime to, int? branchId = null)
         {
+            if (from > to)
+            {
+                throw new ArgumentException("تاريخ البداية لا يمكن أن يكون أحدث من تاريخ النهاية.", nameof(from));
+            }
+
             var invoicesQuery = _db.Invoices
                 .AsNoTracking()
                 .Include(i => i.Visit)

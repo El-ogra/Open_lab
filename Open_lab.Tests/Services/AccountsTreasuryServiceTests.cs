@@ -119,5 +119,20 @@ namespace Open_lab.Tests.Services
             docRow.Should().NotBeNull();
             docRow!.CommissionAmount.Should().Be(100m); // 10% of 1000
         }
+
+        [Fact]
+        public async Task GetSnapshotAsync_WithInvalidDates_ShouldThrowException_FailureGuard()
+        {
+            // Arrange
+            var from = DateTime.Today;
+            var to = DateTime.Today.AddDays(-1); // to is before from
+            
+            // Act
+            Func<Task> act = async () => await _service.GetSnapshotAsync(from, to);
+
+            // Assert
+            await act.Should().ThrowAsync<ArgumentException>()
+                .WithMessage("*تاريخ البداية*");
+        }
     }
 }
