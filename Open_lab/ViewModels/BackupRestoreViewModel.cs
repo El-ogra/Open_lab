@@ -14,6 +14,7 @@ namespace Open_lab.ViewModels
         private string _restorePath = string.Empty;
         private string? _selectedBackupFile;
         private string _statusMessage = string.Empty;
+        private bool _isLoading;
 
         public BackupRestoreViewModel(IBackupRestoreService backupRestoreService)
         {
@@ -56,6 +57,12 @@ namespace Open_lab.ViewModels
             private set => SetProperty(ref _statusMessage, value);
         }
 
+        public bool IsLoading
+        {
+            get => _isLoading;
+            private set => SetProperty(ref _isLoading, value);
+        }
+
         public ICommand BackupCommand { get; }
         public ICommand RestoreCommand { get; }
         public ICommand LoadBackupsCommand { get; }
@@ -68,6 +75,7 @@ namespace Open_lab.ViewModels
                 return;
             }
 
+            IsLoading = true;
             try
             {
                 await _backupRestoreService.BackupAsync(BackupPath);
@@ -77,6 +85,10 @@ namespace Open_lab.ViewModels
             catch (Exception ex)
             {
                 StatusMessage = $"خطأ: {ex.Message}";
+            }
+            finally
+            {
+                IsLoading = false;
             }
         }
 
@@ -88,6 +100,7 @@ namespace Open_lab.ViewModels
                 return;
             }
 
+            IsLoading = true;
             try
             {
                 await _backupRestoreService.RestoreAsync(RestorePath);
@@ -97,6 +110,10 @@ namespace Open_lab.ViewModels
             catch (Exception ex)
             {
                 StatusMessage = $"خطأ: {ex.Message}";
+            }
+            finally
+            {
+                IsLoading = false;
             }
         }
 
@@ -112,8 +129,20 @@ namespace Open_lab.ViewModels
                 return;
             }
 
-            await LoadBackupsFromPathAsync(sourcePath);
-            StatusMessage = "تم تحديث قائمة النسخ.";
+            IsLoading = true;
+            try
+            {
+                await LoadBackupsFromPathAsync(sourcePath);
+                StatusMessage = "تم تحديث قائمة النسخ.";
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = $"خطأ: {ex.Message}";
+            }
+            finally
+            {
+                IsLoading = false;
+            }
         }
 
         private async Task LoadBackupsFromPathAsync(string sourcePath)
