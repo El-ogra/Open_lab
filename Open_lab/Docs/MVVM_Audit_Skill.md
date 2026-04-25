@@ -46,11 +46,15 @@ Error handling is considered COMPLETE if ANY of these exist:
 - Throwing explicit exceptions with clear messages
   (ArgumentNullException, InvalidOperationException, etc.)
 - Validation methods that throw domain-specific exceptions
+- Null/empty checks before applying DB operations
+  even if they don't throw exceptions
+  Example: if (!string.IsNullOrWhiteSpace(name)) is VALID validation
 
-Error handling is considered MISSING only if:
-- No validation whatsoever before DB operations
-- Exceptions are silently swallowed
-- No meaningful error information is propagated to the caller
+Error handling is considered MISSING only if ALL of these are true:
+- No null/empty checks before DB operations
+- No explicit exception throwing
+- No try/catch anywhere in the method
+- Exceptions from EF are silently swallowed
 
 ### VIEWMODEL CHECK
 - [ ] Does a ViewModel exist for this function?
@@ -111,6 +115,26 @@ IsLoading property is:
 - [ ] REJECT any test that uses hardcoded data unrelated
       to business logic
 
+#### VIEWMODEL TEST COMPLETENESS RULE
+For each ICommand in the ViewModel you MUST verify:
+- [ ] SUCCESS test exists for this specific Command
+- [ ] FAILURE test exists for this specific Command
+- [ ] EDGE CASE test exists if the Command handles data
+
+If ANY Command is missing FAILURE test:
+- Verdict MUST be ⚠️ WEAK COVERAGE
+- List every Command missing FAILURE test explicitly in Issues column
+
+#### SERVICE TEST COMPLETENESS RULE
+For each public method in the Service you MUST verify:
+- [ ] SUCCESS test exists for this specific method
+- [ ] FAILURE test exists for this specific method
+- [ ] EDGE CASE test exists for boundary conditions
+
+If ANY method is missing tests entirely:
+- Verdict MUST be ⚠️ WEAK COVERAGE
+- List every method missing tests explicitly in Issues column
+
 #### CRITICAL TEST RULE
 If Unit Tests exist for ViewModel ONLY but NOT for Service:
 - Unit Tests verdict MUST be ⚠️ WEAK COVERAGE
@@ -136,6 +160,8 @@ The function has no implementation at all.
 ✅ STRONG COVERAGE
 All scenarios covered with real assertions and correct mocking
 for BOTH ViewModel AND Service layers.
+Every Command in ViewModel has SUCCESS and FAILURE tests.
+Every public method in Service has SUCCESS and FAILURE tests.
 
 ⚠️ WEAK COVERAGE - [specify what is missing]
 Tests exist but one or more of the following:
@@ -143,6 +169,8 @@ Tests exist but one or more of the following:
 - Assertions are too weak
 - Mocking is incorrect or missing
 - Service layer has no tests even if ViewModel tests exist
+- Any Command in ViewModel has only SUCCESS tests
+- Any Service method has no direct tests at all
 
 ❌ NO TESTS
 No test class or test methods exist for this function.
@@ -200,6 +228,10 @@ If the function is already complete write: No actions required.
 - A passing test is NOT the same as a good test
 - NEVER give ✅ STRONG COVERAGE for Unit Tests unless BOTH
   ViewModel AND Service are tested with real assertions
+- NEVER give ✅ STRONG COVERAGE if any Command in ViewModel
+  has only SUCCESS tests without FAILURE tests
+- NEVER give ✅ STRONG COVERAGE if any Service method
+  has no direct tests at all
 - NEVER offer to make changes or create PRs
 - NEVER ask for permission to provide the ACTION PLAN section
 - The ACTION PLAN section is mandatory in every single report
