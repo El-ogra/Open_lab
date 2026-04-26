@@ -104,5 +104,30 @@ namespace Open_lab.Tests.Services
             // Assert
             rows.Should().HaveCount(1);
         }
+
+        [Fact]
+        public async Task GetRecentActivitiesAsync_Should_Return_Recent_Activities_Success()
+        {
+            var user = new User { Username = "u-success" };
+            _db.Users.Add(user);
+            await _db.SaveChangesAsync();
+
+            _db.AuditLogs.Add(new AuditLog
+            {
+                UserId = user.UserId,
+                Action = "Insert",
+                TableName = "Patients",
+                RecordId = "15",
+                Timestamp = DateTime.Now
+            });
+            await _db.SaveChangesAsync();
+
+            var rows = await _service.GetRecentActivitiesAsync();
+
+            rows.Should().ContainSingle();
+            rows[0].Username.Should().Be("u-success");
+            rows[0].ActivityDescription.Should().NotBeNullOrWhiteSpace();
+        }
+
     }
 }

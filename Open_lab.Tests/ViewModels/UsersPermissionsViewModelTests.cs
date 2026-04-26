@@ -66,6 +66,18 @@ namespace Open_lab.Tests.ViewModels
         }
 
         [Fact]
+        public async Task SaveUserCommand_When_Username_Empty_Should_Set_Validation_Message_Failure()
+        {
+            _viewModel.Username = " ";
+
+            _viewModel.SaveUserCommand.Execute(null);
+            await Task.Delay(50);
+
+            _viewModel.StatusMessage.Should().Be("أدخل اسم المستخدم.");
+            _userAdminServiceMock.Verify(x => x.CreateUserAsync(It.IsAny<User>(), It.IsAny<string?>()), Times.Never);
+        }
+
+        [Fact]
         public async Task SaveRolePermissionsAsync_Should_Send_Granted_Codes()
         {
             var role = new Role { RoleId = 4, RoleName = "Reception" };
@@ -105,6 +117,18 @@ namespace Open_lab.Tests.ViewModels
         }
 
         [Fact]
+        public async Task DeleteUserCommand_When_Service_Throws_Should_Set_Error_Message_Failure()
+        {
+            _viewModel.SelectedUser = new User { UserId = 10, Username = "delete-me" };
+            _userAdminServiceMock.Setup(x => x.DeleteUserAsync(10)).ThrowsAsync(new InvalidOperationException("delete-failed"));
+
+            _viewModel.DeleteUserCommand.Execute(null);
+            await Task.Delay(50);
+
+            _viewModel.StatusMessage.Should().Contain("delete-failed");
+        }
+
+        [Fact]
         public async Task SaveRoleCommand_When_RoleName_Empty_Should_Set_Validation_Message_Failure()
         {
             // Arrange
@@ -136,6 +160,18 @@ namespace Open_lab.Tests.ViewModels
         }
 
         [Fact]
+        public async Task SaveRoleCommand_When_Service_Throws_Should_Set_Error_Message_Failure()
+        {
+            _viewModel.RoleName = "Reception";
+            _userAdminServiceMock.Setup(x => x.CreateRoleAsync("Reception")).ThrowsAsync(new InvalidOperationException("role-create-failed"));
+
+            _viewModel.SaveRoleCommand.Execute(null);
+            await Task.Delay(50);
+
+            _viewModel.StatusMessage.Should().Contain("role-create-failed");
+        }
+
+        [Fact]
         public async Task AssignRoleCommand_When_User_And_Role_Selected_Should_Call_Service_Success()
         {
             // Arrange
@@ -153,6 +189,19 @@ namespace Open_lab.Tests.ViewModels
         }
 
         [Fact]
+        public async Task AssignRoleCommand_When_Service_Throws_Should_Set_Error_Message_Failure()
+        {
+            _viewModel.SelectedUser = new User { UserId = 1, Username = "u" };
+            _viewModel.SelectedRole = new Role { RoleId = 2, RoleName = "r" };
+            _userAdminServiceMock.Setup(x => x.AssignSingleRoleAsync(1, 2)).ThrowsAsync(new InvalidOperationException("assign-failed"));
+
+            _viewModel.AssignRoleCommand.Execute(null);
+            await Task.Delay(50);
+
+            _viewModel.StatusMessage.Should().Contain("assign-failed");
+        }
+
+        [Fact]
         public async Task UnassignRoleCommand_When_Service_Throws_Should_Set_Error_Message_Failure()
         {
             // Arrange
@@ -166,6 +215,56 @@ namespace Open_lab.Tests.ViewModels
 
             // Assert
             _viewModel.StatusMessage.Should().Contain("unlink-failed");
+        }
+
+        [Fact]
+        public async Task UnassignRoleCommand_When_Selected_User_And_Role_Should_Call_Service_Success()
+        {
+            _viewModel.SelectedUser = new User { UserId = 1, Username = "u" };
+            _viewModel.SelectedRole = new Role { RoleId = 2, RoleName = "r" };
+            _userAdminServiceMock.Setup(x => x.RemoveUserRoleAsync(1, 2)).Returns(Task.CompletedTask);
+
+            _viewModel.UnassignRoleCommand.Execute(null);
+            await Task.Delay(50);
+
+            _userAdminServiceMock.Verify(x => x.RemoveUserRoleAsync(1, 2), Times.Once);
+            _viewModel.StatusMessage.Should().Be("تم فك ربط الدور من المستخدم.");
+        }
+
+        [Fact]
+        public async Task DeleteRoleCommand_When_Selected_Role_Exists_Should_Call_Service_Success()
+        {
+            _viewModel.SelectedRole = new Role { RoleId = 20, RoleName = "r20" };
+            _userAdminServiceMock.Setup(x => x.DeleteRoleAsync(20)).Returns(Task.CompletedTask);
+
+            _viewModel.DeleteRoleCommand.Execute(null);
+            await Task.Delay(50);
+
+            _userAdminServiceMock.Verify(x => x.DeleteRoleAsync(20), Times.Once);
+            _viewModel.StatusMessage.Should().Be("تم حذف الدور.");
+        }
+
+        [Fact]
+        public async Task DeleteRoleCommand_When_Service_Throws_Should_Set_Error_Message_Failure()
+        {
+            _viewModel.SelectedRole = new Role { RoleId = 21, RoleName = "r21" };
+            _userAdminServiceMock.Setup(x => x.DeleteRoleAsync(21)).ThrowsAsync(new InvalidOperationException("role-delete-failed"));
+
+            _viewModel.DeleteRoleCommand.Execute(null);
+            await Task.Delay(50);
+
+            _viewModel.StatusMessage.Should().Contain("role-delete-failed");
+        }
+
+        [Fact]
+        public async Task SaveRolePermissionsCommand_When_No_Selected_Role_Should_Not_Call_Service_Edge()
+        {
+            _viewModel.SelectedRole = null;
+
+            _viewModel.SaveRolePermissionsCommand.Execute(null);
+            await Task.Delay(50);
+
+            _userAdminServiceMock.Verify(x => x.SaveRolePermissionsAsync(It.IsAny<int>(), It.IsAny<IEnumerable<string>>()), Times.Never);
         }
 
         [Fact]

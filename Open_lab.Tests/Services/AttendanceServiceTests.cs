@@ -116,7 +116,8 @@ namespace Open_lab.Tests.Services
             updatedLog!.LogoutAt = logoutTime;
             await _db.SaveChangesAsync();
 
-            // Act - Calculate work hours
+            // Act - Calculate work hours through service summary (real business path)
+            var summary = await _service.GetDailyWorkingSummaryAsync(user.UserId, DateTime.Today, DateTime.Today.AddHours(18));
             var workHours = updatedLog.LogoutAt.Value - updatedLog.LoginAt;
             var expectedWorkHours = TimeSpan.FromHours(8.5); // 8:30 to 17:00
             var shiftDuration = shift.EndTime - shift.StartTime; // 8 hours
@@ -125,10 +126,13 @@ namespace Open_lab.Tests.Services
 
             // Assert - Logic Guard: Verify work hours, delay, and overtime calculations
             workHours.Should().BeCloseTo(expectedWorkHours, TimeSpan.FromMinutes(1));
+            summary.GrossMinutes.Should().Be(510);
+            summary.NetMinutes.Should().Be(510);
             delayMinutes.Should().Be(30, "Should be 30 minutes late");
             overtimeMinutes.Should().Be(60, "Should be 60 minutes overtime");
             updatedLog.UserId.Should().Be(user.UserId);
             updatedLog.ShiftId.Should().Be(shift.ShiftId);
+            shiftDuration.TotalHours.Should().Be(8);
         }
 
         [Fact]
@@ -136,6 +140,18 @@ namespace Open_lab.Tests.Services
         {
             var result = await _service.ClockOutAsync(userId: 9999);
             result.Should().BeNull();
+        }
+
+        [Fact]
+        public async Task ClockOutAsync_When_Open_Log_Exists_Should_Close_Log_Success()
+        {
+            var open = await _service.ClockInAsync(444, DateTime.Today.AddHours(8));
+
+            var closed = await _service.ClockOutAsync(444, DateTime.Today.AddHours(16));
+
+            closed.Should().NotBeNull();
+            closed!.AttendanceLogId.Should().Be(open.AttendanceLogId);
+            closed.LogoutAt.Should().Be(DateTime.Today.AddHours(16));
         }
 
         [Fact]
@@ -192,6 +208,18 @@ namespace Open_lab.Tests.Services
         }
 
         [Fact]
+        public async Task StartBreakAsync_Should_Create_Break_Success()
+        {
+            await _service.ClockInAsync(78, DateTime.Today.AddHours(8));
+
+            var br = await _service.StartBreakAsync(78, "Meal", DateTime.Today.AddHours(12));
+
+            br.Should().NotBeNull();
+            br!.Type.Should().Be("Meal");
+            br.EndAt.Should().BeNull();
+        }
+
+        [Fact]
         public async Task EndBreakAsync_When_No_Open_Break_Should_Return_Null_Failure()
         {
             // Arrange
@@ -202,6 +230,19 @@ namespace Open_lab.Tests.Services
 
             // Assert
             br.Should().BeNull();
+        }
+
+        [Fact]
+        public async Task EndBreakAsync_Should_Close_Open_Break_Success()
+        {
+            await _service.ClockInAsync(300, DateTime.Today.AddHours(8));
+            var started = await _service.StartBreakAsync(300, "Rest", DateTime.Today.AddHours(10));
+
+            var ended = await _service.EndBreakAsync(300, DateTime.Today.AddHours(10).AddMinutes(20));
+
+            ended.Should().NotBeNull();
+            ended!.BreakId.Should().Be(started!.BreakId);
+            ended.EndAt.Should().Be(DateTime.Today.AddHours(10).AddMinutes(20));
         }
 
         [Fact]
@@ -243,5 +284,32 @@ namespace Open_lab.Tests.Services
             summary.FirstLoginAt.Should().Be(loginAt);
             summary.LastLogoutAt.Should().Be(logoutAt);
         }
+
+        [Fact]
+        public async Task GetLogsAsync_When_No_Logs_Should_Return_Empty_Edge()
+        {
+            var rows = await _service.GetLogsAsync(DateTime.Today.AddDays(-1), DateTime.Today.AddDays(1));
+
+            rows.Should().BeEmpty();
+        }
+
+        [Fact]
+        public async Task CloseAsync_When_Log_Not_Found_Should_Not_Throw_Edge()
+        {
+            await _service.CloseAsync(99999);
+
+            (await _db.AttendanceLogs.CountAsync()).Should().Be(0);
+        }
+
+        [Fact]
+        public async Task CreateLoginAsync_When_Note_Null_Should_Create_Log_Edge()
+        {
+            var log = await _service.CreateLoginAsync(700, null);
+
+            log.Should().NotBeNull();
+            log.UserId.Should().Be(700);
+            log.Note.Should().BeNull();
+        }
+
     }
 }

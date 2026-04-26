@@ -63,6 +63,19 @@ namespace Open_lab.Tests.ViewModels
         }
 
         [Fact]
+        public async Task LoadLogsCommand_When_Service_Returns_Empty_Should_Set_Zero_Status_Edge()
+        {
+            _attendanceServiceMock.Setup(x => x.GetLogsAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>()))
+                .ReturnsAsync(new List<AttendanceLog>());
+
+            _viewModel.LoadLogsCommand.Execute(null);
+            await Task.Delay(50);
+
+            _viewModel.Logs.Should().BeEmpty();
+            _viewModel.StatusMessage.Should().Contain("تم تحميل 0 سجل");
+        }
+
+        [Fact]
         public async Task ClockOutAsync_When_NoOpenLog_Should_Set_NotFoundMessage_EdgeGuard()
         {
             // Arrange
@@ -76,6 +89,23 @@ namespace Open_lab.Tests.ViewModels
 
             // Assert
             _viewModel.StatusMessage.Should().Contain("لا يوجد سجل حضور مفتوح");
+        }
+
+        [Fact]
+        public async Task ClockOutCommand_When_OpenLog_Exists_Should_Reset_AttendanceLogId_Success()
+        {
+            AppSession.UserId = 11;
+            AppSession.AttendanceLogId = 55;
+            _attendanceServiceMock
+                .Setup(x => x.ClockOutAsync(AppSession.UserId, It.IsAny<DateTime?>()))
+                .ReturnsAsync(new AttendanceLog { AttendanceLogId = 55, UserId = 11, LogoutAt = DateTime.Now });
+            _attendanceServiceMock.Setup(x => x.GetOpenLogAsync(AppSession.UserId)).ReturnsAsync((AttendanceLog?)null);
+
+            _viewModel.ClockOutCommand.Execute(null);
+            await Task.Delay(50);
+
+            AppSession.AttendanceLogId.Should().Be(0);
+            _attendanceServiceMock.Verify(x => x.ClockOutAsync(AppSession.UserId, It.IsAny<DateTime?>()), Times.Once);
         }
 
         [Fact]
@@ -113,6 +143,22 @@ namespace Open_lab.Tests.ViewModels
         }
 
         [Fact]
+        public async Task StartBreakCommand_When_Open_Log_Exists_Should_Set_Success_Message()
+        {
+            AppSession.UserId = 22;
+            _viewModel.BreakNote = "break note";
+            _attendanceServiceMock.Setup(x => x.StartBreakAsync(AppSession.UserId, It.IsAny<string>(), It.IsAny<DateTime?>(), It.IsAny<string?>()))
+                .ReturnsAsync(new AttendanceBreak { BreakId = 3, AttendanceLogId = 1, StartAt = DateTime.Now });
+            _attendanceServiceMock.Setup(x => x.GetOpenLogAsync(AppSession.UserId)).ReturnsAsync((AttendanceLog?)null);
+
+            _viewModel.StartBreakCommand.Execute(null);
+            await Task.Delay(50);
+
+            _attendanceServiceMock.Verify(x => x.StartBreakAsync(AppSession.UserId, It.IsAny<string>(), It.IsAny<DateTime?>(), It.IsAny<string?>()), Times.Once);
+            _viewModel.BreakNote.Should().BeEmpty();
+        }
+
+        [Fact]
         public async Task EndBreakCommand_When_Open_Break_Exists_Should_Set_Success_Message()
         {
             // Arrange
@@ -130,6 +176,19 @@ namespace Open_lab.Tests.ViewModels
         }
 
         [Fact]
+        public async Task EndBreakCommand_When_No_Open_Break_Should_Set_Failure_Message()
+        {
+            AppSession.UserId = 30;
+            _attendanceServiceMock.Setup(x => x.EndBreakAsync(AppSession.UserId, It.IsAny<DateTime?>()))
+                .ReturnsAsync((AttendanceBreak?)null);
+
+            _viewModel.EndBreakCommand.Execute(null);
+            await Task.Delay(50);
+
+            _viewModel.StatusMessage.Should().Contain("لا توجد راحة مفتوحة");
+        }
+
+        [Fact]
         public async Task LoadDailySummaryCommand_When_Service_Throws_Should_Set_Error_Message_Failure()
         {
             // Arrange
@@ -144,6 +203,22 @@ namespace Open_lab.Tests.ViewModels
 
             // Assert
             _viewModel.StatusMessage.Should().Contain("summary-failed");
+        }
+
+        [Fact]
+        public async Task LoadDailySummaryCommand_When_Service_Returns_Data_Should_Set_Summary_Message_Success()
+        {
+            AppSession.UserId = 41;
+            _attendanceServiceMock
+                .Setup(x => x.GetDailyWorkingSummaryAsync(AppSession.UserId, It.IsAny<DateTime>(), It.IsAny<DateTime?>()))
+                .ReturnsAsync(new DailyWorkingSummary { UserId = 41, GrossMinutes = 480, BreakMinutes = 30, NetMinutes = 450 });
+
+            _viewModel.LoadDailySummaryCommand.Execute(null);
+            await Task.Delay(50);
+
+            _viewModel.DailySummary.Should().NotBeNull();
+            _viewModel.DailySummary!.NetMinutes.Should().Be(450);
+            _viewModel.StatusMessage.Should().Contain("صافي 450 دقيقة");
         }
 
         [Fact]
@@ -170,6 +245,19 @@ namespace Open_lab.Tests.ViewModels
             // Assert
             _viewModel.Breaks.Should().ContainSingle(b => b.BreakId == 1 && b.Duration == "مفتوحة");
             _viewModel.StatusMessage.Should().Contain("سجل حضور مفتوح");
+        }
+
+        [Fact]
+        public async Task RefreshOpenLogCommand_When_Service_Throws_Should_Set_Error_Message_Failure()
+        {
+            AppSession.UserId = 52;
+            _attendanceServiceMock.Setup(x => x.GetOpenLogAsync(AppSession.UserId))
+                .ThrowsAsync(new InvalidOperationException("refresh-open-failed"));
+
+            _viewModel.RefreshOpenLogCommand.Execute(null);
+            await Task.Delay(50);
+
+            _viewModel.StatusMessage.Should().Contain("refresh-open-failed");
         }
 
         public void Dispose() => AppSessionTestHelper.Reset();

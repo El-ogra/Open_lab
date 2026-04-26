@@ -124,6 +124,14 @@ namespace Open_lab.Tests.Services
         }
 
         [Fact]
+        public async Task CreateManifestAsync_With_Null_QueueIds_Should_Throw_Failure()
+        {
+            Func<Task> act = async () => await _service.CreateManifestAsync(1, null!, "notes");
+
+            await act.Should().ThrowAsync<NullReferenceException>();
+        }
+
+        [Fact]
         public async Task UpdateQueueStatusAsync_Should_Update_LogicGuard()
         {
             // Refactored to Logic Guard - verifies status update with complete data validation
@@ -396,6 +404,7 @@ namespace Open_lab.Tests.Services
             (await _db.ExternalLabQueues.CountAsync()).Should().Be(0);
         }
 
+
         // 8.6 External Lab Report Tests - NEW TEST
 
         [Fact]
@@ -451,5 +460,15 @@ namespace Open_lab.Tests.Services
             reportItem.ExternalReference.Should().Be("EXT-REF-123");
             reportItem.DateQueued.Should().BeCloseTo(DateTime.Now, TimeSpan.FromSeconds(5));
         }
+
+
+        [Fact]
+        public async Task GetAllManifestsAsync_When_None_Exist_Should_Return_Empty_Edge()
+        {
+            var manifests = await _service.GetAllManifestsAsync();
+
+            manifests.Should().BeEmpty();
+        }
+
     }
 }

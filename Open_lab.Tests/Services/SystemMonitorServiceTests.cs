@@ -140,5 +140,6 @@ namespace Open_lab.Tests.Services
             rows[0].Username.Should().Be("open-user");
             rows[0].Status.Should().Be("متصل");
         }
+
     }
 }

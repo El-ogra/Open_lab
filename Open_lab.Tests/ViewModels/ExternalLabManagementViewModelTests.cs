@@ -96,6 +96,17 @@ namespace Open_lab.Tests.ViewModels
         }
 
         [Fact]
+        public async Task LoadQueueCommand_When_Service_Throws_Should_Set_Error_Message_Failure()
+        {
+            _externalLabServiceMock.Setup(x => x.GetPendingQueueAsync()).ThrowsAsync(new Exception("queue-load-failed"));
+
+            _viewModel.LoadQueueCommand.Execute(null);
+            await Task.Delay(50);
+
+            _viewModel.StatusMessage.Should().Contain("queue-load-failed");
+        }
+
+        [Fact]
         public async Task LoadManifestsCommand_When_Executed_Should_Load_Manifest_List_Success()
         {
             // Arrange
@@ -198,6 +209,17 @@ namespace Open_lab.Tests.ViewModels
         }
 
         [Fact]
+        public async Task CreateManifestCommand_When_Queue_Selection_Empty_Should_Not_Call_Service_Edge()
+        {
+            _viewModel.SelectedReferralId = 3;
+
+            _viewModel.CreateManifestCommand.Execute(null);
+            await Task.Delay(50);
+
+            _externalLabServiceMock.Verify(x => x.CreateManifestAsync(It.IsAny<int>(), It.IsAny<List<int>>(), It.IsAny<string?>()), Times.Never);
+        }
+
+        [Fact]
         public async Task UpdateStatusCommand_When_SelectedItem_Exists_Should_Call_Service_Success()
         {
             // Arrange
@@ -225,6 +247,21 @@ namespace Open_lab.Tests.ViewModels
 
             // Assert
             _externalLabServiceMock.Verify(x => x.UpdateQueueStatusAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string?>()), Times.Never);
+        }
+
+        [Fact]
+        public async Task UpdateStatusCommand_When_Service_Throws_Should_Set_Error_Message_Failure()
+        {
+            await _viewModel.InvokePrivateAsync("LoadQueueAsync");
+            _viewModel.SelectedQueueItem = _viewModel.PendingQueue[0];
+            _externalLabServiceMock
+                .Setup(x => x.UpdateQueueStatusAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string?>()))
+                .ThrowsAsync(new Exception("update-status-failed"));
+
+            _viewModel.UpdateStatusCommand.Execute(null);
+            await Task.Delay(50);
+
+            _viewModel.StatusMessage.Should().Contain("update-status-failed");
         }
 
         [Fact]
@@ -260,6 +297,32 @@ namespace Open_lab.Tests.ViewModels
         }
 
         [Fact]
+        public async Task LoadSettlementCommand_When_Referral_Not_Selected_Should_Not_Call_Service_Edge()
+        {
+            _viewModel.SelectedReferralId = null;
+
+            _viewModel.LoadSettlementCommand.Execute(null);
+            await Task.Delay(50);
+
+            _externalSettlementServiceMock.Verify(x => x.GetPendingBalanceAsync(It.IsAny<int>()), Times.Never);
+            _externalSettlementServiceMock.Verify(x => x.GetSettlementHistoryAsync(It.IsAny<int>()), Times.Never);
+        }
+
+        [Fact]
+        public async Task LoadSettlementCommand_When_Service_Throws_Should_Set_Error_Message_Failure()
+        {
+            _viewModel.SelectedReferralId = 3;
+            _externalSettlementServiceMock
+                .Setup(x => x.GetPendingBalanceAsync(3))
+                .ThrowsAsync(new Exception("settlement-load-failed"));
+
+            _viewModel.LoadSettlementCommand.Execute(null);
+            await Task.Delay(50);
+
+            _viewModel.StatusMessage.Should().Contain("settlement-load-failed");
+        }
+
+        [Fact]
         public async Task CreateSettlementAsync_When_AmountIsZero_Should_NotCall_Service_EdgeGuard()
         {
             // Arrange
@@ -291,6 +354,21 @@ namespace Open_lab.Tests.ViewModels
             // Assert
             _externalSettlementServiceMock.Verify(x => x.CreateSettlementAsync(3, 15m, "note"), Times.Once);
             _viewModel.SettlementAmount.Should().Be(0m);
+        }
+
+        [Fact]
+        public async Task CreateSettlementCommand_When_Service_Throws_Should_Set_Error_Message_Failure()
+        {
+            _viewModel.SelectedReferralId = 3;
+            _viewModel.SettlementAmount = 20m;
+            _externalSettlementServiceMock
+                .Setup(x => x.CreateSettlementAsync(3, 20m, It.IsAny<string?>()))
+                .ThrowsAsync(new Exception("settlement-create-failed"));
+
+            _viewModel.CreateSettlementCommand.Execute(null);
+            await Task.Delay(50);
+
+            _viewModel.StatusMessage.Should().Contain("settlement-create-failed");
         }
 
         [Fact]

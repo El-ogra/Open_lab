@@ -212,6 +212,23 @@ namespace Open_lab.Tests.ViewModels
         }
 
         [Fact]
+        public async Task LoginCommand_When_AdminSetup_Throws_Should_Set_Error_Message_Failure()
+        {
+            _viewModel.Username = "admin";
+            _viewModel.Password = "admin123";
+            var user = new User { UserId = 1, Username = "admin", IsActive = true };
+
+            _authServiceMock.Setup(x => x.ValidateCredentialsAsync("admin", "admin123")).ReturnsAsync(user);
+            _adminSetupServiceMock.Setup(x => x.EnsureAdminAccessAsync(1)).ThrowsAsync(new InvalidOperationException("admin-setup-failed"));
+
+            _viewModel.LoginCommand.Execute(null);
+            await Task.Delay(50);
+
+            _viewModel.StatusMessage.Should().Contain("admin-setup-failed");
+            _viewModel.IsBusy.Should().BeFalse();
+        }
+
+        [Fact]
         public void TogglePasswordVisibilityCommand_When_Executed_Twice_Should_Return_To_Initial_State_Edge()
         {
             // Arrange
