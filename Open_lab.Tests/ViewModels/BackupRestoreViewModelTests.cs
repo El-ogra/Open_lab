@@ -3,23 +3,37 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Moq;
+using Open_lab.Tests.Infrastructure;
 using Open_lab.Services;
 using Open_lab.ViewModels;
 using Xunit;
 
 namespace Open_lab.Tests.ViewModels
 {
-    public class BackupRestoreViewModelTests
+    public class BackupRestoreViewModelTests : IDisposable
     {
         private readonly Mock<IBackupRestoreService> _mockService;
         private readonly BackupRestoreViewModel _viewModel;
 
         public BackupRestoreViewModelTests()
         {
+            AppSessionTestHelper.ResetToAdmin();
             _mockService = new Mock<IBackupRestoreService>();
+            _mockService
+                .Setup(s => s.GetBackupScheduleStatusAsync())
+                .ReturnsAsync(new BackupScheduleStatus
+                {
+                    IsEnabled = false,
+                    DirectoryPath = string.Empty,
+                    ScheduledTime = TimeSpan.FromHours(2)
+                });
             
-            // Assuming the AppSession allows the execution for testing purposes via standard unit test environments
             _viewModel = new BackupRestoreViewModel(_mockService.Object);
+        }
+
+        public void Dispose()
+        {
+            AppSessionTestHelper.Reset();
         }
 
         [Fact]
@@ -120,6 +134,69 @@ namespace Open_lab.Tests.ViewModels
             // Assert
             _viewModel.StatusMessage.Should().Contain("Access Denied");
             _viewModel.IsLoading.Should().BeFalse();
+        }
+
+        [Fact]
+        public async Task ConfigureScheduleCommand_Should_Fail_When_Directory_Missing_FailureGuard()
+        {
+            // Arrange
+            _viewModel.ScheduledBackupDirectory = string.Empty;
+            _viewModel.ScheduledBackupTime = "03:30";
+
+            // Act
+            _viewModel.ConfigureScheduleCommand.Execute(null);
+            await Task.Delay(50);
+
+            // Assert
+            _viewModel.StatusMessage.Should().Be("حدد مجلد النسخ الاحتياطي المجدول.");
+            _mockService.Verify(s => s.ConfigureDailyBackupScheduleAsync(It.IsAny<string>(), It.IsAny<TimeSpan>()), Times.Never);
+        }
+
+        [Fact]
+        public async Task ConfigureScheduleCommand_Should_Call_Service_And_Enable_Schedule_SuccessGuard()
+        {
+            // Arrange
+            _viewModel.ScheduledBackupDirectory = "C:\\Backups\\Daily";
+            _viewModel.ScheduledBackupTime = "03:30";
+            _mockService.Setup(s => s.ConfigureDailyBackupScheduleAsync("C:\\Backups\\Daily", It.IsAny<TimeSpan>())).Returns(Task.CompletedTask);
+            _mockService.Setup(s => s.GetBackupScheduleStatusAsync()).ReturnsAsync(new BackupScheduleStatus
+            {
+                IsEnabled = true,
+                DirectoryPath = "C:\\Backups\\Daily",
+                ScheduledTime = new TimeSpan(3, 30, 0),
+                LastRunUtc = DateTime.UtcNow
+            });
+
+            // Act
+            _viewModel.ConfigureScheduleCommand.Execute(null);
+            await Task.Delay(50);
+
+            // Assert
+            _mockService.Verify(s => s.ConfigureDailyBackupScheduleAsync("C:\\Backups\\Daily", new TimeSpan(3, 30, 0)), Times.Once);
+            _viewModel.IsScheduleEnabled.Should().BeTrue();
+            _viewModel.ScheduledBackupTime.Should().Be("03:30");
+        }
+
+        [Fact]
+        public async Task DisableScheduleCommand_Should_Call_Service_And_Disable_Schedule_SuccessGuard()
+        {
+            // Arrange
+            _mockService.Setup(s => s.CancelBackupScheduleAsync()).Returns(Task.CompletedTask);
+            _mockService.Setup(s => s.GetBackupScheduleStatusAsync()).ReturnsAsync(new BackupScheduleStatus
+            {
+                IsEnabled = false,
+                DirectoryPath = string.Empty,
+                ScheduledTime = new TimeSpan(2, 0, 0)
+            });
+
+            // Act
+            _viewModel.DisableScheduleCommand.Execute(null);
+            await Task.Delay(50);
+
+            // Assert
+            _mockService.Verify(s => s.CancelBackupScheduleAsync(), Times.Once);
+            _viewModel.IsScheduleEnabled.Should().BeFalse();
+            _viewModel.StatusMessage.Should().Be("تم إيقاف النسخ الاحتياطي المجدول.");
         }
     }
 }

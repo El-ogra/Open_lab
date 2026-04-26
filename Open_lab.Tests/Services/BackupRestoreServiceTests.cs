@@ -14,15 +14,18 @@ namespace Open_lab.Tests.Services
     public class BackupRestoreServiceTests : IDisposable
     {
         private readonly Open_lab.Data.OpenLabDbContext _db;
+        private readonly BackupRestoreService _service;
         private readonly string _dbName = Guid.NewGuid().ToString();
 
         public BackupRestoreServiceTests()
         {
             _db = InMemoryDbContextFactory.Create(_dbName);
+            _service = new BackupRestoreService(_db);
         }
 
         public void Dispose()
         {
+            _service.CancelBackupScheduleAsync().GetAwaiter().GetResult();
             _db.Database.EnsureDeleted();
             _db.Dispose();
         }
@@ -31,7 +34,6 @@ namespace Open_lab.Tests.Services
         public async Task ListBackupsAsync_Should_Return_Files_If_Exists_LogicGuard()
         {
             // 13.7 Configure Backup - Refactored to Logic Guard
-            var service = new BackupRestoreService(_db);
             var tempPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
             Directory.CreateDirectory(tempPath);
             try
@@ -42,7 +44,7 @@ namespace Open_lab.Tests.Services
                 File.WriteAllText(file2, "more dummy content");
                 
                 // Act
-                var backups = await service.ListBackupsAsync(tempPath);
+                var backups = await _service.ListBackupsAsync(tempPath);
                 
                 // Assert - Logic Guard: Verify all backup files are returned with correct names
                 backups.Should().HaveCount(2, "Should return all .bak files");
@@ -65,8 +67,7 @@ namespace Open_lab.Tests.Services
         public async Task BackupAsync_With_EmptyPath_Should_Throw_LogicGuard()
         {
             // Refactored to Logic Guard - verifies exception message and side effect
-            var service = new BackupRestoreService(_db);
-            Func<Task> act = async () => await service.BackupAsync("");
+            Func<Task> act = async () => await _service.BackupAsync("");
             
             // Assert - Logic Guard: Verify exception is thrown with appropriate message
             await act.Should().ThrowAsync<ArgumentException>().WithMessage("*path*");
@@ -87,7 +88,6 @@ namespace Open_lab.Tests.Services
         {
             // 13.7 Configure Backup - Logic Guard: Verify data is prepared for backup (InMemoryDatabase limitation workaround)
             // Arrange
-            var service = new BackupRestoreService(_db);
             var tempPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
             Directory.CreateDirectory(tempPath);
             try
@@ -110,7 +110,7 @@ namespace Open_lab.Tests.Services
                 patients.Should().Contain(p => p.LabId == "L-BACKUP2");
                 
                 // Assert - Logic Guard: Verify backup path validation
-                Func<Task> act = async () => await service.BackupAsync("");
+                Func<Task> act = async () => await _service.BackupAsync("");
                 await act.Should().ThrowAsync<ArgumentException>().WithMessage("*path*");
             }
             finally
@@ -121,8 +121,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task RestoreAsync_WithEmptyPath_ShouldThrowException_FailureGuard()
         {
-            var service = new BackupRestoreService(_db);
-            Func<Task> act = async () => await service.RestoreAsync("");
+            Func<Task> act = async () => await _service.RestoreAsync("");
             
             await act.Should().ThrowAsync<ArgumentException>().WithMessage("*path*");
         }
@@ -132,19 +131,65 @@ namespace Open_lab.Tests.Services
         {
             // Note: Since this is InMemory, exact raw SQL execution testing is tricky,
             // but we ensure the command doesn't throw ArgumentException for valid path.
-            var service = new BackupRestoreService(_db);
             var validPath = Path.Combine(Path.GetTempPath(), "test.bak");
             
             try
             {
                 // This might throw related to InMemory provider lacking relational support, 
                 // but at least it shouldn't throw ArgumentException
-                await service.RestoreAsync(validPath);
+                await _service.RestoreAsync(validPath);
             }
             catch (Exception ex) when (ex is not ArgumentException)
             {
                 // Acceptable in InMemory context without full EF relational provider mockery
             }
+        }
+
+        [Fact]
+        public async Task ConfigureDailyBackupScheduleAsync_Should_Enable_Schedule_And_Persist_LogicGuard()
+        {
+            // Arrange - 13.7 scheduled backup configuration
+            var tempDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            var scheduledTime = DateTime.Now.AddHours(2).TimeOfDay;
+
+            // Act
+            await _service.ConfigureDailyBackupScheduleAsync(tempDirectory, scheduledTime);
+            var status = await _service.GetBackupScheduleStatusAsync();
+
+            // Assert
+            status.IsEnabled.Should().BeTrue();
+            status.DirectoryPath.Should().Be(tempDirectory);
+            status.ScheduledTime.Hours.Should().Be(scheduledTime.Hours);
+            status.ScheduledTime.Minutes.Should().Be(scheduledTime.Minutes);
+
+            _db.SystemSettings.Should().Contain(s => s.SettingKey == "Backup.Schedule.Enabled" && s.SettingValue == bool.TrueString);
+            _db.SystemSettings.Should().Contain(s => s.SettingKey == "Backup.Schedule.Directory" && s.SettingValue == tempDirectory);
+        }
+
+        [Fact]
+        public async Task ConfigureDailyBackupScheduleAsync_With_Empty_Directory_Should_Throw_FailureGuard()
+        {
+            // Arrange/Act
+            Func<Task> act = async () => await _service.ConfigureDailyBackupScheduleAsync(string.Empty, TimeSpan.FromHours(1));
+
+            // Assert
+            await act.Should().ThrowAsync<ArgumentException>()
+                .WithMessage("*directory*");
+        }
+
+        [Fact]
+        public async Task CancelBackupScheduleAsync_Should_Disable_Schedule_LogicGuard()
+        {
+            // Arrange
+            var tempDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            await _service.ConfigureDailyBackupScheduleAsync(tempDirectory, TimeSpan.FromHours(4));
+
+            // Act
+            await _service.CancelBackupScheduleAsync();
+            var status = await _service.GetBackupScheduleStatusAsync();
+
+            // Assert
+            status.IsEnabled.Should().BeFalse();
         }
     }
 }
