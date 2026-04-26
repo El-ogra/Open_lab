@@ -112,6 +112,18 @@ namespace Open_lab.Tests.Services
         }
 
         [Fact]
+        public async Task CreateManifestAsync_With_Empty_QueueIds_Should_Create_Manifest_Without_Items_Edge()
+        {
+            // Act
+            var manifest = await _service.CreateManifestAsync(7, new List<int>(), "empty");
+
+            // Assert
+            manifest.Should().NotBeNull();
+            manifest.ReferralId.Should().Be(7);
+            (await _db.ShipmentItems.CountAsync()).Should().Be(0);
+        }
+
+        [Fact]
         public async Task UpdateQueueStatusAsync_Should_Update_LogicGuard()
         {
             // Refactored to Logic Guard - verifies status update with complete data validation
@@ -204,6 +216,20 @@ namespace Open_lab.Tests.Services
             queue.Should().ContainSingle();
             queue[0].Referral.Should().NotBeNull();
             queue[0].Referral!.Name.Should().Be("Ref Lab");
+        }
+
+        [Fact]
+        public async Task GetPendingQueueAsync_When_No_Pending_Items_Should_Return_Empty_Edge()
+        {
+            // Arrange
+            _db.ExternalLabQueues.Add(new ExternalLabQueue { VisitTestId = 1, Status = "Received", DateQueued = DateTime.Now });
+            await _db.SaveChangesAsync();
+
+            // Act
+            var queue = await _service.GetPendingQueueAsync();
+
+            // Assert
+            queue.Should().BeEmpty();
         }
 
         [Fact]
@@ -311,6 +337,63 @@ namespace Open_lab.Tests.Services
             results[0].Flag.Should().BeNull();
             results[0].VerifiedAt.Should().BeNull();
             results[0].VerifiedBy.Should().BeNull();
+        }
+
+        [Fact]
+        public async Task EnterExternalLabResultAsync_With_Empty_Result_Should_Throw_ArgumentException_Failure()
+        {
+            // Act
+            Func<Task> act = async () => await _service.EnterExternalLabResultAsync(1, "   ");
+
+            // Assert
+            await act.Should().ThrowAsync<ArgumentException>()
+                .WithMessage("*Result value is required*");
+        }
+
+        [Fact]
+        public async Task EnterExternalLabResultAsync_With_Invalid_QueueId_Should_Throw_InvalidOperationException_Failure()
+        {
+            // Act
+            Func<Task> act = async () => await _service.EnterExternalLabResultAsync(9999, "OK");
+
+            // Assert
+            await act.Should().ThrowAsync<InvalidOperationException>()
+                .WithMessage("*External queue item not found*");
+        }
+
+        [Fact]
+        public async Task GetAllManifestsAsync_Should_Return_Manifests_Ordered_By_DateDescending_Success()
+        {
+            // Arrange
+            var referral = new Referral { Name = "Ref", ReferralType = "ExternalLab" };
+            _db.Referrals.Add(referral);
+            await _db.SaveChangesAsync();
+
+            _db.ShipmentManifests.AddRange(
+                new ShipmentManifest { ManifestNumber = "MAN-1", ReferralId = referral.ReferralId, DateCreated = DateTime.Today.AddDays(-1), Status = "Open" },
+                new ShipmentManifest { ManifestNumber = "MAN-2", ReferralId = referral.ReferralId, DateCreated = DateTime.Today, Status = "Open" });
+            await _db.SaveChangesAsync();
+
+            // Act
+            var manifests = await _service.GetAllManifestsAsync();
+
+            // Assert
+            manifests.Should().HaveCount(2);
+            manifests[0].ManifestNumber.Should().Be("MAN-2");
+            manifests[1].ManifestNumber.Should().Be("MAN-1");
+        }
+
+        [Fact]
+        public async Task UpdateQueueStatusAsync_When_Queue_NotFound_Should_Leave_Data_Unchanged_Edge()
+        {
+            // Arrange
+            (await _db.ExternalLabQueues.CountAsync()).Should().Be(0);
+
+            // Act
+            await _service.UpdateQueueStatusAsync(12345, "Received", "X");
+
+            // Assert
+            (await _db.ExternalLabQueues.CountAsync()).Should().Be(0);
         }
 
         // 8.6 External Lab Report Tests - NEW TEST

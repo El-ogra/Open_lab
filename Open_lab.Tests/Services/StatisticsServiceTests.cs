@@ -47,6 +47,16 @@ namespace Open_lab.Tests.Services
         }
 
         [Fact]
+        public async Task GetReferralsAsync_When_No_Data_Should_Return_Empty_Edge()
+        {
+            // Act
+            var list = await _service.GetReferralsAsync();
+
+            // Assert
+            list.Should().BeEmpty();
+        }
+
+        [Fact]
         public async Task GetMonthlyAnalysisAsync_Should_Return_12_Months_With_Correct_Counts_LogicGuard()
         {
             // Refactored to Logic Guard - verifies aggregation accuracy
@@ -113,6 +123,34 @@ namespace Open_lab.Tests.Services
         }
 
         [Fact]
+        public async Task GetTop10TestsAsync_When_More_Than_10_Tests_Should_Return_Only_10_Edge()
+        {
+            // Arrange
+            var patient = new Patient { LabId = "L-TOP", FullName = "Top", Gender = "Male" };
+            _db.Patients.Add(patient);
+            await _db.SaveChangesAsync();
+
+            var visit = new Visit { PatientId = patient.PatientId, VisitDate = DateTime.Today };
+            _db.Visits.Add(visit);
+            await _db.SaveChangesAsync();
+
+            for (var i = 1; i <= 11; i++)
+            {
+                var test = new Test { Code = $"T{i}", NameReport = $"Test-{i}" };
+                _db.Tests.Add(test);
+                await _db.SaveChangesAsync();
+                _db.VisitTests.Add(new VisitTest { VisitId = visit.VisitId, TestId = test.TestId, Price = i });
+                await _db.SaveChangesAsync();
+            }
+
+            // Act
+            var top = await _service.GetTop10TestsAsync(DateTime.Today.AddDays(-1), DateTime.Today.AddDays(1));
+
+            // Assert
+            top.Should().HaveCount(10);
+        }
+
+        [Fact]
         public async Task GetSampleCountPerYear_Should_Return_Yearly_Ranges_LogicGuard()
         {
             // Refactored to Logic Guard - verifies aggregation accuracy
@@ -135,6 +173,16 @@ namespace Open_lab.Tests.Services
             var currentYear = rows.FirstOrDefault(r => r.Year == DateTime.Today.Year);
             currentYear.Should().NotBeNull();
             currentYear!.SamplesCount.Should().Be(1);
+        }
+
+        [Fact]
+        public async Task GetSampleCountPerYearAsync_When_YearsBack_Is_Zero_Should_Default_To_Five_Years_Edge()
+        {
+            // Act
+            var rows = await _service.GetSampleCountPerYearAsync(0);
+
+            // Assert
+            rows.Should().HaveCount(5);
         }
 
         [Fact]
@@ -214,6 +262,28 @@ namespace Open_lab.Tests.Services
             snapshot.Summary.VisitCount.Should().Be(0);
             snapshot.Summary.TotalRevenue.Should().Be(0m);
             snapshot.Summary.TotalPaid.Should().Be(0m);
+        }
+
+        [Fact]
+        public async Task GetSnapshotAsync_When_Filtered_By_Gender_Should_Exclude_Other_Genders_FailureGuard()
+        {
+            // Arrange
+            var male = new Patient { FullName = "M", Gender = "ذكر" };
+            var female = new Patient { FullName = "F", Gender = "أنثى" };
+            _db.Patients.AddRange(male, female);
+            await _db.SaveChangesAsync();
+
+            _db.Visits.AddRange(
+                new Visit { PatientId = male.PatientId, VisitDate = DateTime.Today },
+                new Visit { PatientId = female.PatientId, VisitDate = DateTime.Today });
+            await _db.SaveChangesAsync();
+
+            // Act
+            var snapshot = await _service.GetSnapshotAsync(DateTime.Today.AddDays(-1), DateTime.Today.AddDays(1), "ذكر", null);
+
+            // Assert
+            snapshot.Summary.VisitCount.Should().Be(1);
+            snapshot.ByGender.Should().ContainSingle(g => g.Gender == "ذكر");
         }
 
         // 2.11 - Branch Inventory - Aggregation Accuracy Tests

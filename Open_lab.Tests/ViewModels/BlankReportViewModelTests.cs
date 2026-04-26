@@ -54,5 +54,38 @@ namespace Open_lab.Tests.ViewModels
             _viewModel.ReferralName.Should().Be("Referral X");
             _viewModel.StatusMessage.Should().Contain("تم تحميل بيانات المريض");
         }
+
+        [Fact]
+        public async Task LoadAsync_With_InvalidVisitId_Should_Set_Validation_Message_FailureGuard()
+        {
+            _viewModel.VisitId = 0;
+
+            await _viewModel.InvokePrivateAsync("LoadAsync");
+
+            _viewModel.StatusMessage.Should().Be("يرجى إدخال رقم الزيارة.");
+            _reportServiceMock.Verify(x => x.GetVisitReportAsync(It.IsAny<int>()), Times.Never);
+        }
+
+        [Fact]
+        public async Task LoadAsync_When_ReportData_NotFound_Should_Set_NotFound_Message_FailureGuard()
+        {
+            _viewModel.VisitId = 42;
+            _reportServiceMock.Setup(x => x.GetVisitReportAsync(42)).ReturnsAsync((VisitReportData?)null);
+
+            await _viewModel.InvokePrivateAsync("LoadAsync");
+
+            _viewModel.StatusMessage.Should().Be("لم يتم العثور على بيانات.");
+            _viewModel.PatientName.Should().BeEmpty();
+        }
+
+        [Fact]
+        public async Task PrintBlankAsync_Without_PrintService_Should_Set_ServiceUnavailable_EdgeGuard()
+        {
+            _viewModel.VisitId = 7;
+
+            await _viewModel.InvokePrivateAsync("PrintBlankAsync");
+
+            _viewModel.StatusMessage.Should().Be("خدمة الطباعة غير متاحة.");
+        }
     }
 }

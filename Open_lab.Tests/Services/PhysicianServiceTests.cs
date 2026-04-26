@@ -184,5 +184,78 @@ namespace Open_lab.Tests.Services
             saved.Should().NotBeNull();
             saved!.CommissionPercentage.Should().Be(25m);
         }
+
+        [Fact]
+        public async Task GetAllAsync_Should_Return_All_Physicians_Ordered_By_Name_Success()
+        {
+            // Arrange
+            _db.Physicians.AddRange(
+                new Physician { FullName = "Dr. Zed", IsActive = true },
+                new Physician { FullName = "Dr. Adam", IsActive = false });
+            await _db.SaveChangesAsync();
+
+            // Act
+            var list = await _service.GetAllAsync();
+
+            // Assert
+            list.Should().HaveCount(2);
+            list[0].FullName.Should().Be("Dr. Adam");
+            list[1].FullName.Should().Be("Dr. Zed");
+        }
+
+        [Fact]
+        public async Task GetActiveAsync_Should_Return_Only_Active_Physicians_FailureGuard()
+        {
+            // Arrange
+            _db.Physicians.AddRange(
+                new Physician { FullName = "Dr. Active", IsActive = true },
+                new Physician { FullName = "Dr. Inactive", IsActive = false });
+            await _db.SaveChangesAsync();
+
+            // Act
+            var list = await _service.GetActiveAsync();
+
+            // Assert
+            list.Should().ContainSingle(p => p.FullName == "Dr. Active");
+        }
+
+        [Fact]
+        public async Task GetByIdAsync_When_Not_Found_Should_Return_Null_Edge()
+        {
+            // Act
+            var physician = await _service.GetByIdAsync(9999);
+
+            // Assert
+            physician.Should().BeNull();
+        }
+
+        [Fact]
+        public async Task DeleteAsync_When_Physician_Exists_Should_Remove_It_Success()
+        {
+            // Arrange
+            var physician = new Physician { FullName = "Dr. Delete", IsActive = true };
+            _db.Physicians.Add(physician);
+            await _db.SaveChangesAsync();
+
+            // Act
+            await _service.DeleteAsync(physician.PhysicianId);
+
+            // Assert
+            (await _db.Physicians.FindAsync(physician.PhysicianId)).Should().BeNull();
+        }
+
+        [Fact]
+        public async Task SearchAsync_When_No_Match_Should_Return_Empty_Failure()
+        {
+            // Arrange
+            _db.Physicians.Add(new Physician { FullName = "Dr. Search", Specialty = "Cardio", IsActive = true });
+            await _db.SaveChangesAsync();
+
+            // Act
+            var list = await _service.SearchAsync("NotFound");
+
+            // Assert
+            list.Should().BeEmpty();
+        }
     }
 }

@@ -65,5 +65,93 @@ namespace Open_lab.Tests.ViewModels
             _catalogMock.Verify(x => x.CreateReferralAsync(It.IsAny<Referral>()), Times.Never);
             _viewModel.StatusMessage.Should().Contain("نسبة الخصم");
         }
+
+        [Fact]
+        public async Task SaveAsync_Without_NameOrType_Should_Stop_Validation_FailureGuard()
+        {
+            // Arrange
+            _viewModel.Name = "";
+            _viewModel.Type = "";
+
+            // Act
+            await _viewModel.InvokePrivateAsync("SaveAsync");
+
+            // Assert
+            _catalogMock.Verify(x => x.CreateReferralAsync(It.IsAny<Referral>()), Times.Never);
+            _viewModel.StatusMessage.Should().Contain("الاسم والنوع");
+        }
+
+        [Fact]
+        public async Task SaveAsync_Invalid_CommissionPercentage_Should_Stop_Creation_EdgeGuard()
+        {
+            // Arrange
+            _viewModel.Name = "Company Z";
+            _viewModel.Type = "Company";
+            _viewModel.DiscountPercentage = 10;
+            _viewModel.CommissionPercentage = 120;
+
+            // Act
+            await _viewModel.InvokePrivateAsync("SaveAsync");
+
+            // Assert
+            _catalogMock.Verify(x => x.CreateReferralAsync(It.IsAny<Referral>()), Times.Never);
+            _viewModel.StatusMessage.Should().Contain("نسبة العمولة");
+        }
+
+        [Fact]
+        public async Task SaveCommand_When_Service_Throws_Should_Set_Error_Message_Failure()
+        {
+            // Arrange
+            _viewModel.Name = "Company Err";
+            _viewModel.Type = "Company";
+            _viewModel.DiscountPercentage = 0;
+            _viewModel.CommissionPercentage = 0;
+            _catalogMock.Setup(x => x.CreateReferralAsync(It.IsAny<Referral>()))
+                .ThrowsAsync(new InvalidOperationException("save-failed"));
+
+            // Act
+            _viewModel.SaveCommand.Execute(null);
+            await Task.Delay(50);
+
+            // Assert
+            _viewModel.StatusMessage.Should().Contain("save-failed");
+        }
+
+        [Fact]
+        public async Task DeleteCommand_When_SelectedReferral_Exists_Should_Delete_Success()
+        {
+            // Arrange
+            var referral = new Referral { ReferralId = 9, Name = "ToDelete", ReferralType = "Company" };
+            _viewModel.Referrals.Add(referral);
+            _viewModel.SelectedReferral = referral;
+            _catalogMock.Setup(x => x.DeleteReferralAsync(9)).Returns(Task.CompletedTask);
+
+            // Act
+            _viewModel.DeleteCommand.Execute(null);
+            await Task.Delay(50);
+
+            // Assert
+            _catalogMock.Verify(x => x.DeleteReferralAsync(9), Times.Once);
+            _viewModel.Referrals.Should().BeEmpty();
+            _viewModel.StatusMessage.Should().Be("تم حذف الجهة.");
+        }
+
+        [Fact]
+        public async Task DeleteCommand_When_Service_Throws_Should_Set_Error_Message_Failure()
+        {
+            // Arrange
+            var referral = new Referral { ReferralId = 10, Name = "Fail", ReferralType = "Company" };
+            _viewModel.Referrals.Add(referral);
+            _viewModel.SelectedReferral = referral;
+            _catalogMock.Setup(x => x.DeleteReferralAsync(10))
+                .ThrowsAsync(new InvalidOperationException("delete-failed"));
+
+            // Act
+            _viewModel.DeleteCommand.Execute(null);
+            await Task.Delay(50);
+
+            // Assert
+            _viewModel.StatusMessage.Should().Contain("delete-failed");
+        }
     }
 }

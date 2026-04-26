@@ -268,6 +268,43 @@ namespace Open_lab.Tests.Services
             updatedInvoice!.ContractInvoiceId.Should().Be(contractId);
         }
 
+        [Fact]
+        public async Task GetContractInvoicesAsync_Should_Return_Invoices_Ordered_By_DateTo_Desc_Success()
+        {
+            // Arrange
+            var referral = new Referral { Name = "HistoryRef" };
+            _db.Referrals.Add(referral);
+            await _db.SaveChangesAsync();
+
+            _db.ContractInvoices.AddRange(
+                new ContractInvoice { ReferralId = referral.ReferralId, InvoiceNumber = "A", DateFrom = DateTime.Today.AddDays(-5), DateTo = DateTime.Today.AddDays(-1), TotalAmount = 10m, NetAmount = 10m, CreatedAt = DateTime.Now },
+                new ContractInvoice { ReferralId = referral.ReferralId, InvoiceNumber = "B", DateFrom = DateTime.Today.AddDays(-2), DateTo = DateTime.Today, TotalAmount = 20m, NetAmount = 20m, CreatedAt = DateTime.Now });
+            await _db.SaveChangesAsync();
+
+            // Act
+            var history = await _service.GetContractInvoicesAsync(referral.ReferralId);
+
+            // Assert
+            history.Should().HaveCount(2);
+            history[0].InvoiceNumber.Should().Be("B");
+            history[1].InvoiceNumber.Should().Be("A");
+        }
+
+        [Fact]
+        public async Task GetPendingInvoicesAsync_When_Referral_Has_No_Pending_Should_Return_Empty_Edge()
+        {
+            // Arrange
+            var referral = new Referral { Name = "NoPending" };
+            _db.Referrals.Add(referral);
+            await _db.SaveChangesAsync();
+
+            // Act
+            var rows = await _service.GetPendingInvoicesAsync(referral.ReferralId, DateTime.Today.AddDays(-1), DateTime.Today.AddDays(1));
+
+            // Assert
+            rows.Should().BeEmpty();
+        }
+
         // 12.3 - Contract Discount Logic Tests
         [Fact]
         public async Task Referral_DiscountPercentage_Should_Be_Applied_Correctly()

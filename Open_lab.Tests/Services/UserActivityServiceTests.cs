@@ -51,5 +51,58 @@ namespace Open_lab.Tests.Services
             text.Should().Contain("تعديل");
             (text.Contains("Patients") || text.Contains("بيانات مريض")).Should().BeTrue();
         }
+
+        [Fact]
+        public async Task SimplifyAuditLogAsync_When_LogNotFound_Should_Return_NotFoundMessage_FailureGuard()
+        {
+            // Act
+            var text = await _service.SimplifyAuditLogAsync(9999);
+
+            // Assert
+            text.Should().Be("السجل غير موجود");
+        }
+
+        [Fact]
+        public async Task GetRecentActivitiesAsync_With_UserFilter_Should_Return_Only_SelectedUserRows_EdgeGuard()
+        {
+            // Arrange
+            var user1 = new User { Username = "u1" };
+            var user2 = new User { Username = "u2" };
+            _db.Users.AddRange(user1, user2);
+            await _db.SaveChangesAsync();
+
+            _db.AuditLogs.AddRange(
+                new AuditLog { UserId = user1.UserId, Action = "Insert", TableName = "Patients", RecordId = "1", Timestamp = DateTime.Now },
+                new AuditLog { UserId = user2.UserId, Action = "Insert", TableName = "Visits", RecordId = "2", Timestamp = DateTime.Now.AddMinutes(-1) });
+            await _db.SaveChangesAsync();
+
+            // Act
+            var rows = await _service.GetRecentActivitiesAsync(user1.UserId, 100);
+
+            // Assert
+            rows.Should().ContainSingle();
+            rows[0].Username.Should().Be("u1");
+            rows[0].TableName.Should().Be("Patients");
+        }
+
+        [Fact]
+        public async Task GetRecentActivitiesAsync_Should_Respect_Count_Limit_Edge()
+        {
+            // Arrange
+            var user = new User { Username = "u-limit" };
+            _db.Users.Add(user);
+            await _db.SaveChangesAsync();
+
+            _db.AuditLogs.AddRange(
+                new AuditLog { UserId = user.UserId, Action = "Insert", TableName = "Patients", RecordId = "1", Timestamp = DateTime.Now },
+                new AuditLog { UserId = user.UserId, Action = "Update", TableName = "Patients", RecordId = "2", Timestamp = DateTime.Now.AddSeconds(-1) });
+            await _db.SaveChangesAsync();
+
+            // Act
+            var rows = await _service.GetRecentActivitiesAsync(user.UserId, 1);
+
+            // Assert
+            rows.Should().HaveCount(1);
+        }
     }
 }

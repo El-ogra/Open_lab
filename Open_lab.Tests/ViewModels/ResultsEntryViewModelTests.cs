@@ -89,6 +89,36 @@ namespace Open_lab.Tests.ViewModels
         }
 
         [Fact]
+        public async Task SaveResultsAsync_When_ServiceThrows_Should_Set_ErrorStatus_FailureGuard()
+        {
+            _viewModel.SelectedVisitTest = new VisitTestRow { VisitTestId = 10, TestId = 2, Status = "InProgress" };
+            _viewModel.ResultItems.Clear();
+            _viewModel.ResultItems.Add(new ResultEntryItem { ParameterId = 1, Value = "5.0" });
+            _resultsServiceMock
+                .Setup(x => x.SaveResultAsync(10, 1, "5.0", It.IsAny<string>(), It.IsAny<string>()))
+                .ThrowsAsync(new Exception("save-failed"));
+
+            await _viewModel.InvokePrivateAsync("SaveResultsAsync");
+
+            _viewModel.StatusMessage.Should().Contain("خطأ:");
+            _viewModel.StatusMessage.Should().Contain("save-failed");
+        }
+
+        [Fact]
+        public async Task VerifyResultsAsync_When_ServiceThrows_Should_Set_ErrorStatus_FailureGuard()
+        {
+            _viewModel.SelectedVisitTest = new VisitTestRow { VisitTestId = 10, TestId = 2, Status = "InProgress" };
+            _resultsServiceMock
+                .Setup(x => x.VerifyVisitTestAsync(10, It.IsAny<int>()))
+                .ThrowsAsync(new InvalidOperationException("verify-failed"));
+
+            await _viewModel.InvokePrivateAsync("VerifyResultsAsync");
+
+            _viewModel.StatusMessage.Should().Contain("خطأ:");
+            _viewModel.StatusMessage.Should().Contain("verify-failed");
+        }
+
+        [Fact]
         public async Task ReopenResultsAsync_With_Null_SelectedVisitTest_Should_Do_Nothing()
         {
             _viewModel.SelectedVisitTest = null;

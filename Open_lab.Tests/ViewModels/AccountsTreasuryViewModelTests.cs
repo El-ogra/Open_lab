@@ -123,6 +123,23 @@ namespace Open_lab.Tests.ViewModels
             _viewModel.DateFrom.Day.Should().Be(1);
             _viewModel.IsLoading.Should().BeFalse();
         }
+
+        [Fact]
+        public async Task DailyCommand_When_ServiceThrows_Should_Set_ErrorMessage_FailureGuard()
+        {
+            // Arrange
+            _mockAccountsTreasuryService
+                .Setup(s => s.GetSnapshotAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<int?>()))
+                .ThrowsAsync(new Exception("daily-failed"));
+
+            // Act
+            _viewModel.DailyCommand.Execute(null);
+            await Task.Delay(50);
+
+            // Assert
+            _viewModel.StatusMessage.Should().Contain("daily-failed");
+            _viewModel.IsLoading.Should().BeFalse();
+        }
         
         [Fact]
         public async Task PrintCommand_Should_CallPrintService_SuccessGuard()

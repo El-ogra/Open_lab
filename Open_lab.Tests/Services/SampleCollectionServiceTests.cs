@@ -132,6 +132,67 @@ namespace Open_lab.Tests.Services
         }
 
         [Fact]
+        public async Task GetRowsAsync_With_Inverted_Date_Range_Should_Return_Empty_FailureGuard()
+        {
+            // Arrange
+            var patient = new Patient { LabId = "L-INV", FullName = "Inverted", Gender = "Male" };
+            _db.Patients.Add(patient);
+            await _db.SaveChangesAsync();
+
+            var visit = new Visit { PatientId = patient.PatientId, VisitDate = DateTime.Today };
+            _db.Visits.Add(visit);
+            await _db.SaveChangesAsync();
+
+            var test = new Test { Code = "INV", NameReport = "InvertedRange", Price = 10m };
+            _db.Tests.Add(test);
+            await _db.SaveChangesAsync();
+
+            _db.VisitTests.Add(new VisitTest { VisitId = visit.VisitId, TestId = test.TestId, Price = 10m });
+            await _db.SaveChangesAsync();
+
+            // Act
+            var rows = await _service.GetRowsAsync(DateTime.Today.AddDays(1), DateTime.Today.AddDays(-1));
+
+            // Assert
+            rows.Should().BeEmpty();
+        }
+
+        [Fact]
+        public async Task MarkSeparatedAsync_With_Whitespace_SeparationType_Should_Set_Default_Separated_Status_Edge()
+        {
+            // Arrange
+            _db.SampleCollections.Add(new SampleCollection
+            {
+                VisitTestId = 55,
+                CollectedBy = 1,
+                CollectedAt = DateTime.Now,
+                Status = "مسحوبة"
+            });
+            await _db.SaveChangesAsync();
+
+            // Act
+            await _service.MarkSeparatedAsync(55, "   ");
+
+            // Assert
+            var sample = await _db.SampleCollections.SingleAsync(s => s.VisitTestId == 55);
+            sample.IsSeparated.Should().BeTrue();
+            sample.Status.Should().Be("مفصولة");
+        }
+
+        [Fact]
+        public async Task MarkNotCollectedAsync_When_Sample_Missing_Should_Keep_State_Unchanged_Edge()
+        {
+            // Arrange
+            (await _db.SampleCollections.CountAsync()).Should().Be(0);
+
+            // Act
+            await _service.MarkNotCollectedAsync(404);
+
+            // Assert
+            (await _db.SampleCollections.CountAsync()).Should().Be(0);
+        }
+
+        [Fact]
         public async Task MarkSeparatedAsync_Should_Update_Status_And_IsSeparated()
         {
             // Arrange

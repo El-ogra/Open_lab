@@ -225,5 +225,52 @@ namespace Open_lab.Tests.ViewModels
             // Assert
             _visitServiceMock.Verify(v => v.AddCustomGroupToVisitAsync(It.IsAny<int>(), It.IsAny<int>()), Times.Never);
         }
+
+        [Fact]
+        public async Task CreateVisitAsync_When_ReferralAccountWithoutReferral_Should_Set_ValidationMessage_FailureGuard()
+        {
+            // Arrange
+            _viewModel.InvokePrivate("set_PatientId", 10);
+            _viewModel.SelectedAccountType = "Referral";
+            _viewModel.SelectedReferral = null;
+
+            // Act
+            await _viewModel.InvokePrivateAsync("CreateVisitAsync");
+
+            // Assert
+            _viewModel.StatusMessage.Should().Contain("يرجى اختيار جهة إحالة");
+            _visitServiceMock.Verify(v => v.CreateAsync(It.IsAny<Visit>()), Times.Never);
+        }
+
+        [Fact]
+        public async Task CreateVisitAsync_When_ServiceThrows_Should_Set_ErrorMessage_FailureGuard()
+        {
+            // Arrange
+            _viewModel.InvokePrivate("set_PatientId", 11);
+            _viewModel.SelectedAccountType = "Cash";
+            _visitServiceMock.Setup(v => v.CreateAsync(It.IsAny<Visit>()))
+                .ThrowsAsync(new Exception("create-visit-failed"));
+
+            // Act
+            await _viewModel.InvokePrivateAsync("CreateVisitAsync");
+
+            // Assert
+            _viewModel.StatusMessage.Should().Contain("خطأ:");
+            _viewModel.StatusMessage.Should().Contain("create-visit-failed");
+        }
+
+        [Fact]
+        public async Task RefreshTestsCommand_When_TestCatalogThrows_Should_Set_ErrorMessage_EdgeGuard()
+        {
+            // Arrange
+            _testCatalogServiceMock.Setup(s => s.GetAllTestsAsync()).ThrowsAsync(new Exception("catalog-failed"));
+
+            // Act
+            await _viewModel.InvokePrivateAsync("LoadAvailableTestsAsync");
+
+            // Assert
+            _viewModel.StatusMessage.Should().Contain("خطأ:");
+            _viewModel.StatusMessage.Should().Contain("catalog-failed");
+        }
     }
 }

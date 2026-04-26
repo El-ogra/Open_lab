@@ -134,5 +134,20 @@ namespace Open_lab.Tests.Services
             await act.Should().ThrowAsync<ArgumentException>()
                 .WithMessage("*تاريخ البداية*");
         }
+
+        [Fact]
+        public async Task GetSnapshotAsync_When_NoDataInRange_Should_Return_ZeroedSnapshot_EdgeGuard()
+        {
+            // Act
+            var snapshot = await _service.GetSnapshotAsync(DateTime.Today.AddDays(-1), DateTime.Today);
+
+            // Assert
+            snapshot.TotalInvoiced.Should().Be(0m);
+            snapshot.TotalPaid.Should().Be(0m);
+            snapshot.TotalBalance.Should().Be(0m);
+            snapshot.TotalDiscount.Should().Be(0m);
+            snapshot.NetProfit.Should().Be(0m);
+            snapshot.Payments.Should().BeEmpty();
+        }
     }
 }

@@ -259,6 +259,34 @@ namespace Open_lab.Tests.Services
             values.Should().Contain(v => v.Value == "R" && v.Comment == "avoid");
         }
 
+        [Fact]
+        public async Task SaveCultureResultAsync_When_VisitTestIsVerified_Should_Throw_FailureGuard()
+        {
+            // Arrange
+            var culture = await _service.CreateCultureAsync(new Culture
+            {
+                Name = "Blood C",
+                SampleType = "Blood",
+                IsolatedOrganism = "Staph",
+                GrowthConditions = "Aerobic",
+                ColonyCount = 12
+            });
+
+            var test = new Test { Code = "C-LOCK", NameReport = "Culture Lock", NameReceipt = "Culture Lock", Price = 1m };
+            _db.Tests.Add(test);
+            await _db.SaveChangesAsync();
+
+            var visitTest = new VisitTest { VisitId = 1, TestId = test.TestId, Price = 1m, Status = "Verified" };
+            _db.VisitTests.Add(visitTest);
+            await _db.SaveChangesAsync();
+
+            // Act
+            Func<Task> act = async () => await _service.SaveCultureResultAsync(visitTest.VisitTestId, culture.CultureId, new List<CultureSensitivityValue>());
+
+            // Assert
+            await act.Should().ThrowAsync<InvalidOperationException>().WithMessage("*لا يمكن تعديل نتيجة معتمدة*");
+        }
+
         private async Task<int> SeedVisitTestAsync(Patient patient)
         {
             _db.Patients.Add(patient);

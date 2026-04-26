@@ -143,5 +143,50 @@ namespace Open_lab.Tests.ViewModels
             _invoiceServiceMock.Verify(x => x.AddAdditionalChargeAsync(100, "Extra Service", 50), Times.Once);
             _viewModel.StatusMessage.Should().Contain("تمت إضافة الرسوم الإضافية");
         }
+
+        [Fact]
+        public async Task EditPaymentAsync_With_InvalidAmount_Should_Set_ValidationMessage_FailureGuard()
+        {
+            // Arrange
+            _viewModel.SelectedPayment = new InvoicePaymentRow { PaymentId = 9, Amount = 25m };
+            _viewModel.EditPaymentAmount = 0m;
+
+            // Act
+            await _viewModel.InvokePrivateAsync("EditPaymentAsync");
+
+            // Assert
+            _viewModel.StatusMessage.Should().Contain("أدخل مبلغ تعديل صالح");
+            _invoiceServiceMock.Verify(x => x.EditPaymentAsync(It.IsAny<int>(), It.IsAny<decimal>(), It.IsAny<int>(), It.IsAny<string>()), Times.Never);
+        }
+
+        [Fact]
+        public async Task SettleAccountAsync_When_ServiceThrows_Should_Set_ErrorStatus_FailureGuard()
+        {
+            // Arrange
+            _viewModel.VisitId = 10;
+            _invoiceServiceMock.Setup(x => x.SettleAccountAsync(10))
+                .ThrowsAsync(new InvalidOperationException("remaining balance"));
+
+            // Act
+            await _viewModel.InvokePrivateAsync("SettleAccountAsync");
+
+            // Assert
+            _viewModel.StatusMessage.Should().Contain("خطأ:");
+            _viewModel.StatusMessage.Should().Contain("remaining balance");
+        }
+
+        [Fact]
+        public async Task PrintInvoiceAsync_When_NoInvoiceFound_Should_NotLogPrint_EdgeGuard()
+        {
+            // Arrange
+            _viewModel.VisitId = 77;
+            _invoiceServiceMock.Setup(x => x.GetByVisitIdAsync(77)).ReturnsAsync((Invoice?)null);
+
+            // Act
+            await _viewModel.InvokePrivateAsync("PrintInvoiceAsync");
+
+            // Assert
+            _invoiceServiceMock.Verify(x => x.LogInvoicePrintedAsync(It.IsAny<int>(), It.IsAny<int>()), Times.Never);
+        }
     }
 }

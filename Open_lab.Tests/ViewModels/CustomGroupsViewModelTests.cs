@@ -69,5 +69,35 @@ namespace Open_lab.Tests.ViewModels
             
             _viewModel.GroupItems.Should().HaveCount(1);
         }
+
+        [Fact]
+        public async Task SaveGroupAsync_With_EmptyName_Should_NotCall_Service_FailureGuard()
+        {
+            // Arrange
+            _viewModel.GroupName = " ";
+            _viewModel.GroupPrice = 99m;
+
+            // Act
+            await _viewModel.InvokePrivateAsync("SaveGroupAsync");
+
+            // Assert
+            _testCatalogServiceMock.Verify(x => x.CreateCustomGroupAsync(It.IsAny<CustomGroup>()), Times.Never);
+            _viewModel.StatusMessage.Should().Contain("أدخل اسم المجموعة");
+        }
+
+        [Fact]
+        public async Task AddItemAsync_When_SelectionMissing_Should_NotCall_Service_EdgeGuard()
+        {
+            // Arrange
+            _viewModel.SelectedGroup = null;
+            _viewModel.SelectedTest = new Test { TestId = 1, Code = "T1" };
+
+            // Act
+            await _viewModel.InvokePrivateAsync("AddItemAsync");
+
+            // Assert
+            _testCatalogServiceMock.Verify(x => x.AddCustomGroupItemAsync(It.IsAny<CustomGroupItem>()), Times.Never);
+            _viewModel.GroupItems.Should().BeEmpty();
+        }
     }
 }

@@ -139,6 +139,86 @@ namespace Open_lab.Tests.Services
         }
 
         [Fact]
+        public async Task ClockInAsync_When_Open_Log_Exists_Should_Return_Existing_Log_Edge()
+        {
+            // Arrange
+            var first = await _service.ClockInAsync(50, DateTime.Today.AddHours(8));
+
+            // Act
+            var second = await _service.ClockInAsync(50, DateTime.Today.AddHours(9));
+
+            // Assert
+            second.AttendanceLogId.Should().Be(first.AttendanceLogId);
+            (await _db.AttendanceLogs.CountAsync(l => l.UserId == 50)).Should().Be(1);
+        }
+
+        [Fact]
+        public async Task GetOpenLogAsync_When_Open_Log_Exists_Should_Return_It_Success()
+        {
+            // Arrange
+            var created = await _service.ClockInAsync(88, DateTime.Today.AddHours(7));
+
+            // Act
+            var open = await _service.GetOpenLogAsync(88);
+
+            // Assert
+            open.Should().NotBeNull();
+            open!.AttendanceLogId.Should().Be(created.AttendanceLogId);
+        }
+
+        [Fact]
+        public async Task StartBreakAsync_When_No_Open_Log_Should_Return_Null_Failure()
+        {
+            // Act
+            var br = await _service.StartBreakAsync(123);
+
+            // Assert
+            br.Should().BeNull();
+        }
+
+        [Fact]
+        public async Task StartBreakAsync_When_Open_Break_Already_Exists_Should_Return_Same_Break_Edge()
+        {
+            // Arrange
+            await _service.ClockInAsync(77, DateTime.Today.AddHours(8));
+            var firstBreak = await _service.StartBreakAsync(77, "Rest", DateTime.Today.AddHours(10));
+
+            // Act
+            var secondBreak = await _service.StartBreakAsync(77, "Meal", DateTime.Today.AddHours(11));
+
+            // Assert
+            secondBreak.Should().NotBeNull();
+            secondBreak!.BreakId.Should().Be(firstBreak!.BreakId);
+        }
+
+        [Fact]
+        public async Task EndBreakAsync_When_No_Open_Break_Should_Return_Null_Failure()
+        {
+            // Arrange
+            await _service.ClockInAsync(66, DateTime.Today.AddHours(8));
+
+            // Act
+            var br = await _service.EndBreakAsync(66);
+
+            // Assert
+            br.Should().BeNull();
+        }
+
+        [Fact]
+        public async Task GetDailyWorkingSummaryAsync_When_No_Logs_Should_Return_Zeroes_Edge()
+        {
+            // Act
+            var summary = await _service.GetDailyWorkingSummaryAsync(999, DateTime.Today, DateTime.Today.AddHours(12));
+
+            // Assert
+            summary.UserId.Should().Be(999);
+            summary.GrossMinutes.Should().Be(0);
+            summary.BreakMinutes.Should().Be(0);
+            summary.NetMinutes.Should().Be(0);
+            summary.HasOpenLog.Should().BeFalse();
+        }
+
+        [Fact]
         public async Task GetDailyWorkingSummaryAsync_Should_Subtract_Break_Minutes()
         {
             var user = new User { Username = "summary-user", FullName = "Summary User" };

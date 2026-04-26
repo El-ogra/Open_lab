@@ -323,5 +323,63 @@ namespace Open_lab.Tests.Services
             // Assert
             await act.Should().ThrowAsync<InvalidOperationException>().WithMessage("*Patient not found*");
         }
+
+        [Fact]
+        public async Task GetByLabIdAsync_When_LabIdHasWhitespace_Should_Trim_And_Return_Patient_EdgeGuard()
+        {
+            // Arrange
+            _db.Patients.Add(new Patient { LabId = "LAB-TRIM", FullName = "Trim User", Gender = "Male" });
+            await _db.SaveChangesAsync();
+
+            // Act
+            var patient = await _service.GetByLabIdAsync("  LAB-TRIM  ");
+
+            // Assert
+            patient.Should().NotBeNull();
+            patient!.LabId.Should().Be("LAB-TRIM");
+        }
+
+        [Fact]
+        public async Task GetByLabIdAsync_When_LabIdIsWhitespace_Should_Throw_FailureGuard()
+        {
+            // Act
+            Func<Task> act = async () => await _service.GetByLabIdAsync(" ");
+
+            // Assert
+            await act.Should().ThrowAsync<ArgumentException>().WithMessage("*LabId is required*");
+        }
+
+        [Fact]
+        public async Task DeleteAsync_When_PatientNotFound_Should_NotThrow_And_KeepData_EdgeGuard()
+        {
+            // Arrange
+            _db.Patients.Add(new Patient { LabId = "LAB-EXIST", FullName = "Existing", Gender = "Male" });
+            await _db.SaveChangesAsync();
+
+            // Act
+            await _service.DeleteAsync(99999);
+
+            // Assert
+            var count = await _db.Patients.CountAsync();
+            count.Should().Be(1);
+        }
+
+        [Fact]
+        public async Task SearchAsync_When_DateFilterHasNoVisits_Should_Return_Empty_FailureGuard()
+        {
+            // Arrange
+            var patient = new Patient { LabId = "LAB-DATE", FullName = "Date User", Gender = "Male" };
+            _db.Patients.Add(patient);
+            await _db.SaveChangesAsync();
+
+            _db.Visits.Add(new Visit { PatientId = patient.PatientId, VisitDate = DateTime.Today.AddDays(-7) });
+            await _db.SaveChangesAsync();
+
+            // Act
+            var rows = await _service.SearchAsync(null, null, DateTime.Today, null);
+
+            // Assert
+            rows.Should().BeEmpty();
+        }
     }
 }

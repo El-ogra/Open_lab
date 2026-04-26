@@ -62,5 +62,82 @@ namespace Open_lab.Tests.ViewModels
             _viewModel.Physicians.Should().ContainSingle();
             _viewModel.Physicians[0].FullName.Should().Be("Dr. John");
         }
+
+        [Fact]
+        public void SaveCommand_When_FullNameEmpty_Should_Be_Disabled_FailureGuard()
+        {
+            // Arrange
+            _viewModel.FullName = " ";
+
+            // Act
+            var canExecute = _viewModel.SaveCommand.CanExecute(null);
+
+            // Assert
+            canExecute.Should().BeFalse();
+        }
+
+        [Fact]
+        public void SearchCommand_When_SearchTermWhitespace_Should_Be_Disabled_EdgeGuard()
+        {
+            // Arrange
+            _viewModel.SearchTerm = " ";
+
+            // Act
+            var canExecute = _viewModel.SearchCommand.CanExecute(null);
+
+            // Assert
+            canExecute.Should().BeFalse();
+        }
+
+        [Fact]
+        public async Task LoadPhysiciansCommand_When_Executed_Should_Load_Active_Physicians_Success()
+        {
+            // Arrange
+            _physicianServiceMock.Setup(x => x.GetActiveAsync()).ReturnsAsync(new List<Physician>
+            {
+                new() { PhysicianId = 1, FullName = "Dr. A", IsActive = true }
+            });
+
+            // Act
+            _viewModel.LoadPhysiciansCommand.Execute(null);
+            await Task.Delay(50);
+
+            // Assert
+            _viewModel.Physicians.Should().ContainSingle(p => p.PhysicianId == 1);
+            _viewModel.StatusMessage.Should().Contain("تم تحميل 1 طبيب");
+        }
+
+        [Fact]
+        public void NewCommand_When_Executed_Should_Clear_Editor_Edge()
+        {
+            // Arrange
+            _viewModel.FullName = "Dr. X";
+            _viewModel.Specialty = "Lab";
+            _viewModel.PriceListId = 3;
+
+            // Act
+            _viewModel.NewCommand.Execute(null);
+
+            // Assert
+            _viewModel.FullName.Should().BeEmpty();
+            _viewModel.Specialty.Should().BeNull();
+            _viewModel.PriceListId.Should().BeNull();
+        }
+
+        [Fact]
+        public async Task SearchCommand_When_Service_Throws_Should_Set_Error_Message_Failure()
+        {
+            // Arrange
+            _viewModel.SearchTerm = "john";
+            _physicianServiceMock.Setup(x => x.SearchAsync("john"))
+                .ThrowsAsync(new InvalidOperationException("search-failed"));
+
+            // Act
+            _viewModel.SearchCommand.Execute(null);
+            await Task.Delay(50);
+
+            // Assert
+            _viewModel.StatusMessage.Should().Contain("search-failed");
+        }
     }
 }

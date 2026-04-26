@@ -150,5 +150,15 @@ namespace Open_lab.Tests.Services
             result.Patient.FullName.Should().Be("Test Patient");
             result.Visits.Should().BeEmpty();
         }
+
+        [Fact]
+        public async Task GetVisitReportAsync_When_VisitNotFound_Should_Return_Null_FailureGuard()
+        {
+            // Act
+            var report = await _service.GetVisitReportAsync(99999);
+
+            // Assert
+            report.Should().BeNull();
+        }
     }
 }

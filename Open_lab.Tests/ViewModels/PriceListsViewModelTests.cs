@@ -75,5 +75,45 @@ namespace Open_lab.Tests.ViewModels
             
             _viewModel.Items.Should().HaveCount(1);
         }
+
+        [Fact]
+        public async Task SaveListAsync_With_EmptyName_Should_NotCall_Service_FailureGuard()
+        {
+            // Arrange
+            _viewModel.ListName = " ";
+
+            // Act
+            await _viewModel.InvokePrivateAsync("SaveListAsync");
+
+            // Assert
+            _testCatalogServiceMock.Verify(x => x.CreatePriceListAsync(It.IsAny<PriceList>()), Times.Never);
+            _viewModel.StatusMessage.Should().Contain("أدخل اسم القائمة");
+        }
+
+        [Fact]
+        public async Task AddItemAsync_When_PriceZero_Should_Fallback_To_TestPrice_EdgeGuard()
+        {
+            // Arrange
+            _viewModel.SelectedPriceList = new PriceList { PriceListId = 2 };
+            _viewModel.SelectedTest = new Test { TestId = 20, Code = "T20", Price = 135m };
+            _viewModel.Price = 0m;
+
+            _testCatalogServiceMock
+                .Setup(x => x.AddPriceListItemAsync(It.IsAny<PriceListItem>()))
+                .ReturnsAsync((PriceListItem item) => new PriceListItem
+                {
+                    PriceListItemId = 2,
+                    PriceListId = item.PriceListId,
+                    TestId = item.TestId,
+                    Price = item.Price
+                });
+
+            // Act
+            await _viewModel.InvokePrivateAsync("AddItemAsync");
+
+            // Assert
+            _testCatalogServiceMock.Verify(x => x.AddPriceListItemAsync(It.Is<PriceListItem>(i =>
+                i.PriceListId == 2 && i.TestId == 20 && i.Price == 135m)), Times.Once);
+        }
     }
 }

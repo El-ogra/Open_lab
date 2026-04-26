@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using FluentAssertions;
@@ -50,6 +51,52 @@ namespace Open_lab.Tests.ViewModels
 
             _settingsMock.Verify(x => x.SetLeftMarginAsync(3.2m), Times.Once);
             _settingsMock.Verify(x => x.SetRightMarginAsync(1.1m), Times.Once);
+        }
+
+        [Fact]
+        public async Task LoadSettingsCommand_When_Executed_Should_Call_Service_And_Update_ViewModel_Success()
+        {
+            // Act
+            _viewModel.LoadSettingsCommand.Execute(null);
+            await Task.Delay(50);
+
+            // Assert
+            _settingsMock.Verify(x => x.GetAllSettingsAsync(), Times.AtLeastOnce);
+            _viewModel.DefaultPrinter.Should().Be("DefaultPrinter");
+        }
+
+        [Fact]
+        public async Task SavePrinterSettingsCommand_When_Executed_Should_Save_All_Printer_Values_Success()
+        {
+            // Arrange
+            _viewModel.DefaultPrinter = "P-Default";
+            _viewModel.ReceiptPrinter = "P-Receipt";
+            _viewModel.ReportPrinter = "P-Report";
+
+            // Act
+            _viewModel.SavePrinterSettingsCommand.Execute(null);
+            await Task.Delay(50);
+
+            // Assert
+            _settingsMock.Verify(x => x.SetDefaultPrinterAsync("P-Default"), Times.Once);
+            _settingsMock.Verify(x => x.SetReceiptPrinterAsync("P-Receipt"), Times.Once);
+            _settingsMock.Verify(x => x.SetReportPrinterAsync("P-Report"), Times.Once);
+        }
+
+        [Fact]
+        public async Task SaveMarginSettingsCommand_When_Service_Throws_Should_Not_Propagate_Exception_Failure()
+        {
+            // Arrange
+            _viewModel.LeftMargin = 1m;
+            _viewModel.RightMargin = 2m;
+            _settingsMock.Setup(x => x.SetLeftMarginAsync(It.IsAny<decimal>())).ThrowsAsync(new InvalidOperationException("margin-failed"));
+
+            // Act
+            _viewModel.SaveMarginSettingsCommand.Execute(null);
+            await Task.Delay(50);
+
+            // Assert
+            _settingsMock.Verify(x => x.SetLeftMarginAsync(1m), Times.Once);
         }
     }
 }

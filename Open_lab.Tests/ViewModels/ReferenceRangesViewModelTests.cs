@@ -83,5 +83,33 @@ namespace Open_lab.Tests.ViewModels
             _viewModel.HighValue.Should().Be(8);
             _viewModel.NormalText.Should().Be("Normal");
         }
+
+        [Fact]
+        public async Task SaveAsync_Without_SelectedTest_Should_NotCall_Service_FailureGuard()
+        {
+            // Arrange
+            _viewModel.SelectedTest = null;
+
+            // Act
+            await _viewModel.InvokePrivateAsync("SaveAsync");
+
+            // Assert
+            _testCatalogServiceMock.Verify(x => x.CreateReferenceRangeAsync(It.IsAny<TestReferenceRange>()), Times.Never);
+            _testCatalogServiceMock.Verify(x => x.UpdateReferenceRangeAsync(It.IsAny<TestReferenceRange>()), Times.Never);
+            _viewModel.StatusMessage.Should().Contain("اختر تحليلًا");
+        }
+
+        [Fact]
+        public async Task DeleteAsync_When_NoSelection_Should_NotCall_Service_EdgeGuard()
+        {
+            // Arrange
+            _viewModel.SelectedRange = null;
+
+            // Act
+            await _viewModel.InvokePrivateAsync("DeleteAsync");
+
+            // Assert
+            _testCatalogServiceMock.Verify(x => x.DeleteReferenceRangeAsync(It.IsAny<int>()), Times.Never);
+        }
     }
 }

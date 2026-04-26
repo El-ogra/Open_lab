@@ -59,5 +59,26 @@ namespace Open_lab.Tests.Services
             cultureData.Results[1].AntibioticName.Should().Be("Ciprofloxacin");
             cultureData.Results[1].Sensitivity.Should().Be("Resistant");
         }
+
+        [Fact]
+        public void Constructor_When_SettingsServiceNull_Should_Throw_FailureGuard()
+        {
+            // Act
+            Action act = () => new PrintService(null!);
+
+            // Assert
+            act.Should().Throw<ArgumentNullException>();
+        }
+
+        [Fact]
+        public async Task PrintTextReportAsync_When_TitleEmpty_Should_Throw_FailureGuard()
+        {
+            var settingsMock = new Mock<ISettingsService>();
+            var service = new PrintService(settingsMock.Object);
+
+            Func<Task> act = async () => await service.PrintTextReportAsync(" ", new List<string>());
+
+            await act.Should().ThrowAsync<ArgumentException>();
+        }
     }
 }

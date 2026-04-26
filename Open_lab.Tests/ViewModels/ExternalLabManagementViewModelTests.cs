@@ -55,6 +55,78 @@ namespace Open_lab.Tests.ViewModels
         }
 
         [Fact]
+        public async Task LoadReferralsCommand_When_Executed_Should_Load_ExternalLab_Referrals_Success()
+        {
+            // Act
+            _viewModel.LoadReferralsCommand.Execute(null);
+            await Task.Delay(50);
+
+            // Assert
+            _viewModel.Referrals.Should().ContainSingle(r => r.ReferralId == 3);
+            _viewModel.StatusMessage.Should().Contain("تم تحميل");
+        }
+
+        [Fact]
+        public async Task LoadReferralsCommand_When_Service_Throws_Should_Set_Error_Message_Failure()
+        {
+            // Arrange
+            _testCatalogServiceMock.Setup(x => x.GetReferralsAsync()).ThrowsAsync(new Exception("referrals-failed"));
+
+            // Act
+            _viewModel.LoadReferralsCommand.Execute(null);
+            await Task.Delay(50);
+
+            // Assert
+            _viewModel.StatusMessage.Should().Contain("referrals-failed");
+        }
+
+        [Fact]
+        public async Task LoadQueueCommand_When_No_Pending_Items_Should_Clear_Queue_Edge()
+        {
+            // Arrange
+            _externalLabServiceMock.Setup(x => x.GetPendingQueueAsync()).ReturnsAsync(new List<ExternalLabQueue>());
+
+            // Act
+            _viewModel.LoadQueueCommand.Execute(null);
+            await Task.Delay(50);
+
+            // Assert
+            _viewModel.PendingQueue.Should().BeEmpty();
+            _viewModel.StatusMessage.Should().Contain("0 عناصر");
+        }
+
+        [Fact]
+        public async Task LoadManifestsCommand_When_Executed_Should_Load_Manifest_List_Success()
+        {
+            // Arrange
+            _externalLabServiceMock.Setup(x => x.GetAllManifestsAsync()).ReturnsAsync(new List<ShipmentManifest>
+            {
+                new() { ManifestId = 9, ManifestNumber = "MAN-9", ReferralId = 3, DateCreated = DateTime.Now, Status = "Open" }
+            });
+
+            // Act
+            _viewModel.LoadManifestsCommand.Execute(null);
+            await Task.Delay(50);
+
+            // Assert
+            _viewModel.Manifests.Should().ContainSingle(m => m.ManifestId == 9);
+        }
+
+        [Fact]
+        public async Task LoadManifestsCommand_When_Service_Throws_Should_Set_Error_Message_Failure()
+        {
+            // Arrange
+            _externalLabServiceMock.Setup(x => x.GetAllManifestsAsync()).ThrowsAsync(new Exception("manifests-failed"));
+
+            // Act
+            _viewModel.LoadManifestsCommand.Execute(null);
+            await Task.Delay(50);
+
+            // Assert
+            _viewModel.StatusMessage.Should().Contain("manifests-failed");
+        }
+
+        [Fact]
         public async Task PrintExternalReportAsync_Should_Print_When_Visit_Is_Available()
         {
             await _viewModel.InvokePrivateAsync("LoadQueueAsync");
@@ -91,6 +163,71 @@ namespace Open_lab.Tests.ViewModels
         }
 
         [Fact]
+        public async Task CreateManifestCommand_With_Valid_Data_Should_Create_Manifest_Success()
+        {
+            // Arrange
+            _viewModel.SelectedReferralId = 3;
+            _viewModel.SelectedQueueIds.Add(1);
+            _externalLabServiceMock
+                .Setup(x => x.CreateManifestAsync(3, It.IsAny<List<int>>(), It.IsAny<string?>()))
+                .ReturnsAsync(new ShipmentManifest { ManifestId = 1, ManifestNumber = "MAN-NEW", ReferralId = 3, DateCreated = DateTime.Now, Status = "Open" });
+
+            // Act
+            _viewModel.CreateManifestCommand.Execute(null);
+            await Task.Delay(50);
+
+            // Assert
+            _externalLabServiceMock.Verify(x => x.CreateManifestAsync(3, It.IsAny<List<int>>(), It.IsAny<string?>()), Times.Once);
+            _viewModel.SelectedQueueIds.Should().BeEmpty();
+            _viewModel.StatusMessage.Should().Contain("MAN-NEW");
+        }
+
+        [Fact]
+        public async Task CreateManifestCommand_When_Referral_Missing_Should_Not_Call_Service_Failure()
+        {
+            // Arrange
+            _viewModel.SelectedReferralId = null;
+            _viewModel.SelectedQueueIds.Add(1);
+
+            // Act
+            _viewModel.CreateManifestCommand.Execute(null);
+            await Task.Delay(50);
+
+            // Assert
+            _externalLabServiceMock.Verify(x => x.CreateManifestAsync(It.IsAny<int>(), It.IsAny<List<int>>(), It.IsAny<string?>()), Times.Never);
+        }
+
+        [Fact]
+        public async Task UpdateStatusCommand_When_SelectedItem_Exists_Should_Call_Service_Success()
+        {
+            // Arrange
+            await _viewModel.InvokePrivateAsync("LoadQueueAsync");
+            _viewModel.SelectedQueueItem = _viewModel.PendingQueue[0];
+
+            // Act
+            _viewModel.UpdateStatusCommand.Execute(null);
+            await Task.Delay(50);
+
+            // Assert
+            _externalLabServiceMock.Verify(x => x.UpdateQueueStatusAsync(1, "InManifest", It.IsAny<string?>()), Times.Once);
+            _viewModel.StatusMessage.Should().Contain("InManifest");
+        }
+
+        [Fact]
+        public async Task UpdateStatusCommand_When_No_Selected_Item_Should_Not_Call_Service_Edge()
+        {
+            // Arrange
+            _viewModel.SelectedQueueItem = null;
+
+            // Act
+            _viewModel.UpdateStatusCommand.Execute(null);
+            await Task.Delay(50);
+
+            // Assert
+            _externalLabServiceMock.Verify(x => x.UpdateQueueStatusAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string?>()), Times.Never);
+        }
+
+        [Fact]
         public async Task LoadSettlementAsync_Should_Load_History_And_TotalProfit()
         {
             _viewModel.SelectedReferralId = 3;
@@ -105,6 +242,121 @@ namespace Open_lab.Tests.ViewModels
             _viewModel.SettlementHistory.Should().ContainSingle();
             _viewModel.TotalProfit.Should().Be(10m);
             _viewModel.StatusMessage.Should().Contain("الرصيد المعلق");
+        }
+
+        [Fact]
+        public async Task LoadSettlementCommand_When_Referral_Selected_Should_Load_Settlement_Success()
+        {
+            // Arrange
+            _viewModel.SelectedReferralId = 3;
+
+            // Act
+            _viewModel.LoadSettlementCommand.Execute(null);
+            await Task.Delay(50);
+
+            // Assert
+            _externalSettlementServiceMock.Verify(x => x.GetPendingBalanceAsync(3), Times.AtLeastOnce);
+            _viewModel.StatusMessage.Should().Contain("الرصيد المعلق");
+        }
+
+        [Fact]
+        public async Task CreateSettlementAsync_When_AmountIsZero_Should_NotCall_Service_EdgeGuard()
+        {
+            // Arrange
+            _viewModel.SelectedReferralId = 3;
+            _viewModel.SettlementAmount = 0m;
+
+            // Act
+            await _viewModel.InvokePrivateAsync("CreateSettlementAsync");
+
+            // Assert
+            _externalSettlementServiceMock.Verify(x => x.CreateSettlementAsync(It.IsAny<int>(), It.IsAny<decimal>(), It.IsAny<string?>()), Times.Never);
+        }
+
+        [Fact]
+        public async Task CreateSettlementCommand_When_Valid_Data_Should_Create_And_Reset_Amount_Success()
+        {
+            // Arrange
+            _viewModel.SelectedReferralId = 3;
+            _viewModel.SettlementAmount = 15m;
+            _viewModel.SettlementNote = "note";
+            _externalSettlementServiceMock
+                .Setup(x => x.CreateSettlementAsync(3, 15m, "note"))
+                .ReturnsAsync(new ExternalLabSettlement { SettlementId = 1, ReferralId = 3, AmountPaid = 15m, Balance = 10m, SettlementDate = DateTime.Now });
+
+            // Act
+            _viewModel.CreateSettlementCommand.Execute(null);
+            await Task.Delay(50);
+
+            // Assert
+            _externalSettlementServiceMock.Verify(x => x.CreateSettlementAsync(3, 15m, "note"), Times.Once);
+            _viewModel.SettlementAmount.Should().Be(0m);
+        }
+
+        [Fact]
+        public async Task EnterExternalResultAsync_When_ServiceThrows_Should_Set_ErrorMessage_FailureGuard()
+        {
+            // Arrange
+            await _viewModel.InvokePrivateAsync("LoadQueueAsync");
+            _viewModel.SelectedQueueItem = _viewModel.PendingQueue[0];
+            _viewModel.ExternalResultValue = "Positive";
+            _externalLabServiceMock
+                .Setup(x => x.EnterExternalLabResultAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<string?>()))
+                .ThrowsAsync(new Exception("enter-failed"));
+
+            // Act
+            await _viewModel.InvokePrivateAsync("EnterExternalResultAsync");
+
+            // Assert
+            _viewModel.StatusMessage.Should().Contain("خطأ:");
+            _viewModel.StatusMessage.Should().Contain("enter-failed");
+        }
+
+        [Fact]
+        public async Task EnterExternalResultCommand_When_Result_Value_Empty_Should_Not_Call_Service_Edge()
+        {
+            // Arrange
+            await _viewModel.InvokePrivateAsync("LoadQueueAsync");
+            _viewModel.SelectedQueueItem = _viewModel.PendingQueue[0];
+            _viewModel.ExternalResultValue = " ";
+
+            // Act
+            _viewModel.EnterExternalResultCommand.Execute(null);
+            await Task.Delay(50);
+
+            // Assert
+            _externalLabServiceMock.Verify(x => x.EnterExternalLabResultAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<string?>()), Times.Never);
+        }
+
+        [Fact]
+        public async Task PrintExternalReportCommand_When_VisitId_Invalid_Should_Set_User_Message_Failure()
+        {
+            // Arrange
+            await _viewModel.InvokePrivateAsync("LoadQueueAsync");
+            _viewModel.SelectedQueueItem = new ExternalLabQueue { QueueId = 3, VisitTest = new VisitTest { VisitId = 0 }, Status = "Pending" };
+
+            // Act
+            _viewModel.PrintExternalReportCommand.Execute(null);
+            await Task.Delay(50);
+
+            // Assert
+            _viewModel.StatusMessage.Should().Contain("لا يمكن تحديد الزيارة المرتبطة");
+        }
+
+        [Fact]
+        public async Task PrintExternalReportCommand_When_Report_Not_Found_Should_Set_NotFound_Message_Edge()
+        {
+            // Arrange
+            await _viewModel.InvokePrivateAsync("LoadQueueAsync");
+            _viewModel.SelectedQueueItem = _viewModel.PendingQueue[0];
+            _reportServiceMock.Setup(x => x.GetVisitReportAsync(12)).ReturnsAsync((VisitReportData?)null);
+
+            // Act
+            _viewModel.PrintExternalReportCommand.Execute(null);
+            await Task.Delay(50);
+
+            // Assert
+            _viewModel.StatusMessage.Should().Contain("لم يتم العثور على تقرير للطباعة");
         }
 
         private static ExternalLabQueue BuildQueueItem()

@@ -1,3 +1,4 @@
+using System;
 using FluentAssertions;
 using Moq;
 using Open_lab.Models;
@@ -93,6 +94,83 @@ namespace Open_lab.Tests.ViewModels
             _viewModel.CurrentMasterPassword.Should().BeEmpty();
             _viewModel.NewMasterPassword.Should().BeEmpty();
             _viewModel.ConfirmMasterPassword.Should().BeEmpty();
+        }
+
+        [Fact]
+        public async Task ReloadCommand_When_Executed_Should_Refresh_Profile_And_Settings_Success()
+        {
+            // Act
+            _viewModel.ReloadCommand.Execute(null);
+            await Task.Delay(50);
+
+            // Assert
+            _settingsServiceMock.Verify(x => x.GetProfileAsync(), Times.AtLeastOnce);
+            _settingsServiceMock.Verify(x => x.GetSettingsAsync(), Times.AtLeastOnce);
+        }
+
+        [Fact]
+        public async Task SaveRawSettingCommand_When_Key_Empty_Should_Set_Validation_Message_Failure()
+        {
+            // Arrange
+            _viewModel.Key = "";
+            _viewModel.Value = "v";
+
+            // Act
+            _viewModel.SaveRawSettingCommand.Execute(null);
+            await Task.Delay(50);
+
+            // Assert
+            _settingsServiceMock.Verify(x => x.SaveSettingAsync(It.IsAny<string>(), It.IsAny<string?>()), Times.Never);
+            _viewModel.StatusMessage.Should().Contain("أدخل المفتاح");
+        }
+
+        [Fact]
+        public async Task SaveRawSettingCommand_When_Key_Valid_Should_Call_Service_Success()
+        {
+            // Arrange
+            _viewModel.Key = "K1";
+            _viewModel.Value = "V1";
+
+            // Act
+            _viewModel.SaveRawSettingCommand.Execute(null);
+            await Task.Delay(50);
+
+            // Assert
+            _settingsServiceMock.Verify(x => x.SaveSettingAsync("K1", "V1"), Times.Once);
+            _viewModel.StatusMessage.Should().Contain("تم حفظ الإعداد المتقدم");
+        }
+
+        [Fact]
+        public async Task DeleteRawSettingCommand_When_SelectedSetting_Exists_Should_Call_Service_Success()
+        {
+            // Arrange
+            _viewModel.SelectedSetting = new Setting { Key = "X", Value = "1" };
+
+            // Act
+            _viewModel.DeleteRawSettingCommand.Execute(null);
+            await Task.Delay(50);
+
+            // Assert
+            _settingsServiceMock.Verify(x => x.DeleteSettingAsync("X"), Times.Once);
+            _viewModel.StatusMessage.Should().Contain("تم حذف الإعداد المتقدم");
+        }
+
+        [Fact]
+        public async Task ChangeMasterPasswordCommand_When_CurrentPassword_Invalid_Should_Set_User_Message_Failure()
+        {
+            // Arrange
+            _settingsServiceMock.Setup(x => x.VerifyMasterPasswordAsync("old")).ReturnsAsync(false);
+            _viewModel.CurrentMasterPassword = "old";
+            _viewModel.NewMasterPassword = "new123";
+            _viewModel.ConfirmMasterPassword = "new123";
+
+            // Act
+            _viewModel.ChangeMasterPasswordCommand.Execute(null);
+            await Task.Delay(50);
+
+            // Assert
+            _settingsServiceMock.Verify(x => x.SetMasterPasswordAsync(It.IsAny<string>()), Times.Never);
+            _viewModel.StatusMessage.Should().Contain("غير صحيحة");
         }
     }
 }

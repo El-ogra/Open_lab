@@ -60,5 +60,57 @@ namespace Open_lab.Tests.Services
             row.TotalConsumed.Should().Be(12m);
             row.TestCount.Should().Be(3);
         }
+
+        [Fact]
+        public async Task GetConsumptionReportAsync_When_NoVisitTestsInRange_Should_Return_Empty_FailureGuard()
+        {
+            // Arrange
+            var reagent = new Reagent { Name = "R2", Unit = "ml", CurrentStock = 500m };
+            var test = new Test { Code = "TX", NameReport = "ALT", Price = 20m };
+            _db.Reagents.Add(reagent);
+            _db.Tests.Add(test);
+            await _db.SaveChangesAsync();
+
+            _db.TestConsumptions.Add(new TestConsumption { TestId = test.TestId, ReagentId = reagent.ReagentId, AmountPerTest = 1m });
+            await _db.SaveChangesAsync();
+
+            // Act
+            var report = await _service.GetConsumptionReportAsync(DateTime.Today.AddDays(-1), DateTime.Today.AddDays(1));
+
+            // Assert
+            report.Should().BeEmpty();
+        }
+
+        [Fact]
+        public async Task GetConsumptionReportAsync_With_ZeroAmountConsumption_Should_Keep_ReagentRow_WithZeroTotal_EdgeGuard()
+        {
+            // Arrange
+            var reagent = new Reagent { Name = "R-Zero", Unit = "ml", CurrentStock = 500m };
+            var test = new Test { Code = "T-ZERO", NameReport = "AST", Price = 20m };
+            _db.Reagents.Add(reagent);
+            _db.Tests.Add(test);
+            await _db.SaveChangesAsync();
+
+            _db.TestConsumptions.Add(new TestConsumption { TestId = test.TestId, ReagentId = reagent.ReagentId, AmountPerTest = 0m });
+            var patient = new Patient { LabId = "LZ", FullName = "Patient Zero", Gender = "Male" };
+            _db.Patients.Add(patient);
+            await _db.SaveChangesAsync();
+
+            var visit = new Visit { PatientId = patient.PatientId, VisitDate = DateTime.Today };
+            _db.Visits.Add(visit);
+            await _db.SaveChangesAsync();
+
+            _db.VisitTests.Add(new VisitTest { VisitId = visit.VisitId, TestId = test.TestId, Price = 20m });
+            await _db.SaveChangesAsync();
+
+            // Act
+            var report = await _service.GetConsumptionReportAsync(DateTime.Today.AddDays(-1), DateTime.Today.AddDays(1));
+
+            // Assert
+            report.Should().ContainSingle();
+            report.Single().ReagentName.Should().Be("R-Zero");
+            report.Single().TotalConsumed.Should().Be(0m);
+            report.Single().TestCount.Should().Be(1);
+        }
     }
 }

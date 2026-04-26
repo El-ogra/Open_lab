@@ -59,6 +59,40 @@ namespace Open_lab.Tests.ViewModels
         }
 
         [Fact]
+        public async Task LoadCommand_Execute_With_Valid_Data_Should_Load_Items_Success()
+        {
+            // Arrange
+            _sampleCollectionServiceMock
+                .Setup(x => x.GetRowsAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>()))
+                .ReturnsAsync(new List<SampleCollectionRow> { new SampleCollectionRow { VisitTestId = 101 } });
+
+            // Act
+            _viewModel.LoadCommand.Execute(null);
+            await Task.Delay(50);
+
+            // Assert
+            _viewModel.Items.Should().ContainSingle(x => x.VisitTestId == 101);
+            _viewModel.StatusMessage.Should().Contain("تم تحميل");
+        }
+
+        [Fact]
+        public async Task LoadCommand_Execute_When_Service_Throws_Should_Set_Error_Message_Failure()
+        {
+            // Arrange
+            _sampleCollectionServiceMock
+                .Setup(x => x.GetRowsAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>()))
+                .ThrowsAsync(new Exception("load failed"));
+
+            // Act
+            _viewModel.LoadCommand.Execute(null);
+            await Task.Delay(50);
+
+            // Assert
+            _viewModel.StatusMessage.Should().Contain("load failed");
+            _viewModel.IsLoading.Should().BeFalse();
+        }
+
+        [Fact]
         public async Task MarkCollectedAsync_With_Null_SelectedRow_Should_Do_Nothing()
         {
             _viewModel.SelectedRow = null;
@@ -77,6 +111,22 @@ namespace Open_lab.Tests.ViewModels
 
             _sampleCollectionServiceMock.Verify(x => x.MarkCollectedAsync(10, It.IsAny<int>(), false, It.IsAny<int?>()), Times.Once);
             _viewModel.IsLoading.Should().BeFalse();
+        }
+
+        [Fact]
+        public async Task MarkCollectedCommand_When_User_Not_LoggedIn_Should_Reject_Request_Failure()
+        {
+            // Arrange
+            AppSessionTestHelper.Reset();
+            _viewModel.SelectedRow = new SampleCollectionRow { VisitTestId = 10 };
+
+            // Act
+            _viewModel.MarkCollectedCommand.Execute(null);
+            await Task.Delay(50);
+
+            // Assert
+            _sampleCollectionServiceMock.Verify(x => x.MarkCollectedAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<bool>(), It.IsAny<int?>()), Times.Never);
+            _viewModel.StatusMessage.Should().Contain("يجب تسجيل الدخول");
         }
         
         [Fact]
@@ -135,6 +185,24 @@ namespace Open_lab.Tests.ViewModels
         }
 
         [Fact]
+        public async Task MarkNotCollectedCommand_When_Service_Throws_Should_Set_Error_Message_Failure()
+        {
+            // Arrange
+            _viewModel.SelectedRow = new SampleCollectionRow { VisitTestId = 10 };
+            _sampleCollectionServiceMock
+                .Setup(x => x.MarkNotCollectedAsync(10))
+                .ThrowsAsync(new Exception("not collected failure"));
+
+            // Act
+            _viewModel.MarkNotCollectedCommand.Execute(null);
+            await Task.Delay(50);
+
+            // Assert
+            _viewModel.StatusMessage.Should().Contain("not collected failure");
+            _viewModel.IsLoading.Should().BeFalse();
+        }
+
+        [Fact]
         public async Task MarkExternalCollectedAsync_With_Valid_Row_Should_Call_Service_SuccessGuard()
         {
             _viewModel.SelectedRow = new SampleCollectionRow { VisitTestId = 20 };
@@ -164,6 +232,22 @@ namespace Open_lab.Tests.ViewModels
         }
 
         [Fact]
+        public async Task MarkExternalCollectedCommand_When_User_Not_LoggedIn_Should_Reject_Request_Failure()
+        {
+            // Arrange
+            AppSessionTestHelper.Reset();
+            _viewModel.SelectedRow = new SampleCollectionRow { VisitTestId = 20 };
+
+            // Act
+            _viewModel.MarkExternalCollectedCommand.Execute(null);
+            await Task.Delay(50);
+
+            // Assert
+            _sampleCollectionServiceMock.Verify(x => x.MarkCollectedAsync(It.IsAny<int>(), It.IsAny<int>(), true, It.IsAny<int?>()), Times.Never);
+            _viewModel.StatusMessage.Should().Contain("يجب تسجيل الدخول");
+        }
+
+        [Fact]
         public async Task RefreshSampleStatusAsync_Should_UpdateStatus_SuccessGuard()
         {
             _viewModel.SelectedRow = new SampleCollectionRow { VisitTestId = 30 };
@@ -189,6 +273,22 @@ namespace Open_lab.Tests.ViewModels
             await Task.Delay(50);
 
             _viewModel.SelectedSampleStatus.Should().Contain("Tracking system offline");
+            _viewModel.IsLoading.Should().BeFalse();
+        }
+
+        [Fact]
+        public async Task RefreshSampleStatusCommand_When_No_Tracking_Record_Should_Show_NotFound_Message_Edge()
+        {
+            // Arrange
+            _viewModel.SelectedRow = new SampleCollectionRow { VisitTestId = 77 };
+            _sampleTrackingServiceMock.Setup(x => x.GetSampleStatusAsync(77)).ReturnsAsync((SampleCollection?)null);
+
+            // Act
+            _viewModel.RefreshSampleStatusCommand.Execute(null);
+            await Task.Delay(50);
+
+            // Assert
+            _viewModel.SelectedSampleStatus.Should().Contain("لا يوجد سجل تتبع");
             _viewModel.IsLoading.Should().BeFalse();
         }
     }

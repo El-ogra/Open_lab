@@ -89,5 +89,61 @@ namespace Open_lab.Tests.ViewModels
             _viewModel.HistoryResults[0].VisitId.Should().Be(1);
             _viewModel.StatusMessage.Should().Contain("تم تحميل");
         }
+
+        [Fact]
+        public async Task LoadHistoryCommand_When_ServiceThrows_Should_Set_ErrorMessage_FailureGuard()
+        {
+            _viewModel.LabId = "L-300";
+            _patientServiceMock.Setup(s => s.GetByLabIdAsync("L-300"))
+                .ReturnsAsync(new Patient { PatientId = 50, FullName = "Patient 50", LabId = "L-300", Gender = "Male" });
+            _catalogServiceMock.Setup(s => s.GetAllTestsAsync())
+                .ReturnsAsync(new List<Test> { new() { TestId = 9, NameReport = "CRP", NameReceipt = "CRP", Code = "CRP", Price = 90m } });
+            _compareServiceMock.Setup(s => s.GetLastResultsAsync(50, 9, 3))
+                .ThrowsAsync(new InvalidOperationException("history unavailable"));
+
+            _viewModel.LoadPatientCommand.Execute(null);
+            await Task.Delay(50);
+            _viewModel.SelectedTestId = 9;
+
+            _viewModel.LoadHistoryCommand.Execute(null);
+            await Task.Delay(50);
+
+            _viewModel.StatusMessage.Should().Contain("خطأ:");
+            _viewModel.StatusMessage.Should().Contain("history unavailable");
+            _viewModel.HistoryResults.Should().BeEmpty();
+        }
+
+        [Fact]
+        public async Task ClearCommand_Should_Reset_State_And_Collections_EdgeGuard()
+        {
+            _viewModel.LabId = "L-RESET";
+            _patientServiceMock.Setup(s => s.GetByLabIdAsync("L-RESET"))
+                .ReturnsAsync(new Patient { PatientId = 60, FullName = "Reset P", LabId = "L-RESET", Gender = "Female" });
+            _catalogServiceMock.Setup(s => s.GetAllTestsAsync())
+                .ReturnsAsync(new List<Test> { new() { TestId = 1, NameReport = "CBC", NameReceipt = "CBC", Code = "CBC", Price = 10m } });
+
+            _viewModel.LoadPatientCommand.Execute(null);
+            await Task.Delay(50);
+            _viewModel.SelectedTestId = 1;
+            _viewModel.HistoryResults.Add(new HistoricalResultRow { VisitId = 1, ParameterName = "P", Value = "1" });
+
+            _viewModel.ClearCommand.Execute(null);
+
+            _viewModel.LabId.Should().BeEmpty();
+            _viewModel.PatientId.Should().BeNull();
+            _viewModel.SelectedTestId.Should().BeNull();
+            _viewModel.Tests.Should().BeEmpty();
+            _viewModel.HistoryResults.Should().BeEmpty();
+            _viewModel.StatusMessage.Should().BeEmpty();
+        }
+
+        [Fact]
+        public void LoadHistoryCommand_CanExecute_Should_Be_False_Without_Patient_Or_Test_FailureGuard()
+        {
+            _viewModel.PatientId.Should().BeNull();
+            _viewModel.SelectedTestId.Should().BeNull();
+
+            _viewModel.LoadHistoryCommand.CanExecute(null).Should().BeFalse();
+        }
     }
 }

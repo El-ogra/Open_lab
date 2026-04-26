@@ -91,6 +91,16 @@ namespace Open_lab.Tests.Services
         }
 
         [Fact]
+        public async Task GetSampleStatusAsync_When_Sample_Does_Not_Exist_Should_Return_Null_FailureGuard()
+        {
+            // Act
+            var result = await _service.GetSampleStatusAsync(99999);
+
+            // Assert
+            result.Should().BeNull();
+        }
+
+        [Fact]
         public async Task GetPendingTrackingSamplesAsync_Should_Return_OnlyPending_LogicGuard()
         {
             // Arrange
@@ -137,6 +147,16 @@ namespace Open_lab.Tests.Services
             pendingSamples.Should().NotBeEmpty();
             pendingSamples.Should().Contain(s => s.VisitTestId == vt1.VisitTestId);
             pendingSamples.Should().NotContain(s => s.VisitTestId == vt2.VisitTestId);
+        }
+
+        [Fact]
+        public async Task GetPendingTrackingSamplesAsync_When_No_Samples_Should_Return_Empty_Edge()
+        {
+            // Act
+            var pendingSamples = await _service.GetPendingTrackingSamplesAsync();
+
+            // Assert
+            pendingSamples.Should().BeEmpty();
         }
     }
 }

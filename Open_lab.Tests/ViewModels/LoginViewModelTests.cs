@@ -1,3 +1,4 @@
+using System;
 using FluentAssertions;
 using Moq;
 using Open_lab.Models;
@@ -190,6 +191,38 @@ namespace Open_lab.Tests.ViewModels
 
             // Assert
             _viewModel.IsPasswordVisible.Should().BeTrue();
+        }
+
+        [Fact]
+        public async Task LoginCommand_When_AuthService_Throws_Should_Set_Error_Message_Failure()
+        {
+            // Arrange
+            _viewModel.Username = "user";
+            _viewModel.Password = "pass";
+            _authServiceMock.Setup(x => x.ValidateCredentialsAsync("user", "pass"))
+                .ThrowsAsync(new InvalidOperationException("auth-failed"));
+
+            // Act
+            _viewModel.LoginCommand.Execute(null);
+            await Task.Delay(50);
+
+            // Assert
+            _viewModel.StatusMessage.Should().Contain("auth-failed");
+            _viewModel.IsBusy.Should().BeFalse();
+        }
+
+        [Fact]
+        public void TogglePasswordVisibilityCommand_When_Executed_Twice_Should_Return_To_Initial_State_Edge()
+        {
+            // Arrange
+            _viewModel.IsPasswordVisible = false;
+
+            // Act
+            _viewModel.TogglePasswordVisibilityCommand.Execute(null);
+            _viewModel.TogglePasswordVisibilityCommand.Execute(null);
+
+            // Assert
+            _viewModel.IsPasswordVisible.Should().BeFalse();
         }
     }
 }

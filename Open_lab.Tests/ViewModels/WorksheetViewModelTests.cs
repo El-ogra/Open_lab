@@ -48,6 +48,86 @@ namespace Open_lab.Tests.ViewModels
             _printServiceMock.Verify(x => x.PrintWorksheetByPatientAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<IReadOnlyCollection<WorkSheetPatientRow>>()), Times.Once);
         }
 
+        [Fact]
+        public async Task LoadCommand_When_Executed_Should_Load_Patient_Rows_Success()
+        {
+            // Arrange
+            _worksheetServiceMock
+                .Setup(x => x.GetWorksheetByPatientAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>()))
+                .ReturnsAsync(new List<WorkSheetPatientRow> { new() { VisitId = 2, PatientName = "P2", TestsCount = 1 } });
+
+            // Act
+            _viewModel.LoadCommand.Execute(null);
+            await Task.Delay(50);
+
+            // Assert
+            _viewModel.Rows.Should().ContainSingle(x => x.VisitId == 2);
+            _viewModel.StatusMessage.Should().Contain("تم تحميل");
+        }
+
+        [Fact]
+        public async Task LoadCommand_When_Service_Fails_Should_Set_Error_Message_Failure()
+        {
+            // Arrange
+            _worksheetServiceMock
+                .Setup(x => x.GetWorksheetByPatientAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>()))
+                .ThrowsAsync(new InvalidOperationException("patient-load-failed"));
+
+            // Act
+            _viewModel.LoadCommand.Execute(null);
+            await Task.Delay(50);
+
+            // Assert
+            _viewModel.StatusMessage.Should().Contain("patient-load-failed");
+        }
+
+        [Fact]
+        public async Task LoadCommand_When_Service_Returns_Empty_Should_Set_Zero_Status_Edge()
+        {
+            // Arrange
+            _worksheetServiceMock
+                .Setup(x => x.GetWorksheetByPatientAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>()))
+                .ReturnsAsync(new List<WorkSheetPatientRow>());
+
+            // Act
+            _viewModel.LoadCommand.Execute(null);
+            await Task.Delay(50);
+
+            // Assert
+            _viewModel.Rows.Should().BeEmpty();
+            _viewModel.StatusMessage.Should().Contain("0 زيارة");
+        }
+
+        [Fact]
+        public async Task PrintCommand_When_PrintService_Fails_Should_Set_Error_Message_Failure()
+        {
+            // Arrange
+            _viewModel.Rows.Add(new WorkSheetPatientRow { VisitId = 3, PatientName = "P3", TestsCount = 1 });
+            _printServiceMock
+                .Setup(x => x.PrintWorksheetByPatientAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<IReadOnlyCollection<WorkSheetPatientRow>>()))
+                .ThrowsAsync(new Exception("patient-print-failed"));
+
+            // Act
+            _viewModel.PrintCommand.Execute(null);
+            await Task.Delay(50);
+
+            // Assert
+            _viewModel.StatusMessage.Should().Contain("patient-print-failed");
+        }
+
+        [Fact]
+        public void PrintCommand_When_No_Rows_Should_Be_Disabled_Edge()
+        {
+            // Arrange
+            _viewModel.Rows.Clear();
+
+            // Act
+            var canExecute = _viewModel.PrintCommand.CanExecute(null);
+
+            // Assert
+            canExecute.Should().BeFalse();
+        }
+
         public void Dispose() => AppSessionTestHelper.Reset();
     }
 
@@ -87,6 +167,86 @@ namespace Open_lab.Tests.ViewModels
             await _viewModel.InvokePrivateAsync("PrintAsync");
 
             _printServiceMock.Verify(x => x.PrintWorksheetByTestAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<IReadOnlyCollection<WorkSheetTestRow>>()), Times.Once);
+        }
+
+        [Fact]
+        public async Task LoadCommand_When_Executed_Should_Load_Test_Rows_Success()
+        {
+            // Arrange
+            _worksheetServiceMock
+                .Setup(x => x.GetWorksheetByTestAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>()))
+                .ReturnsAsync(new List<WorkSheetTestRow> { new() { TestName = "ALT", Count = 2 } });
+
+            // Act
+            _viewModel.LoadCommand.Execute(null);
+            await Task.Delay(50);
+
+            // Assert
+            _viewModel.Rows.Should().ContainSingle(x => x.TestName == "ALT" && x.Count == 2);
+            _viewModel.StatusMessage.Should().Contain("تم تحميل");
+        }
+
+        [Fact]
+        public async Task LoadCommand_When_Service_Fails_Should_Set_Error_Message_Failure()
+        {
+            // Arrange
+            _worksheetServiceMock
+                .Setup(x => x.GetWorksheetByTestAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>()))
+                .ThrowsAsync(new InvalidOperationException("test-load-failed"));
+
+            // Act
+            _viewModel.LoadCommand.Execute(null);
+            await Task.Delay(50);
+
+            // Assert
+            _viewModel.StatusMessage.Should().Contain("test-load-failed");
+        }
+
+        [Fact]
+        public async Task LoadCommand_When_Service_Returns_Empty_Should_Set_Zero_Status_Edge()
+        {
+            // Arrange
+            _worksheetServiceMock
+                .Setup(x => x.GetWorksheetByTestAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>()))
+                .ReturnsAsync(new List<WorkSheetTestRow>());
+
+            // Act
+            _viewModel.LoadCommand.Execute(null);
+            await Task.Delay(50);
+
+            // Assert
+            _viewModel.Rows.Should().BeEmpty();
+            _viewModel.StatusMessage.Should().Contain("0 تحليل");
+        }
+
+        [Fact]
+        public async Task PrintCommand_When_PrintService_Fails_Should_Set_Error_Message_Failure()
+        {
+            // Arrange
+            _viewModel.Rows.Add(new WorkSheetTestRow { TestName = "AST", Count = 1 });
+            _printServiceMock
+                .Setup(x => x.PrintWorksheetByTestAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<IReadOnlyCollection<WorkSheetTestRow>>()))
+                .ThrowsAsync(new Exception("test-print-failed"));
+
+            // Act
+            _viewModel.PrintCommand.Execute(null);
+            await Task.Delay(50);
+
+            // Assert
+            _viewModel.StatusMessage.Should().Contain("test-print-failed");
+        }
+
+        [Fact]
+        public void PrintCommand_When_No_Rows_Should_Be_Disabled_Edge()
+        {
+            // Arrange
+            _viewModel.Rows.Clear();
+
+            // Act
+            var canExecute = _viewModel.PrintCommand.CanExecute(null);
+
+            // Assert
+            canExecute.Should().BeFalse();
         }
 
         public void Dispose() => AppSessionTestHelper.Reset();

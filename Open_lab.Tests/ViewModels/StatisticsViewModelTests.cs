@@ -98,5 +98,125 @@ namespace Open_lab.Tests.ViewModels
             _viewModel.UserProductivity.Should().ContainSingle();
             _viewModel.StatusMessage.Should().Be("تم تحميل الإحصائيات.");
         }
+
+        [Fact]
+        public async Task LoadCommand_When_Executed_Should_Load_Data_Success()
+        {
+            // Act
+            _viewModel.LoadCommand.Execute(null);
+            await Task.Delay(50);
+
+            // Assert
+            _viewModel.VisitCount.Should().Be(2);
+            _viewModel.StatusMessage.Should().Be("تم تحميل الإحصائيات.");
+        }
+
+        [Fact]
+        public async Task LoadAsync_When_SnapshotServiceThrows_Should_Set_ErrorStatus_FailureGuard()
+        {
+            // Arrange
+            _statisticsServiceMock
+                .Setup(x => x.GetSnapshotAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<string?>(), It.IsAny<int?>()))
+                .ThrowsAsync(new InvalidOperationException("snapshot-failed"));
+
+            // Act
+            await _viewModel.InvokePrivateAsync("LoadAsync");
+
+            // Assert
+            _viewModel.StatusMessage.Should().Contain("خطأ:");
+            _viewModel.StatusMessage.Should().Contain("snapshot-failed");
+        }
+
+        [Fact]
+        public async Task LoadCommand_When_Service_Throws_Should_Set_Error_Status_Failure()
+        {
+            // Arrange
+            _statisticsServiceMock
+                .Setup(x => x.GetSnapshotAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<string?>(), It.IsAny<int?>()))
+                .ThrowsAsync(new InvalidOperationException("load-command-failed"));
+
+            // Act
+            _viewModel.LoadCommand.Execute(null);
+            await Task.Delay(50);
+
+            // Assert
+            _viewModel.StatusMessage.Should().Contain("load-command-failed");
+        }
+
+        [Fact]
+        public async Task LoadCommand_When_Services_Return_Empty_Data_Should_Keep_Collections_Empty_Edge()
+        {
+            // Arrange
+            _statisticsServiceMock
+                .Setup(x => x.GetSnapshotAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<string?>(), It.IsAny<int?>()))
+                .ReturnsAsync(new StatisticsSnapshot
+                {
+                    Summary = new StatisticsSummary(),
+                    ByGender = new List<StatisticsGenderRow>(),
+                    ByReferral = new List<StatisticsReferralRow>()
+                });
+            _statisticsServiceMock.Setup(x => x.GetMonthlyAnalysisAsync(It.IsAny<int>())).ReturnsAsync(new List<MonthlyAnalysisRow>());
+            _statisticsServiceMock.Setup(x => x.GetTop10TestsAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>())).ReturnsAsync(new List<TopTestRow>());
+            _statisticsServiceMock.Setup(x => x.GetSampleCountPerYearAsync(It.IsAny<int>())).ReturnsAsync(new List<YearlySampleRow>());
+            _userProductivityServiceMock.Setup(x => x.GetUserPerformanceAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>())).ReturnsAsync(new List<UserPerformanceRow>());
+
+            // Act
+            _viewModel.LoadCommand.Execute(null);
+            await Task.Delay(50);
+
+            // Assert
+            _viewModel.ByGender.Should().BeEmpty();
+            _viewModel.ByReferral.Should().BeEmpty();
+            _viewModel.TopTests.Should().BeEmpty();
+            _viewModel.UserProductivity.Should().BeEmpty();
+        }
+
+        [Fact]
+        public async Task PrintAsync_When_PrintServiceThrows_Should_Set_ErrorStatus_EdgeGuard()
+        {
+            // Arrange
+            _printServiceMock
+                .Setup(x => x.PrintTextReportAsync(It.IsAny<string>(), It.IsAny<IReadOnlyCollection<string>>(), It.IsAny<string>()))
+                .ThrowsAsync(new InvalidOperationException("print-failed"));
+
+            // Act
+            await _viewModel.InvokePrivateAsync("PrintAsync");
+
+            // Assert
+            _viewModel.StatusMessage.Should().Contain("خطأ:");
+            _viewModel.StatusMessage.Should().Contain("print-failed");
+        }
+
+        [Fact]
+        public async Task PrintCommand_When_Executed_Should_Call_Print_Service_Success()
+        {
+            // Arrange
+            await _viewModel.InvokePrivateAsync("LoadAsync");
+
+            // Act
+            _viewModel.PrintCommand.Execute(null);
+            await Task.Delay(50);
+
+            // Assert
+            _printServiceMock.Verify(
+                x => x.PrintTextReportAsync("تقرير الإحصائيات", It.IsAny<IReadOnlyCollection<string>>(), "StatisticsReport"),
+                Times.Once);
+            _viewModel.StatusMessage.Should().Be("تم إرسال التقرير للطباعة.");
+        }
+
+        [Fact]
+        public void Commands_When_User_Has_No_Permission_Should_Be_Disabled_Failure()
+        {
+            // Arrange
+            AppSessionTestHelper.Reset();
+
+            // Act
+            var loadCanExecute = _viewModel.LoadCommand.CanExecute(null);
+            var printCanExecute = _viewModel.PrintCommand.CanExecute(null);
+
+            // Assert
+            loadCanExecute.Should().BeFalse();
+            printCanExecute.Should().BeFalse();
+        }
     }
 }

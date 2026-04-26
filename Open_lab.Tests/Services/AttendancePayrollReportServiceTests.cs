@@ -83,5 +83,48 @@ namespace Open_lab.Tests.Services
             row.VacationDays.Should().Be(1);
             row.AbsentDays.Should().Be(0);
         }
+
+        [Fact]
+        public async Task GeneratePayrollSummaryAsync_When_UserId_NotFound_Should_Return_EmptyList_FailureGuard()
+        {
+            // Arrange
+            var user = new User { Username = "u-any", FullName = "Any User" };
+            _db.Users.Add(user);
+            await _db.SaveChangesAsync();
+
+            // Act
+            var rows = await _service.GeneratePayrollSummaryAsync(DateTime.Today.AddDays(-1), DateTime.Today.AddDays(1), userId: 99999);
+
+            // Assert
+            rows.Should().BeEmpty();
+        }
+
+        [Fact]
+        public async Task GeneratePayrollSummaryAsync_When_ToBeforeFrom_Should_SwapRange_And_Count_UnknownStatus_AsOther_EdgeGuard()
+        {
+            // Arrange
+            var user = new User { Username = "u-edge", FullName = "Edge User" };
+            _db.Users.Add(user);
+            await _db.SaveChangesAsync();
+
+            var targetDay = DateTime.Today;
+            _db.AttendanceDayStatuses.Add(new AttendanceDayStatus
+            {
+                UserId = user.UserId,
+                Date = targetDay,
+                Status = "Training"
+            });
+            await _db.SaveChangesAsync();
+
+            // Act (reversed range on purpose)
+            var rows = await _service.GeneratePayrollSummaryAsync(targetDay.AddDays(1), targetDay.AddDays(-1), user.UserId);
+
+            // Assert
+            rows.Should().ContainSingle();
+            var row = rows[0];
+            row.OtherStatusDays.Should().BeGreaterThan(0);
+            row.From.Date.Should().Be(targetDay.AddDays(-1).Date);
+            row.To.Date.Should().Be(targetDay.AddDays(1).Date);
+        }
     }
 }

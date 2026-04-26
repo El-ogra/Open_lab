@@ -421,6 +421,179 @@ namespace Open_lab.Tests.Services
             updated.ReportMarginBottom.Should().Be(1.3);
         }
 
+        [Fact]
+        public async Task PatientSearchService_SearchPatientsAsync_Should_Filter_By_Name_Phone_And_LabId_SuccessGuard()
+        {
+            var service = new PatientSearchService(_db);
+            _db.Patients.AddRange(
+                new Patient { LabId = "LAB-A", FullName = "Ali Hassan", Gender = "Male", Phone = "01000111" },
+                new Patient { LabId = "LAB-B", FullName = "Mona Ali", Gender = "Female", Phone = "01100222" },
+                new Patient { LabId = "LAB-C", FullName = "Ziad", Gender = "Male", Phone = "01200333" });
+            await _db.SaveChangesAsync();
+
+            var result = await service.SearchPatientsAsync("Ali", "0100", "LAB-A");
+
+            result.Should().ContainSingle();
+            result[0].LabId.Should().Be("LAB-A");
+            result[0].FullName.Should().Contain("Ali");
+        }
+
+        [Fact]
+        public async Task PatientSearchService_SearchPatientsAsync_With_AllFiltersEmpty_Should_Return_AllOrdered_EdgeGuard()
+        {
+            var service = new PatientSearchService(_db);
+            _db.Patients.AddRange(
+                new Patient { LabId = "L2", FullName = "Zed", Gender = "Male" },
+                new Patient { LabId = "L1", FullName = "Adam", Gender = "Male" });
+            await _db.SaveChangesAsync();
+
+            var result = await service.SearchPatientsAsync(null, string.Empty, " ");
+
+            result.Should().HaveCount(2);
+            result[0].FullName.Should().Be("Adam");
+            result[1].FullName.Should().Be("Zed");
+        }
+
+        [Fact]
+        public async Task PatientSearchService_SearchPatientsAsync_With_DateFilter_Should_Exclude_Patients_Without_Visits_FailureGuard()
+        {
+            var service = new PatientSearchService(_db);
+            var withVisit = new Patient { LabId = "LAB-D1", FullName = "With Visit", Gender = "Male" };
+            var withoutVisit = new Patient { LabId = "LAB-D2", FullName = "Without Visit", Gender = "Female" };
+            _db.Patients.AddRange(withVisit, withoutVisit);
+            await _db.SaveChangesAsync();
+            _db.Visits.Add(new Visit { PatientId = withVisit.PatientId, VisitDate = DateTime.Today });
+            await _db.SaveChangesAsync();
+
+            var result = await service.SearchPatientsAsync(null, null, null, DateTime.Today);
+
+            result.Should().ContainSingle();
+            result[0].LabId.Should().Be("LAB-D1");
+        }
+
+        [Fact]
+        public async Task CompareWithHistoryService_GetLastResultsAsync_Should_Return_MostRecent_VisitResults_SuccessGuard()
+        {
+            var service = new CompareWithHistoryService(_db);
+            var patient = new Patient { LabId = "LAB-H1", FullName = "History P", Gender = "Male" };
+            var test = new Test { Code = "HIS1", NameReport = "History Test", NameReceipt = "History Test", Price = 20m };
+            _db.Patients.Add(patient);
+            _db.Tests.Add(test);
+            await _db.SaveChangesAsync();
+
+            var parameter = new TestParameter { TestId = test.TestId, Name = "Param1", OrderNo = 1 };
+            _db.TestParameters.Add(parameter);
+            await _db.SaveChangesAsync();
+
+            var oldVisit = new Visit { PatientId = patient.PatientId, VisitDate = DateTime.Today.AddDays(-10) };
+            var newVisit = new Visit { PatientId = patient.PatientId, VisitDate = DateTime.Today.AddDays(-1) };
+            _db.Visits.AddRange(oldVisit, newVisit);
+            await _db.SaveChangesAsync();
+
+            var oldVisitTest = new VisitTest { VisitId = oldVisit.VisitId, TestId = test.TestId, Price = 20m, Status = "Completed" };
+            var newVisitTest = new VisitTest { VisitId = newVisit.VisitId, TestId = test.TestId, Price = 20m, Status = "Completed" };
+            _db.VisitTests.AddRange(oldVisitTest, newVisitTest);
+            await _db.SaveChangesAsync();
+
+            _db.ResultValues.AddRange(
+                new ResultValue { VisitTestId = oldVisitTest.VisitTestId, ParameterId = parameter.ParameterId, Value = "8.1", Flag = "H" },
+                new ResultValue { VisitTestId = newVisitTest.VisitTestId, ParameterId = parameter.ParameterId, Value = "5.2", Flag = "N" });
+            await _db.SaveChangesAsync();
+
+            var result = await service.GetLastResultsAsync(patient.PatientId, test.TestId, count: 1);
+
+            result.Should().ContainSingle();
+            result[0].Value.Should().Be("5.2");
+            result[0].VisitId.Should().Be(newVisit.VisitId);
+        }
+
+        [Fact]
+        public async Task CompareWithHistoryService_GetLastResultsAsync_When_NoHistory_Should_Return_EmptyList_FailureGuard()
+        {
+            var service = new CompareWithHistoryService(_db);
+
+            var result = await service.GetLastResultsAsync(patientId: 999, testId: 999, count: 3);
+
+            result.Should().BeEmpty();
+        }
+
+        [Fact]
+        public async Task CompareWithHistoryService_GetLastResultsAsync_With_ZeroCount_Should_Return_Empty_EdgeGuard()
+        {
+            var service = new CompareWithHistoryService(_db);
+            var patient = new Patient { LabId = "LAB-H2", FullName = "Edge", Gender = "Male" };
+            var test = new Test { Code = "HIS2", NameReport = "H2", NameReceipt = "H2", Price = 10m };
+            _db.Patients.Add(patient);
+            _db.Tests.Add(test);
+            await _db.SaveChangesAsync();
+
+            var result = await service.GetLastResultsAsync(patient.PatientId, test.TestId, count: 0);
+
+            result.Should().BeEmpty();
+        }
+
+        [Fact]
+        public async Task AuthService_ValidateCredentialsAsync_With_HashedPassword_Should_Return_User_SuccessGuard()
+        {
+            var service = new AuthService(_db);
+            var salt = PasswordSecurity.GenerateSalt();
+            var user = new User
+            {
+                Username = "hashed-user",
+                Salt = salt,
+                PasswordHash = PasswordSecurity.ComputeSha256("p@ss", salt),
+                IsActive = true
+            };
+            _db.Users.Add(user);
+            await _db.SaveChangesAsync();
+
+            var result = await service.ValidateCredentialsAsync("hashed-user", "p@ss");
+
+            result.Should().NotBeNull();
+            result!.Username.Should().Be("hashed-user");
+        }
+
+        [Fact]
+        public async Task AuthService_ValidateCredentialsAsync_With_InvalidPassword_Should_Return_Null_FailureGuard()
+        {
+            var service = new AuthService(_db);
+            var salt = PasswordSecurity.GenerateSalt();
+            _db.Users.Add(new User
+            {
+                Username = "wrong-pass-user",
+                Salt = salt,
+                PasswordHash = PasswordSecurity.ComputeSha256("correct", salt),
+                IsActive = true
+            });
+            await _db.SaveChangesAsync();
+
+            var result = await service.ValidateCredentialsAsync("wrong-pass-user", "incorrect");
+
+            result.Should().BeNull();
+        }
+
+        [Fact]
+        public async Task AuthService_ValidateCredentialsAsync_With_LegacyPassword_Should_MigrateSaltAndHash_EdgeGuard()
+        {
+            var service = new AuthService(_db);
+            var user = new User
+            {
+                Username = "legacy-user",
+                PasswordHash = "legacy-pass",
+                Salt = string.Empty,
+                IsActive = true
+            };
+            _db.Users.Add(user);
+            await _db.SaveChangesAsync();
+
+            var result = await service.ValidateCredentialsAsync("legacy-user", "legacy-pass");
+            var persisted = await _db.Users.FirstAsync(u => u.UserId == user.UserId);
+
+            result.Should().NotBeNull();
+            persisted.Salt.Should().NotBeNullOrWhiteSpace();
+            persisted.PasswordHash.Should().NotBe("legacy-pass");
+        }
+
         private Test SeedTest(string code)
         {
             var test = new Test

@@ -198,5 +198,35 @@ namespace Open_lab.Tests.ViewModels
             _viewModel.IsScheduleEnabled.Should().BeFalse();
             _viewModel.StatusMessage.Should().Be("تم إيقاف النسخ الاحتياطي المجدول.");
         }
+
+        [Fact]
+        public async Task ConfigureScheduleCommand_When_Time_Format_Invalid_Should_Set_Validation_Message_Failure()
+        {
+            // Arrange
+            _viewModel.ScheduledBackupDirectory = "C:\\Backups";
+            _viewModel.ScheduledBackupTime = "invalid";
+
+            // Act
+            _viewModel.ConfigureScheduleCommand.Execute(null);
+            await Task.Delay(50);
+
+            // Assert
+            _viewModel.StatusMessage.Should().Contain("صيغة وقت الجدولة غير صحيحة");
+            _mockService.Verify(s => s.ConfigureDailyBackupScheduleAsync(It.IsAny<string>(), It.IsAny<TimeSpan>()), Times.Never);
+        }
+
+        [Fact]
+        public async Task RefreshScheduleCommand_When_Service_Throws_Should_Set_Error_Message_Failure()
+        {
+            // Arrange
+            _mockService.Setup(s => s.GetBackupScheduleStatusAsync()).ThrowsAsync(new InvalidOperationException("schedule-failed"));
+
+            // Act
+            _viewModel.RefreshScheduleCommand.Execute(null);
+            await Task.Delay(50);
+
+            // Assert
+            _viewModel.StatusMessage.Should().Contain("schedule-failed");
+        }
     }
 }

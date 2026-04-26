@@ -214,5 +214,35 @@ namespace Open_lab.Tests.ViewModels
             printed.Results.Should().ContainSingle();
             printed.Results[0].Sensitivity.Should().Be("R");
         }
+
+        [Fact]
+        public async Task SaveResultAsync_When_SelectionMissing_Should_Set_ValidationMessage_FailureGuard()
+        {
+            // Arrange
+            _viewModel.SelectedVisitTest = null;
+            _viewModel.SelectedCulture = null;
+
+            // Act
+            await _viewModel.InvokePrivateAsync("SaveResultAsync");
+
+            // Assert
+            _viewModel.StatusMessage.Should().Contain("اختر الزيارة والمزرعة");
+            _serviceMock.Verify(s => s.SaveCultureResultAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<IReadOnlyCollection<CultureSensitivityValue>>()), Times.Never);
+        }
+
+        [Fact]
+        public async Task PrintCultureReportAsync_When_DataIncomplete_Should_Set_Message_EdgeGuard()
+        {
+            // Arrange
+            _viewModel.SelectedVisitTest = null;
+            _viewModel.SelectedCulture = null;
+
+            // Act
+            await _viewModel.InvokePrivateAsync("PrintCultureReportAsync");
+
+            // Assert
+            _viewModel.StatusMessage.Should().Be("بيانات الطباعة غير مكتملة.");
+            _printServiceMock.Verify(p => p.PrintCultureReportAsync(It.IsAny<CultureReportData>()), Times.Never);
+        }
     }
 }

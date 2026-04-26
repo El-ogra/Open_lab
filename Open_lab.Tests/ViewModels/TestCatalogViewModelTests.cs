@@ -169,5 +169,40 @@ namespace Open_lab.Tests.ViewModels
             _viewModel.CostPrice.Should().BeNull();
             _viewModel.PatientPrice.Should().BeNull();
         }
+
+        [Fact]
+        public async Task SaveAsync_When_ServiceThrows_Should_Set_ErrorMessage_FailureGuard()
+        {
+            // Arrange
+            _viewModel.SelectedTest = null;
+            _viewModel.Code = "ERR";
+            _viewModel.NameReport = "Err Name";
+            _viewModel.NameReceipt = "Err Receipt";
+            _viewModel.Price = 10m;
+            _testCatalogServiceMock
+                .Setup(x => x.CreateTestAsync(It.IsAny<Test>()))
+                .ThrowsAsync(new Exception("save-failed"));
+
+            // Act
+            await _viewModel.InvokePrivateAsync("SaveAsync");
+
+            // Assert
+            _viewModel.StatusMessage.Should().Contain("خطأ:");
+            _viewModel.StatusMessage.Should().Contain("save-failed");
+        }
+
+        [Fact]
+        public void GenerateBarcode_When_CodeWhitespace_Should_Clear_BarcodeImage_EdgeGuard()
+        {
+            // Arrange
+            _viewModel.Code = "ABC";
+            _viewModel.Code.Should().Be("ABC");
+
+            // Act
+            _viewModel.Code = "   ";
+
+            // Assert
+            _viewModel.BarcodeImage.Should().BeNull();
+        }
     }
 }

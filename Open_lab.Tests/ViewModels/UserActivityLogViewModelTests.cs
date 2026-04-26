@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using FluentAssertions;
@@ -37,6 +38,39 @@ namespace Open_lab.Tests.ViewModels
             _userActivityServiceMock.Verify(x => x.GetRecentActivitiesAsync(null, 100), Times.Once);
             _viewModel.Items.Should().ContainSingle();
             _viewModel.StatusMessage.Should().Contain("تم تحميل 1 سجل");
+        }
+
+        [Fact]
+        public async Task LoadCommand_When_Service_Throws_Should_Set_Error_Message_Failure()
+        {
+            // Arrange
+            _userActivityServiceMock
+                .Setup(x => x.GetRecentActivitiesAsync(It.IsAny<int?>(), It.IsAny<int>()))
+                .ThrowsAsync(new InvalidOperationException("activity-load-failed"));
+
+            // Act
+            _viewModel.LoadCommand.Execute(null);
+            await Task.Delay(50);
+
+            // Assert
+            _viewModel.StatusMessage.Should().Contain("activity-load-failed");
+        }
+
+        [Fact]
+        public async Task LoadCommand_When_Service_Returns_Empty_Should_Keep_Items_Empty_Edge()
+        {
+            // Arrange
+            _userActivityServiceMock
+                .Setup(x => x.GetRecentActivitiesAsync(It.IsAny<int?>(), It.IsAny<int>()))
+                .ReturnsAsync(new List<UserActivityRow>());
+
+            // Act
+            _viewModel.LoadCommand.Execute(null);
+            await Task.Delay(50);
+
+            // Assert
+            _viewModel.Items.Should().BeEmpty();
+            _viewModel.StatusMessage.Should().Contain("تم تحميل 0 سجل");
         }
 
         public void Dispose() => AppSessionTestHelper.Reset();

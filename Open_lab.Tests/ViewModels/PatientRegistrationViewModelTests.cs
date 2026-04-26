@@ -429,5 +429,58 @@ namespace Open_lab.Tests.ViewModels
             _viewModel.StatusMessage.Should().Contain("يرجى إدخال اسم المريض");
             _patientServiceMock.Verify(x => x.CreateAsync(It.IsAny<Patient>()), Times.Never);
         }
+
+        [Fact]
+        public async Task GenerateLabIdAsync_When_ServiceThrows_Should_Set_ErrorMessage_FailureGuard()
+        {
+            // Arrange
+            _patientServiceMock
+                .Setup(x => x.GenerateNextLabIdAsync(It.IsAny<DateTime?>()))
+                .ThrowsAsync(new Exception("gen-failed"));
+
+            // Act
+            await _viewModel.InvokePrivateAsync("GenerateLabIdAsync");
+
+            // Assert
+            _viewModel.StatusMessage.Should().Contain("خطأ توليد Lab ID");
+            _viewModel.StatusMessage.Should().Contain("gen-failed");
+        }
+
+        [Fact]
+        public async Task DeleteAsync_When_DeleteServiceThrows_Should_Set_ErrorMessage_FailureGuard()
+        {
+            // Arrange
+            _viewModel.InvokePrivate("set_PatientId", 9);
+            _patientServiceMock
+                .Setup(x => x.DeleteAsync(9))
+                .ThrowsAsync(new InvalidOperationException("cannot-delete"));
+
+            // Act
+            await _viewModel.InvokePrivateAsync("DeleteAsync");
+
+            // Assert
+            _viewModel.StatusMessage.Should().Contain("خطأ:");
+            _viewModel.StatusMessage.Should().Contain("cannot-delete");
+        }
+
+        [Fact]
+        public async Task ClearFormAsync_When_PatientExists_Should_Reset_Fields_And_Generate_NewLabId_EdgeGuard()
+        {
+            // Arrange
+            _viewModel.InvokePrivate("set_PatientId", 50);
+            _viewModel.FullName = "Filled";
+            _viewModel.Gender = "Male";
+            _viewModel.LabId = "LAB-OLD";
+            _patientServiceMock.Setup(x => x.GenerateNextLabIdAsync(It.IsAny<DateTime?>())).ReturnsAsync("LAB-NEW");
+
+            // Act
+            await _viewModel.InvokePrivateAsync("ClearFormAsync");
+
+            // Assert
+            _viewModel.PatientId.Should().Be(0);
+            _viewModel.FullName.Should().BeEmpty();
+            _viewModel.Gender.Should().BeEmpty();
+            _viewModel.LabId.Should().Be("LAB-NEW");
+        }
     }
 }

@@ -137,5 +137,94 @@ namespace Open_lab.Tests.Services
             current.Should().NotContain(rp => rp.PermissionCode == "OldCode1");
             current.Should().NotContain(rp => rp.PermissionCode == "OldCode2");
         }
+
+        [Fact]
+        public async Task GetUsersAsync_Should_Return_Users_Ordered_By_Username_Success()
+        {
+            // Arrange
+            _db.Users.AddRange(
+                new User { Username = "z-user" },
+                new User { Username = "a-user" });
+            await _db.SaveChangesAsync();
+
+            // Act
+            var users = await _service.GetUsersAsync();
+
+            // Assert
+            users.Select(u => u.Username).Should().ContainInOrder("a-user", "z-user");
+        }
+
+        [Fact]
+        public async Task GetRolesAsync_Should_Return_Roles_Ordered_By_Name_Success()
+        {
+            // Arrange
+            _db.Roles.AddRange(new Role { RoleName = "ZRole" }, new Role { RoleName = "ARole" });
+            await _db.SaveChangesAsync();
+
+            // Act
+            var roles = await _service.GetRolesAsync();
+
+            // Assert
+            roles.Select(r => r.RoleName).Should().ContainInOrder("ARole", "ZRole");
+        }
+
+        [Fact]
+        public async Task GetRolePermissionCodesAsync_When_No_Permissions_Should_Return_Empty_Edge()
+        {
+            // Act
+            var codes = await _service.GetRolePermissionCodesAsync(777);
+
+            // Assert
+            codes.Should().BeEmpty();
+        }
+
+        [Fact]
+        public async Task CreateRoleAsync_When_Name_Is_Whitespace_Should_Throw_Failure()
+        {
+            // Act
+            Func<Task> act = async () => await _service.CreateRoleAsync("   ");
+
+            // Assert
+            await act.Should().ThrowAsync<ArgumentException>();
+        }
+
+        [Fact]
+        public async Task DeleteUserAsync_When_User_Not_Found_Should_Not_Throw_Edge()
+        {
+            // Act
+            await _service.DeleteUserAsync(404);
+
+            // Assert
+            (await _db.Users.CountAsync()).Should().Be(0);
+        }
+
+        [Fact]
+        public async Task DeleteRoleAsync_When_Role_Assigned_To_User_Should_Throw_Failure()
+        {
+            // Arrange
+            var user = new User { Username = "assigned-user" };
+            var role = new Role { RoleName = "AssignedRole" };
+            _db.Users.Add(user);
+            _db.Roles.Add(role);
+            await _db.SaveChangesAsync();
+            _db.UserRoles.Add(new UserRole { UserId = user.UserId, RoleId = role.RoleId });
+            await _db.SaveChangesAsync();
+
+            // Act
+            Func<Task> act = async () => await _service.DeleteRoleAsync(role.RoleId);
+
+            // Assert
+            await act.Should().ThrowAsync<InvalidOperationException>();
+        }
+
+        [Fact]
+        public async Task RemoveUserRoleAsync_When_Link_Not_Found_Should_Not_Throw_Edge()
+        {
+            // Act
+            await _service.RemoveUserRoleAsync(1, 1);
+
+            // Assert
+            (await _db.UserRoles.CountAsync()).Should().Be(0);
+        }
     }
 }

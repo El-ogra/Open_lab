@@ -78,5 +78,37 @@ namespace Open_lab.Tests.ViewModels
             _viewModel.HighComment.Should().Be("High");
             _viewModel.IsDefault.Should().BeTrue();
         }
+
+        [Fact]
+        public async Task SaveAsync_When_SelectedTestIsNull_Should_Set_ValidationMessage_FailureGuard()
+        {
+            // Arrange
+            _viewModel.SelectedTest = null;
+            _viewModel.CommentText = "Any";
+
+            // Act
+            await _viewModel.InvokePrivateAsync("SaveAsync");
+
+            // Assert
+            _viewModel.StatusMessage.Should().Contain("اختر تحليلًا");
+            _testCatalogServiceMock.Verify(x => x.CreateTestCommentAsync(It.IsAny<TestComment>()), Times.Never);
+        }
+
+        [Fact]
+        public async Task DeleteAsync_When_ServiceThrows_Should_Set_ErrorStatus_FailureGuard()
+        {
+            // Arrange
+            _viewModel.SelectedComment = new TestComment { CommentId = 7, TestId = 1, CommentText = "C" };
+            _testCatalogServiceMock
+                .Setup(x => x.DeleteTestCommentAsync(7))
+                .ThrowsAsync(new Exception("delete-failed"));
+
+            // Act
+            await _viewModel.InvokePrivateAsync("DeleteAsync");
+
+            // Assert
+            _viewModel.StatusMessage.Should().Contain("خطأ:");
+            _viewModel.StatusMessage.Should().Contain("delete-failed");
+        }
     }
 }

@@ -98,5 +98,41 @@ namespace Open_lab.Tests.ViewModels
             // Assert
             _viewModel.StatusMessage.Should().Contain("يرجى إدخال Lab ID");
         }
+
+        [Fact]
+        public async Task PrintHistoryAsync_When_HistoryIsNull_Should_NotCall_PrintService_EdgeGuard()
+        {
+            // Arrange
+            _viewModel.History.Should().BeNull();
+
+            // Act
+            await _viewModel.InvokePrivateAsync("PrintHistoryAsync");
+
+            // Assert
+            _printServiceMock.Verify(x => x.PrintPatientHistoryAsync(It.IsAny<PatientHistoryReportData>()), Times.Never);
+        }
+
+        [Fact]
+        public async Task PrintHistoryAsync_When_PrintServiceThrows_Should_Set_PrintErrorMessage_FailureGuard()
+        {
+            // Arrange
+            _viewModel.LabId = "LAB-001";
+            var patient = new Patient { PatientId = 1, FullName = "John", LabId = "LAB-001" };
+            var historyData = new PatientHistoryReportData { Patient = patient };
+            _patientServiceMock.Setup(s => s.GetByLabIdAsync("LAB-001")).ReturnsAsync(patient);
+            _reportServiceMock.Setup(r => r.GetPatientHistoryAsync(1, It.IsAny<DateTime?>(), It.IsAny<DateTime?>()))
+                .ReturnsAsync(historyData);
+            _printServiceMock.Setup(x => x.PrintPatientHistoryAsync(It.IsAny<PatientHistoryReportData>()))
+                .ThrowsAsync(new Exception("print-failed"));
+
+            await _viewModel.InvokePrivateAsync("LoadHistoryAsync");
+
+            // Act
+            await _viewModel.InvokePrivateAsync("PrintHistoryAsync");
+
+            // Assert
+            _viewModel.StatusMessage.Should().Contain("خطأ طباعة");
+            _viewModel.StatusMessage.Should().Contain("print-failed");
+        }
     }
 }

@@ -399,5 +399,66 @@ namespace Open_lab.Tests.Services
             // Assert
             await act.Should().ThrowAsync<InvalidOperationException>().WithMessage("*Custom group has no tests*");
         }
+
+        [Fact]
+        public async Task CreateAsync_When_PatientNotFound_Should_Throw_FailureGuard()
+        {
+            // Arrange
+            var visit = new Visit
+            {
+                PatientId = 99999,
+                VisitDate = DateTime.Now,
+                AccountType = "Cash"
+            };
+
+            // Act
+            Func<Task> act = async () => await _service.CreateAsync(visit);
+
+            // Assert
+            await act.Should().ThrowAsync<InvalidOperationException>().WithMessage("*Patient not found*");
+        }
+
+        [Fact]
+        public async Task CreateAsync_When_VisitDateDefault_Should_Set_Date_And_OpenStatus_EdgeGuard()
+        {
+            // Arrange
+            var patient = new Patient { LabId = "L-E1", FullName = "Edge Patient", Gender = "Male" };
+            _db.Patients.Add(patient);
+            await _db.SaveChangesAsync();
+
+            // Act
+            var created = await _service.CreateAsync(new Visit
+            {
+                PatientId = patient.PatientId,
+                VisitDate = default,
+                AccountType = ""
+            });
+
+            // Assert
+            created.VisitDate.Should().NotBe(default);
+            created.AccountType.Should().Be("Cash");
+            created.Status.Should().Be("Open");
+        }
+
+        [Fact]
+        public async Task GetByPatientIdAsync_When_MultipleVisits_Should_Return_DescendingByDate_EdgeGuard()
+        {
+            // Arrange
+            var patient = new Patient { LabId = "L-E2", FullName = "Order Patient", Gender = "Female" };
+            _db.Patients.Add(patient);
+            await _db.SaveChangesAsync();
+
+            _db.Visits.AddRange(
+                new Visit { PatientId = patient.PatientId, VisitDate = DateTime.Today.AddDays(-3) },
+                new Visit { PatientId = patient.PatientId, VisitDate = DateTime.Today.AddDays(-1) });
+            await _db.SaveChangesAsync();
+
+            // Act
+            var rows = await _service.GetByPatientIdAsync(patient.PatientId);
+
+            // Assert
+            rows.Should().HaveCount(2);
+            rows[0].VisitDate.Should().BeAfter(rows[1].VisitDate);
+        }
     }
 }

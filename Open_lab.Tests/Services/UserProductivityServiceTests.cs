@@ -53,5 +53,51 @@ namespace Open_lab.Tests.Services
             rows[1].Username.Should().Be("tech2");
             rows[1].CompletedTestsCount.Should().Be(1);
         }
+
+        [Fact]
+        public async Task GetUserPerformanceAsync_When_NoVerificationsInRange_Should_Return_Empty_FailureGuard()
+        {
+            // Arrange
+            var user = new User { Username = "tech-empty" };
+            _db.Users.Add(user);
+            await _db.SaveChangesAsync();
+
+            _db.ResultValues.Add(new ResultValue
+            {
+                VisitTestId = 1,
+                ParameterId = 1,
+                VerifiedAt = DateTime.Today.AddDays(-30),
+                VerifiedBy = user.UserId
+            });
+            await _db.SaveChangesAsync();
+
+            // Act
+            var rows = await _service.GetUserPerformanceAsync(DateTime.Today.AddDays(-2), DateTime.Today.AddDays(-1));
+
+            // Assert
+            rows.Should().BeEmpty();
+        }
+
+        [Fact]
+        public async Task GetUserPerformanceAsync_When_VerifierMissingFromUsers_Should_Label_As_Unknown_EdgeGuard()
+        {
+            // Arrange
+            _db.ResultValues.Add(new ResultValue
+            {
+                VisitTestId = 7,
+                ParameterId = 1,
+                VerifiedAt = DateTime.Today,
+                VerifiedBy = 9999
+            });
+            await _db.SaveChangesAsync();
+
+            // Act
+            var rows = await _service.GetUserPerformanceAsync(DateTime.Today.AddDays(-1), DateTime.Today.AddDays(1));
+
+            // Assert
+            rows.Should().ContainSingle();
+            rows[0].Username.Should().Be("Unknown");
+            rows[0].CompletedTestsCount.Should().Be(1);
+        }
     }
 }

@@ -95,5 +95,52 @@ namespace Open_lab.Tests.Services
             history.Should().HaveCount(1);
             history.First().Note.Should().Be("Payment 1");
         }
+
+        [Fact]
+        public async Task GetPendingBalanceAsync_When_NoQueueOrPayments_Should_Return_Zero_FailureGuard()
+        {
+            // Arrange
+            var referral = new Referral { Name = "No Activity Lab" };
+            _db.Referrals.Add(referral);
+            await _db.SaveChangesAsync();
+
+            // Act
+            var pending = await _service.GetPendingBalanceAsync(referral.ReferralId);
+
+            // Assert
+            pending.Should().Be(0m);
+        }
+
+        [Fact]
+        public async Task CreateSettlementAsync_When_AmountPaid_Exceeds_Balance_Should_Store_NegativeBalance_EdgeGuard()
+        {
+            // Arrange
+            var referral = new Referral { Name = "Lab Overpay" };
+            _db.Referrals.Add(referral);
+            await _db.SaveChangesAsync();
+
+            var test = new Test { CostPrice = 50m };
+            _db.Tests.Add(test);
+            await _db.SaveChangesAsync();
+
+            var vt = new VisitTest { VisitId = 1, TestId = test.TestId, Price = 100m };
+            _db.VisitTests.Add(vt);
+            await _db.SaveChangesAsync();
+
+            _db.ExternalLabQueues.Add(new ExternalLabQueue
+            {
+                VisitTestId = vt.VisitTestId,
+                ReferralId = referral.ReferralId,
+                Status = "Shipped"
+            });
+            await _db.SaveChangesAsync();
+
+            // Act
+            var settlement = await _service.CreateSettlementAsync(referral.ReferralId, 80m, "Overpay");
+
+            // Assert
+            settlement.TotalCost.Should().Be(50m);
+            settlement.Balance.Should().Be(-30m);
+        }
     }
 }

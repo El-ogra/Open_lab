@@ -113,5 +113,43 @@ namespace Open_lab.Tests.ViewModels
             _viewModel.StatusMessage.Should().Contain("خطأ: Search Failed");
             _viewModel.Patients.Should().BeEmpty();
         }
+
+        [Fact]
+        public async Task SelectedPatient_When_VisitServiceThrows_Should_Set_ErrorMessage_FailureGuard()
+        {
+            // Arrange
+            var patient = new Patient { PatientId = 99, FullName = "Err Patient" };
+            _patientSearchServiceMock
+                .Setup(service => service.GetPatientVisitsAsync(99))
+                .ThrowsAsync(new Exception("visits-failed"));
+
+            // Act
+            _viewModel.SelectedPatient = patient;
+            await Task.Delay(50);
+
+            // Assert
+            _viewModel.StatusMessage.Should().Contain("خطأ:");
+            _viewModel.StatusMessage.Should().Contain("visits-failed");
+        }
+
+        [Fact]
+        public async Task SelectedPatient_When_SetToNull_Should_Clear_Visits_EdgeGuard()
+        {
+            // Arrange
+            var patient = new Patient { PatientId = 42, FullName = "John" };
+            _patientSearchServiceMock.Setup(service => service.GetPatientVisitsAsync(42))
+                .ReturnsAsync(new List<Visit> { new Visit { VisitId = 1, PatientId = 42, VisitDate = DateTime.Now } });
+
+            _viewModel.SelectedPatient = patient;
+            await Task.Delay(50);
+            _viewModel.Visits.Should().HaveCount(1);
+
+            // Act
+            _viewModel.SelectedPatient = null;
+            await Task.Delay(50);
+
+            // Assert
+            _viewModel.Visits.Should().BeEmpty();
+        }
     }
 }

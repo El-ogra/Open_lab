@@ -71,5 +71,71 @@ namespace Open_lab.Tests.Services
 
             profile.ReceiptHeaderText.Should().Be("مختبر ألف");
         }
+
+        [Fact]
+        public async Task SaveSettingAsync_And_GetSettingsAsync_Should_Persist_KeyValue_Success()
+        {
+            // Act
+            await _service.SaveSettingAsync("Printer.Report", "HP-1");
+            var all = await _service.GetSettingsAsync();
+
+            // Assert
+            all.Should().ContainSingle(s => s.Key == "Printer.Report" && s.Value == "HP-1");
+        }
+
+        [Fact]
+        public async Task DeleteSettingAsync_When_Key_Not_Exists_Should_Not_Throw_Edge()
+        {
+            // Act
+            await _service.DeleteSettingAsync("Missing.Key");
+
+            // Assert
+            (await _db.Settings.CountAsync()).Should().Be(0);
+        }
+
+        [Fact]
+        public async Task VerifyMasterPasswordAsync_When_No_Hash_Should_Allow_Default_Admin123_Edge()
+        {
+            // Act
+            var ok = await _service.VerifyMasterPasswordAsync("admin123");
+            var bad = await _service.VerifyMasterPasswordAsync("wrong");
+
+            // Assert
+            ok.Should().BeTrue();
+            bad.Should().BeFalse();
+        }
+
+        [Fact]
+        public async Task SetMasterPasswordAsync_When_Password_Empty_Should_Return_False_Failure()
+        {
+            // Act
+            var result = await _service.SetMasterPasswordAsync(string.Empty);
+
+            // Assert
+            result.Should().BeFalse();
+        }
+
+        [Fact]
+        public async Task SaveProfileAsync_When_MasterPasswordHash_Provided_Should_Save_Hash_And_Salt_Success()
+        {
+            // Arrange
+            var profile = new SystemSettingsProfile
+            {
+                ReportHeader = "h",
+                ReportFooter = "f",
+                MasterPasswordHash = "hash-value"
+            };
+
+            // Act
+            await _service.SaveProfileAsync(profile);
+
+            // Assert
+            var hash = await _db.Settings.FirstOrDefaultAsync(s => s.Key == "Security.MasterPasswordHash");
+            var salt = await _db.Settings.FirstOrDefaultAsync(s => s.Key == "Security.MasterPasswordSalt");
+            hash.Should().NotBeNull();
+            salt.Should().NotBeNull();
+            hash!.Value.Should().Be("hash-value");
+            salt!.Value.Should().NotBeNullOrWhiteSpace();
+        }
     }
 }

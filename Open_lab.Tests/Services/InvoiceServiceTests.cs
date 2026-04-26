@@ -557,5 +557,60 @@ namespace Open_lab.Tests.Services
             log.Should().NotBeNull();
             log!.UserId.Should().Be(userId);
         }
+
+        [Fact]
+        public async Task SettleAccountAsync_When_BalanceRemaining_Should_Throw_FailureGuard()
+        {
+            // Arrange
+            var patient = new Patient { LabId = "LSET1", FullName = "Settle P", Gender = "Male" };
+            _db.Patients.Add(patient);
+            await _db.SaveChangesAsync();
+            var visit = new Visit { PatientId = patient.PatientId, VisitDate = DateTime.Now, Status = "Open" };
+            _db.Visits.Add(visit);
+            await _db.SaveChangesAsync();
+            _db.VisitTests.Add(new VisitTest { VisitId = visit.VisitId, TestId = 1, Price = 120m });
+            await _db.SaveChangesAsync();
+            await _service.CreateOrUpdateInvoiceAsync(visit.VisitId, 0m, 0m);
+
+            // Act
+            Func<Task> act = async () => await _service.SettleAccountAsync(visit.VisitId);
+
+            // Assert
+            await act.Should().ThrowAsync<InvalidOperationException>().WithMessage("*remaining balance*");
+        }
+
+        [Fact]
+        public async Task SettleAccountAsync_When_FullyPaid_Should_CloseVisit_EdgeGuard()
+        {
+            // Arrange
+            var patient = new Patient { LabId = "LSET2", FullName = "Settle P2", Gender = "Female" };
+            _db.Patients.Add(patient);
+            await _db.SaveChangesAsync();
+            var visit = new Visit { PatientId = patient.PatientId, VisitDate = DateTime.Now, Status = "Open" };
+            _db.Visits.Add(visit);
+            await _db.SaveChangesAsync();
+            _db.VisitTests.Add(new VisitTest { VisitId = visit.VisitId, TestId = 1, Price = 80m });
+            await _db.SaveChangesAsync();
+            var invoice = await _service.CreateOrUpdateInvoiceAsync(visit.VisitId, 0m, 0m);
+            await _service.AddPaymentAsync(invoice.InvoiceId, 80m, "Cash", 1);
+
+            // Act
+            var settled = await _service.SettleAccountAsync(visit.VisitId);
+
+            // Assert
+            settled.Status.Should().Be("Settled");
+            settled.Visit!.Status.Should().Be("Closed");
+            settled.Balance.Should().Be(0m);
+        }
+
+        [Fact]
+        public async Task CalculateReferralDiscountAsync_When_ReferralMissing_Should_Return_Zero_EdgeGuard()
+        {
+            // Act
+            var discount = await _service.CalculateReferralDiscountAsync(99999, 500m);
+
+            // Assert
+            discount.Should().Be(0m);
+        }
     }
 }
