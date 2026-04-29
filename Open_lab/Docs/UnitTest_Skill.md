@@ -232,6 +232,65 @@ Test_AddPatient_Works   ❌ "Works" is not a specific result
 
 ---
 
+## COMMAND TYPE IN THIS PROJECT (MANDATORY)
+
+### How Commands Work in Open_lab
+This project uses a CUSTOM RelayCommand defined in:
+Open_lab/ViewModels/RelayCommand.cs
+
+It implements ICommand directly — it is NOT from CommunityToolkit.
+It is NOT AsyncRelayCommand.
+It accepts Action<object?> and optional Func<object?, bool>?.
+
+### How to Call a Command in Tests
+
+#### For synchronous Commands:
+```csharp
+// CORRECT
+viewModel.TogglePasswordVisibilityCommand.Execute(null);
+Assert.True(viewModel.IsPasswordVisible);
+```
+
+#### For Commands that run async logic internally:
+```csharp
+// CORRECT
+viewModel.SaveCommand.Execute(null);
+await Task.Delay(100);
+Assert.Equal("LAB-001", viewModel.LabId);
+```
+
+#### NEVER use ExecuteAsync in this project:
+```csharp
+// WRONG - this project does not use AsyncRelayCommand
+await viewModel.SaveCommand.ExecuteAsync(null); // ❌ does not exist
+```
+
+### How to Determine Wait Time
+- Simple DB operations: await Task.Delay(100) is sufficient
+- Complex operations with multiple DB calls: await Task.Delay(200)
+- If test is flaky: increase delay by 50ms increments
+- Always assert AFTER the Task.Delay, never before
+
+### How to Instantiate ViewModels in Tests
+Read the actual constructor of the ViewModel before writing any test.
+The RelayCommand is created inside the ViewModel constructor.
+You only need to inject the Service mock.
+
+```csharp
+// CORRECT - inject only the Service
+var mockService = new Mock<IPatientService>();
+var viewModel = new PatientRegistrationViewModel(mockService.Object);
+
+// Then call the command
+viewModel.SaveCommand.Execute(null);
+await Task.Delay(100);
+
+// Then assert
+Assert.Equal("LAB-001", viewModel.LabId);
+```
+
+---
+
 ## TEST STRUCTURE: AAA (MANDATORY)
 
 Every test MUST follow the AAA structure with explicit comments.
@@ -254,7 +313,8 @@ public async Task AddPatient_WithValidData_ShouldSaveAndReturnLabId()
     viewModel.PatientPhone = patient.Phone;
 
     // Act
-    await viewModel.SaveCommand.ExecuteAsync(null);
+    viewModel.SaveCommand.Execute(null);
+    await Task.Delay(100);
 
     // Assert
     Assert.Equal("LAB-001", viewModel.LabId);
@@ -270,37 +330,8 @@ public async Task AddPatient_WithValidData_ShouldSaveAndReturnLabId()
 - The comment // Act MUST appear before the single action being tested
 - The comment // Assert MUST appear before all assertions
 - Each section must be visually separated by a blank line
-- The Act section must contain ONLY ONE method call
+- The Act section contains the Execute call AND the Task.Delay
 - Never mix Act and Assert in the same line
-
----
-
-## COMMANDS IN THIS PROJECT (MANDATORY READING)
-
-In the Open_lab project, Commands are implemented using
-a custom RelayCommand class located in the project.
-The RelayCommand class is confirmed to exist based on:
-RelayCommandTests.cs in the test project.
-
-### How to Call Commands in Tests
-
-```csharp
-// For synchronous commands
-viewModel.SaveCommand.Execute(null);
-
-// For async commands — use ExecuteAsync if available
-// otherwise call Execute and await the underlying task
-await viewModel.SaveCommand.ExecuteAsync(null);
-```
-
-### IMPORTANT: Before writing ViewModel tests
-Open the actual ViewModel class you are testing and read:
-- What type is used for each Command property
-  (RelayCommand, AsyncRelayCommand, ICommand)
-- What parameters the Command accepts
-- How the Command is initialized in the constructor
-Then write your test to match the actual implementation.
-NEVER assume the Command type — always read the actual code first.
 
 ---
 
@@ -344,7 +375,6 @@ mockService.Verify(
     Times.Once);
 
 // WRONG - no verification for write operations
-// just checking return value without verifying the call happened
 ```
 
 ### Rule 4: Verify is RECOMMENDED for read operations
@@ -394,7 +424,8 @@ after the Command executed.
 
 ```csharp
 // CORRECT
-await viewModel.SaveCommand.ExecuteAsync(null);
+viewModel.SaveCommand.Execute(null);
+await Task.Delay(100);
 Assert.Equal("LAB-001", viewModel.LabId);
 Assert.Empty(viewModel.ErrorMessage);
 Assert.True(viewModel.IsSaved);
@@ -410,12 +441,13 @@ that the error message property is set and not empty.
 
 ```csharp
 // CORRECT
-await viewModel.SaveCommand.ExecuteAsync(null);
+viewModel.SaveCommand.Execute(null);
+await Task.Delay(100);
 Assert.NotEmpty(viewModel.ErrorMessage);
 Assert.Contains("required", viewModel.ErrorMessage);
 
 // WRONG - not checking user feedback
-Assert.Null(result); // what does the user see on screen?
+Assert.Null(result);
 ```
 
 ---
@@ -444,15 +476,14 @@ Assert.Null(exception);
 ### Condition 3: Hardcoded Unrelated Data
 ```csharp
 // FAKE - data has nothing to do with business logic
-Assert.Equal(42, someResult);     // where does 42 come from?
-Assert.Equal("test", name);       // "test" is not a real patient name
+Assert.Equal(42, someResult);
+Assert.Equal("test", name);
 ```
 
 ### Condition 4: No Relationship to Business Logic
 ```csharp
 // FAKE - testing infrastructure not business logic
 Assert.NotNull(new PatientViewModel(mockService.Object));
-// this only tests that the constructor does not crash
 ```
 
 ### Condition 5: Only Checks That Method Was Called
@@ -515,6 +546,7 @@ var viewModel = new PatientRegistrationViewModel();
 ## ASYNC TEST RULES
 
 All tests that call async Service methods MUST be async.
+All tests that call Commands with internal async logic MUST be async.
 
 ```csharp
 // CORRECT
@@ -522,16 +554,21 @@ All tests that call async Service methods MUST be async.
 public async Task AddPatient_WithValidData_ShouldSaveAndReturnLabId()
 {
     // Function: 1.1 — Add New Patient
-    // ...
-    await viewModel.SaveCommand.ExecuteAsync(null);
-    // ...
+    // Arrange
+    ...
+    // Act
+    viewModel.SaveCommand.Execute(null);
+    await Task.Delay(100);
+    // Assert
+    ...
 }
 
-// WRONG - can cause deadlocks
+// WRONG - can cause flaky or missed assertions
 [Fact]
 public void AddPatient_WithValidData_ShouldSaveAndReturnLabId()
 {
-    viewModel.SaveCommand.ExecuteAsync(null).Wait();
+    viewModel.SaveCommand.Execute(null);
+    // no await = assertions run before async logic finishes
 }
 ```
 
@@ -594,6 +631,7 @@ Do NOT end your session without updating unit_test_result.md.
 - NEVER put more than ONE action in the Act section
 - NEVER mix concerns: one test = one scenario = one assertion focus
 - NEVER end a session without updating unit_test_result.md
+- NEVER use ExecuteAsync — this project uses Execute(null) only
 - ALWAYS read Open_lab/Docs/Open_lab_Modules_Documentation.md first
 - ALWAYS read Open_lab/Docs/unit_test_result.md before starting
 - ALWAYS read existing tests before writing new ones
@@ -605,3 +643,4 @@ Do NOT end your session without updating unit_test_result.md.
 - ALWAYS assert error messages in failure scenarios
 - ALWAYS write a dedicated test for each BR-XXX-XXX business rule
 - ALWAYS read the actual ViewModel constructor before writing tests
+- ALWAYS use await Task.Delay after Execute for async Commands
