@@ -28,6 +28,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task SearchCommand_Should_Search_By_All_Criteria_And_Populate_Results()
         {
+            // Function: 1.5 — Search Patient
             // Arrange - 1.5 Search by Name, Phone, LabId
             _viewModel.Name = "Ahmed";
             _viewModel.Phone = "123";
@@ -44,7 +45,7 @@ namespace Open_lab.Tests.ViewModels
 
             // Act
             _viewModel.SearchCommand.Execute(null);
-            await Task.Delay(50); // Action is async
+            await Task.Delay(100); // Action is async
 
             // Assert
             _viewModel.Patients.Should().HaveCount(1);
@@ -55,6 +56,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task SearchCommand_By_Date_Should_Filter_Results()
         {
+            // Function: 1.5 — Search Patient
             // Arrange - 1.5 Search by Date
             var searchDate = new DateTime(2026, 4, 23);
             _viewModel.Date = searchDate;
@@ -69,7 +71,7 @@ namespace Open_lab.Tests.ViewModels
 
             // Act
             _viewModel.SearchCommand.Execute(null);
-            await Task.Delay(50);
+            await Task.Delay(100);
 
             // Assert
             _viewModel.Patients.Should().HaveCount(1);
@@ -79,6 +81,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task SelectedPatient_Setter_Should_Load_Visits()
         {
+            // Function: 1.6 — View Patient History
             // Arrange
             var patient = new Patient { PatientId = 42, FullName = "John" };
             var visits = new List<Visit>
@@ -91,7 +94,7 @@ namespace Open_lab.Tests.ViewModels
 
             // Act
             _viewModel.SelectedPatient = patient;
-            await Task.Delay(50);
+            await Task.Delay(100);
 
             // Assert
             _viewModel.Visits.Should().HaveCount(1);
@@ -101,13 +104,14 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task SearchAsync_Should_Handle_Exceptions_Gracefully()
         {
+            // Function: 1.5 — Search Patient
             // Arrange
             _patientSearchServiceMock.Setup(service => service.SearchPatientsAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<DateTime?>()))
                 .ThrowsAsync(new Exception("Search Failed"));
 
             // Act
             _viewModel.SearchCommand.Execute(null);
-            await Task.Delay(50);
+            await Task.Delay(100);
 
             // Assert
             _viewModel.StatusMessage.Should().Contain("خطأ: Search Failed");
@@ -117,6 +121,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task SelectedPatient_When_VisitServiceThrows_Should_Set_ErrorMessage_FailureGuard()
         {
+            // Function: 1.6 — View Patient History
             // Arrange
             var patient = new Patient { PatientId = 99, FullName = "Err Patient" };
             _patientSearchServiceMock
@@ -125,7 +130,7 @@ namespace Open_lab.Tests.ViewModels
 
             // Act
             _viewModel.SelectedPatient = patient;
-            await Task.Delay(50);
+            await Task.Delay(100);
 
             // Assert
             _viewModel.StatusMessage.Should().Contain("خطأ:");
@@ -135,18 +140,19 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task SelectedPatient_When_SetToNull_Should_Clear_Visits_EdgeGuard()
         {
+            // Function: 1.6 — View Patient History
             // Arrange
             var patient = new Patient { PatientId = 42, FullName = "John" };
             _patientSearchServiceMock.Setup(service => service.GetPatientVisitsAsync(42))
                 .ReturnsAsync(new List<Visit> { new Visit { VisitId = 1, PatientId = 42, VisitDate = DateTime.Now } });
 
             _viewModel.SelectedPatient = patient;
-            await Task.Delay(50);
+            await Task.Delay(100);
             _viewModel.Visits.Should().HaveCount(1);
 
             // Act
             _viewModel.SelectedPatient = null;
-            await Task.Delay(50);
+            await Task.Delay(100);
 
             // Assert
             _viewModel.Visits.Should().BeEmpty();

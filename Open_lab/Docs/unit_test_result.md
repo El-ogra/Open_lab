@@ -22,14 +22,14 @@
 
 | رقم الوظيفة | اسم الوظيفة | Service ✅/❌ | ViewModel ✅/❌ | الحالة | أسماء الاختبارات المكتوبة |
 |-------------|-------------|--------------|----------------|--------|--------------------------|
-| 1.1 | إضافة مريض جديد — Add New Patient | ❌ | ❌ | ❌ لم يبدأ | |
-| 1.2 | تعديل بيانات مريض — Edit Patient Data | ❌ | ❌ | ❌ لم يبدأ | |
-| 1.3 | إضافة تحاليل للمريض — Add Tests to Patient | ❌ | ❌ | ❌ لم يبدأ | |
-| 1.4 | حذف تحاليل — Delete Tests | ❌ | ❌ | ❌ لم يبدأ | |
-| 1.5 | البحث عن مريض — Search Patient | ❌ | ❌ | ❌ لم يبدأ | |
-| 1.6 | عرض التاريخ المرضي — View Patient History | ❌ | ❌ | ❌ لم يبدأ | |
-| 1.7 | إضافة تاريخ طبي — Add Medical History | ❌ | ❌ | ❌ لم يبدأ | |
-| 1.8 | إضافة مجموعة تحاليل — Add Group of Tests | ❌ | ❌ | ❌ لم يبدأ | |
+| 1.1 | إضافة مريض جديد — Add New Patient | ✅ | ✅ | ✅ مكتمل | CreateAsync_Should_Create_Patient_And_Generate_LabId, SaveAsync_With_New_Patient_Should_Create_New_Patient_LogicGuard, SaveAsync_When_No_FullName_Should_Show_Error_LogicGuard |
+| 1.2 | تعديل بيانات مريض — Edit Patient Data | ✅ | ✅ | ⚠️ يحتاج مراجعة | UpdateAsync_Should_Update_All_Fields, SaveAsync_With_Existing_Patient_Should_Update_Patient_LogicGuard, UpdateAsync_When_PatientUpdated_Should_NotWrite_AuditLog_ProductionGap |
+| 1.3 | إضافة تحاليل للمريض — Add Tests to Patient | ✅ | ✅ | ⚠️ يحتاج مراجعة | AddTestToVisitAsync_Should_Add_VisitTest_With_Price, ResolveTestPriceAsync_With_Referral_PriceList_Should_Use_Contract_Price, ResolveTestPriceAsync_With_DefaultPriceList_Should_Use_DefaultPrice, ResolveTestPriceAsync_With_PhysicianAssigned_Should_Fallback_To_DefaultPrice_ProductionGap |
+| 1.4 | حذف تحاليل — Delete Tests | ✅ | ✅ | ✅ مكتمل | RemoveVisitTestAsync_Verified_Should_Throw, RemoveTestCommand_Should_Remove_Test_LogicGuard, RemoveTestCommand_When_Service_Throws_Should_Set_Error_StatusMessage |
+| 1.5 | البحث عن مريض — Search Patient | ✅ | ✅ | ✅ مكتمل | SearchAsync_Should_Populate_Results_LogicGuard, SearchCommand_Should_Search_By_All_Criteria_And_Populate_Results, SearchAsync_By_Name_Should_Return_Matching_Patients_LogicGuard |
+| 1.6 | عرض التاريخ المرضي — View Patient History | ✅ | ✅ | ⚠️ يحتاج مراجعة | LoadHistoryCommand_Should_Populate_Visits_LogicGuard, GetMedicalHistoryAsync_Should_Return_History_For_Patient, PatientHistoryViewModel_Should_Expose_ReadOnly_Design_Without_EditCommand_DesignEnforcement |
+| 1.7 | إضافة تاريخ طبي — Add Medical History | ✅ | ✅ | ⚠️ يحتاج مراجعة | SaveMedicalHistoryAsync_Should_Create_New_History, SaveMedicalHistoryAsync_Should_Update_Existing_History, SaveAsync_With_MedicalHistory_Should_Save_Complete_History_LogicGuard, PatientRegistrationViewModel_Should_Have_Only_PatientService_Dependency_Outside_ResultEntryScope_ProductionGap |
+| 1.8 | إضافة مجموعة تحاليل — Add Group of Tests | ✅ | ✅ | ✅ مكتمل | AddCustomGroupCommand_Should_Add_All_Tests_In_Group_LogicGuard, AddCustomGroupToVisitAsync_CustomGroup_Has_No_Tests_Should_Throw, AddCustomGroupToVisitAsync_CustomGroup_Not_Found_Should_Throw |
 
 ---
 
@@ -210,7 +210,7 @@
 
 | الموديول | إجمالي الوظائف | مكتمل ✅ | جزئي 🔄 | لم يبدأ ❌ | يحتاج مراجعة ⚠️ |
 |----------|---------------|---------|---------|-----------|----------------|
-| 1 — إدارة المرضى | 8 | 0 | 0 | 8 | 0 |
+| 1 — إدارة المرضى | 8 | 4 | 0 | 0 | 4 |
 | 2 — المحاسبة والمالية | 13 | 0 | 0 | 13 | 0 |
 | 3 — إدارة التحاليل والأسعار | 9 | 0 | 0 | 9 | 0 |
 | 4 — إدخال النتائج والتقارير | 9 | 0 | 0 | 9 | 0 |
@@ -223,7 +223,27 @@
 | 11 — الحضور والانصراف | 5 | 0 | 0 | 5 | 0 |
 | 12 — جهات التعاقد والإحالة | 9 | 0 | 0 | 9 | 0 |
 | 13 — إعدادات النظام | 8 | 0 | 0 | 8 | 0 |
-| **الإجمالي** | **97** | **0** | **0** | **97** | **0** |
+| **الإجمالي** | **97** | **4** | **0** | **89** | **4** |
+
+---
+
+## Production Code Gaps (Manual Review Required)
+
+- BR-SEC-002 → Missing Audit Logging
+  - Evidence: `UpdateAsync_When_PatientUpdated_Should_NotWrite_AuditLog_ProductionGap` in `Open_lab.Tests/Services/PatientServiceTests.cs`
+  - Note: update flow does not create `AuditLog` with username/timestamp.
+
+- Doctor Pricing → Not Implemented
+  - Evidence: `ResolveTestPriceAsync_With_PhysicianAssigned_Should_Fallback_To_DefaultPrice_ProductionGap` in `Open_lab.Tests/Services/VisitServiceTests.cs`
+  - Note: physician-specific pricing path is not applied; default list is used.
+
+- Read-Only Enforcement → Not Explicit
+  - Evidence: `PatientHistoryViewModel_Should_Expose_ReadOnly_Design_Without_EditCommand_DesignEnforcement` in `Open_lab.Tests/ViewModels/PatientHistoryViewModelTests.cs`
+  - Note: read-only is enforced by lack of edit commands, not explicit runtime guard on mutation operations.
+
+- Medical History Visibility → خارج النطاق
+  - Evidence: `PatientRegistrationViewModel_Should_Have_Only_PatientService_Dependency_Outside_ResultEntryScope_ProductionGap` in `Open_lab.Tests/ViewModels/PatientRegistrationViewModelTests.cs`
+  - Note: BR-MED-006/007 requires result-entry context which is outside current Patient module ViewModel scope.
 
 ---
 

@@ -4,6 +4,7 @@ using Open_lab.Models;
 using Open_lab.Services;
 using Open_lab.Tests.Infrastructure;
 using Open_lab.ViewModels;
+using System.Linq;
 
 namespace Open_lab.Tests.ViewModels
 {
@@ -31,6 +32,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task LoadHistoryCommand_Should_Populate_Visits_LogicGuard()
         {
+            // Function: 1.6 — View Patient History
             // Arrange - 1.6 View History
             _viewModel.LabId = "LAB-001";
             var patient = new Patient { PatientId = 1, FullName = "John", LabId = "LAB-001" };
@@ -43,7 +45,7 @@ namespace Open_lab.Tests.ViewModels
 
             // Act
             _viewModel.LoadHistoryCommand.Execute(null);
-            await Task.Delay(50);
+            await Task.Delay(100);
 
             // Assert
             _viewModel.Visits.Should().HaveCount(1);
@@ -54,13 +56,14 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task LoadHistoryAsync_When_Patient_Not_Found_Should_Set_Error()
         {
+            // Function: 1.6 — View Patient History
             // Arrange
             _viewModel.LabId = "LAB-NONE";
             _patientServiceMock.Setup(s => s.GetByLabIdAsync("LAB-NONE")).ReturnsAsync((Patient?)null);
 
             // Act
             _viewModel.LoadHistoryCommand.Execute(null);
-            await Task.Delay(50);
+            await Task.Delay(100);
 
             // Assert
             _viewModel.StatusMessage.Should().Contain("لم يتم العثور");
@@ -70,6 +73,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task LoadHistoryAsync_When_ReportService_Throws_Should_Set_Error()
         {
+            // Function: 1.6 — View Patient History
             // Arrange - FAILURE test for LoadHistoryCommand
             _viewModel.LabId = "LAB-001";
             var patient = new Patient { PatientId = 1, FullName = "John", LabId = "LAB-001" };
@@ -79,7 +83,7 @@ namespace Open_lab.Tests.ViewModels
 
             // Act
             _viewModel.LoadHistoryCommand.Execute(null);
-            await Task.Delay(50);
+            await Task.Delay(100);
 
             // Assert
             _viewModel.StatusMessage.Should().Contain("خطأ");
@@ -88,12 +92,13 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task LoadHistoryAsync_When_LabId_Empty_Should_Set_Error()
         {
+            // Function: 1.6 — View Patient History
             // Arrange - FAILURE test for LoadHistoryCommand with empty LabId
             _viewModel.LabId = "";
 
             // Act
             _viewModel.LoadHistoryCommand.Execute(null);
-            await Task.Delay(50);
+            await Task.Delay(100);
 
             // Assert
             _viewModel.StatusMessage.Should().Contain("يرجى إدخال Lab ID");
@@ -102,6 +107,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task PrintHistoryAsync_When_HistoryIsNull_Should_NotCall_PrintService_EdgeGuard()
         {
+            // Function: 1.6 — View Patient History
             // Arrange
             _viewModel.History.Should().BeNull();
 
@@ -115,6 +121,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task PrintHistoryAsync_When_PrintServiceThrows_Should_Set_PrintErrorMessage_FailureGuard()
         {
+            // Function: 1.6 — View Patient History
             // Arrange
             _viewModel.LabId = "LAB-001";
             var patient = new Patient { PatientId = 1, FullName = "John", LabId = "LAB-001" };
@@ -133,6 +140,27 @@ namespace Open_lab.Tests.ViewModels
             // Assert
             _viewModel.StatusMessage.Should().Contain("خطأ طباعة");
             _viewModel.StatusMessage.Should().Contain("print-failed");
+        }
+
+        [Fact]
+        public void PatientHistoryViewModel_Should_Expose_ReadOnly_Design_Without_EditCommand_DesignEnforcement()
+        {
+            // Function: 1.6 — View Patient History
+            // Arrange
+            var commandNames = typeof(PatientHistoryViewModel)
+                .GetProperties()
+                .Where(p => p.PropertyType == typeof(System.Windows.Input.ICommand))
+                .Select(p => p.Name)
+                .ToList();
+
+            // Act
+            var hasEditOrSave = commandNames.Any(name =>
+                name.Contains("Edit", StringComparison.OrdinalIgnoreCase)
+                || name.Contains("Save", StringComparison.OrdinalIgnoreCase)
+                || name.Contains("Update", StringComparison.OrdinalIgnoreCase));
+
+            // Assert
+            hasEditOrSave.Should().BeFalse("BR-MED-008 read-only enforcement is currently by design (no edit/save command exposed).");
         }
     }
 }

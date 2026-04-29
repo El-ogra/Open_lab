@@ -30,6 +30,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task CreateAsync_Should_Create_Patient_And_Generate_LabId()
         {
+            // Function: 1.1 — Add New Patient
             // Arrange
             var patient = new Patient
             {
@@ -49,6 +50,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task CreateAsync_Invalid_Gender_Should_Throw()
         {
+            // Function: 1.1 — Add New Patient
             // Arrange
             var patient = new Patient
             {
@@ -66,6 +68,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task GenerateNextLabIdAsync_Should_Increment_Sequence()
         {
+            // Function: 1.1 — Add New Patient
             // Arrange - seed a patient with today's prefix
             var today = DateTime.Today;
             var prefix = today.ToString("yyyyMMdd");
@@ -84,6 +87,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task DeleteAsync_With_Visits_Should_Throw()
         {
+            // Function: 1.2 — Edit Patient Data
             // Arrange
             var patient = new Patient { LabId = "L1", FullName = "P", Gender = "Male" };
             _db.Patients.Add(patient);
@@ -103,6 +107,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task UpdateAsync_Should_Update_All_Fields()
         {
+            // Function: 1.2 — Edit Patient Data
             // Arrange
             var patient = new Patient { LabId = "LUP1", FullName = "Old Name", Gender = "Male", Phone = "123456", Address = "Old Address" };
             _db.Patients.Add(patient);
@@ -135,6 +140,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task UpdateAsync_DuplicateLabId_Should_Throw()
         {
+            // Function: 1.2 — Edit Patient Data
             // Arrange
             var patient1 = new Patient { LabId = "LUP2", FullName = "P1", Gender = "Male" };
             var patient2 = new Patient { LabId = "LUP3", FullName = "P2", Gender = "Male" };
@@ -159,6 +165,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task UpdateAsync_InvalidGender_Should_Throw()
         {
+            // Function: 1.2 — Edit Patient Data
             // Arrange
             var patient = new Patient { LabId = "LUP4", FullName = "P", Gender = "Male" };
             _db.Patients.Add(patient);
@@ -182,6 +189,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task UpdateAsync_FutureBirthDate_Should_Throw()
         {
+            // Function: 1.2 — Edit Patient Data
             // Arrange
             var patient = new Patient { LabId = "LUP5", FullName = "P", Gender = "Male" };
             _db.Patients.Add(patient);
@@ -203,10 +211,44 @@ namespace Open_lab.Tests.Services
             await act.Should().ThrowAsync<ArgumentException>().WithMessage("*BirthDate cannot be in the future*");
         }
 
+        [Fact]
+        public async Task UpdateAsync_When_PatientUpdated_Should_NotWrite_AuditLog_ProductionGap()
+        {
+            // Function: 1.2 — Edit Patient Data
+            // Arrange
+            var user = new User
+            {
+                Username = "reception-user",
+                PasswordHash = "hash",
+                Salt = "salt",
+                IsActive = true
+            };
+            var patient = new Patient { LabId = "LUP-AUD", FullName = "Old Name", Gender = "Male" };
+            _db.Users.Add(user);
+            _db.Patients.Add(patient);
+            await _db.SaveChangesAsync();
+
+            var updatedPatient = new Patient
+            {
+                PatientId = patient.PatientId,
+                LabId = "LUP-AUD",
+                FullName = "New Name",
+                Gender = "Male"
+            };
+
+            // Act
+            await _service.UpdateAsync(updatedPatient);
+
+            // Assert
+            var auditLogs = await _db.AuditLogs.ToListAsync();
+            auditLogs.Should().BeEmpty("BR-SEC-002 requires audit username/timestamp, but production code does not create audit records.");
+        }
+
         // 1.6 - Medical History Retrieval - Clinical Data Integrity Tests
         [Fact]
         public async Task GetMedicalHistoryAsync_Should_Return_History_For_Patient()
         {
+            // Function: 1.6 — View Patient History
             // Arrange
             var patient = new Patient { LabId = "LMH1", FullName = "P", Gender = "Male" };
             _db.Patients.Add(patient);
@@ -237,6 +279,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task GetMedicalHistoryAsync_InvalidPatientId_Should_Throw()
         {
+            // Function: 1.6 — View Patient History
             // Act
             Func<Task> act = async () => await _service.GetMedicalHistoryAsync(-1);
 
@@ -247,6 +290,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task SaveMedicalHistoryAsync_Should_Create_New_History()
         {
+            // Function: 1.7 — Add Medical History
             // Arrange
             var patient = new Patient { LabId = "LMH2", FullName = "P", Gender = "Male" };
             _db.Patients.Add(patient);
@@ -275,6 +319,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task SaveMedicalHistoryAsync_Should_Update_Existing_History()
         {
+            // Function: 1.7 — Add Medical History
             // Arrange
             var patient = new Patient { LabId = "LMH3", FullName = "P", Gender = "Male" };
             _db.Patients.Add(patient);
@@ -314,6 +359,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task SaveMedicalHistoryAsync_NonExistentPatient_Should_Throw()
         {
+            // Function: 1.7 — Add Medical History
             // Arrange
             var history = new MedicalHistory { ChronicDiseases = "Diabetes" };
 
@@ -327,6 +373,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task GetByLabIdAsync_When_LabIdHasWhitespace_Should_Trim_And_Return_Patient_EdgeGuard()
         {
+            // Function: 1.5 — Search Patient
             // Arrange
             _db.Patients.Add(new Patient { LabId = "LAB-TRIM", FullName = "Trim User", Gender = "Male" });
             await _db.SaveChangesAsync();
@@ -342,6 +389,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task GetByLabIdAsync_When_LabIdIsWhitespace_Should_Throw_FailureGuard()
         {
+            // Function: 1.5 — Search Patient
             // Act
             Func<Task> act = async () => await _service.GetByLabIdAsync(" ");
 
@@ -352,6 +400,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task DeleteAsync_When_PatientNotFound_Should_NotThrow_And_KeepData_EdgeGuard()
         {
+            // Function: 1.2 — Edit Patient Data
             // Arrange
             _db.Patients.Add(new Patient { LabId = "LAB-EXIST", FullName = "Existing", Gender = "Male" });
             await _db.SaveChangesAsync();
@@ -367,6 +416,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task SearchAsync_When_DateFilterHasNoVisits_Should_Return_Empty_FailureGuard()
         {
+            // Function: 1.5 — Search Patient
             // Arrange
             var patient = new Patient { LabId = "LAB-DATE", FullName = "Date User", Gender = "Male" };
             _db.Patients.Add(patient);

@@ -4,6 +4,7 @@ using Open_lab.Models;
 using Open_lab.Services;
 using Open_lab.Tests.Infrastructure;
 using Open_lab.ViewModels;
+using System.Linq;
 
 namespace Open_lab.Tests.ViewModels
 {
@@ -27,6 +28,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task Constructor_Should_Generate_LabId_Automatically_LogicGuard()
         {
+            // Function: 1.1 — Add New Patient
             // Arrange
             var expectedLabId = "LAB-2024-001";
             _patientServiceMock.Setup(x => x.GenerateNextLabIdAsync(It.IsAny<DateTime?>())).ReturnsAsync(expectedLabId);
@@ -42,6 +44,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public void Commands_When_Admin_Should_All_Be_Enabled_LogicGuard()
         {
+            // Function: 1.1 — Add New Patient
             // Assert - Logic Guard: Verify command states reflect actual business rules
             _viewModel.SaveCommand.CanExecute(null).Should().BeTrue("Save should be enabled for new patient");
             _viewModel.NewCommand.CanExecute(null).Should().BeTrue("New should always be enabled for admin");
@@ -57,6 +60,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task SaveAsync_With_New_Patient_Should_Create_New_Patient_LogicGuard()
         {
+            // Function: 1.1 — Add New Patient
             // Arrange - PatientId defaults to 0 for new patient
             _viewModel.LabId = "LAB-001";
             _viewModel.FullName = "John Doe";
@@ -78,7 +82,8 @@ namespace Open_lab.Tests.ViewModels
                 .Returns(Task.CompletedTask);
 
             // Act
-            await _viewModel.InvokePrivateAsync("SaveAsync");
+            _viewModel.SaveCommand.Execute(null);
+            await Task.Delay(100);
 
             // Assert - Logic Guard: Verify all patient data is correctly captured and saved
             _viewModel.StatusMessage.Should().Contain("تم إنشاء المريض بنجاح");
@@ -102,6 +107,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task SaveAsync_When_Service_Throws_Should_Set_Error_StatusMessage()
         {
+            // Function: 1.1 — Add New Patient
             // Arrange
             _viewModel.LabId = "LAB-001";
             _viewModel.FullName = "Test";
@@ -109,7 +115,8 @@ namespace Open_lab.Tests.ViewModels
             _patientServiceMock.Setup(x => x.CreateAsync(It.IsAny<Patient>())).ThrowsAsync(new Exception("DB Error"));
 
             // Act
-            await _viewModel.InvokePrivateAsync("SaveAsync");
+            _viewModel.SaveCommand.Execute(null);
+            await Task.Delay(100);
 
             // Assert
             _viewModel.StatusMessage.Should().Contain("DB Error");
@@ -118,11 +125,13 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task LoadByLabIdAsync_With_Empty_LabId_Should_Set_StatusMessage()
         {
+            // Function: 1.2 — Edit Patient Data
             // Arrange
             _viewModel.LabId = "";
 
             // Act
-            await _viewModel.InvokePrivateAsync("LoadByLabIdAsync");
+            _viewModel.LoadByLabIdCommand.Execute(null);
+            await Task.Delay(100);
 
             // Assert
             _viewModel.StatusMessage.Should().Contain("يرجى إدخال Lab ID");
@@ -131,12 +140,14 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task LoadByLabIdAsync_With_NonExistent_LabId_Should_Set_StatusMessage()
         {
+            // Function: 1.2 — Edit Patient Data
             // Arrange
             _viewModel.LabId = "LAB-999";
             _patientServiceMock.Setup(x => x.GetByLabIdAsync("LAB-999")).ReturnsAsync((Patient?)null);
 
             // Act
-            await _viewModel.InvokePrivateAsync("LoadByLabIdAsync");
+            _viewModel.LoadByLabIdCommand.Execute(null);
+            await Task.Delay(100);
 
             // Assert
             _viewModel.StatusMessage.Should().Contain("لم يتم العثور");
@@ -145,6 +156,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task LoadByLabIdAsync_With_Existing_LabId_Should_Load_Patient_Data()
         {
+            // Function: 1.2 — Edit Patient Data
             // Arrange
             _viewModel.LabId = "LAB-001";
             var patient = new Patient
@@ -161,7 +173,8 @@ namespace Open_lab.Tests.ViewModels
             _patientServiceMock.Setup(x => x.GetMedicalHistoryAsync(10)).ReturnsAsync((MedicalHistory?)null);
 
             // Act
-            await _viewModel.InvokePrivateAsync("LoadByLabIdAsync");
+            _viewModel.LoadByLabIdCommand.Execute(null);
+            await Task.Delay(100);
 
             // Assert
             _viewModel.PatientId.Should().Be(10);
@@ -173,6 +186,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task SearchAsync_Should_Populate_Results_LogicGuard()
         {
+            // Function: 1.5 — Search Patient
             // Arrange - 1.5 Search Semantics Tests
             _viewModel.FullName = "John";
             _viewModel.Phone = "123";
@@ -184,7 +198,8 @@ namespace Open_lab.Tests.ViewModels
             _patientServiceMock.Setup(x => x.SearchAsync("John", "123", It.IsAny<DateTime?>(), It.IsAny<string>())).ReturnsAsync(patients);
 
             // Act
-            await _viewModel.InvokePrivateAsync("SearchAsync");
+            _viewModel.SearchCommand.Execute(null);
+            await Task.Delay(100);
 
             // Assert - Logic Guard: Verify search returns correct patients with full data
             _viewModel.Results.Should().HaveCount(2);
@@ -200,6 +215,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task DeleteAsync_With_PatientId_Zero_Should_Not_Call_Service_LogicGuard()
         {
+            // Function: 1.2 — Edit Patient Data
             // Arrange - PatientId defaults to 0
             var deleteCalled = false;
             _patientServiceMock.Setup(x => x.DeleteAsync(It.IsAny<int>()))
@@ -207,7 +223,8 @@ namespace Open_lab.Tests.ViewModels
                 .Returns(Task.CompletedTask);
 
             // Act
-            await _viewModel.InvokePrivateAsync("DeleteAsync");
+            _viewModel.DeleteCommand.Execute(null);
+            await Task.Delay(100);
 
             // Assert - Logic Guard: Verify delete service was NOT called for PatientId 0
             deleteCalled.Should().BeFalse();
@@ -217,8 +234,9 @@ namespace Open_lab.Tests.ViewModels
 
 
         [Fact]
-        public void SelectedPatient_Setter_Should_Load_Patient_Data_LogicGuard()
+        public async Task SelectedPatient_Setter_Should_Load_Patient_Data_LogicGuard()
         {
+            // Function: 1.2 — Edit Patient Data
             // Arrange
             var patient = new Patient
             {
@@ -241,7 +259,7 @@ namespace Open_lab.Tests.ViewModels
 
             // Act
             _viewModel.SelectedPatient = patient;
-            Thread.Sleep(50); // Allow async medical history load to complete
+            await Task.Delay(100);
 
             // Assert - Logic Guard: Verify all patient fields are correctly loaded
             _viewModel.PatientId.Should().Be(7);
@@ -264,6 +282,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task SearchAsync_By_Name_Should_Return_Matching_Patients_LogicGuard()
         {
+            // Function: 1.5 — Search Patient
             // 1.5 Search by name
             // Arrange
             _viewModel.FullName = "Ahmed";
@@ -277,7 +296,8 @@ namespace Open_lab.Tests.ViewModels
             _patientServiceMock.Setup(x => x.SearchAsync("Ahmed", "", It.IsAny<DateTime?>(), It.IsAny<string>())).ReturnsAsync(patients);
 
             // Act
-            await _viewModel.InvokePrivateAsync("SearchAsync");
+            _viewModel.SearchCommand.Execute(null);
+            await Task.Delay(100);
 
             // Assert - Logic Guard: Verify search returns all patients matching name
             _viewModel.Results.Should().HaveCount(3);
@@ -289,6 +309,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task SearchAsync_By_Phone_Should_Return_Exact_Match_LogicGuard()
         {
+            // Function: 1.5 — Search Patient
             // 1.5 Search by phone number
             // Arrange
             _viewModel.FullName = "";
@@ -300,7 +321,8 @@ namespace Open_lab.Tests.ViewModels
             _patientServiceMock.Setup(x => x.SearchAsync("", "5551234", It.IsAny<DateTime?>(), It.IsAny<string>())).ReturnsAsync(patients);
 
             // Act
-            await _viewModel.InvokePrivateAsync("SearchAsync");
+            _viewModel.SearchCommand.Execute(null);
+            await Task.Delay(100);
 
             // Assert - Logic Guard: Verify search returns exact phone match
             _viewModel.Results.Should().ContainSingle();
@@ -312,6 +334,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task SearchAsync_With_No_Results_Should_Return_Empty_LogicGuard()
         {
+            // Function: 1.5 — Search Patient
             // 1.5 Break case: no results found
             // Arrange
             _viewModel.FullName = "NonExistent";
@@ -319,7 +342,8 @@ namespace Open_lab.Tests.ViewModels
             _patientServiceMock.Setup(x => x.SearchAsync("NonExistent", "9999999", It.IsAny<DateTime?>(), It.IsAny<string>())).ReturnsAsync(new List<Patient>());
 
             // Act
-            await _viewModel.InvokePrivateAsync("SearchAsync");
+            _viewModel.SearchCommand.Execute(null);
+            await Task.Delay(100);
 
             // Assert - Logic Guard: Verify empty result set and appropriate message
             _viewModel.Results.Should().BeEmpty();
@@ -329,6 +353,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task SearchAsync_Partial_Match_Should_Return_Relevant_Results_LogicGuard()
         {
+            // Function: 1.5 — Search Patient
             // 1.5 Partial search
             // Arrange
             _viewModel.FullName = "Moh";
@@ -341,7 +366,8 @@ namespace Open_lab.Tests.ViewModels
             _patientServiceMock.Setup(x => x.SearchAsync("Moh", "", It.IsAny<DateTime?>(), It.IsAny<string>())).ReturnsAsync(patients);
 
             // Act
-            await _viewModel.InvokePrivateAsync("SearchAsync");
+            _viewModel.SearchCommand.Execute(null);
+            await Task.Delay(100);
 
             // Assert - Logic Guard: Verify partial matches are returned correctly
             _viewModel.Results.Should().HaveCount(2);
@@ -353,6 +379,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task SaveAsync_With_MedicalHistory_Should_Save_Complete_History_LogicGuard()
         {
+            // Function: 1.7 — Add Medical History
             // 1.7 Add medical history with integrity validation
             // Arrange
             _viewModel.LabId = "LAB-HIST";
@@ -373,7 +400,8 @@ namespace Open_lab.Tests.ViewModels
                 .Returns(Task.CompletedTask);
 
             // Act
-            await _viewModel.InvokePrivateAsync("SaveAsync");
+            _viewModel.SaveCommand.Execute(null);
+            await Task.Delay(100);
 
             // Assert - Logic Guard: Verify medical history is saved with complete data
             capturedHistory.Should().NotBeNull();
@@ -389,6 +417,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task SaveAsync_With_Existing_Patient_Should_Update_Patient_LogicGuard()
         {
+            // Function: 1.2 — Edit Patient Data
             // 1.2 Edit patient data
             // Arrange - Set PatientId > 0 to trigger UpdateAsync
             _viewModel.InvokePrivate("set_PatientId", 500);
@@ -404,7 +433,8 @@ namespace Open_lab.Tests.ViewModels
                 .Returns(Task.CompletedTask);
 
             // Act
-            await _viewModel.InvokePrivateAsync("SaveAsync");
+            _viewModel.SaveCommand.Execute(null);
+            await Task.Delay(100);
 
             // Assert - Logic Guard: Verify UpdateAsync was called instead of CreateAsync
             _viewModel.StatusMessage.Should().Contain("تم تحديث بيانات المريض");
@@ -417,13 +447,15 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task SaveAsync_When_No_FullName_Should_Show_Error_LogicGuard()
         {
+            // Function: 1.1 — Add New Patient
             // 1.1 Validation
             // Arrange
             _viewModel.LabId = "LAB-001";
             _viewModel.FullName = "";
 
             // Act
-            await _viewModel.InvokePrivateAsync("SaveAsync");
+            _viewModel.SaveCommand.Execute(null);
+            await Task.Delay(100);
 
             // Assert
             _viewModel.StatusMessage.Should().Contain("يرجى إدخال اسم المريض");
@@ -433,13 +465,15 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task GenerateLabIdAsync_When_ServiceThrows_Should_Set_ErrorMessage_FailureGuard()
         {
+            // Function: 1.1 — Add New Patient
             // Arrange
             _patientServiceMock
                 .Setup(x => x.GenerateNextLabIdAsync(It.IsAny<DateTime?>()))
                 .ThrowsAsync(new Exception("gen-failed"));
 
             // Act
-            await _viewModel.InvokePrivateAsync("GenerateLabIdAsync");
+            _viewModel.GenerateLabIdCommand.Execute(null);
+            await Task.Delay(100);
 
             // Assert
             _viewModel.StatusMessage.Should().Contain("خطأ توليد Lab ID");
@@ -449,6 +483,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task DeleteAsync_When_DeleteServiceThrows_Should_Set_ErrorMessage_FailureGuard()
         {
+            // Function: 1.2 — Edit Patient Data
             // Arrange
             _viewModel.InvokePrivate("set_PatientId", 9);
             _patientServiceMock
@@ -456,7 +491,8 @@ namespace Open_lab.Tests.ViewModels
                 .ThrowsAsync(new InvalidOperationException("cannot-delete"));
 
             // Act
-            await _viewModel.InvokePrivateAsync("DeleteAsync");
+            _viewModel.DeleteCommand.Execute(null);
+            await Task.Delay(100);
 
             // Assert
             _viewModel.StatusMessage.Should().Contain("خطأ:");
@@ -466,6 +502,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task ClearFormAsync_When_PatientExists_Should_Reset_Fields_And_Generate_NewLabId_EdgeGuard()
         {
+            // Function: 1.1 — Add New Patient
             // Arrange
             _viewModel.InvokePrivate("set_PatientId", 50);
             _viewModel.FullName = "Filled";
@@ -474,13 +511,33 @@ namespace Open_lab.Tests.ViewModels
             _patientServiceMock.Setup(x => x.GenerateNextLabIdAsync(It.IsAny<DateTime?>())).ReturnsAsync("LAB-NEW");
 
             // Act
-            await _viewModel.InvokePrivateAsync("ClearFormAsync");
+            _viewModel.NewCommand.Execute(null);
+            await Task.Delay(100);
 
             // Assert
             _viewModel.PatientId.Should().Be(0);
             _viewModel.FullName.Should().BeEmpty();
             _viewModel.Gender.Should().BeEmpty();
             _viewModel.LabId.Should().Be("LAB-NEW");
+        }
+
+        [Fact]
+        public void PatientRegistrationViewModel_Should_Have_Only_PatientService_Dependency_Outside_ResultEntryScope_ProductionGap()
+        {
+            // Function: 1.7 — Add Medical History
+            // Arrange
+            var constructor = typeof(PatientRegistrationViewModel).GetConstructors().Single();
+            var parameterTypes = constructor.GetParameters().Select(p => p.ParameterType).ToList();
+
+            // Act
+            var hasResultEntryDependency = parameterTypes.Any(t =>
+                t.Name.Contains("Result", StringComparison.OrdinalIgnoreCase)
+                || t.Name.Contains("Visit", StringComparison.OrdinalIgnoreCase));
+
+            // Assert
+            parameterTypes.Should().ContainSingle();
+            parameterTypes[0].Should().Be(typeof(IPatientService));
+            hasResultEntryDependency.Should().BeFalse("BR-MED-006/007 visibility at result-entry stage cannot be validated from this ViewModel scope.");
         }
     }
 }

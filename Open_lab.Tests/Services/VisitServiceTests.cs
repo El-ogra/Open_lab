@@ -30,6 +30,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task AddTestToVisitAsync_Should_Add_VisitTest_With_Price()
         {
+            // Function: 1.3 — Add Tests to Patient
             // Arrange
             var patient = new Patient { LabId = "L1", FullName = "P", Gender = "Male" };
             _db.Patients.Add(patient);
@@ -59,6 +60,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task AddTestToVisitAsync_SendOutTest_Should_Register_ExternalQueue()
         {
+            // Function: 1.3 — Add Tests to Patient
             var patient = new Patient { LabId = "L-EXT", FullName = "Patient", Gender = "Male" };
             var referral = new Referral { Name = "Ref Lab", ReferralType = "ExternalLab" };
             _db.Patients.Add(patient);
@@ -94,6 +96,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task AddTestToVisitAsync_Duplicate_Should_Throw()
         {
+            // Function: 1.3 — Add Tests to Patient
             // Arrange
             var patient = new Patient { LabId = "L1", FullName = "P", Gender = "Male" };
             _db.Patients.Add(patient);
@@ -122,6 +125,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task AddTestToVisitAsync_Visit_Not_Found_Should_Throw()
         {
+            // Function: 1.3 — Add Tests to Patient
             // Arrange - FAILURE test for AddTestToVisitAsync when visit not found
             var test = new Test { Code = "T1", NameReport = "Test", Price = 100m };
             _db.Tests.Add(test);
@@ -137,6 +141,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task AddTestToVisitAsync_Visit_Closed_Should_Throw()
         {
+            // Function: 1.3 — Add Tests to Patient
             // Arrange - FAILURE test for AddTestToVisitAsync when visit is closed
             var patient = new Patient { LabId = "L1", FullName = "P", Gender = "Male" };
             _db.Patients.Add(patient);
@@ -160,6 +165,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task AddTestToVisitAsync_Test_Not_Found_Should_Throw()
         {
+            // Function: 1.3 — Add Tests to Patient
             // Arrange - FAILURE test for AddTestToVisitAsync when test not found
             var patient = new Patient { LabId = "L1", FullName = "P", Gender = "Male" };
             _db.Patients.Add(patient);
@@ -179,6 +185,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task RemoveVisitTestAsync_Verified_Should_Throw()
         {
+            // Function: 1.4 — Delete Tests
             // Arrange
             var patient = new Patient { LabId = "L1", FullName = "P", Gender = "Male" };
             _db.Patients.Add(patient);
@@ -204,6 +211,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task RemoveVisitTestAsync_Visit_Closed_Should_Throw()
         {
+            // Function: 1.4 — Delete Tests
             // Arrange - FAILURE test for RemoveVisitTestAsync when visit is closed
             var patient = new Patient { LabId = "L1", FullName = "P", Gender = "Male" };
             _db.Patients.Add(patient);
@@ -229,6 +237,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task RemoveVisitTestAsync_VisitTest_Not_Found_Should_Not_Throw()
         {
+            // Function: 1.4 — Delete Tests
             // Arrange - FAILURE test for RemoveVisitTestAsync when visit test not found
             var patient = new Patient { LabId = "L1", FullName = "P", Gender = "Male" };
             _db.Patients.Add(patient);
@@ -249,6 +258,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task ResolveTestPriceAsync_With_Referral_PriceList_Should_Use_Contract_Price()
         {
+            // Function: 1.3 — Add Tests to Patient
             // Arrange
             var referral = new Referral { Name = "Contract1" };
             _db.Referrals.Add(referral);
@@ -273,6 +283,82 @@ namespace Open_lab.Tests.Services
 
             // Assert
             vt.Price.Should().Be(150m); // Contract price instead of base 200m
+        }
+
+        [Fact]
+        public async Task ResolveTestPriceAsync_With_DefaultPriceList_Should_Use_DefaultPrice()
+        {
+            // Function: 1.3 — Add Tests to Patient
+            // Arrange
+            var patient = new Patient { LabId = "L-DEF", FullName = "Default Price Patient", Gender = "Male" };
+            _db.Patients.Add(patient);
+            var test = new Test { Code = "T-DEF", NameReport = "Default Test", Price = 300m };
+            _db.Tests.Add(test);
+            await _db.SaveChangesAsync();
+
+            var defaultList = new PriceList { Name = "Default", IsDefault = true };
+            _db.PriceLists.Add(defaultList);
+            await _db.SaveChangesAsync();
+            _db.PriceListItems.Add(new PriceListItem
+            {
+                PriceListId = defaultList.PriceListId,
+                TestId = test.TestId,
+                Price = 210m
+            });
+            await _db.SaveChangesAsync();
+
+            var visit = new Visit { PatientId = patient.PatientId, VisitDate = DateTime.Now, AccountType = "Cash" };
+            _db.Visits.Add(visit);
+            await _db.SaveChangesAsync();
+
+            // Act
+            var visitTest = await _service.AddTestToVisitAsync(visit.VisitId, test.TestId);
+
+            // Assert
+            visitTest.Price.Should().Be(210m);
+        }
+
+        [Fact]
+        public async Task ResolveTestPriceAsync_With_PhysicianAssigned_Should_Fallback_To_DefaultPrice_ProductionGap()
+        {
+            // Function: 1.3 — Add Tests to Patient
+            // Arrange
+            var physician = new Physician { FullName = "Dr. Sameh" };
+            var patient = new Patient { LabId = "L-DR", FullName = "Doctor Pricing Patient", Gender = "Female" };
+            _db.Physicians.Add(physician);
+            _db.Patients.Add(patient);
+
+            var test = new Test { Code = "T-DR", NameReport = "Doctor Pricing Test", Price = 400m };
+            _db.Tests.Add(test);
+            await _db.SaveChangesAsync();
+
+            var defaultList = new PriceList { Name = "Default", IsDefault = true };
+            _db.PriceLists.Add(defaultList);
+            await _db.SaveChangesAsync();
+
+            _db.PriceListItems.Add(new PriceListItem
+            {
+                PriceListId = defaultList.PriceListId,
+                TestId = test.TestId,
+                Price = 250m
+            });
+            await _db.SaveChangesAsync();
+
+            var visit = new Visit
+            {
+                PatientId = patient.PatientId,
+                VisitDate = DateTime.Now,
+                PhysicianId = physician.PhysicianId,
+                AccountType = "Cash"
+            };
+            _db.Visits.Add(visit);
+            await _db.SaveChangesAsync();
+
+            // Act
+            var visitTest = await _service.AddTestToVisitAsync(visit.VisitId, test.TestId);
+
+            // Assert
+            visitTest.Price.Should().Be(250m, "Doctor-specific pricing is not implemented in production, so default pricing is applied.");
         }
 
         [Fact]
@@ -323,6 +409,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task AddCustomGroupToVisitAsync_Visit_Not_Found_Should_Throw()
         {
+            // Function: 1.8 — Add Group of Tests
             // Arrange - FAILURE test for AddCustomGroupToVisitAsync when visit not found
             var group = new CustomGroup { CustomGroupId = 1, Name = "Group" };
             _db.CustomGroups.Add(group);
@@ -338,6 +425,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task AddCustomGroupToVisitAsync_Visit_Closed_Should_Throw()
         {
+            // Function: 1.8 — Add Group of Tests
             // Arrange - FAILURE test for AddCustomGroupToVisitAsync when visit is closed
             var patient = new Patient { LabId = "L1", FullName = "P", Gender = "Male" };
             _db.Patients.Add(patient);
@@ -361,6 +449,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task AddCustomGroupToVisitAsync_CustomGroup_Not_Found_Should_Throw()
         {
+            // Function: 1.8 — Add Group of Tests
             // Arrange - FAILURE test for AddCustomGroupToVisitAsync when custom group not found
             var patient = new Patient { LabId = "L1", FullName = "P", Gender = "Male" };
             _db.Patients.Add(patient);
@@ -380,6 +469,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task AddCustomGroupToVisitAsync_CustomGroup_Has_No_Tests_Should_Throw()
         {
+            // Function: 1.8 — Add Group of Tests
             // Arrange - FAILURE test for AddCustomGroupToVisitAsync when custom group has no tests
             var patient = new Patient { LabId = "L1", FullName = "P", Gender = "Male" };
             _db.Patients.Add(patient);

@@ -39,6 +39,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task LoadPatientCommand_Should_Load_Patient_Data_LogicGuard()
         {
+            // Function: 1.3 — Add Tests to Patient
             // Arrange
             _viewModel.LabId = "LAB-001";
             var patient = new Patient { PatientId = 10, FullName = "Alice", LabId = "LAB-001" };
@@ -49,7 +50,8 @@ namespace Open_lab.Tests.ViewModels
             _testCatalogServiceMock.Setup(service => service.GetCustomGroupsAsync()).ReturnsAsync(new List<CustomGroup>());
 
             // Act
-            await _viewModel.InvokePrivateAsync("LoadPatientAsync");
+            _viewModel.LoadPatientCommand.Execute(null);
+            await Task.Delay(100);
 
             // Assert
             _viewModel.PatientId.Should().Be(10);
@@ -61,6 +63,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task AddTestCommand_Should_Add_Test_To_Visit_LogicGuard()
         {
+            // Function: 1.3 — Add Tests to Patient
             // Arrange - 1.3 Add test
             _viewModel.InvokePrivate("set_VisitId", 100);
             var test = new Test { TestId = 1, Code = "GLU", Price = 50m };
@@ -73,7 +76,8 @@ namespace Open_lab.Tests.ViewModels
                 .ReturnsAsync(new Invoice { InvoiceId = 1, VisitId = 100, Total = 50, Discount = 0, NetTotal = 50, Paid = 0, Balance = 50 });
 
             // Act
-            await _viewModel.InvokePrivateAsync("AddTestAsync");
+            _viewModel.AddTestCommand.Execute(null);
+            await Task.Delay(100);
 
             // Assert
             _viewModel.SelectedTests.Should().Contain(t => t.VisitTestId == 1);
@@ -85,6 +89,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task AddTestCommand_When_Service_Throws_Should_Set_Error_StatusMessage()
         {
+            // Function: 1.3 — Add Tests to Patient
             // Arrange - FAILURE test for AddTestCommand
             _viewModel.InvokePrivate("set_VisitId", 100);
             var test = new Test { TestId = 1, Code = "GLU", Price = 50m };
@@ -93,7 +98,8 @@ namespace Open_lab.Tests.ViewModels
                 .ThrowsAsync(new Exception("Service Error"));
 
             // Act
-            await _viewModel.InvokePrivateAsync("AddTestAsync");
+            _viewModel.AddTestCommand.Execute(null);
+            await Task.Delay(100);
 
             // Assert
             _viewModel.StatusMessage.Should().Contain("خطأ");
@@ -103,12 +109,14 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task AddTestCommand_When_SelectedAvailableTest_Null_Should_Not_Call_Service_LogicGuard()
         {
+            // Function: 1.3 — Add Tests to Patient
             // Arrange - FAILURE test for AddTestCommand with null test
             _viewModel.InvokePrivate("set_VisitId", 100);
             _viewModel.SelectedAvailableTest = null;
 
             // Act
-            await _viewModel.InvokePrivateAsync("AddTestAsync");
+            _viewModel.AddTestCommand.Execute(null);
+            await Task.Delay(100);
 
             // Assert
             _visitServiceMock.Verify(service => service.AddTestToVisitAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<decimal?>()), Times.Never);
@@ -117,6 +125,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task RemoveTestCommand_Should_Remove_Test_LogicGuard()
         {
+            // Function: 1.4 — Delete Tests
             // Arrange - 1.4 Delete test
             _viewModel.InvokePrivate("set_VisitId", 100);
             var item = new SelectedTestItem { VisitTestId = 200, TestName = "Test" };
@@ -129,7 +138,8 @@ namespace Open_lab.Tests.ViewModels
                 .ReturnsAsync(new Invoice { InvoiceId = 2, VisitId = 100, Total = 0, Discount = 0, NetTotal = 0, Paid = 0, Balance = 0 });
 
             // Act
-            await _viewModel.InvokePrivateAsync("RemoveTestAsync");
+            _viewModel.RemoveTestCommand.Execute(null);
+            await Task.Delay(100);
 
             // Assert
             _viewModel.SelectedTests.Should().NotContain(item);
@@ -140,6 +150,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task RemoveTestCommand_When_Service_Throws_Should_Set_Error_StatusMessage()
         {
+            // Function: 1.4 — Delete Tests
             // Arrange - FAILURE test for RemoveTestCommand
             _viewModel.InvokePrivate("set_VisitId", 100);
             var item = new SelectedTestItem { VisitTestId = 200, TestName = "Test" };
@@ -149,7 +160,8 @@ namespace Open_lab.Tests.ViewModels
                 .ThrowsAsync(new Exception("Service Error"));
 
             // Act
-            await _viewModel.InvokePrivateAsync("RemoveTestAsync");
+            _viewModel.RemoveTestCommand.Execute(null);
+            await Task.Delay(100);
 
             // Assert
             _viewModel.StatusMessage.Should().Contain("خطأ");
@@ -159,12 +171,14 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task RemoveTestCommand_When_SelectedVisitTest_Null_Should_Not_Call_Service_LogicGuard()
         {
+            // Function: 1.4 — Delete Tests
             // Arrange - FAILURE test for RemoveTestCommand with null selection
             _viewModel.InvokePrivate("set_VisitId", 100);
             _viewModel.SelectedVisitTest = null;
 
             // Act
-            await _viewModel.InvokePrivateAsync("RemoveTestAsync");
+            _viewModel.RemoveTestCommand.Execute(null);
+            await Task.Delay(100);
 
             // Assert
             _visitServiceMock.Verify(service => service.RemoveVisitTestAsync(It.IsAny<int>()), Times.Never);
@@ -173,6 +187,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task AddCustomGroupCommand_Should_Add_All_Tests_In_Group_LogicGuard()
         {
+            // Function: 1.8 — Add Group of Tests
             // Arrange - 1.8 Add Group
             _viewModel.InvokePrivate("set_VisitId", 100);
             var group = new CustomGroup { CustomGroupId = 5, Name = "Basic Profile" };
@@ -186,7 +201,8 @@ namespace Open_lab.Tests.ViewModels
                 .ReturnsAsync(new Invoice { InvoiceId = 3, VisitId = 100, Total = 20, Discount = 0, NetTotal = 20, Paid = 0, Balance = 20 });
 
             // Act
-            await _viewModel.InvokePrivateAsync("AddCustomGroupAsync");
+            _viewModel.AddCustomGroupCommand.Execute(null);
+            await Task.Delay(100);
 
             // Assert
             _visitServiceMock.Verify(v => v.AddCustomGroupToVisitAsync(100, 5), Times.Once);
@@ -197,6 +213,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task AddCustomGroupCommand_When_Service_Throws_Should_Set_Error_StatusMessage()
         {
+            // Function: 1.8 — Add Group of Tests
             // Arrange - FAILURE test for AddCustomGroupCommand
             _viewModel.InvokePrivate("set_VisitId", 100);
             var group = new CustomGroup { CustomGroupId = 5, Name = "Basic Profile" };
@@ -205,7 +222,8 @@ namespace Open_lab.Tests.ViewModels
                 .ThrowsAsync(new Exception("Service Error"));
 
             // Act
-            await _viewModel.InvokePrivateAsync("AddCustomGroupAsync");
+            _viewModel.AddCustomGroupCommand.Execute(null);
+            await Task.Delay(100);
 
             // Assert
             _viewModel.StatusMessage.Should().Contain("خطأ");
@@ -215,12 +233,14 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task AddCustomGroupCommand_When_SelectedCustomGroup_Null_Should_Not_Call_Service_LogicGuard()
         {
+            // Function: 1.8 — Add Group of Tests
             // Arrange - FAILURE test for AddCustomGroupCommand with null group
             _viewModel.InvokePrivate("set_VisitId", 100);
             _viewModel.SelectedCustomGroup = null;
 
             // Act
-            await _viewModel.InvokePrivateAsync("AddCustomGroupAsync");
+            _viewModel.AddCustomGroupCommand.Execute(null);
+            await Task.Delay(100);
 
             // Assert
             _visitServiceMock.Verify(v => v.AddCustomGroupToVisitAsync(It.IsAny<int>(), It.IsAny<int>()), Times.Never);
@@ -229,13 +249,15 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task CreateVisitAsync_When_ReferralAccountWithoutReferral_Should_Set_ValidationMessage_FailureGuard()
         {
+            // Function: 1.3 — Add Tests to Patient
             // Arrange
             _viewModel.InvokePrivate("set_PatientId", 10);
             _viewModel.SelectedAccountType = "Referral";
             _viewModel.SelectedReferral = null;
 
             // Act
-            await _viewModel.InvokePrivateAsync("CreateVisitAsync");
+            _viewModel.CreateVisitCommand.Execute(null);
+            await Task.Delay(100);
 
             // Assert
             _viewModel.StatusMessage.Should().Contain("يرجى اختيار جهة إحالة");
@@ -245,6 +267,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task CreateVisitAsync_When_ServiceThrows_Should_Set_ErrorMessage_FailureGuard()
         {
+            // Function: 1.3 — Add Tests to Patient
             // Arrange
             _viewModel.InvokePrivate("set_PatientId", 11);
             _viewModel.SelectedAccountType = "Cash";
@@ -252,7 +275,8 @@ namespace Open_lab.Tests.ViewModels
                 .ThrowsAsync(new Exception("create-visit-failed"));
 
             // Act
-            await _viewModel.InvokePrivateAsync("CreateVisitAsync");
+            _viewModel.CreateVisitCommand.Execute(null);
+            await Task.Delay(100);
 
             // Assert
             _viewModel.StatusMessage.Should().Contain("خطأ:");
@@ -262,11 +286,13 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task RefreshTestsCommand_When_TestCatalogThrows_Should_Set_ErrorMessage_EdgeGuard()
         {
+            // Function: 1.3 — Add Tests to Patient
             // Arrange
             _testCatalogServiceMock.Setup(s => s.GetAllTestsAsync()).ThrowsAsync(new Exception("catalog-failed"));
 
             // Act
-            await _viewModel.InvokePrivateAsync("LoadAvailableTestsAsync");
+            _viewModel.RefreshTestsCommand.Execute(null);
+            await Task.Delay(100);
 
             // Assert
             _viewModel.StatusMessage.Should().Contain("خطأ:");
