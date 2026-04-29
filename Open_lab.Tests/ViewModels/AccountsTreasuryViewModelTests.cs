@@ -154,6 +154,33 @@ namespace Open_lab.Tests.ViewModels
         }
 
         [Fact]
+        public async Task LoadCommand_With_EmptySnapshot_Should_Keep_ZeroTotals_EdgeGuard()
+        {
+            // Function: 2.10 — Generate Inventory
+            // Arrange
+            var accountsTreasuryServiceMock = new Mock<IAccountsTreasuryService>();
+            var printServiceMock = new Mock<IPrintService>();
+            accountsTreasuryServiceMock
+                .Setup(s => s.GetSnapshotAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<int?>()))
+                .ReturnsAsync(new AccountsTreasurySnapshot());
+
+            var viewModel = CreateViewModel(accountsTreasuryServiceMock, printServiceMock);
+
+            // Act
+            viewModel.LoadCommand.Execute(null);
+            await Task.Delay(100);
+
+            // Assert
+            viewModel.TotalInvoiced.Should().Be(0m);
+            viewModel.TotalPaid.Should().Be(0m);
+            viewModel.TotalBalance.Should().Be(0m);
+            viewModel.ByBranch.Should().BeEmpty();
+            viewModel.ByDoctor.Should().BeEmpty();
+
+            AppSessionTestHelper.Reset();
+        }
+
+        [Fact]
         public async Task DailyCommand_When_ServiceThrows_Should_Set_ErrorMessage_FailureGuard()
         {
             // Function: 2.10 — Generate Inventory

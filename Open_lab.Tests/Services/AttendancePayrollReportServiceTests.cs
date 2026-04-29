@@ -29,7 +29,8 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task GeneratePayrollSummaryAsync_Should_Calculate_Time_And_Day_Statuses_For_Module11_5()
         {
-            var user = new User { Username = "u-pay", FullName = "Payroll User" };
+            // Function: 11.5 — `Generate Attendance Report`
+            var user = new User { Username = "u-payroll", FullName = "Payroll User" };
             _db.Users.Add(user);
 
             var shift = new ShiftSchedule

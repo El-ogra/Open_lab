@@ -31,7 +31,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task Patient_And_Visit_Functions_Should_Work_EndToEnd()
         {
-            // 1.1, 1.3, 1.4
+            // Function: 1.1 — , 1.3, 1.4
             var patientService = new PatientService(_db);
             var visitService = new VisitService(_db);
 
@@ -51,7 +51,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task Finance_Gap_Functions_Should_Work()
         {
-            // 2.1, 2.2, 2.5, 2.9
+            // Function: 2.1 — , 2.2, 2.5, 2.9
             var invoiceService = new InvoiceService(_db);
 
             var patient = new Patient { LabId = "L-FIN", FullName = "P", Gender = "Male" };
@@ -83,7 +83,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task Catalog_Gap_Functions_Should_Work()
         {
-            // 3.1, 3.2, 3.4, 3.5, 3.6, 3.8, 3.9
+            // Function: 3.1 — , 3.2, 3.4, 3.5, 3.6, 3.8, 3.9
             var catalog = new TestCatalogService(_db);
 
             var test = await catalog.CreateTestAsync(new Test
@@ -119,7 +119,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task Results_And_Preview_Gap_Functions_Should_Work()
         {
-            // 4.1, 4.2, 4.6
+            // Function: 4.1 — , 4.2, 4.6
             var resultsService = new ResultsService(_db);
             var reportService = new ReportService(_db);
 
@@ -150,7 +150,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task Culture_Gap_Functions_Should_Work()
         {
-            // 5.1, 5.2, 5.3, 5.6
+            // Function: 5.1 — , 5.2, 5.3, 5.6
             var service = new CultureSensitivityService(_db);
 
             var culture = await service.CreateCultureAsync(new Culture
@@ -192,7 +192,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task Sample_Collection_Gap_Functions_Should_Work()
         {
-            // 6.1, 6.2
+            // Function: 6.1 — , 6.2
             var service = new SampleCollectionService(_db);
             var patient = new Patient { LabId = "L-SMP", FullName = "P", Gender = "Male" };
             _db.Patients.Add(patient);
@@ -218,7 +218,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task Worksheet_Gap_Functions_Should_Work()
         {
-            // 7.1, 7.2
+            // Function: 7.1 — , 7.2
             var service = new WorksheetService(_db);
             var patient = new Patient { LabId = "L-WS", FullName = "P", Gender = "Male" };
             _db.Patients.Add(patient);
@@ -242,7 +242,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task External_Lab_Gap_Functions_Should_Work()
         {
-            // 8.1, 8.2, 8.3, 8.4
+            // Function: 8.1 — , 8.2, 8.3, 8.4
             var visitService = new VisitService(_db);
             var externalService = new ExternalLabService(_db);
 
@@ -275,7 +275,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task Statistics_Gap_Functions_Should_Work()
         {
-            // 9.1, 9.2, 9.3, 9.4, 9.5
+            // Function: 9.1 — , 9.2, 9.3, 9.4, 9.5
             var service = new StatisticsService(_db);
 
             var referral = new Referral { Name = "Referral", ReferralType = "Company" };
@@ -318,7 +318,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task User_Attendance_Gap_Functions_Should_Work()
         {
-            // 10.1, 10.2, 10.3, 10.4, 10.5, 11.1, 11.2, 11.4
+            // Function: 10.1 — , 10.2, 10.3, 10.4, 10.5, 11.1, 11.2, 11.4
             var userAdmin = new UserAdminService(_db);
             var attendance = new AttendanceService(_db);
             var tardiness = new TardinessService(_db);
@@ -365,7 +365,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task Contract_Invoice_Gap_Functions_Should_Work()
         {
-            // 12.8, 12.9
+            // Function: 12.8 — , 12.9
             var service = new ContractInvoiceService(_db);
             var referral = new Referral { Name = "Insurance A", ReferralType = "Company" };
             _db.Referrals.Add(referral);
@@ -391,7 +391,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task System_Settings_Gap_Function_Should_Work()
         {
-            // 13.1
+            // Function: 13.1 — Set Report Margins
             var service = new SystemSettingsService(_db);
             var profile = await service.GetProfileAsync();
             var updatedProfile = new SystemSettingsProfile

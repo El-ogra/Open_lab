@@ -322,7 +322,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task CompleteStateTransition_Collected_To_Separated_Should_Update_Status_LogicGuard()
         {
-            // 6.3 State Transition: Collected → Separated
+            // Function: 6.3 — State Transition: Collected → Separated
             // Arrange
             var patient = new Patient { LabId = "L-ST1", FullName = "State Patient", Gender = "Male" };
             _db.Patients.Add(patient);
@@ -361,7 +361,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task StateTransition_Invalid_Skip_Should_Fail_LogicGuard()
         {
-            // 6.3 Break Case: Attempt to skip Collected state and go directly to Separated
+            // Function: 6.3 — Break Case: Attempt to skip Collected state and go directly to Separated
             // Arrange
             var patient = new Patient { LabId = "L-ST2", FullName = "Skip Patient", Gender = "Female" };
             _db.Patients.Add(patient);

@@ -28,7 +28,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task SaveGroupAsync_Should_Create_Group()
         {
-            // 3.5 Custom Group - Logic Guard
+            // Function: 3.5 — Custom Group - Logic Guard
             // Arrange
             _viewModel.GroupName = "Profile Test";
             _viewModel.GroupPrice = 150m;

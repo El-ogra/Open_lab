@@ -172,7 +172,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task HeaderFooter_Settings_Should_Work()
         {
-            // 13.3 Configure Header/Footer
+            // Function: 13.3 — Configure Header/Footer
             await _service.SetSettingAsync("Print.Header", "Lab Name");
             await _service.SetSettingAsync("Print.Footer", "Page {0}");
             
@@ -191,7 +191,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task DefaultAccountType_Setting_Should_Work()
         {
-            // 13.4 Set Default Account Type
+            // Function: 13.4 — Set Default Account Type
             await _service.SetSettingAsync("Visit.DefaultAccountType", "Referral");
             var type = await _service.GetStringAsync("Visit.DefaultAccountType");
             type.Should().Be("Referral");
@@ -203,7 +203,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task InvoiceSettings_Should_Work()
         {
-            // 13.6 Set Invoice Settings
+            // Function: 13.6 — Set Invoice Settings
             await _service.SetSettingAsync("Invoice.ShowLogo", true);
             await _service.SetSettingAsync("Invoice.Currency", "EGP");
             

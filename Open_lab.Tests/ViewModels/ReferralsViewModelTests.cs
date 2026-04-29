@@ -28,6 +28,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task SaveAsync_Should_Create_Referral_For_Module12_1()
         {
+            // Function: 12.1 — `Create Contract Entity`
             _viewModel.Name = "Company X";
             _viewModel.Type = "Company";
             _viewModel.DiscountPercentage = 10;
@@ -56,6 +57,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task SaveAsync_Invalid_Discount_Should_Stop_For_Module12_3()
         {
+            // Function: 12.3 — `Set Entity Discount`
             _viewModel.Name = "Company Y";
             _viewModel.Type = "Company";
             _viewModel.DiscountPercentage = 120;

@@ -187,6 +187,21 @@ namespace Open_lab.Tests.Services
         }
 
         [Fact]
+        public async Task GetSnapshotAsync_DoctorWise_When_DateRangeInvalid_Should_Throw_FailureGuard()
+        {
+            // Function: 2.12 — Doctor-wise Inventory
+            // Arrange
+            var from = DateTime.Today;
+            var to = DateTime.Today.AddDays(-1);
+
+            // Act
+            Func<Task> act = async () => await _service.GetSnapshotAsync(from, to);
+
+            // Assert
+            await act.Should().ThrowAsync<ArgumentException>();
+        }
+
+        [Fact]
         public async Task GetSnapshotAsync_WithInvalidDates_ShouldThrowException_FailureGuard()
         {
             // Function: 2.10 — Generate Inventory

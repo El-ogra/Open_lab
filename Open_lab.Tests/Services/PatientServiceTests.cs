@@ -288,6 +288,22 @@ namespace Open_lab.Tests.Services
         }
 
         [Fact]
+        public async Task GetMedicalHistoryAsync_When_NoHistoryExists_Should_Return_Null_EdgeGuard()
+        {
+            // Function: 1.6 — View Patient History
+            // Arrange
+            var patient = new Patient { LabId = "LMH-NONE", FullName = "No History", Gender = "Male" };
+            _db.Patients.Add(patient);
+            await _db.SaveChangesAsync();
+
+            // Act
+            var result = await _service.GetMedicalHistoryAsync(patient.PatientId);
+
+            // Assert
+            result.Should().BeNull();
+        }
+
+        [Fact]
         public async Task SaveMedicalHistoryAsync_Should_Create_New_History()
         {
             // Function: 1.7 — Add Medical History
@@ -430,6 +446,24 @@ namespace Open_lab.Tests.Services
 
             // Assert
             rows.Should().BeEmpty();
+        }
+
+        [Fact]
+        public async Task SearchAsync_With_NameAndPhone_Should_Return_Matching_Patients_SuccessGuard()
+        {
+            // Function: 1.5 — Search Patient
+            // Arrange
+            var patient = new Patient { LabId = "LAB-S1", FullName = "Omar Ali", Gender = "Male", Phone = "0100" };
+            _db.Patients.Add(patient);
+            await _db.SaveChangesAsync();
+
+            // Act
+            var rows = await _service.SearchAsync("Omar", "0100", null, null);
+
+            // Assert
+            rows.Should().ContainSingle();
+            rows[0].LabId.Should().Be("LAB-S1");
+            rows[0].FullName.Should().Be("Omar Ali");
         }
     }
 }

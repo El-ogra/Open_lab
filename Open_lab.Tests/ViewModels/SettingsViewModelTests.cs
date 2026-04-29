@@ -44,6 +44,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task SaveMarginSettingsAsync_Should_Save_Updated_Margins_For_Module13_1()
         {
+            // Function: 13.1 — `Set Report Margins`
             _viewModel.LeftMargin = 3.2m;
             _viewModel.RightMargin = 1.1m;
 

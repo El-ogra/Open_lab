@@ -28,7 +28,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task SaveAsync_Should_Persist_Low_High_Comments_LogicGuard()
         {
-            // 3.4 Low/High Comments - Logic Guard: Verify properties are correctly sent to service
+            // Function: 3.4 — Low/High Comments - Logic Guard: Verify properties are correctly sent to service
             // Arrange
             var test = new Test { TestId = 1, Code = "T1" };
             _viewModel.SelectedTest = test;

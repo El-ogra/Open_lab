@@ -243,7 +243,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task UpdateQueueStatusAsync_Should_Save_External_Result_Reference()
         {
-            // 8.5 Enter External Lab Result
+            // Function: 8.5 — Enter External Lab Result
             var queue = new ExternalLabQueue { VisitTestId = 1, ReferralId = 2, Status = "Shipped", DateQueued = DateTime.Now };
             _db.ExternalLabQueues.Add(queue);
             await _db.SaveChangesAsync();
@@ -410,7 +410,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task GetPendingQueueAsync_Should_Validate_Report_Data_Integrity_LogicGuard()
         {
-            // 8.6 Print External Lab Report - Logic Guard: Verify report data integrity
+            // Function: 8.6 — Print External Lab Report - Logic Guard: Verify report data integrity
             // Arrange
             var patient = new Patient { LabId = "L-EXT-REP", FullName = "External Report Patient", Gender = "Male", Phone = "555-9999" };
             _db.Patients.Add(patient);

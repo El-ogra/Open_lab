@@ -97,6 +97,23 @@ namespace Open_lab.Tests.ViewModels
         }
 
         [Fact]
+        public async Task LoadVisitAsync_When_ServiceThrows_Should_Set_StatusMessage_FailureGuard()
+        {
+            // Function: 2.9 — View Patient Account
+            // Arrange
+            _viewModel.VisitId = 10;
+            _invoiceServiceMock.Setup(x => x.GetVisitTotalAsync(10))
+                .ThrowsAsync(new InvalidOperationException("account-load-failed"));
+
+            // Act
+            _viewModel.LoadVisitCommand.Execute(null);
+            await Task.Delay(100);
+
+            // Assert
+            _viewModel.StatusMessage.Should().Contain("account-load-failed");
+        }
+
+        [Fact]
         public async Task SaveInvoiceAsync_With_VisitId_Zero_Should_Set_StatusMessage()
         {
             // Function: 2.8 — Generate Invoice
@@ -580,6 +597,92 @@ namespace Open_lab.Tests.ViewModels
             // Assert
             _invoiceServiceMock.Verify(x => x.CreateOrUpdateInvoiceAsync(10, 0m, 0), Times.Once);
             _viewModel.NetTotal.Should().Be(500m);
+        }
+
+        [Fact]
+        public async Task AddPaymentAsync_With_ValidPayment_Should_RecordPayment_SuccessGuard()
+        {
+            // Function: 2.3 — Record Payment
+            // Arrange
+            _viewModel.VisitId = 10;
+            _viewModel.Paid = 40m;
+            var invoice = new Invoice { InvoiceId = 100 };
+            _invoiceServiceMock.Setup(x => x.CreateOrUpdateInvoiceAsync(10, 0, 0)).ReturnsAsync(invoice);
+            _invoiceServiceMock.Setup(x => x.AddPaymentAsync(100, 40m, It.IsAny<string>(), It.IsAny<int>()))
+                .ReturnsAsync(new Payment { PaymentId = 7, Amount = 40m });
+            _invoiceServiceMock.Setup(x => x.GetVisitTotalAsync(10)).ReturnsAsync(200m);
+            _invoiceServiceMock.Setup(x => x.GetByVisitIdAsync(10)).ReturnsAsync(invoice);
+            _invoiceServiceMock.Setup(x => x.GetPaymentsAsync(100)).ReturnsAsync(new List<Payment>());
+
+            // Act
+            _viewModel.AddPaymentCommand.Execute(null);
+            await Task.Delay(100);
+
+            // Assert
+            _invoiceServiceMock.Verify(x => x.AddPaymentAsync(100, 40m, It.IsAny<string>(), It.IsAny<int>()), Times.Once);
+        }
+
+        [Fact]
+        public async Task SettleAccountAsync_With_FullyPaidInvoice_Should_Settle_SuccessGuard()
+        {
+            // Function: 2.4 — Settle Account
+            // Arrange
+            _viewModel.VisitId = 10;
+            var settledInvoice = new Invoice { InvoiceId = 100, Total = 500m, NetTotal = 500m, Paid = 500m, Balance = 0m, Status = "Settled" };
+            _invoiceServiceMock.Setup(x => x.SettleAccountAsync(10)).ReturnsAsync(settledInvoice);
+            _invoiceServiceMock.Setup(x => x.GetVisitTotalAsync(10)).ReturnsAsync(500m);
+            _invoiceServiceMock.Setup(x => x.GetByVisitIdAsync(10)).ReturnsAsync(settledInvoice);
+            _invoiceServiceMock.Setup(x => x.GetPaymentsAsync(100)).ReturnsAsync(new List<Payment>());
+
+            // Act
+            _viewModel.SettleAccountCommand.Execute(null);
+            await Task.Delay(100);
+
+            // Assert
+            _invoiceServiceMock.Verify(x => x.SettleAccountAsync(10), Times.Once);
+            _viewModel.StatusMessage.Should().Contain("تمت تصفية الحساب");
+        }
+
+        [Fact]
+        public async Task EditPaymentAsync_With_ValidAmount_Should_EditPayment_SuccessGuard()
+        {
+            // Function: 2.5 — Edit Payment
+            // Arrange
+            _viewModel.SelectedPayment = new InvoicePaymentRow { PaymentId = 5, Amount = 50m };
+            _viewModel.EditPaymentAmount = 80m;
+            _viewModel.VisitId = 10;
+            var invoice = new Invoice { InvoiceId = 100 };
+            _invoiceServiceMock.Setup(x => x.EditPaymentAsync(5, 80m, It.IsAny<int>(), It.IsAny<string>()))
+                .ReturnsAsync(new Payment { PaymentId = 5, Amount = 80m });
+            _invoiceServiceMock.Setup(x => x.GetVisitTotalAsync(10)).ReturnsAsync(500);
+            _invoiceServiceMock.Setup(x => x.GetByVisitIdAsync(10)).ReturnsAsync(invoice);
+            _invoiceServiceMock.Setup(x => x.GetPaymentsAsync(100)).ReturnsAsync(new List<Payment>());
+
+            // Act
+            _viewModel.EditPaymentCommand.Execute(null);
+            await Task.Delay(100);
+
+            // Assert
+            _invoiceServiceMock.Verify(x => x.EditPaymentAsync(5, 80m, It.IsAny<int>(), It.IsAny<string>()), Times.Once);
+        }
+
+        [Fact]
+        public async Task PrintInvoiceAsync_When_LogThrows_Should_Set_ErrorStatus_FailureGuard()
+        {
+            // Function: 2.8 — Generate Invoice
+            // Arrange
+            _viewModel.VisitId = 77;
+            var invoice = new Invoice { InvoiceId = 555, VisitId = 77 };
+            _invoiceServiceMock.Setup(x => x.GetByVisitIdAsync(77)).ReturnsAsync(invoice);
+            _invoiceServiceMock.Setup(x => x.LogInvoicePrintedAsync(555, It.IsAny<int>()))
+                .ThrowsAsync(new InvalidOperationException("print-log-failed"));
+
+            // Act
+            _viewModel.PrintInvoiceCommand.Execute(null);
+            await Task.Delay(100);
+
+            // Assert
+            _viewModel.StatusMessage.Should().Contain("print-log-failed");
         }
     }
 }

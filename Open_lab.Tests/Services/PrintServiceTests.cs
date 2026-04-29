@@ -9,7 +9,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task PrintCultureReportAsync_When_Data_Is_Null_Should_Throw()
         {
-            // 5.7 Print Culture Report (guard path)
+            // Function: 5.7 — Print Culture Report (guard path)
             var settingsMock = new Mock<ISettingsService>();
             var service = new PrintService(settingsMock.Object);
 
@@ -21,7 +21,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task PrintVisitReportAsync_When_Report_Is_Null_Should_Throw()
         {
-            // 8.6 Print External Lab Report uses same visit-report printing pipeline
+            // Function: 8.6 — Print External Lab Report uses same visit-report printing pipeline
             var settingsMock = new Mock<ISettingsService>();
             var service = new PrintService(settingsMock.Object);
 
@@ -35,7 +35,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public void PrintCultureReportData_Should_Validate_Report_Structure_LogicGuard()
         {
-            // 5.7 Culture Report Printing - unit-level data contract validation.
+            // Function: 5.7 — Culture Report Printing - unit-level data contract validation.
             // Do not invoke real print pipeline in unit tests because it depends on OS printer drivers.
             var cultureData = new CultureReportData
             {

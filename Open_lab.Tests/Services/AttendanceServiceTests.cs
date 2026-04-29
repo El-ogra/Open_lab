@@ -86,7 +86,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task CalculateWorkHours_Should_Validate_Regular_Overtime_Delay_LogicGuard()
         {
-            // 11.3 Calculate Work Hours - Logic Guard: Verify regular, overtime, and delay calculation
+            // Function: 11.3 — Calculate Work Hours - Logic Guard: Verify regular, overtime, and delay calculation
             // Arrange
             var user = new User { Username = "timecalc", FullName = "Time Calc User" };
             _db.Users.Add(user);

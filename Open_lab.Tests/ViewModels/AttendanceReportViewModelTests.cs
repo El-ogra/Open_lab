@@ -45,6 +45,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task GenerateReportAsync_Should_Load_Report_Rows_For_Module11_5()
         {
+            // Function: 11.5 — `Generate Attendance Report`
             _tardinessServiceMock
                 .Setup(x => x.GetPunctualityReportAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<int?>()))
                 .ReturnsAsync(new List<AttendanceReportRow>
@@ -95,6 +96,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task GeneratePayrollSummaryAsync_Should_Load_Summary_Rows_For_Module11_5()
         {
+            // Function: 11.5 — `Generate Attendance Report`
             _payrollServiceMock
                 .Setup(x => x.GeneratePayrollSummaryAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<int?>()))
                 .ReturnsAsync(new List<AttendancePayrollSummaryRow>

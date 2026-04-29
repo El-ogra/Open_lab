@@ -33,6 +33,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task SaveAsync_Should_Create_Physician_For_Module12_6_12_7()
         {
+            // Function: 12.6 — `Add Referring Physician`
             _viewModel.FullName = "Dr. New";
             _viewModel.Specialty = "Lab";
             _viewModel.PriceListId = 4;

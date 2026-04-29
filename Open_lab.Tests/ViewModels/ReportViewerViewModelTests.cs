@@ -25,7 +25,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task LoadReportAsync_With_Valid_Visit_Should_Build_Preview_LogicGuard()
         {
-            // 4.4 Composite Report - 4.5 Report Order Validation
+            // Function: 4.4 — Composite Report - 4.5 Report Order Validation
             var report = BuildReport(visitId: 10, isSendOut: false);
             _reportServiceMock.Setup(x => x.GetVisitReportAsync(10)).ReturnsAsync(report);
             _viewModel.VisitId = 10;
@@ -57,7 +57,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task PrintAsync_Should_Call_PrintService_For_Report_LogicGuard()
         {
-            // 4.7 Print Report - Logic Guard: Verify correct data is passed to print service
+            // Function: 4.7 — Print Report - Logic Guard: Verify correct data is passed to print service
             VisitReportData? capturedReport = null;
             bool? capturedPreview = null;
             _printServiceMock.Setup(x => x.PrintVisitReportAsync(It.IsAny<VisitReportData>(), It.IsAny<bool>()))

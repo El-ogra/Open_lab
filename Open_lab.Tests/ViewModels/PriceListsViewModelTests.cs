@@ -35,7 +35,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task SaveListAsync_Should_Create_PriceList()
         {
-            // 3.7 Price List - Logic Guard
+            // Function: 3.7 — Price List - Logic Guard
             // Arrange
             _viewModel.ListName = "Corporate List";
             _viewModel.SelectedReferral = new Referral { ReferralId = 5, Name = "Ref1" };
@@ -56,7 +56,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task AddItemAsync_Should_Add_Test_To_PriceList()
         {
-            // 3.8 Update Prices - Logic Guard
+            // Function: 3.8 — Update Prices - Logic Guard
             // Arrange
             _viewModel.SelectedPriceList = new PriceList { PriceListId = 1 };
             _viewModel.SelectedTest = new Test { TestId = 10, Code = "T10", Price = 100m };

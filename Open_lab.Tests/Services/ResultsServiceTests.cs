@@ -166,7 +166,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task GetResultsByVisitAsync_Should_Return_Multiple_Tests_Results_LogicGuard()
         {
-            // 4.4 Create Composite Report - Logic Guard: Verify composite report structure
+            // Function: 4.4 — Create Composite Report - Logic Guard: Verify composite report structure
             // Arrange
             var visitId = 10;
             var patient = new Patient { LabId = "L-COMP", FullName = "Composite Patient", Gender = "Male" };
@@ -385,7 +385,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task SaveResultAsync_With_ReferenceRange_Should_Classify_Correctly_LogicGuard()
         {
-            // 3.3 Reference Range Decision - Logic Guard: Verify result classification
+            // Function: 3.3 — Reference Range Decision - Logic Guard: Verify result classification
             // Arrange
             var patient = new Patient { LabId = "L-REF", FullName = "Ref Patient", Gender = "Male", Age = 30 };
             _db.Patients.Add(patient);
@@ -458,7 +458,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task Function_4_1_Automated_Intelligence_Full_Verification()
         {
-            // Requirement 4.1: Automated Range Comparison and Suggested Comments
+            // Function: 4.1 — `Enter Test Results`
             var patient = new Patient { PatientId = 1, Gender = "Female", Age = 25 };
             _db.Patients.Add(patient);
 
@@ -487,7 +487,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task Function_4_3_Audit_Trail_Integrity_Verification()
         {
-            // Requirement 4.3: Secure audit trail for result modifications
+            // Function: 4.3 — `Edit Results`
             var vtId = 5;
             var pId = 20;
             _db.VisitTests.Add(new VisitTest { VisitTestId = vtId, VisitId = 10, TestId = 10 });
@@ -508,7 +508,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task Function_4_7_Print_Audit_Logging_Verification()
         {
-            // Requirement 4.7: Log report printing actions
+            // Function: 4.7 — `Print Report`
             var visitId = 70;
             var userId = 5;
 

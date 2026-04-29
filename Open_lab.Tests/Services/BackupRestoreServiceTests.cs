@@ -33,7 +33,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task ListBackupsAsync_Should_Return_Files_If_Exists_LogicGuard()
         {
-            // 13.7 Configure Backup - Refactored to Logic Guard
+            // Function: 13.7 — Configure Backup - Refactored to Logic Guard
             var tempPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
             Directory.CreateDirectory(tempPath);
             try
@@ -86,7 +86,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task BackupWorkflow_Should_Validate_Data_Preparation_LogicGuard()
         {
-            // 13.7 Configure Backup - Logic Guard: Verify data is prepared for backup (InMemoryDatabase limitation workaround)
+            // Function: 13.7 — Configure Backup - Logic Guard: Verify data is prepared for backup (InMemoryDatabase limitation workaround)
             // Arrange
             var tempPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
             Directory.CreateDirectory(tempPath);

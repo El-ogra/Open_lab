@@ -108,7 +108,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task SaveAsync_With_OutsourceData_Should_Persist_Pricing_LogicGuard()
         {
-            // 3.9 Outsourced - Logic Guard: Verify pricing fields are sent to service
+            // Function: 3.9 — Outsourced - Logic Guard: Verify pricing fields are sent to service
             // Arrange
             _viewModel.SelectedTest = null;
             _viewModel.Code = "OUT";

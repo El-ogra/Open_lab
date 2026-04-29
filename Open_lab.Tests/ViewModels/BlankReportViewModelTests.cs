@@ -21,7 +21,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task LoadAsync_With_Valid_Visit_Should_Populate_Blank_Report_Data_LogicGuard()
         {
-            // 4.8 Print Blank Report - Logic Guard: Verify all blank report fields are populated
+            // Function: 4.8 — Print Blank Report - Logic Guard: Verify all blank report fields are populated
             var patient = new Patient
             {
                 PatientId = 1,

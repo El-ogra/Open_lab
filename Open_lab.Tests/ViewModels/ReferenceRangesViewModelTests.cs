@@ -28,7 +28,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task SaveAsync_NewRange_Should_Call_CreateRange()
         {
-            // 3.3 Reference Values - Logic Guard
+            // Function: 3.3 — Reference Values - Logic Guard
             // Arrange
             var test = new Test { TestId = 1, Code = "T1" };
             _viewModel.SelectedTest = test;

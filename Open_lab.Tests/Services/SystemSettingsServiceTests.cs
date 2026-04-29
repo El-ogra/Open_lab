@@ -27,7 +27,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task SaveProfileAsync_Should_Persist_Paper_Size()
         {
-            // 13.2 Set Paper Size
+            // Function: 13.2 — Set Paper Size
             var profile = new SystemSettingsProfile
             {
                 ReportPaperSize = "A5",
@@ -43,7 +43,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task SetMasterPasswordAsync_Should_Save_And_Verify_Password()
         {
-            // 13.8 Set System Password
+            // Function: 13.8 — Set System Password
             var set = await _service.SetMasterPasswordAsync("NewStrongPass#1");
             set.Should().BeTrue();
 
@@ -64,6 +64,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task GetProfileAsync_Should_Read_ReceiptHeader_From_Settings_For_Module13_3()
         {
+            // Function: 13.3 — `Configure Header/Footer`
             _db.Settings.Add(new Setting { Key = "Receipt.Header", Value = "مختبر ألف" });
             await _db.SaveChangesAsync();
 

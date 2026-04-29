@@ -415,6 +415,59 @@ namespace Open_lab.Tests.ViewModels
         }
 
         [Fact]
+        public async Task SaveAsync_When_MedicalHistorySaveFails_Should_Set_Error_Message_FailureGuard()
+        {
+            // Function: 1.7 — Add Medical History
+            // Arrange
+            _viewModel.LabId = "LAB-HIST-ERR";
+            _viewModel.FullName = "History Patient";
+            _viewModel.Gender = "Female";
+            _patientServiceMock.Setup(x => x.CreateAsync(It.IsAny<Patient>()))
+                .ReturnsAsync((Patient p) => { p.PatientId = 101; return p; });
+            _patientServiceMock.Setup(x => x.SaveMedicalHistoryAsync(101, It.IsAny<MedicalHistory>()))
+                .ThrowsAsync(new InvalidOperationException("history-failed"));
+
+            // Act
+            _viewModel.SaveCommand.Execute(null);
+            await Task.Delay(100);
+
+            // Assert
+            _viewModel.StatusMessage.Should().Contain("history-failed");
+        }
+
+        [Fact]
+        public async Task SaveAsync_With_Empty_MedicalHistoryFields_Should_Save_Without_Throw_EdgeGuard()
+        {
+            // Function: 1.7 — Add Medical History
+            // Arrange
+            _viewModel.LabId = "LAB-HIST-EMPTY";
+            _viewModel.FullName = "History Patient";
+            _viewModel.Gender = "Female";
+            _viewModel.ChronicDiseases = string.Empty;
+            _viewModel.Allergies = string.Empty;
+            _viewModel.Medications = string.Empty;
+            _viewModel.MedicalNotes = string.Empty;
+
+            MedicalHistory? capturedHistory = null;
+            _patientServiceMock.Setup(x => x.CreateAsync(It.IsAny<Patient>()))
+                .ReturnsAsync((Patient p) => { p.PatientId = 102; return p; });
+            _patientServiceMock.Setup(x => x.SaveMedicalHistoryAsync(102, It.IsAny<MedicalHistory>()))
+                .Callback<int, MedicalHistory>((_, h) => capturedHistory = h)
+                .Returns(Task.CompletedTask);
+
+            // Act
+            _viewModel.SaveCommand.Execute(null);
+            await Task.Delay(100);
+
+            // Assert
+            capturedHistory.Should().NotBeNull();
+            capturedHistory!.ChronicDiseases.Should().BeEmpty();
+            capturedHistory.Allergies.Should().BeEmpty();
+            capturedHistory.Medications.Should().BeEmpty();
+            capturedHistory.Notes.Should().BeEmpty();
+        }
+
+        [Fact]
         public async Task SaveAsync_With_Existing_Patient_Should_Update_Patient_LogicGuard()
         {
             // Function: 1.2 — Edit Patient Data

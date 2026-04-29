@@ -328,7 +328,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task CreateReferenceRangeAsync_Should_Validate_Range_Boundaries_LogicGuard()
         {
-            // 3.3 Reference Range - Logic Guard: Verify range boundaries are validated
+            // Function: 3.3 — Reference Range - Logic Guard: Verify range boundaries are validated
             // Arrange
             var test = new Test { Code = "REF2", NameReport = "Ref Test", NameReceipt = "Ref", Price = 10m };
             _db.Tests.Add(test);
@@ -362,7 +362,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task CreateReferenceRangeAsync_Equal_Boundaries_Should_Be_Valid_LogicGuard()
         {
-            // 3.3 Reference Range - Logic Guard: Verify equal boundaries are handled
+            // Function: 3.3 — Reference Range - Logic Guard: Verify equal boundaries are handled
             // Arrange
             var test = new Test { Code = "REF3", NameReport = "Ref Test 3", NameReceipt = "Ref3", Price = 10m };
             _db.Tests.Add(test);
@@ -406,6 +406,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task CreateReferralAsync_Should_Create_Entity_For_Module12_1()
         {
+            // Function: 12.1 — `Create Contract Entity`
             var referral = new Referral
             {
                 Name = "Insurance A",
@@ -426,6 +427,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task UpdateReferralAsync_Should_Set_Discount_And_Commission_For_Module12_3_12_4()
         {
+            // Function: 12.3 — `Set Entity Discount`
             var referral = new Referral { Name = "Company A", ReferralType = "Company" };
             _db.Referrals.Add(referral);
             await _db.SaveChangesAsync();

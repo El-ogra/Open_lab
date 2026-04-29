@@ -209,6 +209,31 @@ namespace Open_lab.Tests.Services
         }
 
         [Fact]
+        public async Task RemoveVisitTestAsync_Pending_Should_Delete_Successfully()
+        {
+            // Function: 1.4 — Delete Tests
+            // Arrange
+            var patient = new Patient { LabId = "L1", FullName = "P", Gender = "Male" };
+            _db.Patients.Add(patient);
+            await _db.SaveChangesAsync();
+
+            var visit = new Visit { PatientId = patient.PatientId, VisitDate = DateTime.Now, Status = "Open" };
+            _db.Visits.Add(visit);
+            await _db.SaveChangesAsync();
+
+            var vt = new VisitTest { VisitId = visit.VisitId, TestId = 1, Price = 50m, Status = "Pending" };
+            _db.VisitTests.Add(vt);
+            await _db.SaveChangesAsync();
+
+            // Act
+            await _service.RemoveVisitTestAsync(vt.VisitTestId);
+
+            // Assert
+            var deleted = await _db.VisitTests.AnyAsync(v => v.VisitTestId == vt.VisitTestId);
+            deleted.Should().BeFalse();
+        }
+
+        [Fact]
         public async Task RemoveVisitTestAsync_Visit_Closed_Should_Throw()
         {
             // Function: 1.4 — Delete Tests

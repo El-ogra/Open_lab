@@ -44,7 +44,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task LoadAsync_Should_Load_PaperSize_And_DefaultAccountType()
         {
-            // 13.2 + 13.4
+            // Function: 13.2 — + 13.4
             await _viewModel.InvokePrivateAsync("LoadAsync");
 
             _viewModel.ReportPaperSize.Should().Be("A5");
@@ -54,7 +54,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task SaveProfileAsync_Should_Persist_PaperSize_And_DefaultAccountType()
         {
-            // 13.2 + 13.4
+            // Function: 13.2 — + 13.4
             _viewModel.ReportPaperSize = "A4";
             _viewModel.DefaultAccountType = "Cash";
 
@@ -67,7 +67,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task ChangeMasterPasswordAsync_When_ConfirmationMismatch_Should_Not_Call_Service()
         {
-            // 13.8
+            // Function: 13.8 — Set System Password
             _viewModel.CurrentMasterPassword = "old";
             _viewModel.NewMasterPassword = "new1";
             _viewModel.ConfirmMasterPassword = "new2";
@@ -82,7 +82,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task ChangeMasterPasswordAsync_With_Valid_CurrentPassword_Should_Update_And_Clear_Fields()
         {
-            // 13.8
+            // Function: 13.8 — Set System Password
             _viewModel.CurrentMasterPassword = "old";
             _viewModel.NewMasterPassword = "newStrong";
             _viewModel.ConfirmMasterPassword = "newStrong";

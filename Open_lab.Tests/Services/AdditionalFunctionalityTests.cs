@@ -30,7 +30,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task StatisticsService_BranchWiseInventory_Should_Filter_By_Branch()
         {
-            // 2.11 Branch-wise Inventory
+            // Function: 2.11 — Branch-wise Inventory
             var service = new StatisticsService(_db);
             var branch1 = new Branch { Name = "Branch 1" };
             var branch2 = new Branch { Name = "Branch 2" };
@@ -63,7 +63,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task ExternalSettlementService_Should_Calculate_Correct_Balance()
         {
-            // 2.13 Lab-to-Lab Settlement & 8.7 Settle External Lab Account
+            // Function: 2.13 — Lab-to-Lab Settlement
             var service = new ExternalSettlementService(_db);
             var lab = new Referral { Name = "External Lab", ReferralType = "Lab" };
             _db.Referrals.Add(lab);
@@ -98,7 +98,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task UserProductivityService_Should_Return_Correct_Counts()
         {
-            // 9.6 User Productivity Report
+            // Function: 9.6 — User Productivity Report
             var service = new UserProductivityService(_db);
             var user = new User { Username = "tech1" };
             _db.Users.Add(user);
@@ -123,7 +123,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task CompareWithHistoryService_Should_Return_Historical_Results()
         {
-            // 4.9 Compare with History
+            // Function: 4.9 — Compare with History
             var service = new CompareWithHistoryService(_db);
             var p = new Patient { FullName = "P1", LabId = "L1" };
             _db.Patients.Add(p);
@@ -157,7 +157,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task TestClassificationService_Should_Calculate_Consumption()
         {
-            // 7.4 Test Classification LOG
+            // Function: 7.4 — Test Classification LOG
             var service = new TestClassificationService(_db);
             var reagent = new Reagent { Name = "R1", Unit = "ml", CurrentStock = 1000 };
             _db.Reagents.Add(reagent);
@@ -184,7 +184,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task SystemMonitorService_Should_Track_Active_Sessions()
         {
-            // 10.7 Monitor System Usage
+            // Function: 10.7 — Monitor System Usage
             var service = new SystemMonitorService(_db);
             var user = new User { Username = "active_user" };
             _db.Users.Add(user);
@@ -209,7 +209,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task UserActivityService_Should_Return_Audit_Logs()
         {
-            // 10.6 View User Activity Log
+            // Function: 10.6 — View User Activity Log
             var service = new UserActivityService(_db);
             var user = new User { Username = "admin" };
             _db.Users.Add(user);
@@ -235,7 +235,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task GroupWorksheetService_Should_Return_Patients_In_Group()
         {
-            // 7.3 Generate Group Worksheet
+            // Function: 7.3 — Generate Group Worksheet
             var service = new GroupWorksheetService(_db);
             var group = new TestGroup { GroupName = "G1" };
             _db.TestGroups.Add(group);
@@ -262,7 +262,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task AttendanceService_WorkingHours_Should_Be_Calculated()
         {
-            // 11.3 Calculate Working Hours & 11.5 Generate Attendance Report
+            // Function: 11.3 — Calculate Working Hours
             var service = new AttendanceService(_db);
             var user = new User { Username = "worker1" };
             _db.Users.Add(user);
@@ -284,7 +284,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task VisitService_AddCustomGroup_Should_Add_All_Tests()
         {
-            // 1.8 Add Group of Tests (Profile)
+            // Function: 1.8 — Add Group of Tests (Profile)
             // Tested via ViewModel logic since service currently handles individual tests
             var visitService = new VisitService(_db);
             var group = new CustomGroup { Name = "Profile1", Price = 100 };
@@ -320,7 +320,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task Test_ReportOrder_Should_Be_Respected()
         {
-            // 4.5 Arrange Report Order
+            // Function: 4.5 — Arrange Report Order
             var t1 = new Test { NameReport = "A", Code = "A", Price = 10, ReportOrder = 2 };
             var t2 = new Test { NameReport = "B", Code = "B", Price = 10, ReportOrder = 1 };
             _db.Tests.AddRange(t1, t2);
@@ -334,7 +334,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public void Referral_Properties_Should_Store_Values()
         {
-            // 12.3 Set Entity Discount & 12.4 Set Entity Commission
+            // Function: 12.3 — Set Entity Discount
             var referral = new Referral
             {
                 Name = "Entity1",
@@ -349,7 +349,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task Visit_AssignReferral_Should_Store_Correctly()
         {
-            // 12.5 Assign Patient to Contract
+            // Function: 12.5 — Assign Patient to Contract
             var p = new Patient { FullName = "P", LabId = "L" };
             var ref1 = new Referral { Name = "Contract A" };
             _db.Patients.Add(p);
@@ -367,7 +367,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task SettingsService_PrinterConfiguration_Should_Work()
         {
-            // 13.5 Configure Printers
+            // Function: 13.5 — Configure Printers
             var service = new SettingsService(_db);
             await service.SetReceiptPrinterAsync("Epson TM-T20");
             await service.SetReportPrinterAsync("HP LaserJet");

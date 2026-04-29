@@ -32,7 +32,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task Function_4_4_Composite_Report_Structure_Validation()
         {
-            // Requirement 4.4: Support composite reports with multiple tests
+            // Function: 4.4 — `Create Composite Report`
             var visitId = 50;
             var patient = new Patient { PatientId = 5, FullName = "Bob" };
             _db.Patients.Add(patient);
@@ -58,7 +58,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task Function_4_5_Report_Manual_Ordering_Integrity()
         {
-            // Requirement 4.5: Manual/Fixed ordering of tests in report
+            // Function: 4.5 — `Arrange Report Order`
             var visitId = 60;
             _db.Patients.Add(new Patient { PatientId = 6, FullName = "Charlie" });
             _db.Visits.Add(new Visit { VisitId = visitId, PatientId = 6 });
@@ -82,7 +82,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task Function_4_9_Historical_History_Comparison_Validation()
         {
-            // Requirement 4.9: Compare current results with patient history
+            // Function: 4.9 — `Compare with History`
             var patientId = 100;
             _db.Patients.Add(new Patient { PatientId = patientId, FullName = "History Patient" });
 

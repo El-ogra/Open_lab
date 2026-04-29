@@ -741,5 +741,85 @@ namespace Open_lab.Tests.Services
             // Assert - BR-ACC-001/BR-ACC-002: Referral discount applied (10% of 100 = 10)
             discount.Should().Be(10m);
         }
+
+        [Fact]
+        public async Task AddPaymentAsync_With_ValidAmount_Should_RecordPayment_SuccessGuard()
+        {
+            // Function: 2.3 — Record Payment
+            // Arrange
+            var invoice = new Invoice { VisitId = 1, Total = 200m, Discount = 0m, NetTotal = 200m, Paid = 0m, Balance = 200m };
+            _db.Invoices.Add(invoice);
+            await _db.SaveChangesAsync();
+
+            // Act
+            var payment = await _service.AddPaymentAsync(invoice.InvoiceId, 75m, "Cash", 5);
+
+            // Assert
+            payment.PaymentId.Should().BeGreaterThan(0);
+            payment.Amount.Should().Be(75m);
+            var updated = await _db.Invoices.FindAsync(invoice.InvoiceId);
+            updated.Should().NotBeNull();
+            updated!.Paid.Should().Be(75m);
+            updated.Balance.Should().Be(125m);
+        }
+
+        [Fact]
+        public async Task EditPaymentAsync_When_PaymentNotFound_Should_Throw_FailureGuard()
+        {
+            // Function: 2.5 — Edit Payment
+            // Act
+            Func<Task> act = async () => await _service.EditPaymentAsync(99999, 50m, 1, "Reason");
+
+            // Assert
+            await act.Should().ThrowAsync<InvalidOperationException>().WithMessage("*Payment not found*");
+        }
+
+        [Fact]
+        public async Task EditPaymentAsync_When_ReasonWhitespace_Should_Throw_EdgeGuard()
+        {
+            // Function: 2.5 — Edit Payment
+            // Arrange
+            var invoice = new Invoice { VisitId = 1, Total = 100m, Discount = 0m, NetTotal = 100m, Paid = 20m, Balance = 80m };
+            _db.Invoices.Add(invoice);
+            await _db.SaveChangesAsync();
+            var payment = new Payment { InvoiceId = invoice.InvoiceId, Amount = 20m, UserId = 1, PaymentDate = DateTime.Now };
+            _db.Payments.Add(payment);
+            await _db.SaveChangesAsync();
+
+            // Act
+            Func<Task> act = async () => await _service.EditPaymentAsync(payment.PaymentId, 30m, 1, " ");
+
+            // Assert
+            await act.Should().ThrowAsync<ArgumentException>().WithMessage("*Reason is required*");
+        }
+
+        [Fact]
+        public async Task AddAdditionalChargeAsync_With_DescriptionWhitespaceAround_Should_Trim_EdgeGuard()
+        {
+            // Function: 2.7 — Add Additional Charge
+            // Arrange
+            var invoice = new Invoice { VisitId = 1, Total = 100m, Discount = 0m, NetTotal = 100m };
+            _db.Invoices.Add(invoice);
+            await _db.SaveChangesAsync();
+
+            // Act
+            var charge = await _service.AddAdditionalChargeAsync(invoice.InvoiceId, "  Urgent Fee  ", 10m);
+
+            // Assert
+            charge.Description.Should().Be("Urgent Fee");
+        }
+
+        [Fact]
+        public async Task LogInvoicePrintedAsync_With_ZeroUserId_Should_Create_Log_EdgeGuard()
+        {
+            // Function: 2.8 — Generate Invoice
+            // Act
+            await _service.LogInvoicePrintedAsync(200, 0);
+
+            // Assert
+            var log = await _db.AuditLogs.FirstOrDefaultAsync(l => l.TableName == "Invoice" && l.RecordId == "200");
+            log.Should().NotBeNull();
+            log!.UserId.Should().Be(0);
+        }
     }
 }

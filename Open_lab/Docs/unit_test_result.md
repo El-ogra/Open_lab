@@ -22,14 +22,14 @@
 
 | رقم الوظيفة | اسم الوظيفة | Service ✅/❌ | ViewModel ✅/❌ | الحالة | أسماء الاختبارات المكتوبة |
 |-------------|-------------|--------------|----------------|--------|--------------------------|
-| 1.1 | إضافة مريض جديد — Add New Patient | ❌ | ❌ | ❌ لم يبدأ | |
-| 1.2 | تعديل بيانات مريض — Edit Patient Data | ❌ | ❌ | ❌ لم يبدأ | |
-| 1.3 | إضافة تحاليل للمريض — Add Tests to Patient | ❌ | ❌ | ❌ لم يبدأ | |
-| 1.4 | حذف تحاليل — Delete Tests | ❌ | ❌ | ❌ لم يبدأ | |
-| 1.5 | البحث عن مريض — Search Patient | ❌ | ❌ | ❌ لم يبدأ | |
-| 1.6 | عرض التاريخ المرضي — View Patient History | ❌ | ❌ | ❌ لم يبدأ | |
-| 1.7 | إضافة تاريخ طبي — Add Medical History | ❌ | ❌ | ❌ لم يبدأ | |
-| 1.8 | إضافة مجموعة تحاليل — Add Group of Tests | ❌ | ❌ | ❌ لم يبدأ | |
+| 1.1 | إضافة مريض جديد — Add New Patient | ✅ | ✅ | ✅ مكتمل | PatientServiceTests + PatientRegistrationViewModelTests (Success/Failure/Edge) |
+| 1.2 | تعديل بيانات مريض — Edit Patient Data | ✅ | ✅ | ⚠️ يحتاج مراجعة | Production Code Issue - Requires Manual Fix (BR-SEC-002 Audit Trail missing in production update flow) |
+| 1.3 | إضافة تحاليل للمريض — Add Tests to Patient | ✅ | ✅ | ✅ مكتمل | VisitServiceTests + PatientTestsSelectionViewModelTests (Success/Failure/Edge) |
+| 1.4 | حذف تحاليل — Delete Tests | ✅ | ✅ | ✅ مكتمل | VisitServiceTests + PatientTestsSelectionViewModelTests (Success/Failure/Edge) |
+| 1.5 | البحث عن مريض — Search Patient | ✅ | ✅ | ✅ مكتمل | PatientServiceTests + PatientSearchViewModelTests + PatientRegistrationViewModelTests |
+| 1.6 | عرض التاريخ المرضي — View Patient History | ✅ | ✅ | ✅ مكتمل | PatientServiceTests + PatientHistoryViewModelTests + PatientSearchViewModelTests |
+| 1.7 | إضافة تاريخ طبي — Add Medical History | ✅ | ✅ | ✅ مكتمل | PatientServiceTests + PatientRegistrationViewModelTests (Success/Failure/Edge) |
+| 1.8 | إضافة مجموعة تحاليل — Add Group of Tests | ✅ | ✅ | ✅ مكتمل | VisitServiceTests + PatientTestsSelectionViewModelTests (Success/Failure/Edge) |
 
 ---
 
@@ -37,19 +37,19 @@
 
 | رقم الوظيفة | اسم الوظيفة | Service ✅/❌ | ViewModel ✅/❌ | الحالة | أسماء الاختبارات المكتوبة |
 |-------------|-------------|--------------|----------------|--------|--------------------------|
-| 2.1 | حساب الإجمالي — Calculate Total | ❌ | ❌ | ❌ لم يبدأ | |
-| 2.2 | تطبيق خصم — Apply Discount | ❌ | ❌ | ❌ لم يبدأ | |
-| 2.3 | تسجيل دفعة — Record Payment | ❌ | ❌ | ❌ لم يبدأ | |
-| 2.4 | تصفية الحساب — Settle Account | ❌ | ❌ | ❌ لم يبدأ | |
-| 2.5 | تعديل دفعة — Edit Payment | ❌ | ❌ | ❌ لم يبدأ | |
-| 2.6 | حذف دفعة — Delete Payment | ❌ | ❌ | ❌ لم يبدأ | |
-| 2.7 | إضافة رسوم إضافية — Add Additional Charge | ❌ | ❌ | ❌ لم يبدأ | |
-| 2.8 | إصدار فاتورة — Generate Invoice | ❌ | ❌ | ❌ لم يبدأ | |
-| 2.9 | كشف حساب المريض — View Patient Account | ❌ | ❌ | ❌ لم يبدأ | |
-| 2.10 | تقرير الجرد المالي — Generate Inventory | ❌ | ❌ | ❌ لم يبدأ | |
-| 2.11 | جرد مالي للفرع — Branch-wise Inventory | ❌ | ❌ | ❌ لم يبدأ | |
-| 2.12 | حساب الأطباء — Doctor-wise Inventory | ❌ | ❌ | ❌ لم يبدأ | |
-| 2.13 | تصفية حسابات المعامل الخارجية — Lab-to-Lab Settlement | ❌ | ❌ | ❌ لم يبدأ | |
+| 2.1 | حساب الإجمالي — Calculate Total | ✅ | ✅ | ✅ مكتمل | InvoiceServiceTests + PatientBillingViewModelTests (Success/Failure/Edge) |
+| 2.2 | تطبيق خصم — Apply Discount | ✅ | ✅ | ✅ مكتمل | InvoiceServiceTests + PatientBillingViewModelTests (Success/Failure/Edge) |
+| 2.3 | تسجيل دفعة — Record Payment | ✅ | ✅ | ✅ مكتمل | InvoiceServiceTests + PatientBillingViewModelTests (Success/Failure/Edge) |
+| 2.4 | تصفية الحساب — Settle Account | ✅ | ✅ | ✅ مكتمل | InvoiceServiceTests + PatientBillingViewModelTests (Success/Failure/Edge) |
+| 2.5 | تعديل دفعة — Edit Payment | ✅ | ✅ | ✅ مكتمل | InvoiceServiceTests + PatientBillingViewModelTests (Success/Failure/Edge) |
+| 2.6 | حذف دفعة — Delete Payment | ✅ | ✅ | ✅ مكتمل | InvoiceServiceTests + PatientBillingViewModelTests (Success/Failure/Edge) |
+| 2.7 | إضافة رسوم إضافية — Add Additional Charge | ✅ | ✅ | ✅ مكتمل | InvoiceServiceTests + PatientBillingViewModelTests (Success/Failure/Edge) |
+| 2.8 | إصدار فاتورة — Generate Invoice | ✅ | ✅ | ✅ مكتمل | InvoiceServiceTests + PatientBillingViewModelTests (Success/Failure/Edge) |
+| 2.9 | كشف حساب المريض — View Patient Account | ✅ | ✅ | ✅ مكتمل | InvoiceServiceTests + PatientBillingViewModelTests (Success/Failure/Edge) |
+| 2.10 | تقرير الجرد المالي — Generate Inventory | ✅ | ✅ | ✅ مكتمل | AccountsTreasuryServiceTests + AccountsTreasuryViewModelTests (Success/Failure/Edge) |
+| 2.11 | جرد مالي للفرع — Branch-wise Inventory | ✅ | ✅ | ✅ مكتمل | AccountsTreasuryServiceTests + AccountsTreasuryViewModelTests (Success/Failure/Edge) |
+| 2.12 | حساب الأطباء — Doctor-wise Inventory | ✅ | ✅ | ✅ مكتمل | AccountsTreasuryServiceTests + AccountsTreasuryViewModelTests (Success/Failure/Edge) |
+| 2.13 | تصفية حسابات المعامل الخارجية — Lab-to-Lab Settlement | ✅ | ✅ | ✅ مكتمل | ExternalSettlementServiceTests + ExternalLabManagementViewModelTests (Success/Failure/Edge) |
 
 ---
 
@@ -210,8 +210,8 @@
 
 | الموديول | إجمالي الوظائف | مكتمل ✅ | جزئي 🔄 | لم يبدأ ❌ | يحتاج مراجعة ⚠️ |
 |----------|---------------|---------|---------|-----------|----------------|
-| 1 — إدارة المرضى | 8 | 0 | 0 | 8 | 0 |
-| 2 — المحاسبة والمالية | 13 | 0 | 0 | 13 | 0 |
+| 1 — إدارة المرضى | 8 | 7 | 0 | 0 | 1 |
+| 2 — المحاسبة والمالية | 13 | 13 | 0 | 0 | 0 |
 | 3 — إدارة التحاليل والأسعار | 9 | 0 | 0 | 9 | 0 |
 | 4 — إدخال النتائج والتقارير | 9 | 0 | 0 | 9 | 0 |
 | 5 — المزارع والحساسية | 7 | 0 | 0 | 7 | 0 |
@@ -223,7 +223,7 @@
 | 11 — الحضور والانصراف | 5 | 0 | 0 | 5 | 0 |
 | 12 — جهات التعاقد والإحالة | 9 | 0 | 0 | 9 | 0 |
 | 13 — إعدادات النظام | 8 | 0 | 0 | 8 | 0 |
-| **الإجمالي** | **97** | **0** | **0** | **97** | **0** |
+| **الإجمالي** | **97** | **20** | **0** | **76** | **1** |
 
 ---
 
