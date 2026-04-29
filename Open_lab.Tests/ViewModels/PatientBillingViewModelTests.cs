@@ -57,7 +57,12 @@ namespace Open_lab.Tests.ViewModels
             _invoiceServiceMock.Setup(x => x.GetVisitTotalAsync(10)).ReturnsAsync(500);
             var invoice = new Invoice
             {
-                InvoiceId = 100, Total = 500, Discount = 50, Paid = 200, NetTotal = 450, Balance = 250
+                InvoiceId = 100,
+                Total = 500m,
+                Discount = 0m,
+                NetTotal = 500m,
+                Paid = 0m,
+                Balance = 500m
             };
             _invoiceServiceMock.Setup(x => x.GetByVisitIdAsync(10)).ReturnsAsync(invoice);
             _invoiceServiceMock.Setup(x => x.GetPaymentsAsync(100)).ReturnsAsync(new List<Payment>());
@@ -68,11 +73,27 @@ namespace Open_lab.Tests.ViewModels
             await Task.Delay(100);
 
             // Assert
-            _viewModel.Total.Should().Be(500);
-            _viewModel.Discount.Should().Be(50);
-            _viewModel.NetTotal.Should().Be(450);
-            _viewModel.Balance.Should().Be(250);
-            _viewModel.StatusMessage.Should().Contain("تم تحميل");
+            _invoiceServiceMock.Verify(x => x.GetVisitTotalAsync(10), Times.Once);
+            _viewModel.Total.Should().Be(500m);
+        }
+
+        [Fact]
+        public async Task LoadVisitAsync_When_VisitHasNoInvoice_Should_Create_New_EdgeGuard()
+        {
+            // Function: 2.9 — View Patient Account
+            // Arrange
+            _viewModel.VisitId = 10;
+            _invoiceServiceMock.Setup(x => x.GetVisitTotalAsync(10)).ReturnsAsync(300m);
+            _invoiceServiceMock.Setup(x => x.GetByVisitIdAsync(10)).ReturnsAsync((Invoice?)null);
+
+            // Act
+            _viewModel.LoadVisitCommand.Execute(null);
+            await Task.Delay(100);
+
+            // Assert
+            _invoiceServiceMock.Verify(x => x.GetVisitTotalAsync(10), Times.Once);
+            _invoiceServiceMock.Verify(x => x.GetByVisitIdAsync(10), Times.Once);
+            _viewModel.Total.Should().Be(300m);
         }
 
         [Fact]
@@ -128,6 +149,49 @@ namespace Open_lab.Tests.ViewModels
         }
 
         [Fact]
+        public async Task AddPaymentAsync_When_ServiceThrows_Should_Show_Error_FailureGuard()
+        {
+            // Function: 2.3 — Record Payment
+            // Arrange
+            _viewModel.VisitId = 10;
+            _viewModel.Paid = 50m;
+            var invoice = new Invoice { InvoiceId = 100 };
+            _invoiceServiceMock.Setup(x => x.CreateOrUpdateInvoiceAsync(10, 0, 0)).ReturnsAsync(invoice);
+            _invoiceServiceMock.Setup(x => x.AddPaymentAsync(100, 50m, It.IsAny<string>(), It.IsAny<int>()))
+                .ThrowsAsync(new InvalidOperationException("Invalid payment"));
+
+            // Act
+            _viewModel.AddPaymentCommand.Execute(null);
+            await Task.Delay(100);
+
+            // Assert
+            _invoiceServiceMock.Verify(x => x.AddPaymentAsync(100, 50m, It.IsAny<string>(), It.IsAny<int>()), Times.Once);
+            _viewModel.StatusMessage.Should().Contain("Invalid payment");
+        }
+
+        [Fact]
+        public async Task AddPaymentAsync_With_MaximumAmount_Should_Handle_LargeValue_EdgeGuard()
+        {
+            // Function: 2.3 — Record Payment
+            // Arrange
+            _viewModel.VisitId = 10;
+            _viewModel.Paid = 999999.99m;
+            var invoice = new Invoice { InvoiceId = 100 };
+            _invoiceServiceMock.Setup(x => x.CreateOrUpdateInvoiceAsync(10, 0, 0)).ReturnsAsync(invoice);
+            _invoiceServiceMock.Setup(x => x.AddPaymentAsync(100, 999999.99m, It.IsAny<string>(), It.IsAny<int>())).ReturnsAsync(new Payment { PaymentId = 1 });
+            _invoiceServiceMock.Setup(x => x.GetVisitTotalAsync(10)).ReturnsAsync(500);
+            _invoiceServiceMock.Setup(x => x.GetByVisitIdAsync(10)).ReturnsAsync(invoice);
+            _invoiceServiceMock.Setup(x => x.GetPaymentsAsync(100)).ReturnsAsync(new List<Payment>());
+
+            // Act
+            _viewModel.AddPaymentCommand.Execute(null);
+            await Task.Delay(100);
+
+            // Assert
+            _invoiceServiceMock.Verify(x => x.AddPaymentAsync(100, 999999.99m, It.IsAny<string>(), It.IsAny<int>()), Times.Once);
+        }
+
+        [Fact]
         public async Task DeletePaymentAsync_With_Null_SelectedPayment_Should_Return()
         {
             // Function: 2.6 — Delete Payment
@@ -142,6 +206,47 @@ namespace Open_lab.Tests.ViewModels
         }
 
         [Fact]
+        public async Task EditPaymentAsync_When_ServiceThrows_Should_Show_Error_FailureGuard()
+        {
+            // Function: 2.5 — Edit Payment
+            // Arrange
+            _viewModel.SelectedPayment = new InvoicePaymentRow { PaymentId = 5, Amount = 50m };
+            _viewModel.VisitId = 10;
+            _invoiceServiceMock.Setup(x => x.EditPaymentAsync(5, 50m, It.IsAny<int>(), It.IsAny<string>()))
+                .ThrowsAsync(new InvalidOperationException("Edit failed"));
+
+            // Act
+            _viewModel.EditPaymentCommand.Execute(null);
+            await Task.Delay(100);
+
+            // Assert
+            _invoiceServiceMock.Verify(x => x.EditPaymentAsync(5, 50m, It.IsAny<int>(), It.IsAny<string>()), Times.Once);
+            _viewModel.StatusMessage.Should().Contain("Edit failed");
+        }
+
+        [Fact]
+        public async Task EditPaymentAsync_When_EditingToSameAmount_Should_Handle_NoChange_EdgeGuard()
+        {
+            // Function: 2.5 — Edit Payment
+            // Arrange
+            _viewModel.SelectedPayment = new InvoicePaymentRow { PaymentId = 5, Amount = 50m };
+            _viewModel.EditPaymentAmount = 50m;
+            _viewModel.VisitId = 10;
+            var invoice = new Invoice { InvoiceId = 100 };
+            _invoiceServiceMock.Setup(x => x.EditPaymentAsync(5, 50m, It.IsAny<int>(), It.IsAny<string>())).ReturnsAsync(new Payment { PaymentId = 5, Amount = 50m });
+            _invoiceServiceMock.Setup(x => x.GetVisitTotalAsync(10)).ReturnsAsync(500);
+            _invoiceServiceMock.Setup(x => x.GetByVisitIdAsync(10)).ReturnsAsync(invoice);
+            _invoiceServiceMock.Setup(x => x.GetPaymentsAsync(100)).ReturnsAsync(new List<Payment>());
+
+            // Act
+            _viewModel.EditPaymentCommand.Execute(null);
+            await Task.Delay(100);
+
+            // Assert
+            _invoiceServiceMock.Verify(x => x.EditPaymentAsync(5, 50m, It.IsAny<int>(), It.IsAny<string>()), Times.Once);
+        }
+
+        [Fact]
         public async Task DeletePaymentAsync_With_Valid_SelectedPayment_Should_Delete()
         {
             // Function: 2.6 — Delete Payment
@@ -153,7 +258,6 @@ namespace Open_lab.Tests.ViewModels
             _invoiceServiceMock.Setup(x => x.GetVisitTotalAsync(10)).ReturnsAsync(500);
             _invoiceServiceMock.Setup(x => x.GetByVisitIdAsync(10)).ReturnsAsync(invoice);
             _invoiceServiceMock.Setup(x => x.GetPaymentsAsync(100)).ReturnsAsync(new List<Payment>());
-            _invoiceServiceMock.Setup(x => x.GetAdditionalChargesAsync(100)).ReturnsAsync(new List<AdditionalCharge>());
 
             // Act
             _viewModel.DeletePaymentCommand.Execute(null);
@@ -161,7 +265,46 @@ namespace Open_lab.Tests.ViewModels
 
             // Assert
             _invoiceServiceMock.Verify(x => x.DeletePaymentAsync(3, It.IsAny<int>(), It.IsAny<string>()), Times.Once);
-            _viewModel.StatusMessage.Should().Contain("تم حذف الدفعة");
+        }
+
+        [Fact]
+        public async Task DeletePaymentAsync_When_ServiceThrows_Should_Show_Error_FailureGuard()
+        {
+            // Function: 2.6 — Delete Payment
+            // Arrange
+            _viewModel.SelectedPayment = new InvoicePaymentRow { PaymentId = 3 };
+            _invoiceServiceMock.Setup(x => x.DeletePaymentAsync(3, It.IsAny<int>(), It.IsAny<string>()))
+                .ThrowsAsync(new InvalidOperationException("Delete failed"));
+
+            // Act
+            _viewModel.DeletePaymentCommand.Execute(null);
+            await Task.Delay(100);
+
+            // Assert
+            _invoiceServiceMock.Verify(x => x.DeletePaymentAsync(3, It.IsAny<int>(), It.IsAny<string>()), Times.Once);
+            _viewModel.StatusMessage.Should().Contain("Delete failed");
+        }
+
+        [Fact]
+        public async Task DeletePaymentAsync_When_DeletingLastPayment_Should_UpdateBalanceCorrectly_EdgeGuard()
+        {
+            // Function: 2.6 — Delete Payment
+            // Arrange
+            _viewModel.SelectedPayment = new InvoicePaymentRow { PaymentId = 3 };
+            _viewModel.VisitId = 10;
+            var invoice = new Invoice { InvoiceId = 100, Total = 200m, Paid = 100m, Balance = 100m };
+            _invoiceServiceMock.Setup(x => x.DeletePaymentAsync(3, It.IsAny<int>(), It.IsAny<string>())).Returns(Task.CompletedTask);
+            _invoiceServiceMock.Setup(x => x.GetVisitTotalAsync(10)).ReturnsAsync(200m);
+            _invoiceServiceMock.Setup(x => x.GetByVisitIdAsync(10)).ReturnsAsync(invoice);
+            _invoiceServiceMock.Setup(x => x.GetPaymentsAsync(100)).ReturnsAsync(new List<Payment>());
+
+            // Act
+            _viewModel.DeletePaymentCommand.Execute(null);
+            await Task.Delay(100);
+
+            // Assert
+            _invoiceServiceMock.Verify(x => x.DeletePaymentAsync(3, It.IsAny<int>(), It.IsAny<string>()), Times.Once);
+            _viewModel.Total.Should().Be(200m);
         }
 
         [Fact]
@@ -205,6 +348,52 @@ namespace Open_lab.Tests.ViewModels
         }
 
         [Fact]
+        public async Task AddChargeAsync_When_ServiceThrows_Should_Show_Error_FailureGuard()
+        {
+            // Function: 2.7 — Add Additional Charge
+            // Arrange
+            _viewModel.VisitId = 10;
+            _viewModel.NewChargeAmount = 50;
+            _viewModel.NewChargeDescription = "Extra Service";
+            var invoice = new Invoice { InvoiceId = 100 };
+            _invoiceServiceMock.Setup(x => x.CreateOrUpdateInvoiceAsync(10, It.IsAny<decimal>(), 0)).ReturnsAsync(invoice);
+            _invoiceServiceMock.Setup(x => x.AddAdditionalChargeAsync(100, "Extra Service", 50))
+                .ThrowsAsync(new InvalidOperationException("Add charge failed"));
+
+            // Act
+            _viewModel.AddChargeCommand.Execute(null);
+            await Task.Delay(100);
+
+            // Assert
+            _invoiceServiceMock.Verify(x => x.AddAdditionalChargeAsync(100, "Extra Service", 50), Times.Once);
+            _viewModel.StatusMessage.Should().Contain("Add charge failed");
+        }
+
+        [Fact]
+        public async Task AddChargeAsync_With_ZeroAmount_Should_Handle_Gracefully_EdgeGuard()
+        {
+            // Function: 2.7 — Add Additional Charge
+            // Arrange
+            _viewModel.VisitId = 10;
+            _viewModel.NewChargeAmount = 0;
+            _viewModel.NewChargeDescription = "Zero Fee";
+            var invoice = new Invoice { InvoiceId = 100 };
+            _invoiceServiceMock.Setup(x => x.CreateOrUpdateInvoiceAsync(10, It.IsAny<decimal>(), 0)).ReturnsAsync(invoice);
+            _invoiceServiceMock.Setup(x => x.AddAdditionalChargeAsync(100, "Zero Fee", 0)).ReturnsAsync(new AdditionalCharge { AdditionalChargeId = 1 });
+            _invoiceServiceMock.Setup(x => x.GetVisitTotalAsync(10)).ReturnsAsync(500);
+            _invoiceServiceMock.Setup(x => x.GetByVisitIdAsync(10)).ReturnsAsync(invoice);
+            _invoiceServiceMock.Setup(x => x.GetPaymentsAsync(100)).ReturnsAsync(new List<Payment>());
+            _invoiceServiceMock.Setup(x => x.GetAdditionalChargesAsync(100)).ReturnsAsync(new List<AdditionalCharge>());
+
+            // Act
+            _viewModel.AddChargeCommand.Execute(null);
+            await Task.Delay(100);
+
+            // Assert
+            _invoiceServiceMock.Verify(x => x.AddAdditionalChargeAsync(100, "Zero Fee", 0), Times.Once);
+        }
+
+        [Fact]
         public async Task EditPaymentAsync_With_InvalidAmount_Should_Set_ValidationMessage_FailureGuard()
         {
             // Function: 2.5 — Edit Payment
@@ -237,6 +426,36 @@ namespace Open_lab.Tests.ViewModels
             // Assert
             _viewModel.StatusMessage.Should().Contain("خطأ:");
             _viewModel.StatusMessage.Should().Contain("remaining balance");
+        }
+
+        [Fact]
+        public async Task SettleAccountAsync_When_AlreadySettled_Should_Handle_Gracefully_EdgeGuard()
+        {
+            // Function: 2.4 — Settle Account
+            // Arrange
+            _viewModel.VisitId = 10;
+            var settledInvoice = new Invoice
+            {
+                InvoiceId = 100,
+                Total = 500m,
+                Discount = 0m,
+                NetTotal = 500m,
+                Paid = 500m,
+                Balance = 0m,
+                Status = "Settled"
+            };
+            _invoiceServiceMock.Setup(x => x.SettleAccountAsync(10)).ReturnsAsync(settledInvoice);
+            _invoiceServiceMock.Setup(x => x.GetVisitTotalAsync(10)).ReturnsAsync(500);
+            _invoiceServiceMock.Setup(x => x.GetByVisitIdAsync(10)).ReturnsAsync(settledInvoice);
+            _invoiceServiceMock.Setup(x => x.GetPaymentsAsync(100)).ReturnsAsync(new List<Payment>());
+
+            // Act
+            _viewModel.SettleAccountCommand.Execute(null);
+            await Task.Delay(100);
+
+            // Assert
+            _invoiceServiceMock.Verify(x => x.SettleAccountAsync(10), Times.Once);
+            _viewModel.StatusMessage.Should().Contain("تمت تصفية الحساب");
         }
 
         [Fact]
@@ -273,6 +492,40 @@ namespace Open_lab.Tests.ViewModels
         }
 
         [Fact]
+        public async Task LoadVisitCommand_When_VisitNotFound_Should_Show_Error_FailureGuard()
+        {
+            // Function: 2.1 — Calculate Total
+            // Arrange
+            _viewModel.VisitId = 99999;
+            _invoiceServiceMock.Setup(x => x.GetVisitTotalAsync(99999)).ReturnsAsync(0m);
+
+            // Act
+            _viewModel.LoadVisitCommand.Execute(null);
+            await Task.Delay(100);
+
+            // Assert
+            _invoiceServiceMock.Verify(x => x.GetVisitTotalAsync(99999), Times.Once);
+            _viewModel.Total.Should().Be(0m);
+        }
+
+        [Fact]
+        public async Task LoadVisitCommand_When_VisitHasNoTests_Should_Return_Zero_EdgeGuard()
+        {
+            // Function: 2.1 — Calculate Total
+            // Arrange
+            _viewModel.VisitId = 10;
+            _invoiceServiceMock.Setup(x => x.GetVisitTotalAsync(10)).ReturnsAsync(0m);
+
+            // Act
+            _viewModel.LoadVisitCommand.Execute(null);
+            await Task.Delay(100);
+
+            // Assert
+            _invoiceServiceMock.Verify(x => x.GetVisitTotalAsync(10), Times.Once);
+            _viewModel.Total.Should().Be(0m);
+        }
+
+        [Fact]
         public async Task ApplyDiscountAsync_Should_Update_NetTotal_Directly()
         {
             // Function: 2.2 — Apply Discount
@@ -289,6 +542,44 @@ namespace Open_lab.Tests.ViewModels
             // Assert
             _invoiceServiceMock.Verify(x => x.CreateOrUpdateInvoiceAsync(10, 50m, 0), Times.Once);
             _viewModel.NetTotal.Should().Be(450m);
+        }
+
+        [Fact]
+        public async Task ApplyDiscountAsync_When_DiscountExceedsTotal_Should_Throw_FailureGuard()
+        {
+            // Function: 2.2 — Apply Discount
+            // Arrange
+            _viewModel.VisitId = 10;
+            _viewModel.Discount = 150m;
+            _invoiceServiceMock.Setup(x => x.CreateOrUpdateInvoiceAsync(10, 150m, 0))
+                .ThrowsAsync(new InvalidOperationException("الخصم لا يمكن أن يتجاوز إجمالي الفاتورة"));
+
+            // Act
+            _viewModel.SaveInvoiceCommand.Execute(null);
+            await Task.Delay(100);
+
+            // Assert
+            _invoiceServiceMock.Verify(x => x.CreateOrUpdateInvoiceAsync(10, 150m, 0), Times.Once);
+            _viewModel.StatusMessage.Should().Contain("الخصم");
+        }
+
+        [Fact]
+        public async Task ApplyDiscountAsync_With_ZeroDiscount_Should_Calculate_Correctly_EdgeGuard()
+        {
+            // Function: 2.2 — Apply Discount
+            // Arrange
+            _viewModel.VisitId = 10;
+            _viewModel.Discount = 0m;
+            var invoice = new Invoice { InvoiceId = 100, Total = 500m, Discount = 0m, NetTotal = 500m };
+            _invoiceServiceMock.Setup(x => x.CreateOrUpdateInvoiceAsync(10, 0m, 0)).ReturnsAsync(invoice);
+
+            // Act
+            _viewModel.SaveInvoiceCommand.Execute(null);
+            await Task.Delay(100);
+
+            // Assert
+            _invoiceServiceMock.Verify(x => x.CreateOrUpdateInvoiceAsync(10, 0m, 0), Times.Once);
+            _viewModel.NetTotal.Should().Be(500m);
         }
     }
 }

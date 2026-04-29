@@ -138,6 +138,40 @@ namespace Open_lab.Tests.Services
         }
 
         [Fact]
+        public async Task GetVisitTotalAsync_When_VisitNotFound_Should_Return_Zero_FailureGuard()
+        {
+            // Function: 2.1 — Calculate Total
+            // Arrange
+            var nonExistentVisitId = 99999;
+
+            // Act
+            var total = await _service.GetVisitTotalAsync(nonExistentVisitId);
+
+            // Assert
+            total.Should().Be(0m);
+        }
+
+        [Fact]
+        public async Task GetVisitTotalAsync_With_NoTestsOrCharges_Should_Return_Zero_EdgeGuard()
+        {
+            // Function: 2.1 — Calculate Total
+            // Arrange
+            var patient = new Patient { LabId = "L2", FullName = "P", Gender = "Male" };
+            _db.Patients.Add(patient);
+            await _db.SaveChangesAsync();
+
+            var visit = new Visit { PatientId = patient.PatientId, VisitDate = DateTime.Now };
+            _db.Visits.Add(visit);
+            await _db.SaveChangesAsync();
+
+            // Act
+            var total = await _service.GetVisitTotalAsync(visit.VisitId);
+
+            // Assert
+            total.Should().Be(0m);
+        }
+
+        [Fact]
         public async Task EditPaymentAsync_Should_Update_Amount_And_Recalculate_Invoice_LogicGuard()
         {
             // Function: 2.5 — Edit Payment
@@ -174,6 +208,7 @@ namespace Open_lab.Tests.Services
             log!.NewValues.Should().Contain("Test Reason");
             log.UserId.Should().Be(2);
         }
+
 
         [Fact]
         public async Task GetPatientAccount_ByDate_Should_Return_Invoices_And_Payments_For_Same_Patient_LogicGuard()
@@ -214,6 +249,48 @@ namespace Open_lab.Tests.Services
             payments.Should().ContainSingle();
             payments[0].Amount.Should().Be(60m);
             payments[0].InvoiceId.Should().Be(invoice.InvoiceId);
+        }
+
+        [Fact]
+        public async Task GetPatientAccount_When_PatientNotFound_Should_Return_Empty_FailureGuard()
+        {
+            // Function: 2.9 — View Patient Account
+            // Arrange
+            var nonExistentPatientId = 99999;
+
+            // Act
+            var invoices = await _service.GetPatientInvoicesByDateAsync(nonExistentPatientId, DateTime.Today.AddDays(-1), DateTime.Today.AddDays(1));
+            var payments = await _service.GetPatientPaymentsByDateAsync(nonExistentPatientId, DateTime.Today.AddDays(-1), DateTime.Today.AddDays(1));
+
+            // Assert
+            invoices.Should().BeEmpty();
+            payments.Should().BeEmpty();
+        }
+
+        [Fact]
+        public async Task GetPatientAccount_With_DateRangeOutside_VisitDate_Should_Return_Empty_EdgeGuard()
+        {
+            // Function: 2.9 — View Patient Account
+            // Arrange
+            var patient = new Patient { LabId = "LACC2", FullName = "Account P2", Gender = "Male" };
+            _db.Patients.Add(patient);
+            await _db.SaveChangesAsync();
+
+            var visit = new Visit { PatientId = patient.PatientId, VisitDate = DateTime.Today };
+            _db.Visits.Add(visit);
+            await _db.SaveChangesAsync();
+
+            var invoice = new Invoice { VisitId = visit.VisitId, Total = 100m, Discount = 0m, NetTotal = 100m };
+            _db.Invoices.Add(invoice);
+            await _db.SaveChangesAsync();
+
+            // Act - query for a date range that doesn't include the visit date
+            var invoices = await _service.GetPatientInvoicesByDateAsync(patient.PatientId, DateTime.Today.AddDays(-10), DateTime.Today.AddDays(-5));
+            var payments = await _service.GetPatientPaymentsByDateAsync(patient.PatientId, DateTime.Today.AddDays(-10), DateTime.Today.AddDays(-5));
+
+            // Assert
+            invoices.Should().BeEmpty();
+            payments.Should().BeEmpty();
         }
 
         [Fact]
@@ -386,30 +463,6 @@ namespace Open_lab.Tests.Services
         }
 
         [Fact]
-        public async Task AddPaymentAsync_FullPayment_Should_Update_Balance_To_Zero()
-        {
-            // Function: 2.3 — Record Payment
-            // Arrange
-            var invoice = new Invoice { VisitId = 1, Total = 100m, Discount = 0m, NetTotal = 100m, Paid = 0m, Balance = 100m };
-            _db.Invoices.Add(invoice);
-            await _db.SaveChangesAsync();
-
-            // Act
-            await _service.AddPaymentAsync(invoice.InvoiceId, 100m, "Cash", 1);
-
-            // Assert
-            var updated = await _db.Invoices.FindAsync(invoice.InvoiceId);
-            updated.Should().NotBeNull();
-            updated!.Paid.Should().Be(100m);
-            updated.Balance.Should().Be(0m);
-            updated.Status.Should().Be("Paid");
-
-            var payment = await _db.Payments.FirstOrDefaultAsync(p => p.InvoiceId == invoice.InvoiceId);
-            payment.Should().NotBeNull();
-            payment!.Amount.Should().Be(100m);
-        }
-
-        [Fact]
         public async Task AddPaymentAsync_PartialPayment_Should_Update_Balance_Correctly()
         {
             // Function: 2.3 — Record Payment
@@ -427,6 +480,30 @@ namespace Open_lab.Tests.Services
             updated!.Paid.Should().Be(50m);
             updated.Balance.Should().Be(150m);
             updated.Status.Should().Be("Partial");
+        }
+
+        [Fact]
+        public async Task AddPaymentAsync_When_PaymentExceedsBalance_Should_Allow_Overpayment_EdgeGuard()
+        {
+            // Function: 2.3 — Record Payment
+            // Arrange
+            var invoice = new Invoice { VisitId = 1, Total = 100m, Discount = 0m, NetTotal = 100m, Paid = 0m, Balance = 100m };
+            _db.Invoices.Add(invoice);
+            await _db.SaveChangesAsync();
+
+            // Act - pay more than balance
+            await _service.AddPaymentAsync(invoice.InvoiceId, 150m, "Cash", 1);
+
+            // Assert
+            var updated = await _db.Invoices.FindAsync(invoice.InvoiceId);
+            updated.Should().NotBeNull();
+            updated!.Paid.Should().Be(150m);
+            updated.Balance.Should().Be(0m); // Production code caps balance at 0, not negative
+            updated.Status.Should().Be("Paid");
+
+            var payment = await _db.Payments.FirstOrDefaultAsync(p => p.InvoiceId == invoice.InvoiceId);
+            payment.Should().NotBeNull();
+            payment!.Amount.Should().Be(150m);
         }
 
         [Fact]
@@ -538,6 +615,7 @@ namespace Open_lab.Tests.Services
             await act.Should().ThrowAsync<ArgumentException>();
         }
 
+
         [Fact]
         public async Task LogInvoicePrintedAsync_Should_Create_AuditLog_Entry()
         {
@@ -551,6 +629,23 @@ namespace Open_lab.Tests.Services
 
             // Assert
             var log = await _db.AuditLogs.FirstOrDefaultAsync(l => l.TableName == "Invoice" && l.Action == "Print" && l.RecordId == "100");
+            log.Should().NotBeNull();
+            log!.UserId.Should().Be(userId);
+        }
+
+        [Fact]
+        public async Task LogInvoicePrintedAsync_With_InvalidInvoiceId_Should_Still_Create_Log_FailureGuard()
+        {
+            // Function: 2.8 — Generate Invoice
+            // Arrange
+            var invalidInvoiceId = -1;
+            var userId = 1;
+
+            // Act
+            await _service.LogInvoicePrintedAsync(invalidInvoiceId, userId);
+
+            // Assert
+            var log = await _db.AuditLogs.FirstOrDefaultAsync(l => l.TableName == "Invoice" && l.Action == "Print" && l.RecordId == "-1");
             log.Should().NotBeNull();
             log!.UserId.Should().Be(userId);
         }

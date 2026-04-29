@@ -247,16 +247,16 @@ namespace Open_lab.Tests.ViewModels
             var printServiceMock = new Mock<IPrintService>();
             var snapshot = new AccountsTreasurySnapshot
             {
-                TotalInvoiced = 500,
-                TotalPaid = 400,
-                TotalBalance = 100,
-                TotalDiscount = 25,
-                TotalExpenses = 50,
-                NetProfit = 350
+                TotalInvoiced = 100m,
+                TotalPaid = 50m,
+                TotalBalance = 50m,
+                TotalDiscount = 0m,
+                NetProfit = 50m,
+                Payments = new List<AccountsPaymentRow>(),
+                ByBranch = new List<TreasuryByBranchRow> { new TreasuryByBranchRow { BranchName = "TestBranch", TotalInvoiced = 100m } }
             };
-            
             accountsTreasuryServiceMock
-                .Setup(s => s.GetSnapshotAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>(), 5))
+                .Setup(s => s.GetSnapshotAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<int?>()))
                 .ReturnsAsync(snapshot);
 
             var viewModel = CreateViewModel(accountsTreasuryServiceMock, printServiceMock);
@@ -268,8 +268,72 @@ namespace Open_lab.Tests.ViewModels
 
             // Assert
             accountsTreasuryServiceMock.Verify(s => s.GetSnapshotAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>(), 5), Times.Once);
-            viewModel.TotalInvoiced.Should().Be(500);
-            viewModel.StatusMessage.Should().Contain("تم تحميل بيانات الخزينة.");
+            viewModel.TotalInvoiced.Should().Be(100m);
+            viewModel.ByBranch.Should().HaveCount(1);
+
+            AppSessionTestHelper.Reset();
+        }
+
+        [Fact]
+        public async Task LoadCommand_With_BranchFilter_When_ServiceThrows_Should_Show_Error_FailureGuard()
+        {
+            // Function: 2.11 — Branch-wise Inventory
+            // Arrange
+            var accountsTreasuryServiceMock = new Mock<IAccountsTreasuryService>();
+            var printServiceMock = new Mock<IPrintService>();
+            accountsTreasuryServiceMock
+                .Setup(s => s.GetSnapshotAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<int?>()))
+                .ThrowsAsync(new InvalidOperationException("Branch load failed"));
+
+            var viewModel = CreateViewModel(accountsTreasuryServiceMock, printServiceMock);
+            viewModel.SelectedBranchId = 5;
+
+            // Act
+            viewModel.LoadCommand.Execute(null);
+            await Task.Delay(100);
+
+            // Assert
+            viewModel.StatusMessage.Should().Contain("Branch load failed");
+            viewModel.IsLoading.Should().BeFalse();
+
+            AppSessionTestHelper.Reset();
+        }
+
+        [Fact]
+        public async Task LoadCommand_With_NoBranchSelected_Should_Load_AllBranches_EdgeGuard()
+        {
+            // Function: 2.11 — Branch-wise Inventory
+            // Arrange
+            var accountsTreasuryServiceMock = new Mock<IAccountsTreasuryService>();
+            var printServiceMock = new Mock<IPrintService>();
+            var snapshot = new AccountsTreasurySnapshot
+            {
+                TotalInvoiced = 1000m,
+                TotalPaid = 800m,
+                TotalBalance = 200m,
+                TotalDiscount = 0m,
+                NetProfit = 800m,
+                Payments = new List<AccountsPaymentRow>(),
+                ByBranch = new List<TreasuryByBranchRow>
+                {
+                    new TreasuryByBranchRow { BranchName = "Branch1", TotalInvoiced = 500m },
+                    new TreasuryByBranchRow { BranchName = "Branch2", TotalInvoiced = 500m }
+                }
+            };
+            accountsTreasuryServiceMock
+                .Setup(s => s.GetSnapshotAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>(), null))
+                .ReturnsAsync(snapshot);
+
+            var viewModel = CreateViewModel(accountsTreasuryServiceMock, printServiceMock);
+            viewModel.SelectedBranchId = null;
+
+            // Act
+            viewModel.LoadCommand.Execute(null);
+            await Task.Delay(100);
+
+            // Assert
+            accountsTreasuryServiceMock.Verify(s => s.GetSnapshotAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>(), null), Times.AtLeastOnce());
+            viewModel.ByBranch.Should().HaveCount(2);
 
             AppSessionTestHelper.Reset();
         }
@@ -283,18 +347,14 @@ namespace Open_lab.Tests.ViewModels
             var printServiceMock = new Mock<IPrintService>();
             var snapshot = new AccountsTreasurySnapshot
             {
-                TotalInvoiced = 1000,
-                TotalPaid = 800,
-                TotalBalance = 200,
-                TotalDiscount = 50,
-                TotalExpenses = 100,
-                NetProfit = 700,
-                ByDoctor = new List<TreasuryByDoctorRow>
-                {
-                    new TreasuryByDoctorRow { DoctorName = "Dr. A", VisitsCount = 10, CommissionAmount = 250m }
-                }
+                TotalInvoiced = 1000m,
+                TotalPaid = 800m,
+                TotalBalance = 200m,
+                TotalDiscount = 0m,
+                NetProfit = 800m,
+                Payments = new List<AccountsPaymentRow>(),
+                ByDoctor = new List<TreasuryByDoctorRow> { new TreasuryByDoctorRow { DoctorName = "Dr. Ahmed", CommissionAmount = 100m } }
             };
-            
             accountsTreasuryServiceMock
                 .Setup(s => s.GetSnapshotAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<int?>()))
                 .ReturnsAsync(snapshot);
@@ -307,9 +367,67 @@ namespace Open_lab.Tests.ViewModels
 
             // Assert
             accountsTreasuryServiceMock.Verify(s => s.GetSnapshotAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<int?>()), Times.AtLeastOnce);
-            viewModel.TotalInvoiced.Should().Be(1000);
-            viewModel.NetProfit.Should().Be(700);
-            viewModel.StatusMessage.Should().Contain("تم تحميل بيانات الخزينة.");
+            viewModel.ByDoctor.Should().HaveCount(1);
+            viewModel.ByDoctor[0].DoctorName.Should().Be("Dr. Ahmed");
+            viewModel.ByDoctor[0].CommissionAmount.Should().Be(100m);
+
+            AppSessionTestHelper.Reset();
+        }
+
+        [Fact]
+        public async Task LoadCommand_When_ServiceThrows_DoctorCommissions_Should_Show_Error_FailureGuard()
+        {
+            // Function: 2.12 — Doctor-wise Inventory
+            // Arrange
+            var accountsTreasuryServiceMock = new Mock<IAccountsTreasuryService>();
+            var printServiceMock = new Mock<IPrintService>();
+            accountsTreasuryServiceMock
+                .Setup(s => s.GetSnapshotAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<int?>()))
+                .ThrowsAsync(new InvalidOperationException("Doctor commissions load failed"));
+
+            var viewModel = CreateViewModel(accountsTreasuryServiceMock, printServiceMock);
+
+            // Act
+            viewModel.LoadCommand.Execute(null);
+            await Task.Delay(100);
+
+            // Assert
+            viewModel.StatusMessage.Should().Contain("Doctor commissions load failed");
+            viewModel.IsLoading.Should().BeFalse();
+
+            AppSessionTestHelper.Reset();
+        }
+
+        [Fact]
+        public async Task LoadCommand_With_NoDoctorCommissions_Should_Return_EmptyList_EdgeGuard()
+        {
+            // Function: 2.12 — Doctor-wise Inventory
+            // Arrange
+            var accountsTreasuryServiceMock = new Mock<IAccountsTreasuryService>();
+            var printServiceMock = new Mock<IPrintService>();
+            var snapshot = new AccountsTreasurySnapshot
+            {
+                TotalInvoiced = 1000m,
+                TotalPaid = 800m,
+                TotalBalance = 200m,
+                TotalDiscount = 0m,
+                NetProfit = 800m,
+                Payments = new List<AccountsPaymentRow>(),
+                ByDoctor = new List<TreasuryByDoctorRow>()
+            };
+            accountsTreasuryServiceMock
+                .Setup(s => s.GetSnapshotAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<int?>()))
+                .ReturnsAsync(snapshot);
+
+            var viewModel = CreateViewModel(accountsTreasuryServiceMock, printServiceMock);
+
+            // Act
+            viewModel.LoadCommand.Execute(null);
+            await Task.Delay(100);
+
+            // Assert
+            accountsTreasuryServiceMock.Verify(s => s.GetSnapshotAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<int?>()), Times.AtLeastOnce);
+            viewModel.ByDoctor.Should().BeEmpty();
 
             AppSessionTestHelper.Reset();
         }

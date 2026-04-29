@@ -97,6 +97,42 @@ namespace Open_lab.Tests.Services
         }
 
         [Fact]
+        public async Task GetSnapshotAsync_With_NonExistentBranch_Should_Return_ZeroedSnapshot_FailureGuard()
+        {
+            // Function: 2.11 — Branch-wise Inventory
+            // Arrange
+            var nonExistentBranchId = 99999;
+
+            // Act
+            var snapshot = await _service.GetSnapshotAsync(DateTime.Today.AddDays(-1), DateTime.Today.AddDays(1), nonExistentBranchId);
+
+            // Assert
+            snapshot.TotalInvoiced.Should().Be(0m);
+            snapshot.TotalPaid.Should().Be(0m);
+            snapshot.TotalBalance.Should().Be(0m);
+            snapshot.ByBranch.Should().BeEmpty();
+        }
+
+        [Fact]
+        public async Task GetSnapshotAsync_With_BranchFilter_And_NoData_Should_Return_ZeroedSnapshot_EdgeGuard()
+        {
+            // Function: 2.11 — Branch-wise Inventory
+            // Arrange
+            var branch = new Branch { Name = "TestBranch" };
+            _db.Branches.Add(branch);
+            await _db.SaveChangesAsync();
+
+            // Act
+            var snapshot = await _service.GetSnapshotAsync(DateTime.Today.AddDays(-1), DateTime.Today.AddDays(1), branch.BranchId);
+
+            // Assert
+            snapshot.TotalInvoiced.Should().Be(0m);
+            snapshot.TotalPaid.Should().Be(0m);
+            snapshot.TotalBalance.Should().Be(0m);
+            snapshot.ByBranch.Should().BeEmpty();
+        }
+
+        [Fact]
         public async Task GetSnapshotAsync_Should_Calculate_Doctor_Commissions_LogicGuard()
         {
             // Function: 2.12 — Doctor-wise Inventory
@@ -121,6 +157,33 @@ namespace Open_lab.Tests.Services
             var docRow = snapshot.ByDoctor.FirstOrDefault(d => d.DoctorName == "Dr. Ahmed");
             docRow.Should().NotBeNull();
             docRow!.CommissionAmount.Should().Be(100m); // 10% of 1000
+        }
+
+        [Fact]
+        public async Task GetSnapshotAsync_With_ZeroCommissionPercentage_Should_Calculate_ZeroCommission_EdgeGuard()
+        {
+            // Function: 2.12 — Doctor-wise Inventory
+            // Arrange
+            var doctor = new Physician { FullName = "Dr. Zero", CommissionPercentage = 0m };
+            _db.Physicians.Add(doctor);
+            var p = new Patient { FullName = "P" };
+            _db.Patients.Add(p);
+            await _db.SaveChangesAsync();
+
+            var visit = new Visit { PatientId = p.PatientId, VisitDate = DateTime.Today, PhysicianId = doctor.PhysicianId };
+            _db.Visits.Add(visit);
+            await _db.SaveChangesAsync();
+
+            _db.Invoices.Add(new Invoice { VisitId = visit.VisitId, NetTotal = 1000m });
+            await _db.SaveChangesAsync();
+
+            // Act
+            var snapshot = await _service.GetSnapshotAsync(DateTime.Today.AddDays(-1), DateTime.Today.AddDays(1));
+
+            // Assert
+            var docRow = snapshot.ByDoctor.FirstOrDefault(d => d.DoctorName == "Dr. Zero");
+            docRow.Should().NotBeNull();
+            docRow!.CommissionAmount.Should().Be(0m); // 0% of 1000
         }
 
         [Fact]
