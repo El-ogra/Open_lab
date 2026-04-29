@@ -37,19 +37,19 @@
 
 | رقم الوظيفة | اسم الوظيفة | Service ✅/❌ | ViewModel ✅/❌ | الحالة | أسماء الاختبارات المكتوبة |
 |-------------|-------------|--------------|----------------|--------|--------------------------|
-| 2.1 | حساب الإجمالي — Calculate Total | ❌ | ❌ | ❌ لم يبدأ | |
-| 2.2 | تطبيق خصم — Apply Discount | ❌ | ❌ | ❌ لم يبدأ | |
-| 2.3 | تسجيل دفعة — Record Payment | ❌ | ❌ | ❌ لم يبدأ | |
-| 2.4 | تصفية الحساب — Settle Account | ❌ | ❌ | ❌ لم يبدأ | |
-| 2.5 | تعديل دفعة — Edit Payment | ❌ | ❌ | ❌ لم يبدأ | |
-| 2.6 | حذف دفعة — Delete Payment | ❌ | ❌ | ❌ لم يبدأ | |
-| 2.7 | إضافة رسوم إضافية — Add Additional Charge | ❌ | ❌ | ❌ لم يبدأ | |
-| 2.8 | إصدار فاتورة — Generate Invoice | ❌ | ❌ | ❌ لم يبدأ | |
-| 2.9 | كشف حساب المريض — View Patient Account | ❌ | ❌ | ❌ لم يبدأ | |
-| 2.10 | تقرير الجرد المالي — Generate Inventory | ❌ | ❌ | ❌ لم يبدأ | |
-| 2.11 | جرد مالي للفرع — Branch-wise Inventory | ❌ | ❌ | ❌ لم يبدأ | |
-| 2.12 | حساب الأطباء — Doctor-wise Inventory | ❌ | ❌ | ❌ لم يبدأ | |
-| 2.13 | تصفية حسابات المعامل الخارجية — Lab-to-Lab Settlement | ❌ | ❌ | ❌ لم يبدأ | |
+| 2.1 | حساب الإجمالي — Calculate Total | ✅ | ✅ | ✅ مكتمل | GetVisitTotalAsync_WithCharges_Returns_Sum_LogicGuard, CalculateTotalAsync_Should_Call_GetVisitTotalAsync_Directly |
+| 2.2 | تطبيق خصم — Apply Discount | ✅ | ✅ | ✅ مكتمل | CreateOrUpdateInvoiceAsync_WithZeroDiscount_Should_Calculate_Correctly, CreateOrUpdateInvoiceAsync_WithLargeValues_Should_Handle_Correctly, CreateOrUpdateInvoiceAsync_NegativeDiscount_Should_Throw, CreateOrUpdateInvoiceAsync_DiscountExceedsTotal_Should_Throw_LogicGuard, CalculateReferralDiscountAsync_When_ReferralMissing_Should_Return_Zero_EdgeGuard, CalculateReferralDiscountAsync_With_Valid_Referral_Should_Apply_Discount_LogicGuard, ApplyDiscountAsync_Should_Update_NetTotal_Directly |
+| 2.3 | تسجيل دفعة — Record Payment | ✅ | ✅ | ✅ مكتمل | AddPaymentAsync_InvalidAmount_Should_Throw_LogicGuard, CreateOrUpdateInvoiceAsync_NegativePaid_Should_Throw, CreateOrUpdateInvoiceAsync_PartialPayment_Should_Set_Status_To_Partial, AddPaymentAsync_FullPayment_Should_Update_Balance_To_Zero, AddPaymentAsync_PartialPayment_Should_Update_Balance_Correctly, AddPaymentAsync_With_Paid_Zero_Should_Set_StatusMessage |
+| 2.4 | تصفية الحساب — Settle Account | ✅ | ✅ | ✅ مكتمل | CreateOrUpdateInvoiceAsync_FullPayment_Should_Set_Status_To_Paid, SettleAccountAsync_When_BalanceRemaining_Should_Throw_FailureGuard, SettleAccountAsync_When_FullyPaid_Should_CloseVisit_EdgeGuard, SettleAccountAsync_When_ServiceThrows_Should_Set_ErrorStatus_FailureGuard |
+| 2.5 | تعديل دفعة — Edit Payment | ✅ | ✅ | ✅ مكتمل | EditPaymentAsync_Should_Update_Amount_And_Recalculate_Invoice_LogicGuard, EditPaymentAsync_With_InvalidAmount_Should_Set_ValidationMessage_FailureGuard |
+| 2.6 | حذف دفعة — Delete Payment | ✅ | ✅ | ✅ مكتمل | DeletePaymentAsync_Should_Recalculate_Balance, DeletePaymentAsync_NonExistent_Should_Return_Without_Throwing, DeletePaymentAsync_Without_Reason_Should_Throw, DeletePaymentAsync_With_Null_SelectedPayment_Should_Return, DeletePaymentAsync_With_Valid_SelectedPayment_Should_Delete |
+| 2.7 | إضافة رسوم إضافية — Add Additional Charge | ✅ | ✅ | ✅ مكتمل | AddAdditionalChargeAsync_InvalidDescription_Should_Throw_LogicGuard, AddAdditionalChargeAsync_Should_Create_Charge_Record, AddAdditionalChargeAsync_NegativeAmount_Should_Throw, AddChargeAsync_With_VisitId_Zero_Should_Return, AddChargeAsync_With_Valid_Data_Should_Add_Charge |
+| 2.8 | إصدار فاتورة — Generate Invoice | ✅ | ✅ | ✅ مكتمل | CreateOrUpdateInvoiceAsync_Should_Create_Invoice_With_Correct_Totals_LogicGuard, LogInvoicePrintedAsync_Should_Create_AuditLog_Entry, SaveInvoiceAsync_With_VisitId_Zero_Should_Set_StatusMessage, SaveInvoiceAsync_With_Valid_Visit_Should_Save, PrintInvoiceAsync_When_NoInvoiceFound_Should_NotLogPrint_EdgeGuard |
+| 2.9 | كشف حساب المريض — View Patient Account | ✅ | ✅ | ✅ مكتمل | GetPatientAccount_ByDate_Should_Return_Invoices_And_Payments_For_Same_Patient_LogicGuard, LoadVisitAsync_With_VisitId_Zero_Should_Set_StatusMessage, LoadVisitAsync_With_Existing_Invoice_Should_Load_Data |
+| 2.10 | تقرير الجرد المالي — Generate Inventory | ✅ | ✅ | ✅ مكتمل | GetSnapshotAsync_Overall_Should_Aggregate_Invoices_And_Payments_LogicGuard, GetSnapshotAsync_WithInvalidDates_ShouldThrowException_FailureGuard, GetSnapshotAsync_When_NoDataInRange_Should_Return_ZeroedSnapshot_EdgeGuard, LoadCommand_Should_SetIsLoading_And_LoadData_SuccessGuard, LoadCommand_Failure_Should_HandleException_FailureGuard, DailyCommand_Should_LoadDataForToday_SuccessGuard, WeeklyCommand_Should_CalculateStartOfWeek_SuccessGuard, MonthlyCommand_Should_CalculateStartOfMonth_SuccessGuard, DailyCommand_When_ServiceThrows_Should_Set_ErrorMessage_FailureGuard, PrintCommand_Should_CallPrintService_SuccessGuard, PrintCommand_Failure_Should_HandleException_FailureGuard |
+| 2.11 | جرد مالي للفرع — Branch-wise Inventory | ✅ | ✅ | ✅ مكتمل | GetSnapshotAsync_With_BranchFilter_Should_Isolate_Branch_Data_LogicGuard, LoadCommand_With_BranchFilter_Should_Call_GetSnapshotAsync_With_BranchId |
+| 2.12 | حساب الأطباء — Doctor-wise Inventory | ✅ | ✅ | ✅ مكتمل | GetSnapshotAsync_Should_Calculate_Doctor_Commissions_LogicGuard, LoadCommand_Should_Calculate_Doctor_Commissions_Directly |
+| 2.13 | تصفية حسابات المعامل الخارجية — Lab-to-Lab Settlement | ✅ | ✅ | ✅ مكتمل | GetTotalProfitAsync_Should_Calculate_PatientPrice_Minus_CostPrice_LogicGuard, CreateSettlementAsync_Should_Update_Balance_LogicGuard, GetPendingBalanceAsync_When_NoQueueOrPayments_Should_Return_Zero_FailureGuard, CreateSettlementAsync_When_AmountPaid_Exceeds_Balance_Should_Store_NegativeBalance_EdgeGuard, LoadQueueAsync_Should_Map_Row_With_VisitTest_For_Printing, LoadReferralsCommand_When_Executed_Should_Load_ExternalLab_Referrals_Success, LoadReferralsCommand_When_Service_Throws_Should_Set_Error_Message_Failure, LoadQueueCommand_When_No_Pending_Items_Should_Clear_Queue_Edge, LoadQueueCommand_When_Service_Throws_Should_Set_Error_Message_Failure, LoadManifestsCommand_When_Executed_Should_Load_Manifest_List_Success, LoadManifestsCommand_When_Service_Throws_Should_Set_Error_Message_Failure, PrintExternalReportAsync_Should_Print_When_Visit_Is_Available, EnterExternalResultAsync_Should_Call_Service_And_Reset_Input, CreateManifestCommand_With_Valid_Data_Should_Create_Manifest_Success, CreateManifestCommand_When_Referral_Missing_Should_Not_Call_Service_Failure, CreateManifestCommand_When_Queue_Selection_Empty_Should_Not_Call_Service_Edge, UpdateStatusCommand_When_SelectedItem_Exists_Should_Call_Service_Success, UpdateStatusCommand_When_No_Selected_Item_Should_Not_Call_Service_Edge, UpdateStatusCommand_When_Service_Throws_Should_Set_Error_Message_Failure, LoadSettlementAsync_Should_Load_History_And_TotalProfit, LoadSettlementCommand_When_Referral_Selected_Should_Load_Settlement_Success, LoadSettlementCommand_When_Referral_Not_Selected_Should_Not_Call_Service_Edge, LoadSettlementCommand_When_Service_Throws_Should_Set_Error_Message_Failure, CreateSettlementAsync_When_AmountIsZero_Should_NotCall_Service_EdgeGuard, CreateSettlementCommand_When_Valid_Data_Should_Create_And_Reset_Amount_Success, CreateSettlementCommand_When_Service_Throws_Should_Set_Error_Message_Failure, EnterExternalResultAsync_When_ServiceThrows_Should_Set_ErrorMessage_FailureGuard, EnterExternalResultCommand_When_Result_Value_Empty_Should_Not_Call_Service_Edge, PrintExternalReportCommand_When_VisitId_Invalid_Should_Set_User_Message_Failure, PrintExternalReportCommand_When_Report_Not_Found_Should_Set_NotFound_Message_Edge |
 
 ---
 
@@ -211,7 +211,7 @@
 | الموديول | إجمالي الوظائف | مكتمل ✅ | جزئي 🔄 | لم يبدأ ❌ | يحتاج مراجعة ⚠️ |
 |----------|---------------|---------|---------|-----------|----------------|
 | 1 — إدارة المرضى | 8 | 4 | 0 | 0 | 4 |
-| 2 — المحاسبة والمالية | 13 | 0 | 0 | 13 | 0 |
+| 2 — المحاسبة والمالية | 13 | 13 | 0 | 0 | 0 |
 | 3 — إدارة التحاليل والأسعار | 9 | 0 | 0 | 9 | 0 |
 | 4 — إدخال النتائج والتقارير | 9 | 0 | 0 | 9 | 0 |
 | 5 — المزارع والحساسية | 7 | 0 | 0 | 7 | 0 |
@@ -223,7 +223,7 @@
 | 11 — الحضور والانصراف | 5 | 0 | 0 | 5 | 0 |
 | 12 — جهات التعاقد والإحالة | 9 | 0 | 0 | 9 | 0 |
 | 13 — إعدادات النظام | 8 | 0 | 0 | 8 | 0 |
-| **الإجمالي** | **97** | **4** | **0** | **89** | **4** |
+| **الإجمالي** | **97** | **17** | **0** | **76** | **4** |
 
 ---
 

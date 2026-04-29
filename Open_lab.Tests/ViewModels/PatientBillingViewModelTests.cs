@@ -27,6 +27,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public void Commands_When_Admin_Should_Be_Enabled()
         {
+            // Function: 2.9 — View Patient Account
             _viewModel.LoadVisitCommand.CanExecute(null).Should().BeTrue();
             _viewModel.SaveInvoiceCommand.CanExecute(null).Should().BeTrue();
             _viewModel.AddPaymentCommand.CanExecute(null).Should().BeFalse();
@@ -35,14 +36,23 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task LoadVisitAsync_With_VisitId_Zero_Should_Set_StatusMessage()
         {
+            // Function: 2.9 — View Patient Account
+            // Arrange
             _viewModel.VisitId = 0;
-            await _viewModel.InvokePrivateAsync("LoadVisitAsync");
+
+            // Act
+            _viewModel.LoadVisitCommand.Execute(null);
+            await Task.Delay(100);
+
+            // Assert
             _viewModel.StatusMessage.Should().Contain("يرجى إدخال رقم الزيارة");
         }
 
         [Fact]
         public async Task LoadVisitAsync_With_Existing_Invoice_Should_Load_Data()
         {
+            // Function: 2.9 — View Patient Account
+            // Arrange
             _viewModel.VisitId = 10;
             _invoiceServiceMock.Setup(x => x.GetVisitTotalAsync(10)).ReturnsAsync(500);
             var invoice = new Invoice
@@ -53,54 +63,89 @@ namespace Open_lab.Tests.ViewModels
             _invoiceServiceMock.Setup(x => x.GetPaymentsAsync(100)).ReturnsAsync(new List<Payment>());
             _invoiceServiceMock.Setup(x => x.GetAdditionalChargesAsync(100)).ReturnsAsync(new List<AdditionalCharge>());
 
-            await _viewModel.InvokePrivateAsync("LoadVisitAsync");
+            // Act
+            _viewModel.LoadVisitCommand.Execute(null);
+            await Task.Delay(100);
 
+            // Assert
             _viewModel.Total.Should().Be(500);
             _viewModel.Discount.Should().Be(50);
+            _viewModel.NetTotal.Should().Be(450);
+            _viewModel.Balance.Should().Be(250);
             _viewModel.StatusMessage.Should().Contain("تم تحميل");
         }
 
         [Fact]
         public async Task SaveInvoiceAsync_With_VisitId_Zero_Should_Set_StatusMessage()
         {
+            // Function: 2.8 — Generate Invoice
+            // Arrange
             _viewModel.VisitId = 0;
-            await _viewModel.InvokePrivateAsync("SaveInvoiceAsync");
+
+            // Act
+            _viewModel.SaveInvoiceCommand.Execute(null);
+            await Task.Delay(100);
+
             _viewModel.StatusMessage.Should().Contain("يرجى إدخال رقم الزيارة");
         }
 
         [Fact]
         public async Task SaveInvoiceAsync_With_Valid_Visit_Should_Save()
         {
+            // Function: 2.8 — Generate Invoice
+            // Arrange
             _viewModel.VisitId = 10;
             _viewModel.Discount = 25;
             var invoice = new Invoice { InvoiceId = 100, Total = 500, NetTotal = 475 };
             _invoiceServiceMock.Setup(x => x.CreateOrUpdateInvoiceAsync(10, 25, 0)).ReturnsAsync(invoice);
             _invoiceServiceMock.Setup(x => x.GetPaymentsAsync(100)).ReturnsAsync(new List<Payment>());
 
-            await _viewModel.InvokePrivateAsync("SaveInvoiceAsync");
+            // Act
+            _viewModel.SaveInvoiceCommand.Execute(null);
+            await Task.Delay(100);
 
+            // Assert
+            _viewModel.Total.Should().Be(500);
+            _viewModel.NetTotal.Should().Be(475);
             _viewModel.StatusMessage.Should().Contain("تم حفظ الفاتورة");
+            _invoiceServiceMock.Verify(x => x.CreateOrUpdateInvoiceAsync(10, 25, 0), Times.Once);
         }
 
         [Fact]
         public async Task AddPaymentAsync_With_Paid_Zero_Should_Set_StatusMessage()
         {
+            // Function: 2.3 — Record Payment
+            // Arrange
             _viewModel.VisitId = 10;
             _viewModel.Paid = 0;
-            await _viewModel.InvokePrivateAsync("AddPaymentAsync");
+
+            // Act
+            _viewModel.AddPaymentCommand.Execute(null);
+            await Task.Delay(100);
+
+            // Assert
             _viewModel.StatusMessage.Should().Contain("أدخل قيمة المدفوع");
         }
 
         [Fact]
         public async Task DeletePaymentAsync_With_Null_SelectedPayment_Should_Return()
         {
-            await _viewModel.InvokePrivateAsync("DeletePaymentAsync");
+            // Function: 2.6 — Delete Payment
+            // Arrange
+
+            // Act
+            _viewModel.DeletePaymentCommand.Execute(null);
+            await Task.Delay(100);
+
+            // Assert
             _invoiceServiceMock.Verify(x => x.DeletePaymentAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>()), Times.Never);
         }
 
         [Fact]
         public async Task DeletePaymentAsync_With_Valid_SelectedPayment_Should_Delete()
         {
+            // Function: 2.6 — Delete Payment
+            // Arrange
             _viewModel.SelectedPayment = new InvoicePaymentRow { PaymentId = 3 };
             _viewModel.VisitId = 10;
             var invoice = new Invoice { InvoiceId = 100 };
@@ -110,8 +155,11 @@ namespace Open_lab.Tests.ViewModels
             _invoiceServiceMock.Setup(x => x.GetPaymentsAsync(100)).ReturnsAsync(new List<Payment>());
             _invoiceServiceMock.Setup(x => x.GetAdditionalChargesAsync(100)).ReturnsAsync(new List<AdditionalCharge>());
 
-            await _viewModel.InvokePrivateAsync("DeletePaymentAsync");
+            // Act
+            _viewModel.DeletePaymentCommand.Execute(null);
+            await Task.Delay(100);
 
+            // Assert
             _invoiceServiceMock.Verify(x => x.DeletePaymentAsync(3, It.IsAny<int>(), It.IsAny<string>()), Times.Once);
             _viewModel.StatusMessage.Should().Contain("تم حذف الدفعة");
         }
@@ -119,14 +167,23 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task AddChargeAsync_With_VisitId_Zero_Should_Return()
         {
+            // Function: 2.7 — Add Additional Charge
+            // Arrange
             _viewModel.VisitId = 0;
-            await _viewModel.InvokePrivateAsync("AddChargeAsync");
+
+            // Act
+            _viewModel.AddChargeCommand.Execute(null);
+            await Task.Delay(100);
+
+            // Assert
             _invoiceServiceMock.Verify(x => x.AddAdditionalChargeAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<decimal>()), Times.Never);
         }
 
         [Fact]
         public async Task AddChargeAsync_With_Valid_Data_Should_Add_Charge()
         {
+            // Function: 2.7 — Add Additional Charge
+            // Arrange
             _viewModel.VisitId = 10;
             _viewModel.NewChargeAmount = 50;
             _viewModel.NewChargeDescription = "Extra Service";
@@ -138,8 +195,11 @@ namespace Open_lab.Tests.ViewModels
             _invoiceServiceMock.Setup(x => x.GetPaymentsAsync(100)).ReturnsAsync(new List<Payment>());
             _invoiceServiceMock.Setup(x => x.GetAdditionalChargesAsync(100)).ReturnsAsync(new List<AdditionalCharge>());
 
-            await _viewModel.InvokePrivateAsync("AddChargeAsync");
+            // Act
+            _viewModel.AddChargeCommand.Execute(null);
+            await Task.Delay(100);
 
+            // Assert
             _invoiceServiceMock.Verify(x => x.AddAdditionalChargeAsync(100, "Extra Service", 50), Times.Once);
             _viewModel.StatusMessage.Should().Contain("تمت إضافة الرسوم الإضافية");
         }
@@ -147,12 +207,14 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task EditPaymentAsync_With_InvalidAmount_Should_Set_ValidationMessage_FailureGuard()
         {
+            // Function: 2.5 — Edit Payment
             // Arrange
             _viewModel.SelectedPayment = new InvoicePaymentRow { PaymentId = 9, Amount = 25m };
             _viewModel.EditPaymentAmount = 0m;
 
             // Act
-            await _viewModel.InvokePrivateAsync("EditPaymentAsync");
+            _viewModel.EditPaymentCommand.Execute(null);
+            await Task.Delay(100);
 
             // Assert
             _viewModel.StatusMessage.Should().Contain("أدخل مبلغ تعديل صالح");
@@ -162,13 +224,15 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task SettleAccountAsync_When_ServiceThrows_Should_Set_ErrorStatus_FailureGuard()
         {
+            // Function: 2.4 — Settle Account
             // Arrange
             _viewModel.VisitId = 10;
             _invoiceServiceMock.Setup(x => x.SettleAccountAsync(10))
                 .ThrowsAsync(new InvalidOperationException("remaining balance"));
 
             // Act
-            await _viewModel.InvokePrivateAsync("SettleAccountAsync");
+            _viewModel.SettleAccountCommand.Execute(null);
+            await Task.Delay(100);
 
             // Assert
             _viewModel.StatusMessage.Should().Contain("خطأ:");
@@ -178,15 +242,53 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task PrintInvoiceAsync_When_NoInvoiceFound_Should_NotLogPrint_EdgeGuard()
         {
+            // Function: 2.8 — Generate Invoice
             // Arrange
             _viewModel.VisitId = 77;
             _invoiceServiceMock.Setup(x => x.GetByVisitIdAsync(77)).ReturnsAsync((Invoice?)null);
 
             // Act
-            await _viewModel.InvokePrivateAsync("PrintInvoiceAsync");
+            _viewModel.PrintInvoiceCommand.Execute(null);
+            await Task.Delay(100);
 
             // Assert
             _invoiceServiceMock.Verify(x => x.LogInvoicePrintedAsync(It.IsAny<int>(), It.IsAny<int>()), Times.Never);
+        }
+
+        [Fact]
+        public async Task CalculateTotalAsync_Should_Call_GetVisitTotalAsync_Directly()
+        {
+            // Function: 2.1 — Calculate Total
+            // Arrange
+            _viewModel.VisitId = 10;
+            _invoiceServiceMock.Setup(x => x.GetVisitTotalAsync(10)).ReturnsAsync(500m);
+
+            // Act
+            _viewModel.LoadVisitCommand.Execute(null);
+            await Task.Delay(100);
+
+            // Assert
+            _invoiceServiceMock.Verify(x => x.GetVisitTotalAsync(10), Times.Once);
+            _viewModel.Total.Should().Be(500m);
+        }
+
+        [Fact]
+        public async Task ApplyDiscountAsync_Should_Update_NetTotal_Directly()
+        {
+            // Function: 2.2 — Apply Discount
+            // Arrange
+            _viewModel.VisitId = 10;
+            _viewModel.Discount = 50m;
+            var invoice = new Invoice { InvoiceId = 100, Total = 500m, Discount = 50m, NetTotal = 450m };
+            _invoiceServiceMock.Setup(x => x.CreateOrUpdateInvoiceAsync(10, 50m, 0)).ReturnsAsync(invoice);
+
+            // Act
+            _viewModel.SaveInvoiceCommand.Execute(null);
+            await Task.Delay(100);
+
+            // Assert
+            _invoiceServiceMock.Verify(x => x.CreateOrUpdateInvoiceAsync(10, 50m, 0), Times.Once);
+            _viewModel.NetTotal.Should().Be(450m);
         }
     }
 }

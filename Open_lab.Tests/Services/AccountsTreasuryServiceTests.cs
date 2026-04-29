@@ -32,7 +32,8 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task GetSnapshotAsync_Overall_Should_Aggregate_Invoices_And_Payments_LogicGuard()
         {
-            // Arrange - Function 2.10
+            // Function: 2.10 — Generate Inventory
+            // Arrange
             var branch = new Branch { Name = "Main" };
             _db.Branches.Add(branch);
             var patient = new Patient { FullName = "P1" };
@@ -53,7 +54,7 @@ namespace Open_lab.Tests.Services
             // Act
             var snapshot = await _service.GetSnapshotAsync(DateTime.Today.AddDays(-1), DateTime.Today.AddDays(1));
 
-            // Assert - Logic Guard: Verify exact aggregation (2.10)
+            // Assert
             snapshot.TotalInvoiced.Should().Be(450);
             snapshot.TotalPaid.Should().Be(100);
             snapshot.TotalDiscount.Should().Be(50);
@@ -63,7 +64,8 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task GetSnapshotAsync_With_BranchFilter_Should_Isolate_Branch_Data_LogicGuard()
         {
-            // Arrange - Function 2.11
+            // Function: 2.11 — Branch-wise Inventory
+            // Arrange
             var b1 = new Branch { Name = "B1" };
             var b2 = new Branch { Name = "B2" };
             _db.Branches.AddRange(b1, b2);
@@ -85,10 +87,10 @@ namespace Open_lab.Tests.Services
 
             await _db.SaveChangesAsync();
 
-            // Act - Fetch ONLY Branch 1
+            // Act
             var snapshot = await _service.GetSnapshotAsync(DateTime.Today.AddDays(-1), DateTime.Today.AddDays(1), b1.BranchId);
 
-            // Assert - Logic Guard: Verify isolation (2.11)
+            // Assert
             snapshot.TotalInvoiced.Should().Be(100); // Should NOT include 500 from B2
             snapshot.ByBranch.Should().HaveCount(1);
             snapshot.ByBranch.First().BranchName.Should().Be("B1");
@@ -97,7 +99,8 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task GetSnapshotAsync_Should_Calculate_Doctor_Commissions_LogicGuard()
         {
-            // Arrange - Function 2.12
+            // Function: 2.12 — Doctor-wise Inventory
+            // Arrange
             var doctor = new Physician { FullName = "Dr. Ahmed", CommissionPercentage = 10m };
             _db.Physicians.Add(doctor);
             var p = new Patient { FullName = "P" };
@@ -114,7 +117,7 @@ namespace Open_lab.Tests.Services
             // Act
             var snapshot = await _service.GetSnapshotAsync(DateTime.Today.AddDays(-1), DateTime.Today.AddDays(1));
 
-            // Assert - Logic Guard: Verify 10% commission (2.12)
+            // Assert
             var docRow = snapshot.ByDoctor.FirstOrDefault(d => d.DoctorName == "Dr. Ahmed");
             docRow.Should().NotBeNull();
             docRow!.CommissionAmount.Should().Be(100m); // 10% of 1000
@@ -123,6 +126,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task GetSnapshotAsync_WithInvalidDates_ShouldThrowException_FailureGuard()
         {
+            // Function: 2.10 — Generate Inventory
             // Arrange
             var from = DateTime.Today;
             var to = DateTime.Today.AddDays(-1); // to is before from
@@ -138,6 +142,9 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task GetSnapshotAsync_When_NoDataInRange_Should_Return_ZeroedSnapshot_EdgeGuard()
         {
+            // Function: 2.10 — Generate Inventory
+            // Arrange
+
             // Act
             var snapshot = await _service.GetSnapshotAsync(DateTime.Today.AddDays(-1), DateTime.Today);
 

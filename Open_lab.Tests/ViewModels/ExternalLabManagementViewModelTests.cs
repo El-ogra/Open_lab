@@ -46,8 +46,14 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task LoadQueueAsync_Should_Map_Row_With_VisitTest_For_Printing()
         {
-            await _viewModel.InvokePrivateAsync("LoadQueueAsync");
+            // Function: 2.13 — Lab-to-Lab Settlement
+            // Arrange
 
+            // Act
+            _viewModel.LoadQueueCommand.Execute(null);
+            await Task.Delay(100);
+
+            // Assert
             _viewModel.PendingQueue.Should().ContainSingle();
             _viewModel.PendingQueue[0].PatientName.Should().Be("Patient 1");
             _viewModel.PendingQueue[0].VisitTest.Should().NotBeNull();
@@ -57,9 +63,12 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task LoadReferralsCommand_When_Executed_Should_Load_ExternalLab_Referrals_Success()
         {
+            // Function: 2.13 — Lab-to-Lab Settlement
+            // Arrange
+
             // Act
             _viewModel.LoadReferralsCommand.Execute(null);
-            await Task.Delay(50);
+            await Task.Delay(100);
 
             // Assert
             _viewModel.Referrals.Should().ContainSingle(r => r.ReferralId == 3);
@@ -69,12 +78,13 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task LoadReferralsCommand_When_Service_Throws_Should_Set_Error_Message_Failure()
         {
+            // Function: 2.13 — Lab-to-Lab Settlement
             // Arrange
             _testCatalogServiceMock.Setup(x => x.GetReferralsAsync()).ThrowsAsync(new Exception("referrals-failed"));
 
             // Act
             _viewModel.LoadReferralsCommand.Execute(null);
-            await Task.Delay(50);
+            await Task.Delay(100);
 
             // Assert
             _viewModel.StatusMessage.Should().Contain("referrals-failed");
@@ -83,12 +93,13 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task LoadQueueCommand_When_No_Pending_Items_Should_Clear_Queue_Edge()
         {
+            // Function: 2.13 — Lab-to-Lab Settlement
             // Arrange
             _externalLabServiceMock.Setup(x => x.GetPendingQueueAsync()).ReturnsAsync(new List<ExternalLabQueue>());
 
             // Act
             _viewModel.LoadQueueCommand.Execute(null);
-            await Task.Delay(50);
+            await Task.Delay(100);
 
             // Assert
             _viewModel.PendingQueue.Should().BeEmpty();
@@ -98,17 +109,22 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task LoadQueueCommand_When_Service_Throws_Should_Set_Error_Message_Failure()
         {
+            // Function: 2.13 — Lab-to-Lab Settlement
+            // Arrange
             _externalLabServiceMock.Setup(x => x.GetPendingQueueAsync()).ThrowsAsync(new Exception("queue-load-failed"));
 
+            // Act
             _viewModel.LoadQueueCommand.Execute(null);
-            await Task.Delay(50);
+            await Task.Delay(100);
 
+            // Assert
             _viewModel.StatusMessage.Should().Contain("queue-load-failed");
         }
 
         [Fact]
         public async Task LoadManifestsCommand_When_Executed_Should_Load_Manifest_List_Success()
         {
+            // Function: 2.13 — Lab-to-Lab Settlement
             // Arrange
             _externalLabServiceMock.Setup(x => x.GetAllManifestsAsync()).ReturnsAsync(new List<ShipmentManifest>
             {
@@ -117,7 +133,7 @@ namespace Open_lab.Tests.ViewModels
 
             // Act
             _viewModel.LoadManifestsCommand.Execute(null);
-            await Task.Delay(50);
+            await Task.Delay(100);
 
             // Assert
             _viewModel.Manifests.Should().ContainSingle(m => m.ManifestId == 9);
@@ -126,12 +142,13 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task LoadManifestsCommand_When_Service_Throws_Should_Set_Error_Message_Failure()
         {
+            // Function: 2.13 — Lab-to-Lab Settlement
             // Arrange
             _externalLabServiceMock.Setup(x => x.GetAllManifestsAsync()).ThrowsAsync(new Exception("manifests-failed"));
 
             // Act
             _viewModel.LoadManifestsCommand.Execute(null);
-            await Task.Delay(50);
+            await Task.Delay(100);
 
             // Assert
             _viewModel.StatusMessage.Should().Contain("manifests-failed");
@@ -140,7 +157,10 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task PrintExternalReportAsync_Should_Print_When_Visit_Is_Available()
         {
-            await _viewModel.InvokePrivateAsync("LoadQueueAsync");
+            // Function: 2.13 — Lab-to-Lab Settlement
+            // Arrange
+            _viewModel.LoadQueueCommand.Execute(null);
+            await Task.Delay(100);
             _viewModel.SelectedQueueItem = _viewModel.PendingQueue[0];
 
             var report = new VisitReportData
@@ -150,8 +170,11 @@ namespace Open_lab.Tests.ViewModels
             };
             _reportServiceMock.Setup(x => x.GetVisitReportAsync(12)).ReturnsAsync(report);
 
-            await _viewModel.InvokePrivateAsync("PrintExternalReportAsync");
+            // Act
+            _viewModel.PrintExternalReportCommand.Execute(null);
+            await Task.Delay(100);
 
+            // Assert
             _printServiceMock.Verify(x => x.PrintVisitReportAsync(report, true), Times.Once);
             _viewModel.StatusMessage.Should().Be("تم إرسال تقرير المعمل الخارجي للطباعة.");
         }
@@ -159,14 +182,20 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task EnterExternalResultAsync_Should_Call_Service_And_Reset_Input()
         {
-            await _viewModel.InvokePrivateAsync("LoadQueueAsync");
+            // Function: 2.13 — Lab-to-Lab Settlement
+            // Arrange
+            _viewModel.LoadQueueCommand.Execute(null);
+            await Task.Delay(100);
             _viewModel.SelectedQueueItem = _viewModel.PendingQueue[0];
             _viewModel.ExternalResultValue = "Positive";
             _viewModel.ExternalResultComment = "comment";
             _viewModel.ExternalReference = "REF-9";
 
-            await _viewModel.InvokePrivateAsync("EnterExternalResultAsync");
+            // Act
+            _viewModel.EnterExternalResultCommand.Execute(null);
+            await Task.Delay(100);
 
+            // Assert
             _externalLabServiceMock.Verify(x => x.EnterExternalLabResultAsync(1, "Positive", "comment", "REF-9"), Times.Once);
             _viewModel.ExternalResultValue.Should().BeEmpty();
             _viewModel.ExternalResultComment.Should().BeNull();
@@ -176,6 +205,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task CreateManifestCommand_With_Valid_Data_Should_Create_Manifest_Success()
         {
+            // Function: 2.13 — Lab-to-Lab Settlement
             // Arrange
             _viewModel.SelectedReferralId = 3;
             _viewModel.SelectedQueueIds.Add(1);
@@ -185,7 +215,7 @@ namespace Open_lab.Tests.ViewModels
 
             // Act
             _viewModel.CreateManifestCommand.Execute(null);
-            await Task.Delay(50);
+            await Task.Delay(100);
 
             // Assert
             _externalLabServiceMock.Verify(x => x.CreateManifestAsync(3, It.IsAny<List<int>>(), It.IsAny<string?>()), Times.Once);
@@ -196,13 +226,14 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task CreateManifestCommand_When_Referral_Missing_Should_Not_Call_Service_Failure()
         {
+            // Function: 2.13 — Lab-to-Lab Settlement
             // Arrange
             _viewModel.SelectedReferralId = null;
             _viewModel.SelectedQueueIds.Add(1);
 
             // Act
             _viewModel.CreateManifestCommand.Execute(null);
-            await Task.Delay(50);
+            await Task.Delay(100);
 
             // Assert
             _externalLabServiceMock.Verify(x => x.CreateManifestAsync(It.IsAny<int>(), It.IsAny<List<int>>(), It.IsAny<string?>()), Times.Never);
@@ -211,24 +242,30 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task CreateManifestCommand_When_Queue_Selection_Empty_Should_Not_Call_Service_Edge()
         {
+            // Function: 2.13 — Lab-to-Lab Settlement
+            // Arrange
             _viewModel.SelectedReferralId = 3;
 
+            // Act
             _viewModel.CreateManifestCommand.Execute(null);
-            await Task.Delay(50);
+            await Task.Delay(100);
 
+            // Assert
             _externalLabServiceMock.Verify(x => x.CreateManifestAsync(It.IsAny<int>(), It.IsAny<List<int>>(), It.IsAny<string?>()), Times.Never);
         }
 
         [Fact]
         public async Task UpdateStatusCommand_When_SelectedItem_Exists_Should_Call_Service_Success()
         {
+            // Function: 2.13 — Lab-to-Lab Settlement
             // Arrange
-            await _viewModel.InvokePrivateAsync("LoadQueueAsync");
+            _viewModel.LoadQueueCommand.Execute(null);
+            await Task.Delay(100);
             _viewModel.SelectedQueueItem = _viewModel.PendingQueue[0];
 
             // Act
             _viewModel.UpdateStatusCommand.Execute(null);
-            await Task.Delay(50);
+            await Task.Delay(100);
 
             // Assert
             _externalLabServiceMock.Verify(x => x.UpdateQueueStatusAsync(1, "InManifest", It.IsAny<string?>()), Times.Once);
@@ -238,12 +275,13 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task UpdateStatusCommand_When_No_Selected_Item_Should_Not_Call_Service_Edge()
         {
+            // Function: 2.13 — Lab-to-Lab Settlement
             // Arrange
             _viewModel.SelectedQueueItem = null;
 
             // Act
             _viewModel.UpdateStatusCommand.Execute(null);
-            await Task.Delay(50);
+            await Task.Delay(100);
 
             // Assert
             _externalLabServiceMock.Verify(x => x.UpdateQueueStatusAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string?>()), Times.Never);
@@ -252,21 +290,28 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task UpdateStatusCommand_When_Service_Throws_Should_Set_Error_Message_Failure()
         {
-            await _viewModel.InvokePrivateAsync("LoadQueueAsync");
+            // Function: 2.13 — Lab-to-Lab Settlement
+            // Arrange
+            _viewModel.LoadQueueCommand.Execute(null);
+            await Task.Delay(100);
             _viewModel.SelectedQueueItem = _viewModel.PendingQueue[0];
             _externalLabServiceMock
                 .Setup(x => x.UpdateQueueStatusAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string?>()))
                 .ThrowsAsync(new Exception("update-status-failed"));
 
+            // Act
             _viewModel.UpdateStatusCommand.Execute(null);
-            await Task.Delay(50);
+            await Task.Delay(100);
 
+            // Assert
             _viewModel.StatusMessage.Should().Contain("update-status-failed");
         }
 
         [Fact]
         public async Task LoadSettlementAsync_Should_Load_History_And_TotalProfit()
         {
+            // Function: 2.13 — Lab-to-Lab Settlement
+            // Arrange
             _viewModel.SelectedReferralId = 3;
             _externalSettlementServiceMock.Setup(x => x.GetSettlementHistoryAsync(3))
                 .ReturnsAsync(new List<ExternalLabSettlement>
@@ -274,8 +319,11 @@ namespace Open_lab.Tests.ViewModels
                     new() { SettlementId = 1, AmountPaid = 20m, Balance = 5m }
                 });
 
-            await _viewModel.InvokePrivateAsync("LoadSettlementAsync");
+            // Act
+            _viewModel.LoadSettlementCommand.Execute(null);
+            await Task.Delay(100);
 
+            // Assert
             _viewModel.SettlementHistory.Should().ContainSingle();
             _viewModel.TotalProfit.Should().Be(10m);
             _viewModel.StatusMessage.Should().Contain("الرصيد المعلق");
@@ -284,12 +332,13 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task LoadSettlementCommand_When_Referral_Selected_Should_Load_Settlement_Success()
         {
+            // Function: 2.13 — Lab-to-Lab Settlement
             // Arrange
             _viewModel.SelectedReferralId = 3;
 
             // Act
             _viewModel.LoadSettlementCommand.Execute(null);
-            await Task.Delay(50);
+            await Task.Delay(100);
 
             // Assert
             _externalSettlementServiceMock.Verify(x => x.GetPendingBalanceAsync(3), Times.AtLeastOnce);
@@ -299,11 +348,15 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task LoadSettlementCommand_When_Referral_Not_Selected_Should_Not_Call_Service_Edge()
         {
+            // Function: 2.13 — Lab-to-Lab Settlement
+            // Arrange
             _viewModel.SelectedReferralId = null;
 
+            // Act
             _viewModel.LoadSettlementCommand.Execute(null);
-            await Task.Delay(50);
+            await Task.Delay(100);
 
+            // Assert
             _externalSettlementServiceMock.Verify(x => x.GetPendingBalanceAsync(It.IsAny<int>()), Times.Never);
             _externalSettlementServiceMock.Verify(x => x.GetSettlementHistoryAsync(It.IsAny<int>()), Times.Never);
         }
@@ -311,26 +364,32 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task LoadSettlementCommand_When_Service_Throws_Should_Set_Error_Message_Failure()
         {
+            // Function: 2.13 — Lab-to-Lab Settlement
+            // Arrange
             _viewModel.SelectedReferralId = 3;
             _externalSettlementServiceMock
                 .Setup(x => x.GetPendingBalanceAsync(3))
                 .ThrowsAsync(new Exception("settlement-load-failed"));
 
+            // Act
             _viewModel.LoadSettlementCommand.Execute(null);
-            await Task.Delay(50);
+            await Task.Delay(100);
 
+            // Assert
             _viewModel.StatusMessage.Should().Contain("settlement-load-failed");
         }
 
         [Fact]
         public async Task CreateSettlementAsync_When_AmountIsZero_Should_NotCall_Service_EdgeGuard()
         {
+            // Function: 2.13 — Lab-to-Lab Settlement
             // Arrange
             _viewModel.SelectedReferralId = 3;
             _viewModel.SettlementAmount = 0m;
 
             // Act
-            await _viewModel.InvokePrivateAsync("CreateSettlementAsync");
+            _viewModel.CreateSettlementCommand.Execute(null);
+            await Task.Delay(100);
 
             // Assert
             _externalSettlementServiceMock.Verify(x => x.CreateSettlementAsync(It.IsAny<int>(), It.IsAny<decimal>(), It.IsAny<string?>()), Times.Never);
@@ -339,6 +398,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task CreateSettlementCommand_When_Valid_Data_Should_Create_And_Reset_Amount_Success()
         {
+            // Function: 2.13 — Lab-to-Lab Settlement
             // Arrange
             _viewModel.SelectedReferralId = 3;
             _viewModel.SettlementAmount = 15m;
@@ -349,7 +409,7 @@ namespace Open_lab.Tests.ViewModels
 
             // Act
             _viewModel.CreateSettlementCommand.Execute(null);
-            await Task.Delay(50);
+            await Task.Delay(100);
 
             // Assert
             _externalSettlementServiceMock.Verify(x => x.CreateSettlementAsync(3, 15m, "note"), Times.Once);
@@ -359,23 +419,29 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task CreateSettlementCommand_When_Service_Throws_Should_Set_Error_Message_Failure()
         {
+            // Function: 2.13 — Lab-to-Lab Settlement
+            // Arrange
             _viewModel.SelectedReferralId = 3;
             _viewModel.SettlementAmount = 20m;
             _externalSettlementServiceMock
                 .Setup(x => x.CreateSettlementAsync(3, 20m, It.IsAny<string?>()))
                 .ThrowsAsync(new Exception("settlement-create-failed"));
 
+            // Act
             _viewModel.CreateSettlementCommand.Execute(null);
-            await Task.Delay(50);
+            await Task.Delay(100);
 
+            // Assert
             _viewModel.StatusMessage.Should().Contain("settlement-create-failed");
         }
 
         [Fact]
         public async Task EnterExternalResultAsync_When_ServiceThrows_Should_Set_ErrorMessage_FailureGuard()
         {
+            // Function: 2.13 — Lab-to-Lab Settlement
             // Arrange
-            await _viewModel.InvokePrivateAsync("LoadQueueAsync");
+            _viewModel.LoadQueueCommand.Execute(null);
+            await Task.Delay(100);
             _viewModel.SelectedQueueItem = _viewModel.PendingQueue[0];
             _viewModel.ExternalResultValue = "Positive";
             _externalLabServiceMock
@@ -383,7 +449,8 @@ namespace Open_lab.Tests.ViewModels
                 .ThrowsAsync(new Exception("enter-failed"));
 
             // Act
-            await _viewModel.InvokePrivateAsync("EnterExternalResultAsync");
+            _viewModel.EnterExternalResultCommand.Execute(null);
+            await Task.Delay(100);
 
             // Assert
             _viewModel.StatusMessage.Should().Contain("خطأ:");
@@ -393,14 +460,16 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task EnterExternalResultCommand_When_Result_Value_Empty_Should_Not_Call_Service_Edge()
         {
+            // Function: 2.13 — Lab-to-Lab Settlement
             // Arrange
-            await _viewModel.InvokePrivateAsync("LoadQueueAsync");
+            _viewModel.LoadQueueCommand.Execute(null);
+            await Task.Delay(100);
             _viewModel.SelectedQueueItem = _viewModel.PendingQueue[0];
             _viewModel.ExternalResultValue = " ";
 
             // Act
             _viewModel.EnterExternalResultCommand.Execute(null);
-            await Task.Delay(50);
+            await Task.Delay(100);
 
             // Assert
             _externalLabServiceMock.Verify(x => x.EnterExternalLabResultAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<string?>()), Times.Never);
@@ -409,13 +478,15 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task PrintExternalReportCommand_When_VisitId_Invalid_Should_Set_User_Message_Failure()
         {
+            // Function: 2.13 — Lab-to-Lab Settlement
             // Arrange
-            await _viewModel.InvokePrivateAsync("LoadQueueAsync");
+            _viewModel.LoadQueueCommand.Execute(null);
+            await Task.Delay(100);
             _viewModel.SelectedQueueItem = new ExternalLabQueue { QueueId = 3, VisitTest = new VisitTest { VisitId = 0 }, Status = "Pending" };
 
             // Act
             _viewModel.PrintExternalReportCommand.Execute(null);
-            await Task.Delay(50);
+            await Task.Delay(100);
 
             // Assert
             _viewModel.StatusMessage.Should().Contain("لا يمكن تحديد الزيارة المرتبطة");
@@ -424,14 +495,16 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task PrintExternalReportCommand_When_Report_Not_Found_Should_Set_NotFound_Message_Edge()
         {
+            // Function: 2.13 — Lab-to-Lab Settlement
             // Arrange
-            await _viewModel.InvokePrivateAsync("LoadQueueAsync");
+            _viewModel.LoadQueueCommand.Execute(null);
+            await Task.Delay(100);
             _viewModel.SelectedQueueItem = _viewModel.PendingQueue[0];
             _reportServiceMock.Setup(x => x.GetVisitReportAsync(12)).ReturnsAsync((VisitReportData?)null);
 
             // Act
             _viewModel.PrintExternalReportCommand.Execute(null);
-            await Task.Delay(50);
+            await Task.Delay(100);
 
             // Assert
             _viewModel.StatusMessage.Should().Contain("لم يتم العثور على تقرير للطباعة");
