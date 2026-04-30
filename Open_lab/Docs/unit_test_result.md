@@ -114,10 +114,10 @@
 
 | رقم الوظيفة | اسم الوظيفة | Service ✅/❌ | ViewModel ✅/❌ | الحالة | أسماء الاختبارات المكتوبة |
 |-------------|-------------|--------------|----------------|--------|--------------------------|
-| 7.1 | إنشاء ورقة عمل المرضى — Generate Patient Worksheet | ❌ | ❌ | ❌ لم يبدأ | |
-| 7.2 | إنشاء ورقة عمل التحليل — Generate Test Worksheet | ❌ | ❌ | ❌ لم يبدأ | |
-| 7.3 | إنشاء ورقة عمل المجموعة — Generate Group Worksheet | ❌ | ❌ | ❌ لم يبدأ | |
-| 7.4 | سجل تصنيف التحاليل — Test Classification LOG | ❌ | ❌ | ❌ لم يبدأ | |
+| 7.1 | إنشاء ورقة عمل المرضى — Generate Patient Worksheet | ✅ | ✅ | ✅ مكتمل | Module7ServiceTests_Additional: GetWorksheetByPatientAsync_With_Multiple_Visits_Should_Return_Correct_Row_Count_SuccessGuard, GetWorksheetByPatientAsync_Should_Include_Patient_LabId_In_Rows_SuccessGuard, GetWorksheetByPatientAsync_With_Null_VisitDate_Should_Handle_EdgeGuard + Module7ViewModelTests_Additional: LoadCommand_With_Specific_Date_Range_Should_Pass_Range_To_Service_SuccessGuard, PrintCommand_With_Multiple_Rows_Should_Call_Print_With_All_Rows_SuccessGuard + WorksheetServiceTests + WorkSheetByPatientViewModelTests (existing coverage) |
+| 7.2 | إنشاء ورقة عمل التحليل — Generate Test Worksheet | ✅ | ✅ | ✅ مكتمل | Module7ServiceTests_Additional: GetWorksheetByTestAsync_With_Multiple_Same_Tests_Should_Aggregate_Count_EdgeGuard, GetWorksheetByTestAsync_Should_Include_Test_Code_SuccessGuard + Module7ViewModelTests_Additional: LoadCommand_With_Multiple_Test_Results_Should_Display_All_SuccessGuard + WorksheetServiceTests + WorkSheetByTestViewModelTests (existing coverage) |
+| 7.3 | إنشاء ورقة عمل المجموعة — Generate Group Worksheet | ✅ | ✅ | ✅ مكتمل | Module7ServiceTests_Additional: GetGroupWorksheetByGroupAsync_With_Mixed_Group_Tests_Should_Count_Only_Target_SuccessGuard, GetGroupWorksheetByCustomGroupAsync_With_Multiple_Items_Should_Sum_Correctly_SuccessGuard, GetGroupWorksheetByGroupAsync_With_NonExistent_Group_Should_Return_Empty_EdgeGuard + Module7ViewModelTests_Additional: LoadWorksheetCommand_With_Custom_Group_Should_Call_Custom_Group_Service_SuccessGuard, LoadWorksheetCommand_With_Normal_Group_Should_Call_Group_Service_SuccessGuard, PrintCommand_With_Group_Worksheet_Should_Call_Print_Service_SuccessGuard + GroupWorksheetServiceTests + GroupWorksheetViewModelTests (existing coverage) |
+| 7.4 | سجل تصنيف التحاليل — Test Classification LOG | ✅ | ✅ | ✅ مكتمل | Module7ServiceTests_Additional: GetConsumptionReportAsync_Should_Calculate_Total_Consumption_Correctly_SuccessGuard, GetConsumptionReportAsync_With_No_Reagent_Assigned_Should_Not_Include_Test_EdgeGuard, GetConsumptionReportAsync_With_Multiple_Reagents_Should_Group_By_Reagent_SuccessGuard, GetConsumptionReportAsync_Should_Include_Current_Stock_Info_SuccessGuard + Module7ViewModelTests_Additional: LoadAsync_With_Multiple_Reagent_Consumptions_Should_Display_All_SuccessGuard, LoadCommand_When_Service_Throws_Should_Set_Error_Message_FailureGuard, PrintCommand_With_Empty_Items_Should_Not_Call_Print_Service_EdgeGuard + TestClassificationServiceTests + TestClassificationLogViewModelTests (existing coverage) |
 
 ---
 
@@ -216,14 +216,14 @@
 | 4 — إدخال النتائج والتقارير | 9 | 9 | 0 | 0 | 0 |
 | 5 — المزارع والحساسية | 7 | 7 | 0 | 0 | 0 |
 | 6 — سحب العينات | 4 | 4 | 0 | 0 | 0 |
-| 7 — أوراق العمل | 4 | 0 | 0 | 4 | 0 |
+| 7 — أوراق العمل | 4 | 4 | 0 | 0 | 0 |
 | 8 — المعامل الخارجية | 7 | 0 | 0 | 7 | 0 |
 | 9 — الإحصائيات والتحليلات | 6 | 0 | 0 | 6 | 0 |
 | 10 — إدارة المستخدمين | 8 | 8 | 8 | 0 | 8 |
 | 11 — الحضور والانصراف | 5 | 0 | 0 | 5 | 0 |
 | 12 — جهات التعاقد والإحالة | 9 | 0 | 0 | 9 | 0 |
 | 13 — إعدادات النظام | 8 | 0 | 0 | 8 | 0 |
-| **الإجمالي** | **97** | **57** | **8** | **36** | **9** |
+| **الإجمالي** | **97** | **61** | **8** | **32** | **9** |
 
 ---
 
