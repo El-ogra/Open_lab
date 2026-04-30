@@ -344,6 +344,71 @@ namespace Open_lab.Tests.Services
         }
 
         [Fact]
+        public async Task AddTestsToPatient_When_ReferralAndDefaultPriceListExist_Should_PrioritizeReferralPriceList()
+        {
+            // Function: 1.3 — Add Tests to Patient
+            // Arrange
+            var referral = new Referral { Name = "ContractX" };
+            _db.Referrals.Add(referral);
+
+            var patient = new Patient { LabId = "L-PRI", FullName = "Priority Patient", Gender = "Male" };
+            _db.Patients.Add(patient);
+
+            var test = new Test { Code = "T-PRI", NameReport = "Priority Test", Price = 500m };
+            _db.Tests.Add(test);
+            await _db.SaveChangesAsync();
+
+            var defaultList = new PriceList { Name = "Default", IsDefault = true };
+            var referralList = new PriceList { Name = "ReferralList", ReferralId = referral.ReferralId, IsDefault = false };
+            _db.PriceLists.AddRange(defaultList, referralList);
+            await _db.SaveChangesAsync();
+
+            _db.PriceListItems.AddRange(
+                new PriceListItem { PriceListId = defaultList.PriceListId, TestId = test.TestId, Price = 300m },
+                new PriceListItem { PriceListId = referralList.PriceListId, TestId = test.TestId, Price = 200m });
+            await _db.SaveChangesAsync();
+
+            var visit = new Visit
+            {
+                PatientId = patient.PatientId,
+                VisitDate = DateTime.Now,
+                ReferralId = referral.ReferralId,
+                AccountType = "Referral"
+            };
+            _db.Visits.Add(visit);
+            await _db.SaveChangesAsync();
+
+            // Act
+            var visitTest = await _service.AddTestToVisitAsync(visit.VisitId, test.TestId);
+
+            // Assert
+            visitTest.Price.Should().Be(200m);
+        }
+
+        [Fact]
+        public async Task AddTestsToPatient_When_NoPriceListsExist_Should_Use_BaseTestPrice_EdgeGuard()
+        {
+            // Function: 1.3 — Add Tests to Patient
+            // Arrange
+            var patient = new Patient { LabId = "L-NOPL", FullName = "No PriceList", Gender = "Female" };
+            _db.Patients.Add(patient);
+            await _db.SaveChangesAsync();
+
+            var visit = new Visit { PatientId = patient.PatientId, VisitDate = DateTime.Now, AccountType = "Cash" };
+            _db.Visits.Add(visit);
+
+            var test = new Test { Code = "T-NOPL", NameReport = "No PL", Price = 123m };
+            _db.Tests.Add(test);
+            await _db.SaveChangesAsync();
+
+            // Act
+            var visitTest = await _service.AddTestToVisitAsync(visit.VisitId, test.TestId);
+
+            // Assert
+            visitTest.Price.Should().Be(123m);
+        }
+
+        [Fact]
         public async Task ResolveTestPriceAsync_With_PhysicianAssigned_Should_Fallback_To_DefaultPrice_ProductionGap()
         {
             // Function: 1.3 — Add Tests to Patient
@@ -513,6 +578,80 @@ namespace Open_lab.Tests.Services
 
             // Assert
             await act.Should().ThrowAsync<InvalidOperationException>().WithMessage("*Custom group has no tests*");
+        }
+
+        [Fact]
+        public async Task AddGroupOfTests_WithValidCustomGroup_Should_AddAllTestsToVisit()
+        {
+            // Function: 1.8 — Add Group of Tests
+            // Arrange
+            var patient = new Patient { LabId = "L-GRP1", FullName = "Group Patient", Gender = "Male" };
+            _db.Patients.Add(patient);
+            await _db.SaveChangesAsync();
+
+            var visit = new Visit { PatientId = patient.PatientId, VisitDate = DateTime.Now, Status = "Open" };
+            _db.Visits.Add(visit);
+            await _db.SaveChangesAsync();
+
+            var test1 = new Test { Code = "G1", NameReport = "Group 1", Price = 10m };
+            var test2 = new Test { Code = "G2", NameReport = "Group 2", Price = 20m };
+            _db.Tests.AddRange(test1, test2);
+            await _db.SaveChangesAsync();
+
+            var group = new CustomGroup { Name = "Profile A", Price = 0m };
+            _db.CustomGroups.Add(group);
+            await _db.SaveChangesAsync();
+
+            _db.CustomGroupItems.AddRange(
+                new CustomGroupItem { CustomGroupId = group.CustomGroupId, TestId = test1.TestId },
+                new CustomGroupItem { CustomGroupId = group.CustomGroupId, TestId = test2.TestId });
+            await _db.SaveChangesAsync();
+
+            // Act
+            var added = await _service.AddCustomGroupToVisitAsync(visit.VisitId, group.CustomGroupId);
+
+            // Assert
+            added.Should().HaveCount(2);
+            (await _db.VisitTests.CountAsync(vt => vt.VisitId == visit.VisitId)).Should().Be(2);
+        }
+
+        [Fact]
+        public async Task AddGroupOfTests_WhenSomeTestsAlreadyInVisit_Should_AddOnlyMissingOnes_EdgeGuard()
+        {
+            // Function: 1.8 — Add Group of Tests
+            // Arrange
+            var patient = new Patient { LabId = "L-GRP2", FullName = "Group Patient 2", Gender = "Female" };
+            _db.Patients.Add(patient);
+            await _db.SaveChangesAsync();
+
+            var visit = new Visit { PatientId = patient.PatientId, VisitDate = DateTime.Now, Status = "Open" };
+            _db.Visits.Add(visit);
+            await _db.SaveChangesAsync();
+
+            var test1 = new Test { Code = "G3", NameReport = "Group 3", Price = 10m };
+            var test2 = new Test { Code = "G4", NameReport = "Group 4", Price = 20m };
+            _db.Tests.AddRange(test1, test2);
+            await _db.SaveChangesAsync();
+
+            _db.VisitTests.Add(new VisitTest { VisitId = visit.VisitId, TestId = test1.TestId, Price = 10m, Status = "Pending" });
+            await _db.SaveChangesAsync();
+
+            var group = new CustomGroup { Name = "Profile B", Price = 0m };
+            _db.CustomGroups.Add(group);
+            await _db.SaveChangesAsync();
+
+            _db.CustomGroupItems.AddRange(
+                new CustomGroupItem { CustomGroupId = group.CustomGroupId, TestId = test1.TestId },
+                new CustomGroupItem { CustomGroupId = group.CustomGroupId, TestId = test2.TestId });
+            await _db.SaveChangesAsync();
+
+            // Act
+            var added = await _service.AddCustomGroupToVisitAsync(visit.VisitId, group.CustomGroupId);
+
+            // Assert
+            added.Should().ContainSingle();
+            added[0].TestId.Should().Be(test2.TestId);
+            (await _db.VisitTests.CountAsync(vt => vt.VisitId == visit.VisitId)).Should().Be(2);
         }
 
         [Fact]

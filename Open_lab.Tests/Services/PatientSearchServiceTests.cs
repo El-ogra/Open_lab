@@ -28,8 +28,9 @@ namespace Open_lab.Tests.Services
         }
 
         [Fact]
-        public async Task SearchPatientsAsync_When_LabIdMatches_Should_Return_Patient_SuccessGuard()
+        public async Task SearchPatient_WithMatchingLabId_ShouldReturnPatient()
         {
+            // Function: 1.5 — Search Patient
             // Arrange
             _db.Patients.AddRange(
                 new Patient { LabId = "LAB-001", FullName = "Ahmed Ali", Gender = "Male" },
@@ -45,8 +46,9 @@ namespace Open_lab.Tests.Services
         }
 
         [Fact]
-        public async Task SearchPatientsAsync_When_NoPatientMatchesCriteria_Should_Return_Empty_FailureGuard()
+        public async Task SearchPatient_WhenNoMatch_ShouldReturnEmptyList()
         {
+            // Function: 1.5 — Search Patient
             // Arrange
             _db.Patients.Add(new Patient { LabId = "LAB-010", FullName = "Patient A", Gender = "Male", Phone = "1111" });
             await _db.SaveChangesAsync();
@@ -59,8 +61,9 @@ namespace Open_lab.Tests.Services
         }
 
         [Fact]
-        public async Task SearchPatientsAsync_When_AllFiltersNull_Should_Return_AllPatientsOrdered_EdgeGuard()
+        public async Task SearchPatient_WhenAllFiltersEmpty_ShouldReturnAllOrderedByName()
         {
+            // Function: 1.5 — Search Patient
             // Arrange
             _db.Patients.AddRange(
                 new Patient { LabId = "L2", FullName = "Zain", Gender = "Male" },
@@ -77,8 +80,9 @@ namespace Open_lab.Tests.Services
         }
 
         [Fact]
-        public async Task GetPatientVisitsAsync_When_VisitsExist_Should_Return_DescendingByVisitDate_SuccessGuard()
+        public async Task ViewPatientHistory_WhenVisitsExist_ShouldReturnDescendingByVisitDate()
         {
+            // Function: 1.6 — View Patient History
             // Arrange
             var patient = new Patient { LabId = "LAB-V", FullName = "Visit P", Gender = "Male" };
             _db.Patients.Add(patient);
@@ -98,8 +102,9 @@ namespace Open_lab.Tests.Services
         }
 
         [Fact]
-        public async Task GetPatientVisitsAsync_When_PatientHasNoVisits_Should_Return_Empty_EdgeGuard()
+        public async Task ViewPatientHistory_WhenNoVisits_ShouldReturnEmptyList()
         {
+            // Function: 1.6 — View Patient History
             // Arrange
             var patient = new Patient { LabId = "LAB-NOVISIT", FullName = "No Visit", Gender = "Female" };
             _db.Patients.Add(patient);

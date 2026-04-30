@@ -28,7 +28,7 @@ namespace Open_lab.Tests.Services
         }
 
         [Fact]
-        public async Task CreateAsync_Should_Create_Patient_And_Generate_LabId()
+        public async Task AddNewPatient_WithValidData_ShouldCreatePatientAndGenerateLabId()
         {
             // Function: 1.1 — Add New Patient
             // Arrange
@@ -48,7 +48,7 @@ namespace Open_lab.Tests.Services
         }
 
         [Fact]
-        public async Task CreateAsync_Invalid_Gender_Should_Throw()
+        public async Task AddNewPatient_WithInvalidGender_ShouldThrowArgumentException()
         {
             // Function: 1.1 — Add New Patient
             // Arrange
@@ -66,7 +66,7 @@ namespace Open_lab.Tests.Services
         }
 
         [Fact]
-        public async Task GenerateNextLabIdAsync_Should_Increment_Sequence()
+        public async Task AddNewPatient_WhenLabIdSequenceExists_ShouldGenerateNextLabId()
         {
             // Function: 1.1 — Add New Patient
             // Arrange - seed a patient with today's prefix
@@ -82,6 +82,46 @@ namespace Open_lab.Tests.Services
             // Assert
             next.Should().StartWith(prefix);
             next.Should().EndWith("002");
+        }
+
+        [Fact]
+        public async Task AddNewPatient_WithMissingFullName_ShouldThrowArgumentException()
+        {
+            // Function: 1.1 — Add New Patient
+            // Arrange
+            var patient = new Patient
+            {
+                FullName = " ",
+                Gender = "Male"
+            };
+
+            // Act
+            Func<Task> act = async () => await _service.CreateAsync(patient);
+
+            // Assert
+            var ex = await act.Should().ThrowAsync<ArgumentException>();
+            ex.Which.Message.Should().Contain("FullName");
+        }
+
+        [Fact]
+        public async Task AddNewPatient_WithWhitespacePhone_ShouldStoreNullPhone_EdgeCase()
+        {
+            // Function: 1.1 — Add New Patient
+            // Arrange
+            var patient = new Patient
+            {
+                FullName = "Phone Edge",
+                Gender = "Male",
+                Phone = "   "
+            };
+
+            // Act
+            var created = await _service.CreateAsync(patient);
+
+            // Assert
+            var persisted = await _db.Patients.FindAsync(created.PatientId);
+            persisted.Should().NotBeNull();
+            persisted!.Phone.Should().BeNull();
         }
 
         [Fact]
@@ -384,6 +424,49 @@ namespace Open_lab.Tests.Services
 
             // Assert
             await act.Should().ThrowAsync<InvalidOperationException>().WithMessage("*Patient not found*");
+        }
+
+        [Fact]
+        public async Task AddMedicalHistory_WithNullHistory_ShouldThrowArgumentNullException()
+        {
+            // Function: 1.7 — Add Medical History
+            // Arrange
+            var patient = new Patient { LabId = "LMH-NULL", FullName = "P", Gender = "Male" };
+            _db.Patients.Add(patient);
+            await _db.SaveChangesAsync();
+
+            // Act
+            Func<Task> act = async () => await _service.SaveMedicalHistoryAsync(patient.PatientId, null!);
+
+            // Assert
+            await act.Should().ThrowAsync<ArgumentNullException>();
+        }
+
+        [Fact]
+        public async Task AddMedicalHistory_WithWhitespaceFields_ShouldStoreNulls_EdgeCase()
+        {
+            // Function: 1.7 — Add Medical History
+            // Arrange
+            var patient = new Patient { LabId = "LMH-TRIM", FullName = "P", Gender = "Male" };
+            _db.Patients.Add(patient);
+            await _db.SaveChangesAsync();
+
+            // Act
+            await _service.SaveMedicalHistoryAsync(patient.PatientId, new MedicalHistory
+            {
+                ChronicDiseases = "  ",
+                Allergies = "\t",
+                Medications = "\n",
+                Notes = " "
+            });
+
+            // Assert
+            var saved = await _db.MedicalHistories.FirstOrDefaultAsync(m => m.PatientId == patient.PatientId);
+            saved.Should().NotBeNull();
+            saved!.ChronicDiseases.Should().BeNull();
+            saved.Allergies.Should().BeNull();
+            saved.Medications.Should().BeNull();
+            saved.Notes.Should().BeNull();
         }
 
         [Fact]

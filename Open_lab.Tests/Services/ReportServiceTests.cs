@@ -117,9 +117,10 @@ namespace Open_lab.Tests.Services
         }
 
         [Fact]
-        public async Task GetPatientHistoryAsync_Patient_Not_Found_Should_Throw()
+        public async Task ViewPatientHistory_WhenPatientNotFound_ShouldThrowInvalidOperationException()
         {
-            // Arrange - FAILURE test for GetPatientHistoryAsync when patient not found
+            // Function: 1.6 — View Patient History
+            // Arrange
             // Act
             Func<Task> act = async () => await _service.GetPatientHistoryAsync(99999, null, null);
 
@@ -128,9 +129,10 @@ namespace Open_lab.Tests.Services
         }
 
         [Fact]
-        public async Task GetPatientHistoryAsync_From_Greater_Than_To_Should_Return_Empty()
+        public async Task ViewPatientHistory_WhenFromGreaterThanTo_ShouldReturnEmptyVisits()
         {
-            // Arrange - FAILURE test for GetPatientHistoryAsync when From > To
+            // Function: 1.6 — View Patient History
+            // Arrange
             var patient = new Patient { PatientId = 100, FullName = "Test Patient" };
             _db.Patients.Add(patient);
             await _db.SaveChangesAsync();
@@ -149,6 +151,30 @@ namespace Open_lab.Tests.Services
             result.Should().NotBeNull();
             result.Patient.FullName.Should().Be("Test Patient");
             result.Visits.Should().BeEmpty();
+        }
+
+        [Fact]
+        public async Task ViewPatientHistory_WithExistingVisits_ShouldReturnVisitsWithinRange()
+        {
+            // Function: 1.6 — View Patient History
+            // Arrange
+            var patient = new Patient { PatientId = 200, FullName = "History Patient", LabId = "H-200", Gender = "Male" };
+            _db.Patients.Add(patient);
+            await _db.SaveChangesAsync();
+
+            var inRangeVisit = new Visit { PatientId = patient.PatientId, VisitDate = new DateTime(2026, 4, 10) };
+            var outOfRangeVisit = new Visit { PatientId = patient.PatientId, VisitDate = new DateTime(2026, 3, 10) };
+            _db.Visits.AddRange(inRangeVisit, outOfRangeVisit);
+            await _db.SaveChangesAsync();
+
+            // Act
+            var result = await _service.GetPatientHistoryAsync(patient.PatientId, new DateTime(2026, 4, 1), new DateTime(2026, 4, 30));
+
+            // Assert
+            result.Should().NotBeNull();
+            result.Patient.PatientId.Should().Be(patient.PatientId);
+            result.Visits.Should().ContainSingle();
+            result.Visits[0].Visit.VisitId.Should().Be(inRangeVisit.VisitId);
         }
 
         [Fact]
