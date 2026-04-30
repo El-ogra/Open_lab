@@ -73,15 +73,15 @@
 
 | رقم الوظيفة | اسم الوظيفة | Service ✅/❌ | ViewModel ✅/❌ | الحالة | أسماء الاختبارات المكتوبة |
 |-------------|-------------|--------------|----------------|--------|--------------------------|
-| 4.1 | إدخال نتائج التحاليل — Enter Test Results | ❌ | ❌ | ❌ لم يبدأ | |
-| 4.2 | حفظ النتائج — Save Results | ❌ | ❌ | ❌ لم يبدأ | |
-| 4.3 | تعديل النتائج — Edit Results | ❌ | ❌ | ❌ لم يبدأ | |
-| 4.4 | إنشاء تقرير مركّب — Create Composite Report | ❌ | ❌ | ❌ لم يبدأ | |
-| 4.5 | ترتيب التقرير — Arrange Report Order | ❌ | ❌ | ❌ لم يبدأ | |
-| 4.6 | معاينة التقرير — Preview Report | ❌ | ❌ | ❌ لم يبدأ | |
-| 4.7 | طباعة التقرير — Print Report | ❌ | ❌ | ❌ لم يبدأ | |
-| 4.8 | طباعة تقرير فارغ — Print Blank Report | ❌ | ❌ | ❌ لم يبدأ | |
-| 4.9 | المقارنة مع التاريخ — Compare with History | ❌ | ❌ | ❌ لم يبدأ | |
+| 4.1 | إدخال نتائج التحاليل — Enter Test Results | ✅ | ✅ | ✅ مكتمل (BR-MED-001, BR-MED-002) | ResultsServiceTests: SaveResultAsync_Should_Create_Result_And_Set_Status, Function_4_1_Automated_Intelligence_Full_Verification, SaveResultAsync_With_ReferenceRange_Should_Classify_Correctly_LogicGuard + ResultsEntryViewModelTests + Module4ServiceTests_Additional: SaveResultAsync_With_ValidData_Should_Save_And_Set_Correct_Flag_SuccessGuard, ValidateResultAsync_With_Value_In_Normal_Range_Should_Set_Normal_Flag_SuccessGuard, ValidateResultAsync_With_Value_Below_Range_Should_Set_Low_Flag_SuccessGuard, ValidateResultAsync_With_Value_Above_Range_Should_Set_High_Flag_SuccessGuard, SaveResultsAsync_With_Multiple_ResultItems_Should_Call_Service_For_Each_SuccessGuard |
+| 4.2 | حفظ النتائج — Save Results | ✅ | ✅ | ✅ مكتمل | ResultsServiceTests: SaveResultAsync_Should_Clear_Verification_On_Update, SaveResultAsync_Should_Set_Status_To_Completed_When_Result_Is_Present + Module4ServiceTests_Additional: SaveResultAsync_Should_Set_Status_To_Completed_When_All_Parameters_Have_Values_SuccessGuard, SaveResultAsync_Should_Remain_InProgress_When_Some_Parameters_Missing_EdgeGuard + ResultsEntryViewModelTests: SaveResultsAsync_When_ServiceThrows_Should_Set_ErrorStatus_FailureGuard |
+| 4.3 | تعديل النتائج — Edit Results | ✅ | ✅ | ✅ مكتمل (BR-SEC-002) | ResultsServiceTests: SaveResultAsync_When_Verified_Should_Throw, Function_4_3_Audit_Trail_Integrity_Verification + Module4ServiceTests_Additional: SaveResultAsync_When_Editing_Existing_Value_Should_Create_Audit_Log_SuccessGuard, SaveResultAsync_When_Verified_Should_Throw_FailureGuard, SaveResultAsync_Should_Clear_Verification_When_Editing_EdgeGuard + ResultsEntryViewModelTests: VerifyResultsAsync_With_Valid_VisitTest_Should_Call_Service, ReopenResultsAsync_With_Verified_Status_Should_Call_Service_SuccessGuard |
+| 4.4 | إنشاء تقرير مركّب — Create Composite Report | ✅ | ✅ | ✅ مكتمل | ResultsServiceTests: GetResultsByVisitAsync_Should_Return_Multiple_Tests_Results_LogicGuard + Module4ServiceTests_Additional: GetResultsForVisitTestAsync_Should_Return_All_Results_Ordered_By_Parameter_SuccessGuard + ReportViewerViewModelTests: LoadReportAsync_With_Valid_Visit_Should_Build_Preview_LogicGuard, LoadReportAsync_Should_Set_Report_Data_Correctly_SuccessGuard |
+| 4.5 | ترتيب التقرير — Arrange Report Order | ✅ | ✅ | ✅ مكتمل | CombinedReportViewModelTests: MoveCommands_Should_Reorder_Items_When_Selection_Changes_EdgeGuard + Module4ServiceTests_Additional: MoveUpCommand_Should_Swap_Items_SuccessGuard, LoadCommand_With_Empty_TestList_Should_Set_Status_EdgeGuard |
+| 4.6 | معاينة التقرير — Preview Report | ✅ | ✅ | ✅ مكتمل (BR-SEC-002) | Module4ServiceTests_Additional: PreviewCommand_Should_Load_Report_And_Set_Preview_Flag_SuccessGuard + ReportViewerViewModelTests: PrintAsync_Should_Call_PrintService_For_Report_LogicGuard |
+| 4.7 | طباعة التقرير — Print Report | ✅ | ✅ | ✅ مكتمل (BR-SEC-002) | ResultsServiceTests: Function_4_7_Print_Audit_Logging_Verification + Module4ServiceTests_Additional: LogVisitReportPrintedAsync_Should_Create_Audit_Log_SuccessGuard + ReportViewerViewModelTests: PrintAsync_Should_Call_PrintService_For_Report_LogicGuard, PrintAsync_When_PrintServiceThrows_Should_Set_PrintErrorMessage_EdgeGuard |
+| 4.8 | طباعة تقرير فارغ — Print Blank Report | ✅ | ✅ | ✅ مكتمل | BlankReportViewModelTests: LoadAsync_With_Valid_Visit_Should_Populate_Blank_Report_Data_LogicGuard, LoadAsync_With_InvalidVisitId_Should_Set_Validation_Message_FailureGuard, PrintBlankAsync_Without_PrintService_Should_Set_ServiceUnavailable_EdgeGuard + Module4ServiceTests_Additional: PrintBlankAsync_Should_Call_PrintService_SuccessGuard, LoadAsync_With_Null_Referral_Should_Handle_EdgeGuard |
+| 4.9 | المقارنة مع التاريخ — Compare with History | ✅ | ✅ | ✅ مكتمل (BR-MED-008) | CompareWithHistoryViewModelTests: LoadPatientCommand_When_LabId_NotFound_Should_Set_Status_FailureGuard, LoadPatientCommand_When_Patient_Exists_Should_Load_Test_List_SuccessGuard, LoadHistoryCommand_Should_Group_And_Load_HistoryRows_EdgeGuard, LoadHistoryCommand_When_ServiceThrows_Should_Set_ErrorMessage_FailureGuard + Module4ServiceTests_Additional: GetResultsByVisitAsync_Should_Include_Historical_Data_For_Comparison_SuccessGuard, LoadHistoryCommand_With_Multiple_Results_Should_Group_By_Visit_EdgeGuard, LoadHistoryCommand_With_No_History_Should_Show_Empty_State_EdgeGuard |
 
 ---
 
@@ -213,7 +213,7 @@
 | 1 — إدارة المرضى | 8 | 7 | 0 | 0 | 1 |
 | 2 — المحاسبة والمالية | 13 | 13 | 0 | 0 | 0 |
 | 3 — إدارة التحاليل والأسعار | 9 | 9 | 0 | 0 | 0 |
-| 4 — إدخال النتائج والتقارير | 9 | 0 | 0 | 9 | 0 |
+| 4 — إدخال النتائج والتقارير | 9 | 9 | 0 | 0 | 0 |
 | 5 — المزارع والحساسية | 7 | 0 | 0 | 7 | 0 |
 | 6 — سحب العينات | 4 | 0 | 0 | 4 | 0 |
 | 7 — أوراق العمل | 4 | 0 | 0 | 4 | 0 |
@@ -223,7 +223,7 @@
 | 11 — الحضور والانصراف | 5 | 0 | 0 | 5 | 0 |
 | 12 — جهات التعاقد والإحالة | 9 | 0 | 0 | 9 | 0 |
 | 13 — إعدادات النظام | 8 | 0 | 0 | 8 | 0 |
-| **الإجمالي** | **97** | **37** | **8** | **59** | **9** |
+| **الإجمالي** | **97** | **46** | **8** | **50** | **9** |
 
 ---
 
