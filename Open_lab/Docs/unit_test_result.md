@@ -22,14 +22,14 @@
 
 | رقم الوظيفة | اسم الوظيفة | Service ✅/❌ | ViewModel ✅/❌ | الحالة | أسماء الاختبارات المكتوبة |
 |-------------|-------------|--------------|----------------|--------|--------------------------|
-| 1.1 | إضافة مريض جديد — Add New Patient | ❌ | ❌ | ❌ لم يبدأ | |
-| 1.2 | تعديل بيانات مريض — Edit Patient Data | ❌ | ❌ | ❌ لم يبدأ | |
-| 1.3 | إضافة تحاليل للمريض — Add Tests to Patient | ❌ | ❌ | ❌ لم يبدأ | |
-| 1.4 | حذف تحاليل — Delete Tests | ❌ | ❌ | ❌ لم يبدأ | |
-| 1.5 | البحث عن مريض — Search Patient | ❌ | ❌ | ❌ لم يبدأ | |
-| 1.6 | عرض التاريخ المرضي — View Patient History | ❌ | ❌ | ❌ لم يبدأ | |
-| 1.7 | إضافة تاريخ طبي — Add Medical History | ❌ | ❌ | ❌ لم يبدأ | |
-| 1.8 | إضافة مجموعة تحاليل — Add Group of Tests | ❌ | ❌ | ❌ لم يبدأ | |
+| 1.1 | إضافة مريض جديد — Add New Patient | ✅ | ✅ | ✅ مكتمل | AddNewPatient_WithValidData_ShouldCreatePatientAndGenerateLabId, AddNewPatient_WithInvalidGender_ShouldThrowArgumentException, AddNewPatient_WithMissingFullName_ShouldThrowArgumentException, AddNewPatient_WithWhitespacePhone_ShouldStoreNullPhone_EdgeCase, SaveAsync_With_New_Patient_Should_Create_New_Patient_LogicGuard, SaveAsync_When_No_FullName_Should_Show_Error_LogicGuard |
+| 1.2 | تعديل بيانات مريض — Edit Patient Data | ✅ | ✅ | ✅ مكتمل | UpdateAsync_Should_Update_All_Fields, UpdateAsync_DuplicateLabId_Should_Throw, UpdateAsync_FutureBirthDate_Should_Throw, DeleteAsync_With_Visits_Should_Throw, SaveAsync_With_Existing_Patient_Should_Update_Patient_LogicGuard, LoadByLabIdAsync_With_Existing_LabId_Should_Load_Patient_Data, DeleteAsync_When_DeleteServiceThrows_Should_Set_ErrorMessage_FailureGuard |
+| 1.3 | إضافة تحاليل للمريض — Add Tests to Patient | ✅ | ✅ | ✅ مكتمل | AddTestToVisitAsync_Should_Add_VisitTest_With_Price, AddTestToVisitAsync_Duplicate_Should_Throw, AddTestToVisitAsync_Visit_Closed_Should_Throw, AddTestsToPatient_When_ReferralAndDefaultPriceListExist_Should_PrioritizeReferralPriceList, AddTestsToPatient_When_NoPriceListsExist_Should_Use_BaseTestPrice_EdgeGuard, AddTestCommand_Should_Add_Test_To_Visit_LogicGuard, AddTestCommand_When_Service_Throws_Should_Set_Error_StatusMessage |
+| 1.4 | حذف تحاليل — Delete Tests | ✅ | ✅ | ✅ مكتمل | RemoveVisitTestAsync_Pending_Should_Delete_Successfully, RemoveVisitTestAsync_Verified_Should_Throw, RemoveVisitTestAsync_Visit_Closed_Should_Throw, RemoveVisitTestAsync_VisitTest_Not_Found_Should_Not_Throw, RemoveTestCommand_Should_Remove_Test_LogicGuard, RemoveTestCommand_When_Service_Throws_Should_Set_Error_StatusMessage |
+| 1.5 | البحث عن مريض — Search Patient | ✅ | ✅ | ✅ مكتمل | SearchPatient_WithMatchingLabId_ShouldReturnPatient, SearchPatient_WhenNoMatch_ShouldReturnEmptyList, SearchPatient_WhenAllFiltersEmpty_ShouldReturnAllOrderedByName, SearchAsync_With_NameAndPhone_Should_Return_Matching_Patients_SuccessGuard, SearchCommand_Should_Search_By_All_Criteria_And_Populate_Results, SearchAsync_Should_Populate_Results_LogicGuard, SearchAsync_With_No_Results_Should_Return_Empty_LogicGuard |
+| 1.6 | عرض التاريخ المرضي — View Patient History | ✅ | ✅ | ✅ مكتمل | ViewPatientHistory_WhenVisitsExist_ShouldReturnDescendingByVisitDate, ViewPatientHistory_WhenNoVisits_ShouldReturnEmptyList, ViewPatientHistory_WhenPatientNotFound_ShouldThrowInvalidOperationException, ViewPatientHistory_WithExistingVisits_ShouldReturnVisitsWithinRange, LoadHistoryCommand_Should_Populate_Visits_LogicGuard, SelectedPatient_Setter_Should_Load_Visits, PatientHistoryViewModel_Should_Expose_ReadOnly_Design_Without_EditCommand_DesignEnforcement |
+| 1.7 | إضافة تاريخ طبي — Add Medical History | ✅ | ✅ | ✅ مكتمل | SaveMedicalHistoryAsync_Should_Create_New_History, SaveMedicalHistoryAsync_Should_Update_Existing_History, SaveMedicalHistoryAsync_NonExistentPatient_Should_Throw, AddMedicalHistory_WithNullHistory_ShouldThrowArgumentNullException, AddMedicalHistory_WithWhitespaceFields_ShouldStoreNulls_EdgeCase, SaveAsync_With_MedicalHistory_Should_Save_Complete_History_LogicGuard, SaveAsync_When_MedicalHistorySaveFails_Should_Set_Error_Message_FailureGuard |
+| 1.8 | إضافة مجموعة تحاليل — Add Group of Tests | ✅ | ✅ | ✅ مكتمل | AddCustomGroupToVisitAsync_Visit_Not_Found_Should_Throw, AddCustomGroupToVisitAsync_CustomGroup_Has_No_Tests_Should_Throw, AddGroupOfTests_WithValidCustomGroup_Should_AddAllTestsToVisit, AddGroupOfTests_WhenSomeTestsAlreadyInVisit_Should_AddOnlyMissingOnes_EdgeGuard, AddCustomGroupCommand_Should_Add_All_Tests_In_Group_LogicGuard, AddCustomGroupCommand_When_Service_Throws_Should_Set_Error_StatusMessage |
 
 ---
 
@@ -210,7 +210,7 @@
 
 | الموديول | إجمالي الوظائف | مكتمل ✅ | جزئي 🔄 | لم يبدأ ❌ | يحتاج مراجعة ⚠️ |
 |----------|---------------|---------|---------|-----------|----------------|
-| 1 — إدارة المرضى | 8 | 0 | 0 | 8 | 0 |
+| 1 — إدارة المرضى | 8 | 8 | 0 | 0 | 0 |
 | 2 — المحاسبة والمالية | 13 | 0 | 0 | 13 | 0 |
 | 3 — إدارة التحاليل والأسعار | 9 | 0 | 0 | 9 | 0 |
 | 4 — إدخال النتائج والتقارير | 9 | 0 | 0 | 9 | 0 |
@@ -223,7 +223,7 @@
 | 11 — الحضور والانصراف | 5 | 0 | 0 | 5 | 0 |
 | 12 — جهات التعاقد والإحالة | 9 | 0 | 0 | 9 | 0 |
 | 13 — إعدادات النظام | 8 | 0 | 0 | 8 | 0 |
-| **الإجمالي** | **97** | **0** | **0** | **97** | **0** |
+| **الإجمالي** | **97** | **8** | **0** | **89** | **0** |
 
 ---
 
