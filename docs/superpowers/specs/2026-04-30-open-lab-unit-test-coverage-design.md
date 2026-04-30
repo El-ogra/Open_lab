@@ -13,8 +13,8 @@
 ## قيود أساسية
 - لا يتم تعديل كود الإنتاج داخل مشروع [Open_lab.csproj](file:///workspace/Open_lab/Open_lab.csproj).
 - يتم تعديل/إضافة الاختبارات فقط داخل مشروع [Open_lab.Tests.csproj](file:///workspace/Open_lab.Tests/Open_lab.Tests.csproj).
-- اختبارات طبقة Service يجب أن تكون Mock فقط بدون استخدام DbContext/InMemory.
-- الاختبارات الحالية التي تعتمد على EF InMemory سيتم نقلها وتصنيفها كاختبارات تكامل Integration.
+- اختبارات طبقة Service يمكن أن تستخدم EF Core InMemory كبديل آمن عن SQL Server (بدون أي اتصال بقاعدة بيانات حقيقية).
+- استخدام EF Core InMemory في هذا المشروع يُعامل كاختبار Unit عمليًا لأنه لا يعتمد على موارد خارجية (SQL Server/شبكة/ملفات) ويُسهل اختبار منطق EF والـqueries بشكل واقعي.
 
 ## تعريف “مكتمل” لكل وظيفة
 لكل وظيفة (x.y) يجب توفير:
@@ -39,25 +39,17 @@
   - رسائل الخطأ/الحالة
   - Verify لاستدعاءات الـService في عمليات الكتابة
 
-### 2) Service Unit Tests (Moq فقط) بدون DbContext
-بما أن أغلب الخدمات تعتمد مباشرة على OpenLabDbContext، سيتم إنشاء طبقة مساعدة داخل الاختبارات لتوفير:
-- Mock لـ OpenLabDbContext
-- Mock لـ DbSet<T> يدعم LINQ وعمليات async الشائعة (ToListAsync/FirstOrDefaultAsync/AnyAsync)
-- “مخزن بيانات” in-memory على هيئة List<T> لكل Entity لازمة للسيناريو
-
-نطاق الدعم سيكون “حسب الحاجة”:
-- نبدأ بالعمليات والـqueries التي تستخدمها الوظائف الـ97 فعلياً.
-- إذا ظهرت عملية EF غير مدعومة في mock infrastructure أثناء التنفيذ:
-  - نوسّع الـhelpers داخل Open_lab.Tests فقط دون تعديل كود الإنتاج.
+### 2) Service Unit Tests (EF Core InMemory)
+- نستخدم OpenLabDbContext عبر EF InMemory داخل الاختبار بدل SQL Server.
+- هذا يتيح اختبار منطق الخدمات والـqueries/relationships بشكل أقرب للواقع وبمجهود أقل مقارنة بمحاولة Mock لـ DbContext/DbSet.
+- لا يتم استخدام أي اتصال خارجي: لا SQL Server ولا ملفات ولا شبكة.
 
 ## تنظيم الاختبارات
 ### الملفات/المجلدات
 - Unit:
   - Open_lab.Tests/Services/*.cs
   - Open_lab.Tests/ViewModels/*.cs
-- Integration:
-  - Open_lab.Tests/Integration/*.cs (نقل اختبارات EF InMemory الحالية هنا)
-  - إضافة [Trait("Category","Integration")] لتسهيل الفلترة عند الحاجة.
+- اختبارات تعتمد على “تدفق شامل جدًا” يمكن تمييزها لاحقًا بـTrait (اختياري) إذا احتجنا فصلها عند التشغيل، لكن لن نقوم بأي نقل افتراضي.
 
 ### قواعد التسمية والربط
 لكل اختبار:
@@ -66,16 +58,14 @@
 - بنية AAA مع فواصل واضحة: Arrange / Act / Assert
 
 ## خطة التنفيذ عالية المستوى (بدون تنفيذ هنا)
-1. نقل اختبارات InMemory الحالية إلى Integration ووضع Trait لها.
-2. إنشاء Mock EF infrastructure داخل Open_lab.Tests/Infrastructure (DbSet mock + async query provider).
-3. تغطية الوظائف 97 على دفعات بحسب الموديولات:
+1. اعتماد EF InMemory كآلية اختبار للخدمات (Service) بدل SQL Server.
+2. تغطية الوظائف 97 على دفعات بحسب الموديولات:
    - لكل وظيفة: قراءة BR من التوثيق + فحص الاختبارات الحالية + كتابة الناقص.
-4. بعد كل دفعة:
+3. بعد كل دفعة:
    - dotnet test
    - تحديث unit_test_result.md (Service/ViewModel/Status + أسماء الاختبارات)
 
 ## ناتج التسليم
 - اختبارات وحدة متوافقة مع UnitTest_Skill.md وتغطي 97 وظيفة.
 - تحديث [unit_test_result.md](file:///workspace/Open_lab/Docs/unit_test_result.md) ليعكس الوضع الحقيقي.
-- بقاء اختبارات التكامل (إن وجدت) داخل Integration ومعلّمة كتTests تكامل.
-
+- إبقاء أي اختبارات “تكامل/سيناريو شامل” ضمن نفس المشروع، مع إمكانية وسمها لاحقًا عند الحاجة للفصل أثناء التشغيل.

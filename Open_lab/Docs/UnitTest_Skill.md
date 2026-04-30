@@ -339,7 +339,8 @@ public async Task AddPatient_WithValidData_ShouldSaveAndReturnLabId()
 
 ### Rule 1: Always Mock Dependencies
 Every external dependency MUST be mocked.
-Never use real database connections in unit tests.
+Never use real database connections in unit tests (SQL Server / networked DB).
+EF Core InMemory is allowed for Service-layer tests in this project because it does not use external resources and provides realistic query/relationship behavior.
 Never use real file system in unit tests.
 
 ```csharp
