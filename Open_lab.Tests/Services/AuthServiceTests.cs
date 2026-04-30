@@ -27,13 +27,24 @@ namespace Open_lab.Tests.Services
             _db.Dispose();
         }
 
+        // ──────────────────────────────────────────────────────────────────
+        // 10.8 — Logout / Validate Credentials (Auth boundary)
+        // ──────────────────────────────────────────────────────────────────
+
         [Fact]
-        public async Task ValidateCredentialsAsync_With_Hashed_Password_Should_Return_User_Success()
+        public async Task ValidateCredentials_WithValidHashedPassword_ShouldReturnUser()
         {
+            // Function: 10.8 — Logout (auth entry: validates credentials before logout)
             // Arrange
             var salt = PasswordSecurity.GenerateSalt();
             var hash = PasswordSecurity.ComputeSha256("p@ss", salt);
-            _db.Users.Add(new User { Username = "tech1", PasswordHash = hash, Salt = salt, IsActive = true });
+            _db.Users.Add(new User
+            {
+                Username = "tech1",
+                PasswordHash = hash,
+                Salt = salt,
+                IsActive = true
+            });
             await _db.SaveChangesAsync();
 
             // Act
@@ -45,57 +56,80 @@ namespace Open_lab.Tests.Services
         }
 
         [Fact]
-        public async Task ValidateCredentialsAsync_When_User_Not_Found_Should_Return_Null_Failure()
+        public async Task ValidateCredentials_WhenUserNotFound_ShouldReturnNull()
         {
-            // Act
-            var user = await _service.ValidateCredentialsAsync("missing", "x");
+            // Function: 10.8 — Logout (failure: invalid credentials)
+            // Arrange & Act
+            var user = await _service.ValidateCredentialsAsync("missing_user", "x");
 
             // Assert
             user.Should().BeNull();
         }
 
         [Fact]
-        public async Task ValidateCredentialsAsync_With_Legacy_PlainText_Should_Migrate_To_Hash_Edge()
+        public async Task ValidateCredentials_WithLegacyPlainText_ShouldMigrateToHash()
         {
+            // Function: 10.8 — Logout (edge: legacy plain-text password migration)
             // Arrange
-            var legacy = new User { Username = "legacy", PasswordHash = "plain", Salt = "", IsActive = true };
+            var legacy = new User
+            {
+                Username = "legacy_user",
+                PasswordHash = "plain_password",
+                Salt = "",
+                IsActive = true
+            };
             _db.Users.Add(legacy);
             await _db.SaveChangesAsync();
 
             // Act
-            var user = await _service.ValidateCredentialsAsync("legacy", "plain");
+            var user = await _service.ValidateCredentialsAsync("legacy_user", "plain_password");
 
             // Assert
             user.Should().NotBeNull();
-            var refreshed = await _db.Users.SingleAsync(u => u.Username == "legacy");
+            var refreshed = await _db.Users.SingleAsync(u => u.Username == "legacy_user");
             refreshed.Salt.Should().NotBeNullOrWhiteSpace();
-            refreshed.PasswordHash.Should().NotBe("plain");
-            PasswordSecurity.Verify("plain", refreshed.Salt, refreshed.PasswordHash).Should().BeTrue();
+            refreshed.PasswordHash.Should().NotBe("plain_password");
+            PasswordSecurity.Verify("plain_password", refreshed.Salt, refreshed.PasswordHash)
+                .Should().BeTrue();
         }
 
         [Fact]
-        public async Task ValidateCredentialsAsync_When_User_Inactive_And_Not_Admin_Should_Return_Null_Failure()
+        public async Task ValidateCredentials_WhenUserInactiveAndNotAdmin_ShouldReturnNull()
         {
+            // Function: 10.8 — Logout (failure: inactive user blocked)
             // Arrange
             var salt = PasswordSecurity.GenerateSalt();
             var hash = PasswordSecurity.ComputeSha256("secret", salt);
-            _db.Users.Add(new User { Username = "inactive", PasswordHash = hash, Salt = salt, IsActive = false });
+            _db.Users.Add(new User
+            {
+                Username = "inactive_emp",
+                PasswordHash = hash,
+                Salt = salt,
+                IsActive = false
+            });
             await _db.SaveChangesAsync();
 
             // Act
-            var user = await _service.ValidateCredentialsAsync("inactive", "secret");
+            var user = await _service.ValidateCredentialsAsync("inactive_emp", "secret");
 
             // Assert
             user.Should().BeNull();
         }
 
         [Fact]
-        public async Task ValidateCredentialsAsync_Admin_Development_Fallback_Should_Reset_Hash_And_Return_User_Edge()
+        public async Task ValidateCredentials_AdminDevelopmentFallback_ShouldResetHashAndReturnUser()
         {
+            // Function: 10.8 — Logout (edge: admin dev fallback always valid)
             // Arrange
             var salt = PasswordSecurity.GenerateSalt();
-            var wrongHash = PasswordSecurity.ComputeSha256("wrong", salt);
-            _db.Users.Add(new User { Username = "admin", PasswordHash = wrongHash, Salt = salt, IsActive = false });
+            var wrongHash = PasswordSecurity.ComputeSha256("wrong_pass", salt);
+            _db.Users.Add(new User
+            {
+                Username = "admin",
+                PasswordHash = wrongHash,
+                Salt = salt,
+                IsActive = false
+            });
             await _db.SaveChangesAsync();
 
             // Act
@@ -105,7 +139,31 @@ namespace Open_lab.Tests.Services
             user.Should().NotBeNull();
             var refreshed = await _db.Users.SingleAsync(u => u.Username == "admin");
             refreshed.IsActive.Should().BeTrue();
-            PasswordSecurity.Verify("admin123", refreshed.Salt, refreshed.PasswordHash).Should().BeTrue();
+            PasswordSecurity.Verify("admin123", refreshed.Salt, refreshed.PasswordHash)
+                .Should().BeTrue();
+        }
+
+        [Fact]
+        public async Task ValidateCredentials_WithWrongPassword_ShouldReturnNull()
+        {
+            // Function: 10.8 — Logout (failure: wrong password)
+            // Arrange
+            var salt = PasswordSecurity.GenerateSalt();
+            var hash = PasswordSecurity.ComputeSha256("correct_pass", salt);
+            _db.Users.Add(new User
+            {
+                Username = "emp1",
+                PasswordHash = hash,
+                Salt = salt,
+                IsActive = true
+            });
+            await _db.SaveChangesAsync();
+
+            // Act
+            var user = await _service.ValidateCredentialsAsync("emp1", "wrong_pass");
+
+            // Assert
+            user.Should().BeNull();
         }
     }
 }

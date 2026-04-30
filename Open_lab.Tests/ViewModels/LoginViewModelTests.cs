@@ -1,13 +1,19 @@
 using System;
+using System.Collections.Generic;
 using FluentAssertions;
 using Moq;
 using Open_lab.Models;
 using Open_lab.Services;
 using Open_lab.Tests.Infrastructure;
 using Open_lab.ViewModels;
+using Xunit;
 
 namespace Open_lab.Tests.ViewModels
 {
+    /// <summary>
+    /// Tests for Module 10: Functions 10.4 (Record Attendance), 10.8 (Logout)
+    /// ViewModel layer for LoginViewModel
+    /// </summary>
     public class LoginViewModelTests : IDisposable
     {
         private readonly Mock<IAuthService> _authServiceMock;
@@ -28,7 +34,9 @@ namespace Open_lab.Tests.ViewModels
             _userPreferenceServiceMock = new Mock<IUserPreferenceService>();
             _onLoginSuccessMock = new Mock<Action>();
 
-            _userPreferenceServiceMock.Setup(x => x.GetRememberedUsername()).Returns(string.Empty);
+            _userPreferenceServiceMock
+                .Setup(x => x.GetRememberedUsername())
+                .Returns(string.Empty);
 
             _viewModel = new LoginViewModel(
                 _authServiceMock.Object,
@@ -44,11 +52,18 @@ namespace Open_lab.Tests.ViewModels
             AppSessionTestHelper.Reset();
         }
 
+        // ──────────────────────────────────────────────────────────────────
+        // 10.4 — Record Attendance + 10.8 — Logout (Login flow)
+        // ──────────────────────────────────────────────────────────────────
+
         [Fact]
-        public void Constructor_When_RememberedUsername_Exists_Should_Set_Username_And_RememberMe()
+        public void Constructor_WhenRememberedUsernameExists_ShouldSetUsernameAndRememberMe()
         {
+            // Function: 10.4 — Record Attendance (pre-fill remembered username)
             // Arrange
-            _userPreferenceServiceMock.Setup(x => x.GetRememberedUsername()).Returns("john");
+            _userPreferenceServiceMock
+                .Setup(x => x.GetRememberedUsername())
+                .Returns("john");
 
             // Act
             var vm = new LoginViewModel(
@@ -65,9 +80,10 @@ namespace Open_lab.Tests.ViewModels
         }
 
         [Fact]
-        public void LoginCommand_CanExecute_Should_Return_True()
+        public void LoginCommand_CanExecute_WhenNotBusy_ShouldReturnTrue()
         {
-            // Act
+            // Function: 10.4 — Record Attendance (command availability)
+            // Arrange & Act
             var canExecute = _viewModel.LoginCommand.CanExecute(null);
 
             // Assert
@@ -75,8 +91,9 @@ namespace Open_lab.Tests.ViewModels
         }
 
         [Fact]
-        public async Task LoginAsync_With_Empty_Username_Should_Set_StatusMessage()
+        public async Task LoginAsync_WithEmptyCredentials_ShouldSetValidationMessage()
         {
+            // Function: 10.4 — Record Attendance (failure: empty credentials)
             // Arrange
             _viewModel.Username = "";
             _viewModel.Password = "";
@@ -90,12 +107,14 @@ namespace Open_lab.Tests.ViewModels
         }
 
         [Fact]
-        public async Task LoginAsync_With_Invalid_Credentials_Should_Set_StatusMessage()
+        public async Task LoginAsync_WithInvalidCredentials_ShouldSetFailureMessage()
         {
+            // Function: 10.4 — Record Attendance (failure: wrong credentials)
             // Arrange
             _viewModel.Username = "user";
             _viewModel.Password = "wrong";
-            _authServiceMock.Setup(x => x.ValidateCredentialsAsync("user", "wrong"))
+            _authServiceMock
+                .Setup(x => x.ValidateCredentialsAsync("user", "wrong"))
                 .ReturnsAsync((User?)null);
 
             // Act
@@ -107,8 +126,9 @@ namespace Open_lab.Tests.ViewModels
         }
 
         [Fact]
-        public async Task LoginAsync_With_Valid_Credentials_Should_Set_Session_And_Invoke_Success()
+        public async Task LoginAsync_WithValidAdminCredentials_ShouldSetSessionAndCreateAttendanceRecord()
         {
+            // Function: 10.4 — Record Attendance (BR-SEC-004: login creates attendance record)
             // Arrange
             _viewModel.Username = "admin";
             _viewModel.Password = "admin123";
@@ -116,11 +136,18 @@ namespace Open_lab.Tests.ViewModels
             var permissions = new[] { PermissionCodes.FullAccess };
             var attendance = new AttendanceLog { AttendanceLogId = 100 };
 
-            _authServiceMock.Setup(x => x.ValidateCredentialsAsync("admin", "admin123"))
+            _authServiceMock
+                .Setup(x => x.ValidateCredentialsAsync("admin", "admin123"))
                 .ReturnsAsync(user);
-            _adminSetupServiceMock.Setup(x => x.EnsureAdminAccessAsync(1)).Returns(Task.CompletedTask);
-            _authorizationServiceMock.Setup(x => x.GetPermissionCodesAsync(1)).ReturnsAsync(permissions);
-            _attendanceServiceMock.Setup(x => x.CreateLoginAsync(1, It.IsAny<string>())).ReturnsAsync(attendance);
+            _adminSetupServiceMock
+                .Setup(x => x.EnsureAdminAccessAsync(1))
+                .Returns(Task.CompletedTask);
+            _authorizationServiceMock
+                .Setup(x => x.GetPermissionCodesAsync(1))
+                .ReturnsAsync(permissions);
+            _attendanceServiceMock
+                .Setup(x => x.CreateLoginAsync(1, It.IsAny<string>()))
+                .ReturnsAsync(attendance);
 
             // Act
             await _viewModel.InvokePrivateAsync("LoginAsync");
@@ -130,25 +157,33 @@ namespace Open_lab.Tests.ViewModels
             AppSession.Username.Should().Be("admin");
             AppSession.IsAdmin.Should().BeTrue();
             AppSession.AttendanceLogId.Should().Be(100);
+            _attendanceServiceMock.Verify(
+                x => x.CreateLoginAsync(1, It.IsAny<string>()), Times.Once);
             _onLoginSuccessMock.Verify(x => x(), Times.Once);
             _viewModel.IsBusy.Should().BeFalse();
         }
 
         [Fact]
-        public async Task LoginAsync_With_RememberMe_Should_Save_Username()
+        public async Task LoginAsync_WithRememberMe_ShouldSaveUsername()
         {
+            // Function: 10.4 — Record Attendance (remember me preference)
             // Arrange
             _viewModel.Username = "john";
             _viewModel.Password = "pass";
             _viewModel.RememberMe = true;
             var user = new User { UserId = 2, Username = "john", IsActive = true };
-            var permissions = new[] { PermissionCodes.PatientsView };
+            var permissions = new List<string> { PermissionCodes.PatientsView };
             var attendance = new AttendanceLog { AttendanceLogId = 200 };
 
-            _authServiceMock.Setup(x => x.ValidateCredentialsAsync("john", "pass"))
+            _authServiceMock
+                .Setup(x => x.ValidateCredentialsAsync("john", "pass"))
                 .ReturnsAsync(user);
-            _authorizationServiceMock.Setup(x => x.GetPermissionCodesAsync(2)).ReturnsAsync(permissions);
-            _attendanceServiceMock.Setup(x => x.CreateLoginAsync(2, It.IsAny<string>())).ReturnsAsync(attendance);
+            _authorizationServiceMock
+                .Setup(x => x.GetPermissionCodesAsync(2))
+                .ReturnsAsync(permissions);
+            _attendanceServiceMock
+                .Setup(x => x.CreateLoginAsync(2, It.IsAny<string>()))
+                .ReturnsAsync(attendance);
 
             // Act
             await _viewModel.InvokePrivateAsync("LoginAsync");
@@ -158,20 +193,26 @@ namespace Open_lab.Tests.ViewModels
         }
 
         [Fact]
-        public async Task LoginAsync_Without_RememberMe_Should_Clear_Username()
+        public async Task LoginAsync_WithoutRememberMe_ShouldClearSavedUsername()
         {
+            // Function: 10.8 — Logout (clear remembered username on opt-out)
             // Arrange
             _viewModel.Username = "john";
             _viewModel.Password = "pass";
             _viewModel.RememberMe = false;
             var user = new User { UserId = 2, Username = "john", IsActive = true };
-            var permissions = new[] { PermissionCodes.PatientsView };
+            var permissions = new List<string> { PermissionCodes.PatientsView };
             var attendance = new AttendanceLog { AttendanceLogId = 200 };
 
-            _authServiceMock.Setup(x => x.ValidateCredentialsAsync("john", "pass"))
+            _authServiceMock
+                .Setup(x => x.ValidateCredentialsAsync("john", "pass"))
                 .ReturnsAsync(user);
-            _authorizationServiceMock.Setup(x => x.GetPermissionCodesAsync(2)).ReturnsAsync(permissions);
-            _attendanceServiceMock.Setup(x => x.CreateLoginAsync(2, It.IsAny<string>())).ReturnsAsync(attendance);
+            _authorizationServiceMock
+                .Setup(x => x.GetPermissionCodesAsync(2))
+                .ReturnsAsync(permissions);
+            _attendanceServiceMock
+                .Setup(x => x.CreateLoginAsync(2, It.IsAny<string>()))
+                .ReturnsAsync(attendance);
 
             // Act
             await _viewModel.InvokePrivateAsync("LoginAsync");
@@ -181,8 +222,9 @@ namespace Open_lab.Tests.ViewModels
         }
 
         [Fact]
-        public void TogglePasswordVisibilityCommand_Should_Toggle_IsPasswordVisible()
+        public void TogglePasswordVisibilityCommand_ShouldToggleIsPasswordVisible()
         {
+            // Function: 10.8 — Logout (password visibility toggle for login screen)
             // Arrange
             _viewModel.IsPasswordVisible = false;
 
@@ -194,17 +236,19 @@ namespace Open_lab.Tests.ViewModels
         }
 
         [Fact]
-        public async Task LoginCommand_When_AuthService_Throws_Should_Set_Error_Message_Failure()
+        public async Task LoginCommand_WhenAuthServiceThrows_ShouldSetErrorMessage()
         {
+            // Function: 10.4 — Record Attendance (failure: auth service error)
             // Arrange
             _viewModel.Username = "user";
             _viewModel.Password = "pass";
-            _authServiceMock.Setup(x => x.ValidateCredentialsAsync("user", "pass"))
+            _authServiceMock
+                .Setup(x => x.ValidateCredentialsAsync("user", "pass"))
                 .ThrowsAsync(new InvalidOperationException("auth-failed"));
 
             // Act
             _viewModel.LoginCommand.Execute(null);
-            await Task.Delay(50);
+            await Task.Delay(100);
 
             // Assert
             _viewModel.StatusMessage.Should().Contain("auth-failed");
@@ -212,25 +256,34 @@ namespace Open_lab.Tests.ViewModels
         }
 
         [Fact]
-        public async Task LoginCommand_When_AdminSetup_Throws_Should_Set_Error_Message_Failure()
+        public async Task LoginCommand_WhenAdminSetupThrows_ShouldSetErrorMessage()
         {
+            // Function: 10.4 — Record Attendance (failure: admin setup error)
+            // Arrange
             _viewModel.Username = "admin";
             _viewModel.Password = "admin123";
             var user = new User { UserId = 1, Username = "admin", IsActive = true };
 
-            _authServiceMock.Setup(x => x.ValidateCredentialsAsync("admin", "admin123")).ReturnsAsync(user);
-            _adminSetupServiceMock.Setup(x => x.EnsureAdminAccessAsync(1)).ThrowsAsync(new InvalidOperationException("admin-setup-failed"));
+            _authServiceMock
+                .Setup(x => x.ValidateCredentialsAsync("admin", "admin123"))
+                .ReturnsAsync(user);
+            _adminSetupServiceMock
+                .Setup(x => x.EnsureAdminAccessAsync(1))
+                .ThrowsAsync(new InvalidOperationException("admin-setup-failed"));
 
+            // Act
             _viewModel.LoginCommand.Execute(null);
-            await Task.Delay(50);
+            await Task.Delay(100);
 
+            // Assert
             _viewModel.StatusMessage.Should().Contain("admin-setup-failed");
             _viewModel.IsBusy.Should().BeFalse();
         }
 
         [Fact]
-        public void TogglePasswordVisibilityCommand_When_Executed_Twice_Should_Return_To_Initial_State_Edge()
+        public void TogglePasswordVisibilityCommand_WhenExecutedTwice_ShouldReturnToInitialState()
         {
+            // Function: 10.8 — Logout (edge: double-toggle returns to original state)
             // Arrange
             _viewModel.IsPasswordVisible = false;
 

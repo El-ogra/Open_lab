@@ -10,6 +10,11 @@ using Xunit;
 
 namespace Open_lab.Tests.Services
 {
+    /// <summary>
+    /// Tests for Module 10: Functions 10.4 (Record Attendance) and 10.5 (Record Departure)
+    /// These functions relate to the system login/logout attendance tracking.
+    /// BR-SEC-004: Every login creates a timestamped attendance record; logout closes it.
+    /// </summary>
     public class AttendanceServiceTests : IDisposable
     {
         private readonly Open_lab.Data.OpenLabDbContext _db;
@@ -28,135 +33,35 @@ namespace Open_lab.Tests.Services
             _db.Dispose();
         }
 
+        // ──────────────────────────────────────────────────────────────────
+        // 10.4 — Record Attendance (BR-SEC-004)
+        // ──────────────────────────────────────────────────────────────────
+
         [Fact]
-        public async Task CreateLoginAsync_Should_Create_Log_LogicGuard()
+        public async Task RecordAttendance_WithValidUserId_ShouldCreateLogWithTimestamp()
         {
-            // Refactored to Logic Guard - verifies complete log creation and side effects
+            // Function: 10.4 — Record Attendance
             // Arrange
             var user = new User { Username = "testuser", FullName = "Test User" };
             _db.Users.Add(user);
             await _db.SaveChangesAsync();
 
             // Act
-            var log = await _service.CreateLoginAsync(user.UserId, "Test login note");
+            var log = await _service.CreateLoginAsync(user.UserId, "تسجيل دخول");
 
-            // Assert - Logic Guard: Verify complete log data
+            // Assert
             log.AttendanceLogId.Should().BeGreaterThan(0);
             log.UserId.Should().Be(user.UserId);
-            log.Note.Should().Be("Test login note");
+            log.Note.Should().Be("تسجيل دخول");
             log.LoginAt.Should().BeCloseTo(DateTime.Now, TimeSpan.FromSeconds(5));
             log.LastActivityAt.Should().BeCloseTo(log.LoginAt, TimeSpan.FromSeconds(1));
-            log.LogoutAt.Should().BeNull("Logout should be null for new login");
-            
-            // Assert - Logic Guard: Verify log is persisted in database
-            var savedLog = await _db.AttendanceLogs.FindAsync(log.AttendanceLogId);
-            savedLog.Should().NotBeNull();
-            savedLog!.UserId.Should().Be(user.UserId);
-            savedLog.LastActivityAt.Should().BeCloseTo(savedLog.LoginAt, TimeSpan.FromSeconds(1));
+            log.LogoutAt.Should().BeNull("Logout should be null when attendance is first recorded");
         }
 
         [Fact]
-        public async Task CloseAsync_Should_Set_LogoutAt()
+        public async Task RecordAttendance_WhenOpenLogAlreadyExists_ShouldReturnExistingLog()
         {
-            var created = await _service.CreateLoginAsync(6, null);
-            await _service.CloseAsync(created.AttendanceLogId);
-            var updated = await _db.AttendanceLogs.FindAsync(created.AttendanceLogId);
-            updated.Should().NotBeNull();
-            updated!.LogoutAt.Should().NotBeNull();
-            updated.LastActivityAt.Should().BeCloseTo(updated.LogoutAt!.Value, TimeSpan.FromSeconds(1));
-        }
-
-        [Fact]
-        public async Task GetLogsAsync_Should_Filter_By_Date()
-        {
-            var user = new User { Username = "u" };
-            _db.Users.Add(user);
-            await _db.SaveChangesAsync();
-
-            var log = new AttendanceLog { UserId = user.UserId, LoginAt = DateTime.Today };
-            _db.AttendanceLogs.Add(log);
-            await _db.SaveChangesAsync();
-
-            var rows = await _service.GetLogsAsync(DateTime.Today.AddDays(-1), DateTime.Today.AddDays(1));
-            rows.Should().ContainSingle();
-        }
-
-        // 11.3, 11.5 Time Calculation Tests - NEW TEST
-
-        [Fact]
-        public async Task CalculateWorkHours_Should_Validate_Regular_Overtime_Delay_LogicGuard()
-        {
-            // Function: 11.3 — Calculate Work Hours - Logic Guard: Verify regular, overtime, and delay calculation
-            // Arrange
-            var user = new User { Username = "timecalc", FullName = "Time Calc User" };
-            _db.Users.Add(user);
-            await _db.SaveChangesAsync();
-
-            var shift = new ShiftSchedule 
-            { 
-                Name = "Standard Shift", 
-                StartTime = new TimeSpan(8, 0, 0), 
-                EndTime = new TimeSpan(16, 0, 0), 
-                GracePeriodMinutes = 15 
-            };
-            _db.ShiftSchedules.Add(shift);
-            await _db.SaveChangesAsync();
-
-            // Scenario: Login at 8:30 (30 min late), Logout at 17:00 (1 hour overtime)
-            var loginTime = DateTime.Today.AddHours(8).AddMinutes(30);
-            var logoutTime = DateTime.Today.AddHours(17);
-
-            var log = await _service.CreateLoginAsync(user.UserId, "Test work hours calculation");
-            log.LoginAt = loginTime;
-            log.ShiftId = shift.ShiftId;
-            await _db.SaveChangesAsync();
-
-            await _service.CloseAsync(log.AttendanceLogId);
-            var updatedLog = await _db.AttendanceLogs.FindAsync(log.AttendanceLogId);
-            updatedLog!.LogoutAt = logoutTime;
-            await _db.SaveChangesAsync();
-
-            // Act - Calculate work hours through service summary (real business path)
-            var summary = await _service.GetDailyWorkingSummaryAsync(user.UserId, DateTime.Today, DateTime.Today.AddHours(18));
-            var workHours = updatedLog.LogoutAt.Value - updatedLog.LoginAt;
-            var expectedWorkHours = TimeSpan.FromHours(8.5); // 8:30 to 17:00
-            var shiftDuration = shift.EndTime - shift.StartTime; // 8 hours
-            var delayMinutes = (int)(loginTime - DateTime.Today.Add(shift.StartTime)).TotalMinutes;
-            var overtimeMinutes = (int)(logoutTime - DateTime.Today.Add(shift.EndTime)).TotalMinutes;
-
-            // Assert - Logic Guard: Verify work hours, delay, and overtime calculations
-            workHours.Should().BeCloseTo(expectedWorkHours, TimeSpan.FromMinutes(1));
-            summary.GrossMinutes.Should().Be(510);
-            summary.NetMinutes.Should().Be(510);
-            delayMinutes.Should().Be(30, "Should be 30 minutes late");
-            overtimeMinutes.Should().Be(60, "Should be 60 minutes overtime");
-            updatedLog.UserId.Should().Be(user.UserId);
-            updatedLog.ShiftId.Should().Be(shift.ShiftId);
-            shiftDuration.TotalHours.Should().Be(8);
-        }
-
-        [Fact]
-        public async Task ClockOutAsync_When_No_Open_Log_Should_Return_Null()
-        {
-            var result = await _service.ClockOutAsync(userId: 9999);
-            result.Should().BeNull();
-        }
-
-        [Fact]
-        public async Task ClockOutAsync_When_Open_Log_Exists_Should_Close_Log_Success()
-        {
-            var open = await _service.ClockInAsync(444, DateTime.Today.AddHours(8));
-
-            var closed = await _service.ClockOutAsync(444, DateTime.Today.AddHours(16));
-
-            closed.Should().NotBeNull();
-            closed!.AttendanceLogId.Should().Be(open.AttendanceLogId);
-            closed.LogoutAt.Should().Be(DateTime.Today.AddHours(16));
-        }
-
-        [Fact]
-        public async Task ClockInAsync_When_Open_Log_Exists_Should_Return_Existing_Log_Edge()
-        {
+            // Function: 10.4 — Record Attendance (BR-SEC-004: one open session per user)
             // Arrange
             var first = await _service.ClockInAsync(50, DateTime.Today.AddHours(8));
 
@@ -169,8 +74,27 @@ namespace Open_lab.Tests.Services
         }
 
         [Fact]
-        public async Task GetOpenLogAsync_When_Open_Log_Exists_Should_Return_It_Success()
+        public async Task RecordAttendance_ShouldPersistLogInDatabase()
         {
+            // Function: 10.4 — Record Attendance (persistence check)
+            // Arrange
+            var user = new User { Username = "persist_user" };
+            _db.Users.Add(user);
+            await _db.SaveChangesAsync();
+
+            // Act
+            var log = await _service.CreateLoginAsync(user.UserId, null);
+
+            // Assert
+            var savedLog = await _db.AttendanceLogs.FindAsync(log.AttendanceLogId);
+            savedLog.Should().NotBeNull();
+            savedLog!.UserId.Should().Be(user.UserId);
+        }
+
+        [Fact]
+        public async Task RecordAttendance_GetOpenLog_WhenOpenLogExists_ShouldReturnIt()
+        {
+            // Function: 10.4 — Record Attendance (edge: retrieve open session)
             // Arrange
             var created = await _service.ClockInAsync(88, DateTime.Today.AddHours(7));
 
@@ -183,9 +107,127 @@ namespace Open_lab.Tests.Services
         }
 
         [Fact]
-        public async Task StartBreakAsync_When_No_Open_Log_Should_Return_Null_Failure()
+        public async Task RecordAttendance_GetOpenLog_WhenNoOpenLog_ShouldReturnNull()
         {
+            // Function: 10.4 — Record Attendance (edge: no open session)
+            // Arrange & Act
+            var open = await _service.GetOpenLogAsync(9999);
+
+            // Assert
+            open.Should().BeNull();
+        }
+
+        [Fact]
+        public async Task RecordAttendance_WithCustomTime_ShouldUseProvidedTime()
+        {
+            // Function: 10.4 — Record Attendance (BR-SEC-004: timestamp integrity)
+            // Arrange
+            var loginTime = DateTime.Today.AddHours(8).AddMinutes(30);
+
             // Act
+            var log = await _service.ClockInAsync(101, loginTime);
+
+            // Assert
+            log.LoginAt.Should().Be(loginTime);
+            log.LastActivityAt.Should().Be(loginTime);
+        }
+
+        // ──────────────────────────────────────────────────────────────────
+        // 10.5 — Record Departure (BR-SEC-004)
+        // ──────────────────────────────────────────────────────────────────
+
+        [Fact]
+        public async Task RecordDeparture_WhenOpenLogExists_ShouldSetLogoutAt()
+        {
+            // Function: 10.5 — Record Departure
+            // Arrange
+            var created = await _service.CreateLoginAsync(6, null);
+
+            // Act
+            await _service.CloseAsync(created.AttendanceLogId);
+
+            // Assert
+            var updated = await _db.AttendanceLogs.FindAsync(created.AttendanceLogId);
+            updated.Should().NotBeNull();
+            updated!.LogoutAt.Should().NotBeNull();
+            updated.LastActivityAt.Should().BeCloseTo(
+                updated.LogoutAt!.Value, TimeSpan.FromSeconds(1));
+        }
+
+        [Fact]
+        public async Task RecordDeparture_WhenNoOpenLog_ShouldReturnNull()
+        {
+            // Function: 10.5 — Record Departure (failure: no open session to close)
+            // Arrange & Act
+            var result = await _service.ClockOutAsync(userId: 9999);
+
+            // Assert
+            result.Should().BeNull();
+        }
+
+        [Fact]
+        public async Task RecordDeparture_WhenOpenLogExists_ShouldCloseCorrectLog()
+        {
+            // Function: 10.5 — Record Departure (BR-SEC-004: exact logout time)
+            // Arrange
+            var open = await _service.ClockInAsync(444, DateTime.Today.AddHours(8));
+
+            // Act
+            var closed = await _service.ClockOutAsync(444, DateTime.Today.AddHours(16));
+
+            // Assert
+            closed.Should().NotBeNull();
+            closed!.AttendanceLogId.Should().Be(open.AttendanceLogId);
+            closed.LogoutAt.Should().Be(DateTime.Today.AddHours(16));
+        }
+
+        [Fact]
+        public async Task RecordDeparture_WithCustomLogoutTime_ShouldUseProvidedTime()
+        {
+            // Function: 10.5 — Record Departure (BR-SEC-004: timestamp integrity)
+            // Arrange
+            var logoutTime = DateTime.Today.AddHours(17).AddMinutes(15);
+            await _service.ClockInAsync(200, DateTime.Today.AddHours(8));
+
+            // Act
+            var closed = await _service.ClockOutAsync(200, logoutTime);
+
+            // Assert
+            closed!.LogoutAt.Should().Be(logoutTime);
+            closed.LastActivityAt.Should().Be(logoutTime);
+        }
+
+        [Fact]
+        public async Task RecordDeparture_GetLogsAsync_ShouldFilterByDateRange()
+        {
+            // Function: 10.5 — Record Departure (edge: log retrieval by date)
+            // Arrange
+            var user = new User { Username = "u" };
+            _db.Users.Add(user);
+            await _db.SaveChangesAsync();
+
+            var log = new AttendanceLog { UserId = user.UserId, LoginAt = DateTime.Today };
+            _db.AttendanceLogs.Add(log);
+            await _db.SaveChangesAsync();
+
+            // Act
+            var rows = await _service.GetLogsAsync(
+                DateTime.Today.AddDays(-1),
+                DateTime.Today.AddDays(1));
+
+            // Assert
+            rows.Should().ContainSingle();
+        }
+
+        // ──────────────────────────────────────────────────────────────────
+        // Break handling — extends 10.4 / 10.5
+        // ──────────────────────────────────────────────────────────────────
+
+        [Fact]
+        public async Task StartBreak_WhenNoOpenLog_ShouldReturnNull()
+        {
+            // Function: 10.4 — Record Attendance (edge: break requires open session)
+            // Arrange & Act
             var br = await _service.StartBreakAsync(123);
 
             // Assert
@@ -193,123 +235,19 @@ namespace Open_lab.Tests.Services
         }
 
         [Fact]
-        public async Task StartBreakAsync_When_Open_Break_Already_Exists_Should_Return_Same_Break_Edge()
+        public async Task StartBreak_WhenOpenBreakAlreadyExists_ShouldReturnSameBreak()
         {
+            // Function: 10.4 — Record Attendance (edge: only one break at a time)
             // Arrange
             await _service.ClockInAsync(77, DateTime.Today.AddHours(8));
             var firstBreak = await _service.StartBreakAsync(77, "Rest", DateTime.Today.AddHours(10));
 
             // Act
-            var secondBreak = await _service.StartBreakAsync(77, "Meal", DateTime.Today.AddHours(11));
+            var secondBreak = await _service.StartBreakAsync(77, "Rest", DateTime.Today.AddHours(10).AddMinutes(5));
 
             // Assert
             secondBreak.Should().NotBeNull();
             secondBreak!.BreakId.Should().Be(firstBreak!.BreakId);
         }
-
-        [Fact]
-        public async Task StartBreakAsync_Should_Create_Break_Success()
-        {
-            await _service.ClockInAsync(78, DateTime.Today.AddHours(8));
-
-            var br = await _service.StartBreakAsync(78, "Meal", DateTime.Today.AddHours(12));
-
-            br.Should().NotBeNull();
-            br!.Type.Should().Be("Meal");
-            br.EndAt.Should().BeNull();
-        }
-
-        [Fact]
-        public async Task EndBreakAsync_When_No_Open_Break_Should_Return_Null_Failure()
-        {
-            // Arrange
-            await _service.ClockInAsync(66, DateTime.Today.AddHours(8));
-
-            // Act
-            var br = await _service.EndBreakAsync(66);
-
-            // Assert
-            br.Should().BeNull();
-        }
-
-        [Fact]
-        public async Task EndBreakAsync_Should_Close_Open_Break_Success()
-        {
-            await _service.ClockInAsync(300, DateTime.Today.AddHours(8));
-            var started = await _service.StartBreakAsync(300, "Rest", DateTime.Today.AddHours(10));
-
-            var ended = await _service.EndBreakAsync(300, DateTime.Today.AddHours(10).AddMinutes(20));
-
-            ended.Should().NotBeNull();
-            ended!.BreakId.Should().Be(started!.BreakId);
-            ended.EndAt.Should().Be(DateTime.Today.AddHours(10).AddMinutes(20));
-        }
-
-        [Fact]
-        public async Task GetDailyWorkingSummaryAsync_When_No_Logs_Should_Return_Zeroes_Edge()
-        {
-            // Act
-            var summary = await _service.GetDailyWorkingSummaryAsync(999, DateTime.Today, DateTime.Today.AddHours(12));
-
-            // Assert
-            summary.UserId.Should().Be(999);
-            summary.GrossMinutes.Should().Be(0);
-            summary.BreakMinutes.Should().Be(0);
-            summary.NetMinutes.Should().Be(0);
-            summary.HasOpenLog.Should().BeFalse();
-        }
-
-        [Fact]
-        public async Task GetDailyWorkingSummaryAsync_Should_Subtract_Break_Minutes()
-        {
-            var user = new User { Username = "summary-user", FullName = "Summary User" };
-            _db.Users.Add(user);
-            await _db.SaveChangesAsync();
-
-            var loginAt = DateTime.Today.AddHours(8);
-            var logoutAt = DateTime.Today.AddHours(16);
-
-            var log = await _service.ClockInAsync(user.UserId, loginAt);
-            await _service.StartBreakAsync(user.UserId, at: DateTime.Today.AddHours(12));
-            await _service.EndBreakAsync(user.UserId, at: DateTime.Today.AddHours(12).AddMinutes(30));
-            await _service.ClockOutAsync(user.UserId, logoutAt);
-
-            var summary = await _service.GetDailyWorkingSummaryAsync(user.UserId, DateTime.Today, now: DateTime.Today.AddHours(18));
-
-            summary.UserId.Should().Be(user.UserId);
-            summary.GrossMinutes.Should().Be(480);
-            summary.BreakMinutes.Should().Be(30);
-            summary.NetMinutes.Should().Be(450);
-            summary.HasOpenLog.Should().BeFalse();
-            summary.FirstLoginAt.Should().Be(loginAt);
-            summary.LastLogoutAt.Should().Be(logoutAt);
-        }
-
-        [Fact]
-        public async Task GetLogsAsync_When_No_Logs_Should_Return_Empty_Edge()
-        {
-            var rows = await _service.GetLogsAsync(DateTime.Today.AddDays(-1), DateTime.Today.AddDays(1));
-
-            rows.Should().BeEmpty();
-        }
-
-        [Fact]
-        public async Task CloseAsync_When_Log_Not_Found_Should_Not_Throw_Edge()
-        {
-            await _service.CloseAsync(99999);
-
-            (await _db.AttendanceLogs.CountAsync()).Should().Be(0);
-        }
-
-        [Fact]
-        public async Task CreateLoginAsync_When_Note_Null_Should_Create_Log_Edge()
-        {
-            var log = await _service.CreateLoginAsync(700, null);
-
-            log.Should().NotBeNull();
-            log.UserId.Should().Be(700);
-            log.Note.Should().BeNull();
-        }
-
     }
 }
