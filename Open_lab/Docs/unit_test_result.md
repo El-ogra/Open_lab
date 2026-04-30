@@ -125,13 +125,13 @@
 
 | رقم الوظيفة | اسم الوظيفة | Service ✅/❌ | ViewModel ✅/❌ | الحالة | أسماء الاختبارات المكتوبة |
 |-------------|-------------|--------------|----------------|--------|--------------------------|
-| 8.1 | تحديد تحليل كخارجي — Mark Test as External | ❌ | ❌ | ❌ لم يبدأ | |
-| 8.2 | تسجيل المريض للتحليل الخارجي — Register Patient for External Test | ❌ | ❌ | ❌ لم يبدأ | |
-| 8.3 | تجهيز العينة الخارجية — Prepare External Sample | ❌ | ❌ | ❌ لم يبدأ | |
-| 8.4 | متابعة حالة العينة الخارجية — Track External Sample Status | ❌ | ❌ | ❌ لم يبدأ | |
-| 8.5 | إدخال نتيجة المعمل الخارجي — Enter External Lab Result | ❌ | ❌ | ❌ لم يبدأ | |
-| 8.6 | طباعة تقرير المعمل الخارجي — Print External Lab Report | ❌ | ❌ | ❌ لم يبدأ | |
-| 8.7 | تسوية حساب المعمل الخارجي — Settle External Lab Account | ❌ | ❌ | ❌ لم يبدأ | |
+| 8.1 | تحديد تحليل كخارجي — Mark Test as External | ✅ | ✅ | ✅ مكتمل | Module8ServiceTests_Additional: AddToQueueAsync_With_Valid_ReferralId_Should_Set_ReferralId_Correctly_SuccessGuard, AddToQueueAsync_With_Null_ReferralId_Should_Set_Null_Referral_EdgeGuard, AddToQueueAsync_When_Already_In_Queue_Should_Return_Existing_Queue_EdgeGuard + Module8ViewModelTests_Additional: LoadQueueCommand_Without_Login_Should_Set_Auth_Error_EdgeGuard, Complete_External_Lab_Workflow_Should_Work_SuccessGuard + ExternalLabServiceTests + ExternalLabManagementViewModelTests (existing coverage) |
+| 8.2 | تسجيل المريض للتحليل الخارجي — Register Patient for External Test | ✅ | ✅ | ✅ مكتمل | Module8ServiceTests_Additional: AddToQueueAsync_Should_Automatically_Add_Patient_To_Pending_Queue_SuccessGuard + ExternalLabServiceTests + ExternalLabManagementViewModelTests (existing coverage) |
+| 8.3 | تجهيز العينة الخارجية — Prepare External Sample | ✅ | ✅ | ✅ مكتمل | Module8ServiceTests_Additional: CreateManifestAsync_With_Valid_Queue_Items_Should_Create_Shipment_Manifest_SuccessGuard, CreateManifestAsync_With_Multiple_Queue_Items_Should_Create_All_Items_SuccessGuard, GetAllManifestsAsync_Should_Return_Manifests_With_Correct_Referral_Details_SuccessGuard + Module8ViewModelTests_Additional: CreateManifest_Then_Ship_Should_Update_Status_SuccessGuard + ExternalLabServiceTests + ExternalLabManagementViewModelTests (existing coverage) |
+| 8.4 | متابعة حالة العينة الخارجية — Track External Sample Status | ✅ | ✅ | ✅ مكتمل | Module8ServiceTests_Additional: GetPendingQueueAsync_Should_Return_Only_Pending_Status_Items_SuccessGuard, UpdateQueueStatusAsync_Should_Update_External_Reference_SuccessGuard, UpdateQueueStatusAsync_With_Different_Statuses_Should_Update_Correctly_EdgeGuard + ExternalLabServiceTests + ExternalLabManagementViewModelTests (existing coverage) |
+| 8.5 | إدخال نتيجة المعمل الخارجي — Enter External Lab Result | ✅ | ✅ | ✅ مكتمل | Module8ServiceTests_Additional: EnterExternalLabResultAsync_With_Valid_Data_Should_Create_Result_Parameter_SuccessGuard, EnterExternalLabResultAsync_Should_Update_Queue_Status_To_ResultReceived_SuccessGuard + Module8ViewModelTests_Additional: EnterExternalResultCommand_With_Null_Queue_Item_Should_Not_Call_Service_EdgeGuard + ExternalLabServiceTests + ExternalLabManagementViewModelTests (existing coverage) |
+| 8.6 | طباعة تقرير المعمل الخارجي — Print External Lab Report | ✅ | ✅ | ✅ مكتمل | Module8ServiceTests_Additional: GetPendingQueueAsync_Should_Return_Data_For_Report_Printing_SuccessGuard + Module8ViewModelTests_Additional: PrintExternalReportCommand_With_Valid_Data_Should_Call_Print_Service_SuccessGuard + ExternalLabServiceTests + ExternalLabManagementViewModelTests (existing coverage) |
+| 8.7 | تسوية حساب المعمل الخارجي — Settle External Lab Account | ✅ | ✅ | ✅ مكتمل | Module8ServiceTests_Additional: GetTotalProfitAsync_With_Multiple_Queue_Items_Should_Sum_All_Profits_SuccessGuard, GetPendingBalanceAsync_With_Existing_Settlements_Should_Calculate_Correctly_EdgeGuard, CreateSettlementAsync_Should_Store_Note_Correctly_SuccessGuard, GetSettlementHistoryAsync_Should_Return_All_Settlements_For_Referral_SuccessGuard + Module8ViewModelTests_Additional: LoadSettlementCommand_Without_Login_Should_Set_Auth_Error_EdgeGuard, CreateSettlementCommand_With_Negative_Amount_Should_Not_Call_Service_EdgeGuard + ExternalSettlementServiceTests + ExternalLabManagementViewModelTests (existing coverage) |
 
 ---
 
@@ -217,13 +217,13 @@
 | 5 — المزارع والحساسية | 7 | 7 | 0 | 0 | 0 |
 | 6 — سحب العينات | 4 | 4 | 0 | 0 | 0 |
 | 7 — أوراق العمل | 4 | 4 | 0 | 0 | 0 |
-| 8 — المعامل الخارجية | 7 | 0 | 0 | 7 | 0 |
+| 8 — المعامل الخارجية | 7 | 7 | 0 | 0 | 0 |
 | 9 — الإحصائيات والتحليلات | 6 | 0 | 0 | 6 | 0 |
 | 10 — إدارة المستخدمين | 8 | 8 | 8 | 0 | 8 |
 | 11 — الحضور والانصراف | 5 | 0 | 0 | 5 | 0 |
 | 12 — جهات التعاقد والإحالة | 9 | 0 | 0 | 9 | 0 |
 | 13 — إعدادات النظام | 8 | 0 | 0 | 8 | 0 |
-| **الإجمالي** | **97** | **61** | **8** | **32** | **9** |
+| **الإجمالي** | **97** | **68** | **8** | **25** | **9** |
 
 ---
 
