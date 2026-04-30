@@ -89,13 +89,13 @@
 
 | رقم الوظيفة | اسم الوظيفة | Service ✅/❌ | ViewModel ✅/❌ | الحالة | أسماء الاختبارات المكتوبة |
 |-------------|-------------|--------------|----------------|--------|--------------------------|
-| 5.1 | إدخال بيانات المزرعة — Enter Culture Data | ❌ | ❌ | ❌ لم يبدأ | |
-| 5.2 | إضافة مضادات حيوية — Add Antibiotics | ❌ | ❌ | ❌ لم يبدأ | |
-| 5.3 | تسجيل الحساسية — Set Sensitivity | ❌ | ❌ | ❌ لم يبدأ | |
-| 5.4 | تصنيف الحساسية — Classify Sensitivity | ❌ | ❌ | ❌ لم يبدأ | |
-| 5.5 | تصفية مضادات الحوامل — Filter Pregnancy Antibiotics | ❌ | ❌ | ❌ لم يبدأ | |
-| 5.6 | تصفية مضادات الأطفال — Filter Children Antibiotics | ❌ | ❌ | ❌ لم يبدأ | |
-| 5.7 | طباعة تقرير المزرعة — Print Culture Report | ❌ | ❌ | ❌ لم يبدأ | |
+| 5.1 | إدخال بيانات المزرعة — Enter Culture Data | ✅ | ✅ | ✅ مكتمل (BR-MED-004) | CultureSensitivityServiceTests: CreateCultureAsync_Should_Create_With_Full_Culture_Metadata, CreateCultureAsync_When_Missing_Clinical_Metadata_Should_Throw, CreateCultureAsync_Duplicate_Should_Throw, LinkAndUnlinkAntibiotic_Should_Work, SearchCultureVisitTestsAsync_Should_Filter_By_Date_And_LabId, SaveCultureResultAsync_Should_Save_Culture_Metadata_And_SIR_Classifications + Module5ServiceTests_Additional: CreateCultureAsync_With_Zero_ColonyCount_Should_Succeed_EdgeGuard, CreateCultureAsync_With_Null_Organism_Should_Succeed_EdgeGuard, DeleteCultureAsync_Should_Remove_Culture_SuccessGuard + CultureSensitivityViewModelTests: AddCultureAsync_Should_Send_Full_Metadata_To_Service + Module5ViewModelTests_Additional: AddCultureAsync_With_Empty_Name_Should_Set_Error_FailureGuard, SearchCommand_With_Valid_LabId_Should_Load_Results_SuccessGuard |
+| 5.2 | إضافة مضادات حيوية — Add Antibiotics | ✅ | ✅ | ✅ مكتمل | CultureSensitivityServiceTests: CreateAntibioticAsync_Should_Persist_Safety_Classification_Flags + Module5ServiceTests_Additional: CreateAntibioticAsync_With_All_Safety_Flags_Should_Persist_EdgeGuard, CreateAntibioticAsync_With_Neither_Safety_Flag_Should_Persist_EdgeGuard, DeleteAntibioticAsync_Should_Remove_Antibiotic_SuccessGuard + Module5ViewModelTests_Additional: AddAntibioticAsync_With_Empty_Name_Should_Set_Error_FailureGuard, AddAntibioticAsync_When_Service_Throws_Should_Set_Error_FailureGuard |
+| 5.3 | تسجيل الحساسية — Set Sensitivity | ✅ | ✅ | ✅ مكتمل (BR-MED-005) | CultureSensitivityServiceTests: SaveCultureResultAsync_Should_Save_Culture_Metadata_And_SIR_Classifications + Module5ServiceTests_Additional: SaveCultureResultAsync_With_Multiple_Sensitivities_Should_Classify_Each_SuccessGuard + CultureSensitivityViewModelTests: SaveResultAsync_Should_Save_Classified_Values_Through_Service + Module5ViewModelTests_Additional: SaveResultAsync_With_Empty_ResultRows_Should_Set_Warning_EdgeGuard |
+| 5.4 | تصنيف الحساسية — Classify Sensitivity | ✅ | ✅ | ✅ مكتمل (BR-MED-005) | CultureSensitivityServiceTests: ClassifySensitivity_Should_Normalize_To_SIR, ClassifySensitivity_When_Unsupported_Should_Throw + Module5ServiceTests_Additional: ClassifySensitivity_Should_Handle_Case_Insensitive_SuccessGuard, ClassifySensitivity_Should_Handle_Arabic_Input_SuccessGuard, ClassifySensitivity_With_Empty_String_Should_Return_Empty_EdgeGuard, ClassifySensitivity_With_Invalid_Value_Should_Throw_FailureGuard, ClassifySensitivity_With_Null_Should_Return_Empty_EdgeGuard |
+| 5.5 | تصفية مضادات الحوامل — Filter Pregnancy Antibiotics | ✅ | ✅ | ✅ مكتمل (BR-MED-006) | CultureSensitivityServiceTests: GetFilteredAntibioticsAsync_PregnantPatient_Should_OnlyReturn_PregnancySafe + Module5ServiceTests_Additional: GetFilteredAntibioticsAsync_Pregnant_With_Mixed_Safety_Should_Return_Only_Safe_SuccessGuard, GetFilteredAntibioticsAsync_Non_Pregnant_Should_Return_All_EdgeGuard + Module5ViewModelTests_Additional: BuildResultRowsAsync_With_Pregnant_Patient_Should_Filter_Antibiotics_SuccessGuard |
+| 5.6 | تصفية مضادات الأطفال — Filter Children Antibiotics | ✅ | ✅ | ✅ مكتمل (BR-MED-007) | CultureSensitivityServiceTests: GetFilteredAntibioticsAsync_ChildPatient_Should_OnlyReturn_ChildrenSafe + Module5ServiceTests_Additional: GetFilteredAntibioticsAsync_Child_With_Mixed_Safety_Should_Return_Only_Safe_SuccessGuard, GetFilteredAntibioticsAsync_Adult_Should_Return_All_EdgeGuard, GetFilteredAntibioticsAsync_Combined_Filter_Pregnant_And_Child_Should_Apply_Both_SuccessGuard + Module5ViewModelTests_Additional: BuildResultRowsAsync_With_Child_Patient_Should_Filter_Antibiotics_SuccessGuard |
+| 5.7 | طباعة تقرير المزرعة — Print Culture Report | ✅ | ✅ | ✅ مكتمل | CultureSensitivityServiceTests: SaveCultureResultAsync_When_VisitTestIsVerified_Should_Throw_FailureGuard + Module5ServiceTests_Additional: SearchCultureVisitTestsAsync_With_Empty_LabId_Should_Return_All_EdgeGuard, SearchCultureVisitTestsAsync_With_NonExistent_LabId_Should_Return_Empty_EdgeGuard + CultureSensitivityViewModelTests: PrintCultureReportAsync_Should_Call_Print_Service_With_Results, PrintCultureReportAsync_When_DataIncomplete_Should_Set_Message_EdgeGuard + Module5ViewModelTests_Additional: PrintCultureReportAsync_With_Null_Culture_Should_Set_Error_FailureGuard, PrintCultureReportAsync_With_Null_VisitTest_Should_Set_Error_FailureGuard, PrintCultureReportAsync_With_Empty_ResultRows_Should_Print_Anyway_SuccessGuard, PrintCultureReportAsync_When_PrintService_Throws_Should_Set_Error_FailureGuard |
 
 ---
 
@@ -214,7 +214,7 @@
 | 2 — المحاسبة والمالية | 13 | 13 | 0 | 0 | 0 |
 | 3 — إدارة التحاليل والأسعار | 9 | 9 | 0 | 0 | 0 |
 | 4 — إدخال النتائج والتقارير | 9 | 9 | 0 | 0 | 0 |
-| 5 — المزارع والحساسية | 7 | 0 | 0 | 7 | 0 |
+| 5 — المزارع والحساسية | 7 | 7 | 0 | 0 | 0 |
 | 6 — سحب العينات | 4 | 0 | 0 | 4 | 0 |
 | 7 — أوراق العمل | 4 | 0 | 0 | 4 | 0 |
 | 8 — المعامل الخارجية | 7 | 0 | 0 | 7 | 0 |
@@ -223,7 +223,7 @@
 | 11 — الحضور والانصراف | 5 | 0 | 0 | 5 | 0 |
 | 12 — جهات التعاقد والإحالة | 9 | 0 | 0 | 9 | 0 |
 | 13 — إعدادات النظام | 8 | 0 | 0 | 8 | 0 |
-| **الإجمالي** | **97** | **46** | **8** | **50** | **9** |
+| **الإجمالي** | **97** | **53** | **8** | **43** | **9** |
 
 ---
 
