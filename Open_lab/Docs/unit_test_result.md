@@ -103,10 +103,10 @@
 
 | رقم الوظيفة | اسم الوظيفة | Service ✅/❌ | ViewModel ✅/❌ | الحالة | أسماء الاختبارات المكتوبة |
 |-------------|-------------|--------------|----------------|--------|--------------------------|
-| 6.1 | تسجيل سحب العينة — Register Sample Collection | ❌ | ❌ | ❌ لم يبدأ | |
-| 6.2 | تسجيل فصل العينة — Record Sample Separation | ❌ | ❌ | ❌ لم يبدأ | |
-| 6.3 | متابعة حالة العينة — Track Sample Status | ❌ | ❌ | ❌ لم يبدأ | |
-| 6.4 | تعليم العينات الخارجية — Mark Taken Outside Lab | ❌ | ❌ | ❌ لم يبدأ | |
+| 6.1 | تسجيل سحب العينة — Register Sample Collection | ✅ | ✅ | ✅ مكتمل | Module6ServiceTests_Additional: MarkCollectedAsync_With_Valid_UserId_Should_Persist_UserId_SuccessGuard, MarkCollectedAsync_With_Null_ReceivedBy_Should_Persist_Null_EdgeGuard, MarkCollectedAsync_With_Valid_ReceivedBy_Should_Persist_ReceivedBy_SuccessGuard, MarkCollectedAsync_Duplicate_Should_Update_Existing_Sample_SuccessGuard, MarkNotCollectedAsync_With_Existing_Sample_Should_Remove_Sample_SuccessGuard, MarkNotCollectedAsync_With_NonExistent_Sample_Should_NotThrow_EdgeGuard + Module6ViewModelTests_Additional: MarkCollectedCommand_CanExecute_When_Row_Null_Should_Return_False_EdgeGuard, LoadCommand_With_Empty_Rows_Should_Set_Empty_Message_EdgeGuard, MarkNotCollectedAsync_Should_Call_Service_SuccessGuard + SampleCollectionServiceTests + SampleCollectionViewModelTests (existing coverage) |
+| 6.2 | تسجيل فصل العينة — Record Sample Separation | ✅ | ✅ | ✅ مكتمل | Module6ServiceTests_Additional: MarkSeparatedAsync_With_Different_Separation_Types_Should_Update_Status_SuccessGuard, MarkSeparatedAsync_With_Empty_String_Should_Set_Default_Status_EdgeGuard, MarkSeparatedAsync_With_Whitespace_Should_Set_Default_Status_EdgeGuard, MarkSeparatedAsync_ReSeparation_Should_Update_Status_SuccessGuard + Module6ViewModelTests_Additional: MarkSeparatedAsync_With_Null_SeparationType_Should_Set_Warning_EdgeGuard, MarkSeparatedCommand_CanExecute_When_No_SeparationType_Should_Return_False_EdgeGuard + SampleCollectionServiceTests + SampleCollectionViewModelTests (existing coverage) |
+| 6.3 | متابعة حالة العينة — Track Sample Status | ✅ | ✅ | ✅ مكتمل | Module6ServiceTests_Additional: UpdateSeparationStatusAsync_With_True_Should_Set_IsSeparated_And_Status_SuccessGuard, UpdateSeparationStatusAsync_With_False_Should_Reset_IsSeparated_And_Status_SuccessGuard, GetSampleStatusAsync_With_NonExistent_Id_Should_Return_Null_EdgeGuard, GetPendingTrackingSamplesAsync_Should_Return_Only_Non_Separated_Samples_SuccessGuard, GetPendingTrackingSamplesAsync_With_All_Separated_Should_Return_Empty_EdgeGuard, CompleteWorkflow_Created_Collected_Separated_Verified_Should_Work_SuccessGuard + Module6ViewModelTests_Additional: RefreshSampleStatusAsync_With_Null_Tracking_Data_Should_Set_NotFound_Message_EdgeGuard, RefreshSampleStatusAsync_With_Valid_Data_Should_Update_Status_SuccessGuard, RefreshSampleStatusAsync_With_Separated_Status_Should_Show_Separated_Message_SuccessGuard + SampleTrackingServiceTests + SampleCollectionViewModelTests (existing coverage) |
+| 6.4 | تعليم العينات الخارجية — Mark Taken Outside Lab | ✅ | ✅ | ✅ مكتمل | Module6ServiceTests_Additional: MarkCollectedAsync_External_With_Null_ReceivedBy_Should_Set_IsExternal_True_SuccessGuard, MarkCollectedAsync_External_With_ReceivedBy_Should_Set_All_Fields_Correctly_SuccessGuard, MarkCollectedAsync_External_With_NonExistent_VisitTest_Should_Throw_FailureGuard + Module6ViewModelTests_Additional: MarkCollectedAsync_With_IsExternal_Flag_Should_Call_Service_With_External_True_SuccessGuard, MarkExternalCollectedAsync_With_Null_SelectedRow_Should_Do_Nothing_EdgeGuard, MarkExternalCollectedAsync_When_Service_Succeeds_Should_Reload_Data_SuccessGuard, MarkExternalCollectedCommand_Without_Login_Should_Reject_FailureGuard + SampleCollectionServiceTests + SampleCollectionViewModelTests (existing coverage) |
 
 ---
 
@@ -215,7 +215,7 @@
 | 3 — إدارة التحاليل والأسعار | 9 | 9 | 0 | 0 | 0 |
 | 4 — إدخال النتائج والتقارير | 9 | 9 | 0 | 0 | 0 |
 | 5 — المزارع والحساسية | 7 | 7 | 0 | 0 | 0 |
-| 6 — سحب العينات | 4 | 0 | 0 | 4 | 0 |
+| 6 — سحب العينات | 4 | 4 | 0 | 0 | 0 |
 | 7 — أوراق العمل | 4 | 0 | 0 | 4 | 0 |
 | 8 — المعامل الخارجية | 7 | 0 | 0 | 7 | 0 |
 | 9 — الإحصائيات والتحليلات | 6 | 0 | 0 | 6 | 0 |
@@ -223,7 +223,7 @@
 | 11 — الحضور والانصراف | 5 | 0 | 0 | 5 | 0 |
 | 12 — جهات التعاقد والإحالة | 9 | 0 | 0 | 9 | 0 |
 | 13 — إعدادات النظام | 8 | 0 | 0 | 8 | 0 |
-| **الإجمالي** | **97** | **53** | **8** | **43** | **9** |
+| **الإجمالي** | **97** | **57** | **8** | **36** | **9** |
 
 ---
 
