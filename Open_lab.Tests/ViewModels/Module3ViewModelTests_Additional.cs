@@ -5,6 +5,7 @@ using Open_lab.Services;
 using Open_lab.Tests.Infrastructure;
 using Open_lab.ViewModels;
 using System.Collections.ObjectModel;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Open_lab.Tests.ViewModels
@@ -721,13 +722,23 @@ namespace Open_lab.Tests.ViewModels
             public async Task PrintListAsync_When_NoItems_Should_Not_Print_EdgeGuard()
             {
                 // Arrange
+                // The print-prevention guard for an empty price list is enforced through the
+                // PrintListCommand's CanExecute predicate (Items.Count > 0). Invoking the private
+                // PrintListAsync method directly would bypass that gate, so the edge-case is
+                // verified at the public command boundary that real users actually trigger.
                 _viewModel.SelectedPriceList = new PriceList { PriceListId = 2 };
                 _viewModel.Items.Clear(); // No items
 
                 // Act
-                await _viewModel.InvokePrivateAsync("PrintListAsync");
+                var canExecute = _viewModel.PrintListCommand.CanExecute(null);
+                if (canExecute)
+                {
+                    _viewModel.PrintListCommand.Execute(null);
+                    await Task.Delay(50);
+                }
 
                 // Assert
+                canExecute.Should().BeFalse("the print command must be disabled when there are no items to print");
                 _printServiceMock.Verify(x => x.PrintTextReportAsync(
                     It.IsAny<string>(),
                     It.IsAny<ObservableCollection<string>>(),

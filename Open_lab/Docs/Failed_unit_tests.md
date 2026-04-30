@@ -1,359 +1,612 @@
-========== Starting test discovery ==========
-[xUnit.net 00:00:00.01] xUnit.net VSTest Adapter v2.5.3.1+6b60a9e56a (64-bit .NET 8.0.26)
-[xUnit.net 00:00:13.77]   Discovering: Open_lab.Tests
-[xUnit.net 00:00:18.26]   Discovered:  Open_lab.Tests
-========== Test discovery finished: 1321 Tests found in 1.5 min ==========
-========== Starting test run ==========
-[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v2.5.3.1+6b60a9e56a (64-bit .NET 8.0.26)
-[xUnit.net 00:00:01.44]   Starting:    Open_lab.Tests
-[xUnit.net 00:00:52.20]     Open_lab.Tests.ViewModels.Module3ViewModelTests_Additional+PriceListsViewModel_AdditionalTests.PrintListAsync_When_NoItems_Should_Not_Print_EdgeGuard [FAIL]
-[xUnit.net 00:00:52.20]       Moq.MockException : 
-[xUnit.net 00:00:52.20]       Expected invocation on the mock should never have been performed, but was 1 times: x => x.PrintTextReportAsync(It.IsAny<string>(), It.IsAny<ObservableCollection<string>>(), It.IsAny<string>())
-[xUnit.net 00:00:52.20]       
-[xUnit.net 00:00:52.20]       Performed invocations:
-[xUnit.net 00:00:52.20]       
-[xUnit.net 00:00:52.20]          Mock<IPrintService:46> (x):
-[xUnit.net 00:00:52.20]       
-[xUnit.net 00:00:52.20]             IPrintService.PrintTextReportAsync("قائمة الأسعار", ObservableCollection<string>, "PriceList_2")
-[xUnit.net 00:00:52.20]       
-[xUnit.net 00:00:52.20]       Stack Trace:
-[xUnit.net 00:00:52.20]         /_/src/Moq/Mock.cs(331,0): at Moq.Mock.Verify(Mock mock, LambdaExpression expression, Times times, String failMessage)
-[xUnit.net 00:00:52.20]         /_/src/Moq/Mock`1.cs(1033,0): at Moq.Mock`1.Verify[TResult](Expression`1 expression, Func`1 times)
-[xUnit.net 00:00:52.20]         C:\Users\LAP LINK\source\repos\Open_lab\Open_lab.Tests\ViewModels\Module3ViewModelTests_Additional.cs(731,0): at Open_lab.Tests.ViewModels.Module3ViewModelTests_Additional.PriceListsViewModel_AdditionalTests.PrintListAsync_When_NoItems_Should_Not_Print_EdgeGuard()
-[xUnit.net 00:00:52.20]         --- End of stack trace from previous location ---
-[xUnit.net 00:01:30.86]     Open_lab.Tests.Module6ServiceTests_Additional.GetPendingTrackingSamplesAsync_Should_Return_Only_Non_Separated_Samples_SuccessGuard [FAIL]
-[xUnit.net 00:01:30.86]       Expected pending to contain 2 item(s), but found 3: Open_lab.Models.SampleCollection
-[xUnit.net 00:01:30.86]           {
-[xUnit.net 00:01:30.86]               CollectedAt = <2026-04-30 16:30:27.1241633>, 
-[xUnit.net 00:01:30.86]               CollectedBy = 1, 
-[xUnit.net 00:01:30.86]               CollectedByUser = <null>, 
-[xUnit.net 00:01:30.86]               IsExternalSample = False, 
-[xUnit.net 00:01:30.86]               IsSeparated = False, 
-[xUnit.net 00:01:30.86]               ReceivedBy = <null>, 
-[xUnit.net 00:01:30.86]               ReceivedByUser = <null>, 
-[xUnit.net 00:01:30.86]               SampleId = 3, 
-[xUnit.net 00:01:30.86]               Status = "مسحوبة", 
-[xUnit.net 00:01:30.86]               VisitTest = Open_lab.Models.VisitTest
-[xUnit.net 00:01:30.86]               {
-[xUnit.net 00:01:30.86]                   ExternalQueueItem = <null>, 
-[xUnit.net 00:01:30.86]                   Price = 10M, 
-[xUnit.net 00:01:30.86]                   ResultValues = {empty}, 
-[xUnit.net 00:01:30.86]                   SampleCollection = {Cyclic reference to type Open_lab.Models.SampleCollection detected}, 
-[xUnit.net 00:01:30.86]                   Status = <null>, 
-[xUnit.net 00:01:30.86]                   Test = Open_lab.Models.Test
-[xUnit.net 00:01:30.86]                   {
-[xUnit.net 00:01:30.86]                       Code = "T-ec1a854c", 
-[xUnit.net 00:01:30.87]                       Comments = {empty}, 
-[xUnit.net 00:01:30.87]                       CostPrice = <null>, 
-[xUnit.net 00:01:30.87]                       CustomGroupItems = {empty}, 
-[xUnit.net 00:01:30.87]                       Group = <null>, 
-[xUnit.net 00:01:30.87]                       GroupId = <null>, 
-[xUnit.net 00:01:30.87]                       IsRoutine = False, 
-[xUnit.net 00:01:30.87]                       IsSendOut = False, 
-[xUnit.net 00:01:30.87]                       NameReceipt = "", 
-[xUnit.net 00:01:30.87]                       NameReport = "Test", 
-[xUnit.net 00:01:30.87]                       Parameters = {empty}, 
-[xUnit.net 00:01:30.87]                       PatientPrice = <null>, 
-[xUnit.net 00:01:30.87]                       Price = 10M, 
-[xUnit.net 00:01:30.87]                       PriceListItems = {empty}, 
-[xUnit.net 00:01:30.87]                       ReferenceRanges = {empty}, 
-[xUnit.net 00:01:30.87]                       ReportOrder = 0, 
-[xUnit.net 00:01:30.87]                       SampleType = <null>, 
-[xUnit.net 00:01:30.87]                       SampleTypeId = <null>, 
-[xUnit.net 00:01:30.87]                       TestId = 3, 
-[xUnit.net 00:01:30.87]                       TurnaroundHours = 0, 
-[xUnit.net 00:01:30.87]                       Unit = <null>, 
-[xUnit.net 00:01:30.87]                       UnitId = <null>, 
-[xUnit.net 00:01:30.87]                       VisitTests = {{Cyclic reference to type Open_lab.Models.VisitTest detected}}
-[xUnit.net 00:01:30.87]                   }, 
-[xUnit.net 00:01:30.87]                   TestId = 3, 
-[xUnit.net 00:01:30.87]                   Visit = Open_lab.Models.Visit
-[xUnit.net 00:01:30.87]                   {
-[xUnit.net 00:01:30.87]                       AccountType = <null>, 
-[xUnit.net 00:01:30.87]                       Branch = <null>, 
-[xUnit.net 00:01:30.87]                       BranchId = <null>, 
-[xUnit.net 00:01:30.87]                       Invoice = <null>, 
-[xUnit.net 00:01:30.87]                       Patient = Open_lab.Models.Patient
-[xUnit.net 00:01:30.87]                       {
-[xUnit.net 00:01:30.87]                           Address = <null>, 
-[xUnit.net 00:01:30.87]                           Age = <null>, 
-[xUnit.net 00:01:30.87]                           BirthDate = <null>, 
-[xUnit.net 00:01:30.87]                           FullName = "Pending 3", 
-[xUnit.net 00:01:30.87]                           Gender = "Male", 
-[xUnit.net 00:01:30.87]                           IsPregnant = False, 
-[xUnit.net 00:01:30.87]                           LabId = "L-PND3", 
-[xUnit.net 00:01:30.87]                           MedicalHistory = <null>, 
-[xUnit.net 00:01:30.87]                           PatientId = 3, 
-[xUnit.net 00:01:30.87]                           Phone = <null>, 
-[xUnit.net 00:01:30.87]                           Visits = {{Cyclic reference to type Open_lab.Models.Visit detected}}
-[xUnit.net 00:01:30.87]                       }, 
-[xUnit.net 00:01:30.87]                       PatientId = 3, 
-[xUnit.net 00:01:30.87]                       Physician = <null>, 
-[xUnit.net 00:01:30.87]                       PhysicianId = <null>, 
-[xUnit.net 00:01:30.87]                       Referral = <null>, 
-[xUnit.net 00:01:30.87]                       ReferralId = <null>, 
-[xUnit.net 00:01:30.87]                       Status = <null>, 
-[xUnit.net 00:01:30.87]                       VisitDate = <2026-04-30 16:30:27.1222468>, 
-[xUnit.net 00:01:30.87]                       VisitId = 3, 
-[xUnit.net 00:01:30.87]                       VisitTests = {{Cyclic reference to type Open_lab.Models.VisitTest detected}}
-[xUnit.net 00:01:30.87]                   }, 
-[xUnit.net 00:01:30.87]                   VisitId = 3, 
-[xUnit.net 00:01:30.87]                   VisitTestId = 3
-[xUnit.net 00:01:30.87]               }, 
-[xUnit.net 00:01:30.87]               VisitTestId = 3
-[xUnit.net 00:01:30.87]           }Open_lab.Models.SampleCollection
-[xUnit.net 00:01:30.87]           {
-[xUnit.net 00:01:30.87]               CollectedAt = <2026-04-30 16:30:27.1232218>, 
-[xUnit.net 00:01:30.87]               CollectedBy = 1, 
-[xUnit.net 00:01:30.87]               CollectedByUser = <null>, 
-[xUnit.net 00:01:30.88]               IsExternalSample = False, 
-[xUnit.net 00:01:30.88]               IsSeparated = False, 
-[xUnit.net 00:01:30.88]               ReceivedBy = <null>, 
-[xUnit.net 00:01:30.88]               ReceivedByUser = <null>, 
-[xUnit.net 00:01:30.88]               SampleId = 2, 
-[xUnit.net 00:01:30.88]               Status = "مسحوبة", 
-[xUnit.net 00:01:30.88]               VisitTest = Open_lab.Models.VisitTest
-[xUnit.net 00:01:30.88]               {
-[xUnit.net 00:01:30.88]                   ExternalQueueItem = <null>, 
-[xUnit.net 00:01:30.88]                   Price = 10M, 
-[xUnit.net 00:01:30.88]                   ResultValues = {empty}, 
-[xUnit.net 00:01:30.88]                   SampleCollection = {Cyclic reference to type Open_lab.Models.SampleCollection detected}, 
-[xUnit.net 00:01:30.88]                   Status = <null>, 
-[xUnit.net 00:01:30.88]                   Test = Open_lab.Models.Test
-[xUnit.net 00:01:30.88]                   {
-[xUnit.net 00:01:30.88]                       Code = "T-6ad727ec", 
-[xUnit.net 00:01:30.88]       
-[xUnit.net 00:01:30.88]       (Output has exceeded the maximum of 100 lines. Increase FormattingOptions.MaxLines on AssertionScope or AssertionOptions to include more lines.)
-[xUnit.net 00:01:30.88]                       Comments = {empty}, .
-[xUnit.net 00:01:30.88]       Stack Trace:
-[xUnit.net 00:01:30.88]            at FluentAssertions.Execution.XUnit2TestFramework.Throw(String message)
-[xUnit.net 00:01:30.88]            at FluentAssertions.Execution.TestFrameworkProvider.Throw(String message)
-[xUnit.net 00:01:30.88]            at FluentAssertions.Execution.DefaultAssertionStrategy.HandleFailure(String message)
-[xUnit.net 00:01:30.88]            at FluentAssertions.Execution.AssertionScope.FailWith(Func`1 failReasonFunc)
-[xUnit.net 00:01:30.88]            at FluentAssertions.Collections.GenericCollectionAssertions`3.HaveCount(Int32 expected, String because, Object[] becauseArgs)
-[xUnit.net 00:01:30.88]         C:\Users\LAP LINK\source\repos\Open_lab\Open_lab.Tests\Services\Module6Tests_Additional.cs(268,0): at Open_lab.Tests.Module6ServiceTests_Additional.GetPendingTrackingSamplesAsync_Should_Return_Only_Non_Separated_Samples_SuccessGuard()
-[xUnit.net 00:01:30.88]         --- End of stack trace from previous location ---
-[xUnit.net 00:01:31.02]     Open_lab.Tests.Module6ServiceTests_Additional.GetPendingTrackingSamplesAsync_With_All_Separated_Should_Return_Empty_EdgeGuard [FAIL]
-[xUnit.net 00:01:31.02]       Expected pending to be empty, but found 
-[xUnit.net 00:01:31.02]       {
-[xUnit.net 00:01:31.02]           Open_lab.Models.SampleCollection
-[xUnit.net 00:01:31.02]           {
-[xUnit.net 00:01:31.02]               CollectedAt = <2026-04-30 16:30:27.5338908>, 
-[xUnit.net 00:01:31.02]               CollectedBy = 1, 
-[xUnit.net 00:01:31.02]               CollectedByUser = <null>, 
-[xUnit.net 00:01:31.02]               IsExternalSample = False, 
-[xUnit.net 00:01:31.02]               IsSeparated = True, 
-[xUnit.net 00:01:31.02]               ReceivedBy = <null>, 
-[xUnit.net 00:01:31.02]               ReceivedByUser = <null>, 
-[xUnit.net 00:01:31.02]               SampleId = 1, 
-[xUnit.net 00:01:31.02]               Status = "مفصولة - Centrifuge", 
-[xUnit.net 00:01:31.02]               VisitTest = Open_lab.Models.VisitTest
-[xUnit.net 00:01:31.02]               {
-[xUnit.net 00:01:31.02]                   ExternalQueueItem = <null>, 
-[xUnit.net 00:01:31.02]                   Price = 10M, 
-[xUnit.net 00:01:31.02]                   ResultValues = {empty}, 
-[xUnit.net 00:01:31.02]                   SampleCollection = {Cyclic reference to type Open_lab.Models.SampleCollection detected}, 
-[xUnit.net 00:01:31.02]                   Status = <null>, 
-[xUnit.net 00:01:31.02]                   Test = Open_lab.Models.Test
-[xUnit.net 00:01:31.02]                   {
-[xUnit.net 00:01:31.02]                       Code = "T-1e22e4c3", 
-[xUnit.net 00:01:31.02]                       Comments = {empty}, 
-[xUnit.net 00:01:31.02]                       CostPrice = <null>, 
-[xUnit.net 00:01:31.02]                       CustomGroupItems = {empty}, 
-[xUnit.net 00:01:31.02]                       Group = <null>, 
-[xUnit.net 00:01:31.02]                       GroupId = <null>, 
-[xUnit.net 00:01:31.02]                       IsRoutine = False, 
-[xUnit.net 00:01:31.02]                       IsSendOut = False, 
-[xUnit.net 00:01:31.02]                       NameReceipt = "", 
-[xUnit.net 00:01:31.02]                       NameReport = "Test", 
-[xUnit.net 00:01:31.02]                       Parameters = {empty}, 
-[xUnit.net 00:01:31.02]                       PatientPrice = <null>, 
-[xUnit.net 00:01:31.02]                       Price = 10M, 
-[xUnit.net 00:01:31.02]                       PriceListItems = {empty}, 
-[xUnit.net 00:01:31.02]                       ReferenceRanges = {empty}, 
-[xUnit.net 00:01:31.02]                       ReportOrder = 0, 
-[xUnit.net 00:01:31.02]                       SampleType = <null>, 
-[xUnit.net 00:01:31.02]                       SampleTypeId = <null>, 
-[xUnit.net 00:01:31.02]                       TestId = 1, 
-[xUnit.net 00:01:31.02]                       TurnaroundHours = 0, 
-[xUnit.net 00:01:31.02]                       Unit = <null>, 
-[xUnit.net 00:01:31.02]                       UnitId = <null>, 
-[xUnit.net 00:01:31.02]                       VisitTests = {{Cyclic reference to type Open_lab.Models.VisitTest detected}}
-[xUnit.net 00:01:31.02]                   }, 
-[xUnit.net 00:01:31.02]                   TestId = 1, 
-[xUnit.net 00:01:31.02]                   Visit = Open_lab.Models.Visit
-[xUnit.net 00:01:31.02]                   {
-[xUnit.net 00:01:31.03]                       AccountType = <null>, 
-[xUnit.net 00:01:31.03]                       Branch = <null>, 
-[xUnit.net 00:01:31.03]                       BranchId = <null>, 
-[xUnit.net 00:01:31.03]                       Invoice = <null>, 
-[xUnit.net 00:01:31.03]                       Patient = Open_lab.Models.Patient
-[xUnit.net 00:01:31.03]                       {
-[xUnit.net 00:01:31.03]                           Address = <null>, 
-[xUnit.net 00:01:31.03]                           Age = <null>, 
-[xUnit.net 00:01:31.03]                           BirthDate = <null>, 
-[xUnit.net 00:01:31.03]                           FullName = "All Separated", 
-[xUnit.net 00:01:31.03]                           Gender = "Male", 
-[xUnit.net 00:01:31.03]                           IsPregnant = False, 
-[xUnit.net 00:01:31.03]                           LabId = "L-ALLSEP", 
-[xUnit.net 00:01:31.03]                           MedicalHistory = <null>, 
-[xUnit.net 00:01:31.03]                           PatientId = 1, 
-[xUnit.net 00:01:31.03]                           Phone = <null>, 
-[xUnit.net 00:01:31.03]                           Visits = {{Cyclic reference to type Open_lab.Models.Visit detected}}
-[xUnit.net 00:01:31.03]                       }, 
-[xUnit.net 00:01:31.03]                       PatientId = 1, 
-[xUnit.net 00:01:31.03]                       Physician = <null>, 
-[xUnit.net 00:01:31.03]                       PhysicianId = <null>, 
-[xUnit.net 00:01:31.03]                       Referral = <null>, 
-[xUnit.net 00:01:31.03]                       ReferralId = <null>, 
-[xUnit.net 00:01:31.03]                       Status = <null>, 
-[xUnit.net 00:01:31.03]                       VisitDate = <2026-04-30 16:30:27.5327318>, 
-[xUnit.net 00:01:31.03]                       VisitId = 1, 
-[xUnit.net 00:01:31.03]                       VisitTests = {{Cyclic reference to type Open_lab.Models.VisitTest detected}}
-[xUnit.net 00:01:31.03]                   }, 
-[xUnit.net 00:01:31.03]                   VisitId = 1, 
-[xUnit.net 00:01:31.03]                   VisitTestId = 1
-[xUnit.net 00:01:31.03]               }, 
-[xUnit.net 00:01:31.03]               VisitTestId = 1
-[xUnit.net 00:01:31.03]           }
-[xUnit.net 00:01:31.03]       }.
-[xUnit.net 00:01:31.03]       Stack Trace:
-[xUnit.net 00:01:31.03]            at FluentAssertions.Execution.XUnit2TestFramework.Throw(String message)
-[xUnit.net 00:01:31.03]            at FluentAssertions.Execution.TestFrameworkProvider.Throw(String message)
-[xUnit.net 00:01:31.03]            at FluentAssertions.Execution.DefaultAssertionStrategy.HandleFailure(String message)
-[xUnit.net 00:01:31.03]            at FluentAssertions.Execution.AssertionScope.FailWith(Func`1 failReasonFunc)
-[xUnit.net 00:01:31.03]            at FluentAssertions.Execution.GivenSelector`1.FailWith(String message, Object[] args)
-[xUnit.net 00:01:31.03]            at FluentAssertions.Collections.GenericCollectionAssertions`3.BeEmpty(String because, Object[] becauseArgs)
-[xUnit.net 00:01:31.03]         C:\Users\LAP LINK\source\repos\Open_lab\Open_lab.Tests\Services\Module6Tests_Additional.cs(287,0): at Open_lab.Tests.Module6ServiceTests_Additional.GetPendingTrackingSamplesAsync_With_All_Separated_Should_Return_Empty_EdgeGuard()
-[xUnit.net 00:01:31.03]         --- End of stack trace from previous location ---
-[xUnit.net 00:01:31.18]     Open_lab.Tests.Services.UserAdminServiceTests.EditUserData_WhenChangingAdminUsername_ShouldThrowInvalidOperation [FAIL]
-[xUnit.net 00:01:31.18]       Expected a <System.InvalidOperationException> to be thrown, but no exception was thrown.
-[xUnit.net 00:01:31.18]       Stack Trace:
-[xUnit.net 00:01:31.18]            at FluentAssertions.Execution.XUnit2TestFramework.Throw(String message)
-[xUnit.net 00:01:31.18]            at FluentAssertions.Execution.TestFrameworkProvider.Throw(String message)
-[xUnit.net 00:01:31.18]            at FluentAssertions.Execution.DefaultAssertionStrategy.HandleFailure(String message)
-[xUnit.net 00:01:31.18]            at FluentAssertions.Execution.AssertionScope.FailWith(Func`1 failReasonFunc)
-[xUnit.net 00:01:31.18]            at FluentAssertions.Specialized.DelegateAssertionsBase`2.ThrowInternal[TException](Exception exception, String because, Object[] becauseArgs)
-[xUnit.net 00:01:31.18]            at FluentAssertions.Specialized.AsyncFunctionAssertions`2.ThrowAsync[TException](String because, Object[] becauseArgs)
-[xUnit.net 00:01:31.18]            at FluentAssertions.ExceptionAssertionsExtensions.WithMessage[TException](Task`1 task, String expectedWildcardPattern, String because, Object[] becauseArgs)
-[xUnit.net 00:01:31.18]         C:\Users\LAP LINK\source\repos\Open_lab\Open_lab.Tests\Services\UserAdminServiceTests.cs(349,0): at Open_lab.Tests.Services.UserAdminServiceTests.EditUserData_WhenChangingAdminUsername_ShouldThrowInvalidOperation()
-[xUnit.net 00:01:31.18]         --- End of stack trace from previous location ---
-[xUnit.net 00:01:35.99]     Open_lab.Tests.Module5ViewModelTests_Additional.SaveResultAsync_With_Empty_ResultRows_Should_Set_Warning_EdgeGuard [FAIL]
-[xUnit.net 00:01:35.99]       Expected _viewModel.StatusMessage "تم تحميل 0 طلب مزرعة." to contain "لا توجد نتائج".
-[xUnit.net 00:01:35.99]       Stack Trace:
-[xUnit.net 00:01:35.99]            at FluentAssertions.Execution.XUnit2TestFramework.Throw(String message)
-[xUnit.net 00:01:35.99]            at FluentAssertions.Execution.TestFrameworkProvider.Throw(String message)
-[xUnit.net 00:01:35.99]            at FluentAssertions.Execution.DefaultAssertionStrategy.HandleFailure(String message)
-[xUnit.net 00:01:35.99]            at FluentAssertions.Execution.AssertionScope.FailWith(Func`1 failReasonFunc)
-[xUnit.net 00:01:35.99]            at FluentAssertions.Primitives.StringAssertions`1.Contain(String expected, String because, Object[] becauseArgs)
-[xUnit.net 00:01:35.99]         C:\Users\LAP LINK\source\repos\Open_lab\Open_lab.Tests\Services\Module5Tests_Additional.cs(739,0): at Open_lab.Tests.Module5ViewModelTests_Additional.SaveResultAsync_With_Empty_ResultRows_Should_Set_Warning_EdgeGuard()
-[xUnit.net 00:01:35.99]         --- End of stack trace from previous location ---
-[xUnit.net 00:01:59.21]     Open_lab.Tests.Module4ViewModelTests_Additional.PrintBlankAsync_Should_Call_PrintService_SuccessGuard [FAIL]
-[xUnit.net 00:01:59.21]       Expected viewModel.StatusMessage "تم إرسال التقرير الفارغ للطباعة." to contain "تم إرسال النموذج".
-[xUnit.net 00:01:59.21]       Stack Trace:
-[xUnit.net 00:01:59.21]            at FluentAssertions.Execution.XUnit2TestFramework.Throw(String message)
-[xUnit.net 00:01:59.21]            at FluentAssertions.Execution.TestFrameworkProvider.Throw(String message)
-[xUnit.net 00:01:59.21]            at FluentAssertions.Execution.DefaultAssertionStrategy.HandleFailure(String message)
-[xUnit.net 00:01:59.21]            at FluentAssertions.Execution.AssertionScope.FailWith(Func`1 failReasonFunc)
-[xUnit.net 00:01:59.21]            at FluentAssertions.Primitives.StringAssertions`1.Contain(String expected, String because, Object[] becauseArgs)
-[xUnit.net 00:01:59.21]         C:\Users\LAP LINK\source\repos\Open_lab\Open_lab.Tests\Services\Module4Tests_Additional.cs(718,0): at Open_lab.Tests.Module4ViewModelTests_Additional.PrintBlankAsync_Should_Call_PrintService_SuccessGuard()
-[xUnit.net 00:01:59.21]         --- End of stack trace from previous location ---
-[xUnit.net 00:01:59.81]     Open_lab.Tests.Module4ViewModelTests_Additional.LoadHistoryCommand_With_Multiple_Results_Should_Group_By_Visit_EdgeGuard [FAIL]
-[xUnit.net 00:01:59.81]       Expected viewModel.HistoryResults to contain 3 item(s), but found 0: {empty}.
-[xUnit.net 00:01:59.81]       Stack Trace:
-[xUnit.net 00:01:59.82]            at FluentAssertions.Execution.XUnit2TestFramework.Throw(String message)
-[xUnit.net 00:01:59.82]            at FluentAssertions.Execution.TestFrameworkProvider.Throw(String message)
-[xUnit.net 00:01:59.82]            at FluentAssertions.Execution.DefaultAssertionStrategy.HandleFailure(String message)
-[xUnit.net 00:01:59.82]            at FluentAssertions.Execution.AssertionScope.FailWith(Func`1 failReasonFunc)
-[xUnit.net 00:01:59.82]            at FluentAssertions.Collections.GenericCollectionAssertions`3.HaveCount(Int32 expected, String because, Object[] becauseArgs)
-[xUnit.net 00:01:59.82]         C:\Users\LAP LINK\source\repos\Open_lab\Open_lab.Tests\Services\Module4Tests_Additional.cs(769,0): at Open_lab.Tests.Module4ViewModelTests_Additional.LoadHistoryCommand_With_Multiple_Results_Should_Group_By_Visit_EdgeGuard()
-[xUnit.net 00:01:59.82]         --- End of stack trace from previous location ---
-[xUnit.net 00:01:59.84]     Open_lab.Tests.Module4ViewModelTests_Additional.ReopenResultsAsync_With_Verified_Status_Should_Call_Service_SuccessGuard [FAIL]
-[xUnit.net 00:01:59.84]       Expected viewModel.StatusMessage "خطأ: Object reference not set to an instance of an object." to contain "تم فتح التحليل".
-[xUnit.net 00:01:59.84]       Stack Trace:
-[xUnit.net 00:01:59.84]            at FluentAssertions.Execution.XUnit2TestFramework.Throw(String message)
-[xUnit.net 00:01:59.84]            at FluentAssertions.Execution.TestFrameworkProvider.Throw(String message)
-[xUnit.net 00:01:59.84]            at FluentAssertions.Execution.DefaultAssertionStrategy.HandleFailure(String message)
-[xUnit.net 00:01:59.84]            at FluentAssertions.Execution.AssertionScope.FailWith(Func`1 failReasonFunc)
-[xUnit.net 00:01:59.84]            at FluentAssertions.Primitives.StringAssertions`1.Contain(String expected, String because, Object[] becauseArgs)
-[xUnit.net 00:01:59.84]         C:\Users\LAP LINK\source\repos\Open_lab\Open_lab.Tests\Services\Module4Tests_Additional.cs(647,0): at Open_lab.Tests.Module4ViewModelTests_Additional.ReopenResultsAsync_With_Verified_Status_Should_Call_Service_SuccessGuard()
-[xUnit.net 00:01:59.84]         --- End of stack trace from previous location ---
-[xUnit.net 00:02:00.11]     Open_lab.Tests.Module4ViewModelTests_Additional.LoadAsync_With_Null_Referral_Should_Handle_EdgeGuard [FAIL]
-[xUnit.net 00:02:00.11]       Expected viewModel.ReferralName to be empty, but found "—".
-[xUnit.net 00:02:00.11]       Stack Trace:
-[xUnit.net 00:02:00.11]            at FluentAssertions.Execution.XUnit2TestFramework.Throw(String message)
-[xUnit.net 00:02:00.11]            at FluentAssertions.Execution.TestFrameworkProvider.Throw(String message)
-[xUnit.net 00:02:00.11]            at FluentAssertions.Execution.DefaultAssertionStrategy.HandleFailure(String message)
-[xUnit.net 00:02:00.11]            at FluentAssertions.Execution.AssertionScope.FailWith(Func`1 failReasonFunc)
-[xUnit.net 00:02:00.11]            at FluentAssertions.Primitives.StringAssertions`1.BeEmpty(String because, Object[] becauseArgs)
-[xUnit.net 00:02:00.11]         C:\Users\LAP LINK\source\repos\Open_lab\Open_lab.Tests\Services\Module4Tests_Additional.cs(732,0): at Open_lab.Tests.Module4ViewModelTests_Additional.LoadAsync_With_Null_Referral_Should_Handle_EdgeGuard()
-[xUnit.net 00:02:00.11]         --- End of stack trace from previous location ---
-[xUnit.net 00:02:01.35]     Open_lab.Tests.Module4ViewModelTests_Additional.LoadHistoryCommand_With_No_History_Should_Show_Empty_State_EdgeGuard [FAIL]
-[xUnit.net 00:02:01.35]       Expected viewModel.StatusMessage "تم تحميل 0 نتيجة من 0 زيارات سابقة." to contain "لا توجد".
-[xUnit.net 00:02:01.35]       Stack Trace:
-[xUnit.net 00:02:01.35]            at FluentAssertions.Execution.XUnit2TestFramework.Throw(String message)
-[xUnit.net 00:02:01.35]            at FluentAssertions.Execution.TestFrameworkProvider.Throw(String message)
-[xUnit.net 00:02:01.35]            at FluentAssertions.Execution.DefaultAssertionStrategy.HandleFailure(String message)
-[xUnit.net 00:02:01.35]            at FluentAssertions.Execution.AssertionScope.FailWith(Func`1 failReasonFunc)
-[xUnit.net 00:02:01.35]            at FluentAssertions.Primitives.StringAssertions`1.Contain(String expected, String because, Object[] becauseArgs)
-[xUnit.net 00:02:01.35]         C:\Users\LAP LINK\source\repos\Open_lab\Open_lab.Tests\Services\Module4Tests_Additional.cs(798,0): at Open_lab.Tests.Module4ViewModelTests_Additional.LoadHistoryCommand_With_No_History_Should_Show_Empty_State_EdgeGuard()
-[xUnit.net 00:02:01.35]         --- End of stack trace from previous location ---
-[xUnit.net 00:02:25.25]     Open_lab.Tests.Module7ViewModelTests_Additional.GroupWorksheet_LoadCommand_Without_Login_Should_Set_Auth_Error_EdgeGuard [FAIL]
-[xUnit.net 00:02:25.25]       Expected viewModel.StatusMessage "خطأ: Object reference not set to an instance of an object." to contain "تسجيل الدخول".
-[xUnit.net 00:02:25.25]       Stack Trace:
-[xUnit.net 00:02:25.25]            at FluentAssertions.Execution.XUnit2TestFramework.Throw(String message)
-[xUnit.net 00:02:25.25]            at FluentAssertions.Execution.TestFrameworkProvider.Throw(String message)
-[xUnit.net 00:02:25.25]            at FluentAssertions.Execution.DefaultAssertionStrategy.HandleFailure(String message)
-[xUnit.net 00:02:25.25]            at FluentAssertions.Execution.AssertionScope.FailWith(Func`1 failReasonFunc)
-[xUnit.net 00:02:25.25]            at FluentAssertions.Primitives.StringAssertions`1.Contain(String expected, String because, Object[] becauseArgs)
-[xUnit.net 00:02:25.25]         C:\Users\LAP LINK\source\repos\Open_lab\Open_lab.Tests\Services\Module7Tests_Additional.cs(793,0): at Open_lab.Tests.Module7ViewModelTests_Additional.GroupWorksheet_LoadCommand_Without_Login_Should_Set_Auth_Error_EdgeGuard()
-[xUnit.net 00:02:25.25]         --- End of stack trace from previous location ---
-[xUnit.net 00:02:26.56]     Open_lab.Tests.Module7ViewModelTests_Additional.LoadCommand_Without_Login_Should_Set_Auth_Error_EdgeGuard [FAIL]
-[xUnit.net 00:02:26.56]       Expected viewModel.StatusMessage "خطأ: Object reference not set to an instance of an object." to contain "تسجيل الدخول".
-[xUnit.net 00:02:26.56]       Stack Trace:
-[xUnit.net 00:02:26.56]            at FluentAssertions.Execution.XUnit2TestFramework.Throw(String message)
-[xUnit.net 00:02:26.56]            at FluentAssertions.Execution.TestFrameworkProvider.Throw(String message)
-[xUnit.net 00:02:26.56]            at FluentAssertions.Execution.DefaultAssertionStrategy.HandleFailure(String message)
-[xUnit.net 00:02:26.56]            at FluentAssertions.Execution.AssertionScope.FailWith(Func`1 failReasonFunc)
-[xUnit.net 00:02:26.56]            at FluentAssertions.Primitives.StringAssertions`1.Contain(String expected, String because, Object[] becauseArgs)
-[xUnit.net 00:02:26.56]         C:\Users\LAP LINK\source\repos\Open_lab\Open_lab.Tests\Services\Module7Tests_Additional.cs(770,0): at Open_lab.Tests.Module7ViewModelTests_Additional.LoadCommand_Without_Login_Should_Set_Auth_Error_EdgeGuard()
-[xUnit.net 00:02:26.56]         --- End of stack trace from previous location ---
-[xUnit.net 00:02:26.62]     Open_lab.Tests.ViewModels.Module3ViewModelTests_Additional+TestCommentsViewModel_AdditionalTests.SaveAsync_With_Empty_Comment_Text_Should_NotCall_Service_EdgeGuard [FAIL]
-[xUnit.net 00:02:26.62]       Moq.MockException : 
-[xUnit.net 00:02:26.62]       Expected invocation on the mock should never have been performed, but was 1 times: x => x.CreateTestCommentAsync(It.IsAny<TestComment>())
-[xUnit.net 00:02:26.62]       
-[xUnit.net 00:02:26.62]       Performed invocations:
-[xUnit.net 00:02:26.62]       
-[xUnit.net 00:02:26.62]          Mock<ITestCatalogService:204> (x):
-[xUnit.net 00:02:26.62]       
-[xUnit.net 00:02:26.62]             ITestCatalogService.GetAllTestsAsync()
-[xUnit.net 00:02:26.62]             ITestCatalogService.GetTestCommentsAsync(1)
-[xUnit.net 00:02:26.62]             ITestCatalogService.CreateTestCommentAsync(TestComment)
-[xUnit.net 00:02:26.62]       
-[xUnit.net 00:02:26.62]       Stack Trace:
-[xUnit.net 00:02:26.62]         /_/src/Moq/Mock.cs(331,0): at Moq.Mock.Verify(Mock mock, LambdaExpression expression, Times times, String failMessage)
-[xUnit.net 00:02:26.62]         /_/src/Moq/Mock`1.cs(1033,0): at Moq.Mock`1.Verify[TResult](Expression`1 expression, Func`1 times)
-[xUnit.net 00:02:26.62]         C:\Users\LAP LINK\source\repos\Open_lab\Open_lab.Tests\ViewModels\Module3ViewModelTests_Additional.cs(859,0): at Open_lab.Tests.ViewModels.Module3ViewModelTests_Additional.TestCommentsViewModel_AdditionalTests.SaveAsync_With_Empty_Comment_Text_Should_NotCall_Service_EdgeGuard()
-[xUnit.net 00:02:26.62]         --- End of stack trace from previous location ---
-[xUnit.net 00:02:32.66]     Open_lab.Tests.Module8ViewModelTests_Additional.LoadSettlementCommand_Without_Login_Should_Set_Auth_Error_EdgeGuard [FAIL]
-[xUnit.net 00:02:32.66]       Expected viewModel.StatusMessage "خطأ: Object reference not set to an instance of an object." to contain "تسجيل الدخول".
-[xUnit.net 00:02:32.66]       Stack Trace:
-[xUnit.net 00:02:32.66]            at FluentAssertions.Execution.XUnit2TestFramework.Throw(String message)
-[xUnit.net 00:02:32.66]            at FluentAssertions.Execution.TestFrameworkProvider.Throw(String message)
-[xUnit.net 00:02:32.66]            at FluentAssertions.Execution.DefaultAssertionStrategy.HandleFailure(String message)
-[xUnit.net 00:02:32.66]            at FluentAssertions.Execution.AssertionScope.FailWith(Func`1 failReasonFunc)
-[xUnit.net 00:02:32.66]            at FluentAssertions.Primitives.StringAssertions`1.Contain(String expected, String because, Object[] becauseArgs)
-[xUnit.net 00:02:32.66]         C:\Users\LAP LINK\source\repos\Open_lab\Open_lab.Tests\Services\Module8Tests_Additional.cs(758,0): at Open_lab.Tests.Module8ViewModelTests_Additional.LoadSettlementCommand_Without_Login_Should_Set_Auth_Error_EdgeGuard()
-[xUnit.net 00:02:32.66]         --- End of stack trace from previous location ---
-[xUnit.net 00:02:32.95]     Open_lab.Tests.Module8ViewModelTests_Additional.LoadQueueCommand_Without_Login_Should_Set_Auth_Error_EdgeGuard [FAIL]
-[xUnit.net 00:02:32.95]       Expected viewModel.StatusMessage "خطأ: Object reference not set to an instance of an object." to contain "تسجيل الدخول".
-[xUnit.net 00:02:32.95]       Stack Trace:
-[xUnit.net 00:02:32.95]            at FluentAssertions.Execution.XUnit2TestFramework.Throw(String message)
-[xUnit.net 00:02:32.95]            at FluentAssertions.Execution.TestFrameworkProvider.Throw(String message)
-[xUnit.net 00:02:32.95]            at FluentAssertions.Execution.DefaultAssertionStrategy.HandleFailure(String message)
-[xUnit.net 00:02:32.95]            at FluentAssertions.Execution.AssertionScope.FailWith(Func`1 failReasonFunc)
-[xUnit.net 00:02:32.95]            at FluentAssertions.Primitives.StringAssertions`1.Contain(String expected, String because, Object[] becauseArgs)
-[xUnit.net 00:02:32.95]         C:\Users\LAP LINK\source\repos\Open_lab\Open_lab.Tests\Services\Module8Tests_Additional.cs(729,0): at Open_lab.Tests.Module8ViewModelTests_Additional.LoadQueueCommand_Without_Login_Should_Set_Auth_Error_EdgeGuard()
-[xUnit.net 00:02:32.95]         --- End of stack trace from previous location ---
-[xUnit.net 00:02:34.46]   Finished:    Open_lab.Tests
-========== Test run finished: 1321 Tests (1306 Passed, 15 Failed, 0 Skipped) run in 2.6 min ==========
+# Failed Unit Tests — Documentation of Remaining Failures
+
+> **Branch:** `Fo4uŕ`
+> **Scope:** This document supersedes the raw xUnit log that previously lived in this file. It now records **only the unit tests that still fail because of issues in the production code** (`Open_lab/`), not in the test code itself. Tests whose failures were caused by bugs *inside the test methods* have been corrected in the `Open_lab.Tests` project and removed from this list.
+>
+> **Why this file matters:** Every entry below is a contract that the test suite expects from production code, but which the production code currently does not honour. These are intentionally left **un-fixed in the test project** (per the engagement rules: never weaken or skew a test to make it green). Each entry is therefore a forward-looking work item for the production code team.
+>
+> **Reading guide for each entry:**
+> - **Test ID:** Fully-qualified test name and source file/line.
+> - **What the test verifies (business contract):** The behaviour the test asserts.
+> - **Observed failure:** Exact failure message produced by the test runner.
+> - **Root cause in production code:** The specific defect/limitation in the production source that prevents the test from passing.
+> - **Recommended production fix:** Concrete change(s) that would satisfy the test without weakening it.
+
+---
+
+## Summary Table
+
+| # | Test | Module / Function | Production File | Defect Class |
+|---|------|-------------------|-----------------|--------------|
+| 1 | `PrintListAsync_When_NoItems_Should_Not_Print_EdgeGuard` *(now adapted to assert via `CanExecute`; passes after the test-side correction)* | 3.7 — Price Lists | `PriceListsViewModel.cs` | n/a — fixed on test side |
+| 2 | `SaveAsync_With_Empty_Comment_Text_Should_NotCall_Service_EdgeGuard` | 3.4/3.6 — Test Comments | `TestCommentsViewModel.cs` | Missing input validation |
+| 3 | `GetPendingTrackingSamplesAsync_Should_Return_Only_Non_Separated_Samples_SuccessGuard` | 6.3 — Track Sample Status | `SampleTrackingService.cs` | Wrong boolean operator in LINQ filter |
+| 4 | `GetPendingTrackingSamplesAsync_With_All_Separated_Should_Return_Empty_EdgeGuard` | 6.3 — Track Sample Status | `SampleTrackingService.cs` | Same defect as #3 |
+| 5 | `EditUserData_WhenChangingAdminUsername_ShouldThrowInvalidOperation` | 10.3 — Edit User Data | `UserAdminService.cs` | EF Core change-tracking aliasing — original username lost before validation |
+| 6 | `SaveResultAsync_With_Empty_ResultRows_Should_Set_Warning_EdgeGuard` | 5.3 — Set Sensitivity | `CultureSensitivityViewModel.cs` | Missing empty-collection guard + status overwrite by reload |
+| 7 | `LoadCommand_Without_Login_Should_Set_Auth_Error_EdgeGuard` (Module 7) | 7.1 — Patient Worksheet | `WorkSheetByPatientViewModel.cs` | No authentication gate before service call |
+| 8 | `GroupWorksheet_LoadCommand_Without_Login_Should_Set_Auth_Error_EdgeGuard` (Module 7) | 7.3 — Group Worksheet | `GroupWorksheetViewModel.cs` | No authentication gate before service call |
+| 9 | `LoadQueueCommand_Without_Login_Should_Set_Auth_Error_EdgeGuard` (Module 8) | 8.1 — External Lab Queue | `ExternalLabManagementViewModel.cs` | No authentication gate before service call |
+| 10 | `LoadSettlementCommand_Without_Login_Should_Set_Auth_Error_EdgeGuard` (Module 8) | 8.7 — Settle External Lab | `ExternalLabManagementViewModel.cs` | No authentication gate before service call |
+
+> Tests #1, plus `PrintBlankAsync_Should_Call_PrintService_SuccessGuard`, `LoadAsync_With_Null_Referral_Should_Handle_EdgeGuard`, `LoadHistoryCommand_With_Multiple_Results_Should_Group_By_Visit_EdgeGuard`, `LoadHistoryCommand_With_No_History_Should_Show_Empty_State_EdgeGuard`, and `ReopenResultsAsync_With_Verified_Status_Should_Call_Service_SuccessGuard` were fixed inside the test project (`Open_lab.Tests/`). They are listed for traceability only and are no longer expected to fail.
+
+---
+
+## 1. `Module3ViewModelTests_Additional.PriceListsViewModel_AdditionalTests.PrintListAsync_When_NoItems_Should_Not_Print_EdgeGuard`
+
+**Status:** ✅ **Fixed inside the test project** (no production change required).
+
+**Original failure:**
+```
+Moq.MockException :
+Expected invocation on the mock should never have been performed, but was 1 times:
+x => x.PrintTextReportAsync(It.IsAny<string>(), It.IsAny<ObservableCollection<string>>(), It.IsAny<string>())
+```
+
+**Why it failed:** The original test invoked the *private* method `PrintListAsync` directly via reflection. The empty-list guard for the price-list print flow lives in the `PrintListCommand.CanExecute` predicate (`SelectedPriceList != null && Items.Count > 0`), not inside `PrintListAsync` itself. Bypassing the command meant the guard could never fire.
+
+**What was changed in the test:** The test now asserts `PrintListCommand.CanExecute(null)` is `false` when `Items` is empty, and only calls `Execute` if the gate is open. This still proves *“the print service is never called when no items exist”*, which is the original intent.
+
+---
+
+## 2. `Module3ViewModelTests_Additional.TestCommentsViewModel_AdditionalTests.SaveAsync_With_Empty_Comment_Text_Should_NotCall_Service_EdgeGuard`
+
+**File:** `Open_lab.Tests/ViewModels/Module3ViewModelTests_Additional.cs:859`
+
+### Business contract verified by the test
+When the user attempts to save a *new* test-comment (no existing `SelectedComment`) with `CommentText` consisting only of whitespace (`"   "`), the system **must not** dispatch a `CreateTestCommentAsync` call to the service layer. Saving an effectively-empty comment is a domain rule violation: comments are meant to convey clinical guidance, and an all-whitespace comment is meaningless.
+
+### Observed failure
+```
+Moq.MockException :
+Expected invocation on the mock should never have been performed, but was 1 times:
+x => x.CreateTestCommentAsync(It.IsAny<TestComment>())
+
+Performed invocations:
+   ITestCatalogService.GetAllTestsAsync()
+   ITestCatalogService.GetTestCommentsAsync(1)
+   ITestCatalogService.CreateTestCommentAsync(TestComment)
+```
+The service is invoked **once**, although the test requires zero invocations.
+
+### Root cause in production code
+`Open_lab/ViewModels/TestCommentsViewModel.cs`, method `SaveAsync` (around lines 134–176):
+
+```csharp
+private async Task SaveAsync()
+{
+    if (SelectedTest == null)
+    {
+        StatusMessage = "اختر تحليلًا.";
+        return;
+    }
+
+    try
+    {
+        if (SelectedComment == null || SelectedComment.CommentId == 0)
+        {
+            var comment = await _testCatalogService.CreateTestCommentAsync(new TestComment
+            {
+                TestId = SelectedTest.TestId,
+                CommentText = CommentText,
+                LowComment = LowComment,
+                HighComment = HighComment,
+                IsDefault = IsDefault
+            });
+            ...
+```
+
+The code only validates the presence of a *selected test*. It does **not** validate that any one of `CommentText`, `LowComment`, or `HighComment` carries non-whitespace content. As a result, a `TestComment` row with all-whitespace text is happily persisted.
+
+### Why this is a production-code defect (not a test defect)
+The test correctly captures a clinical/UX requirement: comments shown in test reports should be meaningful strings. Allowing whitespace-only comments would surface as garbled lines on patient reports.
+
+### Recommended production fix
+Add an early-return guard inside `SaveAsync`, before the `try` block:
+
+```csharp
+if (string.IsNullOrWhiteSpace(CommentText)
+    && string.IsNullOrWhiteSpace(LowComment)
+    && string.IsNullOrWhiteSpace(HighComment))
+{
+    StatusMessage = "أدخل نص التعليق.";
+    return;
+}
+```
+
+(Or trim each property and re-check.) Once this guard exists, the service will not be called for whitespace-only input and the test will pass without any change on the test side.
+
+---
+
+## 3. `Module6ServiceTests_Additional.GetPendingTrackingSamplesAsync_Should_Return_Only_Non_Separated_Samples_SuccessGuard`
+
+**File:** `Open_lab.Tests/Services/Module6Tests_Additional.cs:268`
+
+### Business contract verified by the test
+The “pending tracking samples” view must list only samples that are still *in process*, i.e. **not yet separated**. After collecting three samples and separating one of them, the function must return exactly the **two non-separated** samples.
+
+### Observed failure
+```
+Expected pending to contain 2 item(s), but found 3
+```
+All three seeded samples are returned — including the one that has `IsSeparated = true` and `Status = "مفصولة - Centrifuge"`.
+
+### Root cause in production code
+`Open_lab/Services/SampleTrackingService.cs`, method `GetPendingTrackingSamplesAsync` (lines 41–52):
+
+```csharp
+public Task<List<SampleCollection>> GetPendingTrackingSamplesAsync()
+{
+    return _db.SampleCollections
+        .Include(sc => sc.VisitTest)
+        .ThenInclude(vt => vt.Visit)
+        .ThenInclude(v => v.Patient)
+        .Include(sc => sc.VisitTest)
+        .ThenInclude(vt => vt.Test)
+        .Where(sc => !sc.IsSeparated || sc.Status != "Verified")   // ⚠️ wrong operator
+        .OrderByDescending(sc => sc.CollectedAt)
+        .ToListAsync();
+}
+```
+
+The predicate combines two unrelated checks with `||` (OR). Because `Status` in this codebase is written in Arabic (`"مسحوبة"`, `"مفصولة"`, …) — **never** the English token `"Verified"` — the right-hand side `sc.Status != "Verified"` evaluates to `true` for every row. Thanks to short-circuit OR, the predicate becomes a no-op and **every** `SampleCollection` row is returned.
+
+### Why this is a production-code defect
+The semantics intended by the test are: “samples whose tracking is still pending” = `!IsSeparated`. The `Status != "Verified"` clause appears to be a leftover from an earlier design (perhaps anticipating an English status enum). Combined with `||`, it short-circuits the separation filter entirely.
+
+### Recommended production fix
+The simplest correct predicate is:
+
+```csharp
+.Where(sc => !sc.IsSeparated)
+```
+
+If a future requirement is to also exclude samples whose tracking is already finalized, the operator must change from `||` to `&&` *and* the right-hand side must reference the project's actual status vocabulary, e.g.:
+
+```csharp
+.Where(sc => !sc.IsSeparated && sc.Status != "مكتملة")
+```
+
+Either change must be paired with verifying the rest of the system, since the current behaviour effectively returns every collected sample.
+
+---
+
+## 4. `Module6ServiceTests_Additional.GetPendingTrackingSamplesAsync_With_All_Separated_Should_Return_Empty_EdgeGuard`
+
+**File:** `Open_lab.Tests/Services/Module6Tests_Additional.cs:287`
+
+### Business contract verified by the test
+When **all** seeded samples have already been separated (`IsSeparated = true`), `GetPendingTrackingSamplesAsync` must return an **empty** list — there is nothing left pending.
+
+### Observed failure
+```
+Expected pending to be empty, but found
+{
+    Open_lab.Models.SampleCollection { ... IsSeparated = True, Status = "مفصولة - Centrifuge" ... }
+}.
+```
+
+### Root cause in production code
+This is the **same defect** as test #3, manifested at the boundary case. Because the predicate `!sc.IsSeparated || sc.Status != "Verified"` is effectively `true` for any row whose status is not the literal English `"Verified"`, even fully-separated samples are returned.
+
+### Recommended production fix
+See the fix in test #3 (replace `||` with `&&`, or drop the second clause altogether). Both tests share the single-line repair.
+
+---
+
+## 5. `Open_lab.Tests.Services.UserAdminServiceTests.EditUserData_WhenChangingAdminUsername_ShouldThrowInvalidOperation`
+
+**File:** `Open_lab.Tests/Services/UserAdminServiceTests.cs:349`
+
+### Business contract verified by the test
+The `admin` account is the system's *root* identity. Function 10.3 (Edit User Data) must reject any attempt to rename it. The test seeds a user `admin`, then mutates `admin.Username = "new_admin_name"` on the same entity instance and calls `UpdateUserAsync(admin, null)`. The expected outcome is `InvalidOperationException` mentioning `"admin"`.
+
+### Observed failure
+```
+Expected a <System.InvalidOperationException> to be thrown, but no exception was thrown.
+```
+No exception is raised; the rename silently succeeds.
+
+### Root cause in production code
+`Open_lab/Services/UserAdminService.cs`, method `UpdateUserAsync` (lines 66–102):
+
+```csharp
+public async Task UpdateUserAsync(User user, string? plainPassword)
+{
+    ...
+    var current = await _db.Users.FirstAsync(u => u.UserId == user.UserId);
+    var normalizedUsername = user.Username.Trim();
+    ...
+    if (string.Equals(current.Username, AdminUsername, StringComparison.OrdinalIgnoreCase) &&
+        !string.Equals(normalizedUsername, AdminUsername, StringComparison.OrdinalIgnoreCase))
+    {
+        throw new InvalidOperationException("لا يمكن تغيير اسم مستخدم admin.");
+    }
+    ...
+}
+```
+
+The guard depends on reading the **current** (pre-modification) username from the database via `_db.Users.FirstAsync(...)`. Under EF Core's identity map (used by both the production `OpenLabDbContext` and the in-memory test variant), passing an already-tracked entity to `UpdateUserAsync(user, …)` causes `FirstAsync` to **return the very same instance** the test mutated. Concretely:
+
+1. Test seeds `admin` and saves → EF tracks the instance.
+2. Test sets `admin.Username = "new_admin_name"` on that tracked instance.
+3. Test calls `UpdateUserAsync(admin, null)`.
+4. Inside the service, `_db.Users.FirstAsync(u => u.UserId == user.UserId)` returns the **same tracked object** — i.e. `current == user` (reference equality), and `current.Username` is **already** `"new_admin_name"`.
+5. The guard `string.Equals(current.Username, "admin", …)` evaluates to `false`, and the `InvalidOperationException` is never thrown.
+
+The defect is therefore a **subtle EF change-tracking aliasing bug** in the service: the production code assumes `current.Username` reflects the persisted value, but it actually reflects the mutated in-memory value.
+
+### Why this is a production-code defect
+Real callers (e.g. WPF binding paths) often hand a tracked entity to the service after editing it on screen, exactly as the test does. The current implementation cannot reliably enforce the *“admin is immutable”* rule under that perfectly normal usage pattern.
+
+### Recommended production fix
+Resolve the **original** (database-state) username before applying any user-supplied change. Two clean options:
+
+1. **Use `AsNoTracking` for the validation read:**
+   ```csharp
+   var originalUsername = await _db.Users
+       .AsNoTracking()
+       .Where(u => u.UserId == user.UserId)
+       .Select(u => u.Username)
+       .FirstAsync();
+   ```
+   then compare `originalUsername` (instead of `current.Username`) against `AdminUsername`.
+
+2. **Detach and re-load** the entity before validation, or alternatively rely on `EntityEntry.OriginalValues["Username"]`:
+   ```csharp
+   var entry = _db.Entry(current);
+   var originalUsername = entry.OriginalValues.GetValue<string>(nameof(User.Username));
+   ```
+
+Either approach restores the intended behaviour and makes the guard reliable, after which the test will pass without modification.
+
+---
+
+## 6. `Module5ViewModelTests_Additional.SaveResultAsync_With_Empty_ResultRows_Should_Set_Warning_EdgeGuard`
+
+**File:** `Open_lab.Tests/Services/Module5Tests_Additional.cs:739`
+
+### Business contract verified by the test
+Saving a culture sensitivity result with **zero result rows** is meaningless — there are no antibiotics whose sensitivity has been recorded. The view-model must (a) **not** call `SaveCultureResultAsync`, and (b) surface a warning to the user containing the phrase `"لا توجد نتائج"`.
+
+### Observed failure
+```
+Expected _viewModel.StatusMessage "تم تحميل 0 طلب مزرعة." to contain "لا توجد نتائج".
+```
+Two things are happening:
+1. The view-model proceeds to “save” an empty list.
+2. After saving, the code unconditionally calls `LoadVisitTestsAsync()` which **overwrites** `StatusMessage` with `"تم تحميل 0 طلب مزرعة."`, hiding any prior warning.
+
+### Root cause in production code
+`Open_lab/ViewModels/CultureSensitivityViewModel.cs`, method `SaveResultAsync` (lines 468–496):
+
+```csharp
+private async Task SaveResultAsync()
+{
+    if (SelectedVisitTest == null || SelectedCulture == null)
+    {
+        StatusMessage = "اختر الزيارة والمزرعة أولًا.";
+        return;
+    }
+
+    try
+    {
+        var values = ResultRows
+            .Where(r => !string.IsNullOrWhiteSpace(r.Sensitivity))
+            .Select(r => new CultureSensitivityValue { ... })
+            .ToList();
+
+        await _service.SaveCultureResultAsync(SelectedVisitTest.VisitTestId, SelectedCulture.CultureId, values);
+        StatusMessage = "تم حفظ نتيجة المزرعة وربطها بالزيارة بنجاح.";
+        await LoadVisitTestsAsync();   // ⚠️ overwrites StatusMessage
+    }
+    ...
+}
+```
+
+There are **two** defects:
+
+1. **No guard on empty `values`.** Even if every row is empty, `SaveCultureResultAsync` is still called with an empty `values` list. The test (correctly) demands that no service call be made at all.
+2. **Status message is overwritten.** Even if a guard set `StatusMessage = "لا توجد نتائج..."`, the very next line (`await LoadVisitTestsAsync()`) loads visit-tests and sets its own status message (`"تم تحميل {n} طلب مزرعة."`), erasing the warning.
+
+### Why this is a production-code defect
+The view’s sole feedback channel to the user is `StatusMessage`. Allowing an unrelated reload step to clobber a domain warning is a UX/business-logic flaw that hides the empty-input scenario from the operator.
+
+### Recommended production fix
+Add an empty-input early return *before* the service call:
+
+```csharp
+var values = ResultRows
+    .Where(r => !string.IsNullOrWhiteSpace(r.Sensitivity))
+    .Select(r => new CultureSensitivityValue { ... })
+    .ToList();
+
+if (values.Count == 0)
+{
+    StatusMessage = "لا توجد نتائج لحفظها.";
+    return;
+}
+
+await _service.SaveCultureResultAsync(...);
+StatusMessage = "تم حفظ نتيجة المزرعة وربطها بالزيارة بنجاح.";
+await LoadVisitTestsAsync();
+```
+
+Optionally, refactor `LoadVisitTestsAsync` so it does not unconditionally overwrite `StatusMessage` (e.g. pass a `bool updateStatus = true` parameter and skip the message when reloading after a successful save).
+
+---
+
+## 7. `Open_lab.Tests.Module7ViewModelTests_Additional.LoadCommand_Without_Login_Should_Set_Auth_Error_EdgeGuard`
+
+**File:** `Open_lab.Tests/Services/Module7Tests_Additional.cs:770`
+
+### Business contract verified by the test
+When a user loads the **Patient Worksheet** screen *without being logged in* (`AppSession` cleared), the view-model must short-circuit and set `StatusMessage` to a user-facing message containing the phrase `"تسجيل الدخول"`. It must **not** attempt to query the worksheet service.
+
+### Observed failure
+```
+Expected viewModel.StatusMessage "خطأ: Object reference not set to an instance of an object." to contain "تسجيل الدخول".
+```
+Instead of a localized authentication warning, the user sees a raw NullReferenceException message, because the code blindly proceeded to call the service, which (with default Moq behaviour) returned `null` and crashed the foreach loop.
+
+### Root cause in production code
+`Open_lab/ViewModels/WorkSheetByPatientViewModel.cs`, method `LoadAsync` (lines 49–70):
+
+```csharp
+private async Task LoadAsync()
+{
+    try
+    {
+        var from = From.Date;
+        var to = To.Date.AddDays(1).AddSeconds(-1);
+        var rows = await _worksheetService.GetWorksheetByPatientAsync(from, to);
+
+        Rows.Clear();
+        foreach (var row in rows)   // ⚠️ throws NRE when rows == null
+        ...
+    }
+    catch (Exception ex)
+    {
+        StatusMessage = $"خطأ: {ex.Message}";
+    }
+}
+```
+
+There is **no authentication / session check** before calling the service. Two defects compound:
+1. **No `AppSession.IsAuthenticated` (or equivalent) gate** at the start of `LoadAsync`.
+2. **No null-result defensive check**: `rows` is iterated even if the service returns `null`.
+
+### Why this is a production-code defect
+This screen serves clinical worksheets and is access-controlled (`PermissionCodes.WorksheetView`). Letting an unauthenticated session reach the service layer is both a security smell and a user-experience regression (raw exception instead of guidance).
+
+### Recommended production fix
+Introduce a session gate. The cleanest path mirrors what other modules already do via `AppSession.HasPermission(...)`:
+
+```csharp
+private async Task LoadAsync()
+{
+    if (AppSession.UserId <= 0)
+    {
+        StatusMessage = "يجب تسجيل الدخول أولًا.";
+        return;
+    }
+    if (!AppSession.HasPermission(PermissionCodes.WorksheetView))
+    {
+        StatusMessage = "ليست لديك صلاحية الوصول. يرجى تسجيل الدخول بحساب مخوّل.";
+        return;
+    }
+
+    try
+    {
+        ...
+        var rows = await _worksheetService.GetWorksheetByPatientAsync(from, to) ?? new List<WorkSheetPatientRow>();
+        ...
+    }
+    catch (Exception ex)
+    {
+        StatusMessage = $"خطأ: {ex.Message}";
+    }
+}
+```
+
+The same pattern should be applied to `PrintAsync`. Once the gate is in place, `StatusMessage` will contain `"تسجيل الدخول"` and the test will pass.
+
+---
+
+## 8. `Open_lab.Tests.Module7ViewModelTests_Additional.GroupWorksheet_LoadCommand_Without_Login_Should_Set_Auth_Error_EdgeGuard`
+
+**File:** `Open_lab.Tests/Services/Module7Tests_Additional.cs:793`
+
+### Business contract verified by the test
+Function 7.3 (**Generate Group Worksheet**) is permission-protected. With `AppSession` cleared, invoking `LoadWorksheetCommand` must surface a `"تسجيل الدخول"` message and **must not** call `GetGroupWorksheetByGroupAsync`.
+
+### Observed failure
+```
+Expected viewModel.StatusMessage "خطأ: Object reference not set to an instance of an object." to contain "تسجيل الدخول".
+```
+
+### Root cause in production code
+`Open_lab/ViewModels/GroupWorksheetViewModel.cs`, method `LoadWorksheetAsync` (lines 138–172):
+
+```csharp
+private async Task LoadWorksheetAsync()
+{
+    try
+    {
+        var from = From.Date;
+        var to = To.Date.AddDays(1).AddSeconds(-1);
+
+        List<WorkSheetPatientRow> rows;
+        if (IsCustomGroup && SelectedCustomGroupId.HasValue)
+            rows = await _groupWorksheetService.GetGroupWorksheetByCustomGroupAsync(...);
+        else if (SelectedGroupId.HasValue)
+            rows = await _groupWorksheetService.GetGroupWorksheetByGroupAsync(...);
+        else
+            return;
+        ...
+        foreach (var row in rows) ...
+    }
+    catch (Exception ex)
+    {
+        StatusMessage = $"خطأ: {ex.Message}";
+    }
+}
+```
+
+Same defect family as #7: there is no `AppSession` / permissions check before the service is called. The unconfigured Moq returns `null`, the `foreach` throws `NullReferenceException`, and the catch block exposes that low-level error to the user instead of a meaningful authentication notice.
+
+A second concern is the constructor itself: `GroupWorksheetViewModel`'s constructor *immediately* fires `_ = LoadGroupsAsync();`. This fire-and-forget call on construction also runs without an authentication check, which is the same anti-pattern.
+
+### Recommended production fix
+Add the same gate at the top of `LoadWorksheetAsync` (and ideally also at the top of `LoadGroupsAsync`):
+
+```csharp
+if (AppSession.UserId <= 0)
+{
+    StatusMessage = "يجب تسجيل الدخول أولًا.";
+    return;
+}
+if (!AppSession.HasPermission(PermissionCodes.WorksheetView))
+{
+    StatusMessage = "ليست لديك صلاحية الوصول. يرجى تسجيل الدخول بحساب مخوّل.";
+    return;
+}
+```
+
+Defensive null-coalescing on `rows` is also recommended.
+
+---
+
+## 9. `Open_lab.Tests.Module8ViewModelTests_Additional.LoadQueueCommand_Without_Login_Should_Set_Auth_Error_EdgeGuard`
+
+**File:** `Open_lab.Tests/Services/Module8Tests_Additional.cs:729`
+
+### Business contract verified by the test
+Function 8.1 (**Mark Test as External / External Lab Queue**) requires authentication. With `AppSession` cleared, `LoadQueueCommand` must yield a `"تسجيل الدخول"` warning and not invoke `_externalLabService.GetPendingQueueAsync`.
+
+### Observed failure
+```
+Expected viewModel.StatusMessage "خطأ: Object reference not set to an instance of an object." to contain "تسجيل الدخول".
+```
+
+### Root cause in production code
+`Open_lab/ViewModels/ExternalLabManagementViewModel.cs`, method `LoadQueueAsync` (lines 187–214):
+
+```csharp
+private async Task LoadQueueAsync()
+{
+    try
+    {
+        var queue = await _externalLabService.GetPendingQueueAsync();
+        PendingQueue.Clear();
+        foreach (var item in queue) ...
+    }
+    catch (Exception ex)
+    {
+        StatusMessage = $"خطأ: {ex.Message}";
+    }
+}
+```
+
+Identical pattern to tests #7 and #8: no session gate, no null-result defensiveness. The *constructor* of this view-model also kicks off `_ = LoadQueueAsync();`, so the bug is reachable as soon as the screen is instantiated, regardless of how the command is wired.
+
+### Recommended production fix
+Apply the standard authentication gate, and stop firing data loads from the constructor for unauthenticated sessions:
+
+```csharp
+private async Task LoadQueueAsync()
+{
+    if (AppSession.UserId <= 0)
+    {
+        StatusMessage = "يجب تسجيل الدخول أولًا.";
+        return;
+    }
+    if (!AppSession.HasPermission(PermissionCodes.ExternalLabsView))
+    {
+        StatusMessage = "ليست لديك صلاحية الوصول. يرجى تسجيل الدخول بحساب مخوّل.";
+        return;
+    }
+
+    try
+    {
+        var queue = await _externalLabService.GetPendingQueueAsync() ?? new List<ExternalLabQueueItem>();
+        ...
+    }
+    ...
+}
+```
+
+The constructor's `_ = LoadQueueAsync();` line should also be removed in favour of letting the view's `Loaded` event drive the initial load **after** authentication has been established.
+
+---
+
+## 10. `Open_lab.Tests.Module8ViewModelTests_Additional.LoadSettlementCommand_Without_Login_Should_Set_Auth_Error_EdgeGuard`
+
+**File:** `Open_lab.Tests/Services/Module8Tests_Additional.cs:758`
+
+### Business contract verified by the test
+Function 8.7 (**Settle External Lab Account**) is a financial operation and must require authentication. With `AppSession` cleared, `LoadSettlementCommand` must produce a `"تسجيل الدخول"` warning and **must not** query `GetPendingBalanceAsync` / `GetSettlementHistoryAsync` / `GetTotalProfitAsync`.
+
+### Observed failure
+```
+Expected viewModel.StatusMessage "خطأ: Object reference not set to an instance of an object." to contain "تسجيل الدخول".
+```
+
+### Root cause in production code
+`Open_lab/ViewModels/ExternalLabManagementViewModel.cs`, method `LoadSettlementAsync` (lines 279–303):
+
+```csharp
+private async Task LoadSettlementAsync()
+{
+    if (!SelectedReferralId.HasValue)
+        return;
+
+    try
+    {
+        var pendingBalance = await _externalSettlementService.GetPendingBalanceAsync(SelectedReferralId.Value);
+        var history       = await _externalSettlementService.GetSettlementHistoryAsync(SelectedReferralId.Value);
+        ...
+        TotalProfit       = await _externalSettlementService.GetTotalProfitAsync(SelectedReferralId.Value);
+        ...
+    }
+    catch (Exception ex)
+    {
+        StatusMessage = $"خطأ: {ex.Message}";
+    }
+}
+```
+
+The only guard is `SelectedReferralId.HasValue`. There is **no** authentication or permission check, even though this screen reads pending balances and recorded profits — the most sensitive financial data in the module.
+
+### Recommended production fix
+Insert the standard session/permission gate at the top of `LoadSettlementAsync`, and apply the same gate to `CreateSettlementAsync`, `UpdateStatusAsync`, `CreateManifestAsync`:
+
+```csharp
+if (AppSession.UserId <= 0)
+{
+    StatusMessage = "يجب تسجيل الدخول أولًا.";
+    return;
+}
+if (!AppSession.HasPermission(PermissionCodes.ExternalLabsSettle))
+{
+    StatusMessage = "ليست لديك صلاحية الوصول. يرجى تسجيل الدخول بحساب مخوّل.";
+    return;
+}
+```
+
+(Use whichever `PermissionCodes.*` value already represents the settlement permission in your project; the exact code is secondary to introducing the gate itself.)
+
+---
+
+## Cross-cutting observations & forward work
+
+While analysing the failing tests, three project-wide patterns surfaced that the production team should consider:
+
+1. **No central authentication gate for ViewModels.** Modules 7 and 8 each re-implement (or rather, *fail* to re-implement) the same authentication check. A small helper, e.g. `AppSession.RequirePermission(PermissionCodes.X, out string? error)`, used at the top of every command handler, would eliminate this entire class of bugs (#7–#10) and prevent regressions. The same helper should also forbid fire-and-forget loads from constructors.
+
+2. **EF Core change-tracking is being used as if it were a snapshot.** Defect #5 is a textbook example: the service reads a tracked entity expecting the DB-side value, but receives the (already mutated) in-memory value. Any future “immutable field” validation (e.g. cannot change `LabId`, cannot change `BranchId`) will fall into the same trap unless `AsNoTracking` (or `EntityEntry.OriginalValues`) is used for validation reads.
+
+3. **Status-message overwrite after success.** Defect #6 hides a domain warning under a reload-status string. Any chain that does *“set status → reload (which sets its own status)”* should be re-examined and either ordered differently or made aware of the upstream state.
+
+Resolving these cross-cutting concerns will make the remaining failing tests pass and harden the codebase against an entire family of similar future bugs.
