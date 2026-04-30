@@ -302,6 +302,17 @@ namespace Open_lab.Tests.ViewModels
                 .ReturnsAsync((Physician p) => { p.PhysicianId = 5; return p; });
             var viewModel = new PhysicianViewModel(physicianMock.Object, catalogMock.Object);
             await Task.Delay(50);
+
+            // Track all StatusMessage transitions because SaveAsync calls LoadPhysiciansAsync afterwards which overrides the success message.
+            var statusMessages = new List<string>();
+            viewModel.PropertyChanged += (_, e) =>
+            {
+                if (e.PropertyName == nameof(PhysicianViewModel.StatusMessage))
+                {
+                    statusMessages.Add(viewModel.StatusMessage);
+                }
+            };
+
             viewModel.FullName = "Dr. New";
             viewModel.Specialty = "Cardio";
             viewModel.Phone = "0100";
@@ -314,7 +325,7 @@ namespace Open_lab.Tests.ViewModels
             // Assert
             physicianMock.Verify(s => s.CreateAsync(It.Is<Physician>(p =>
                 p.FullName == "Dr. New" && p.Specialty == "Cardio" && p.CommissionPercentage == 10m)), Times.Once);
-            viewModel.StatusMessage.Should().Contain("تم إنشاء الطبيب");
+            statusMessages.Should().Contain(m => m.Contains("تم إنشاء الطبيب"));
         }
 
         [Fact]
@@ -442,6 +453,16 @@ namespace Open_lab.Tests.ViewModels
             var viewModel = new PhysicianViewModel(physicianMock.Object, catalogMock.Object);
             await Task.Delay(80);
 
+            // Track StatusMessage transitions (SaveAsync calls LoadPhysiciansAsync afterwards which overrides the success message).
+            var statusMessages = new List<string>();
+            viewModel.PropertyChanged += (_, e) =>
+            {
+                if (e.PropertyName == nameof(PhysicianViewModel.StatusMessage))
+                {
+                    statusMessages.Add(viewModel.StatusMessage);
+                }
+            };
+
             viewModel.SelectedPhysician = existing;
             viewModel.PriceListId = 4;
 
@@ -452,7 +473,7 @@ namespace Open_lab.Tests.ViewModels
             // Assert
             physicianMock.Verify(s => s.UpdateAsync(It.Is<Physician>(p =>
                 p.PhysicianId == 7 && p.PriceListId == 4)), Times.Once);
-            viewModel.StatusMessage.Should().Contain("تم تحديث");
+            statusMessages.Should().Contain(m => m.Contains("تم تحديث"));
         }
 
         [Fact]
@@ -757,6 +778,17 @@ namespace Open_lab.Tests.ViewModels
 
             var viewModel = new ContractInvoiceViewModel(contractMock.Object, catalogMock.Object);
             await Task.Delay(50);
+
+            // Track StatusMessage transitions (SettleSelectedAsync calls LoadHistoryAsync afterwards which overrides the success message).
+            var statusMessages = new List<string>();
+            viewModel.PropertyChanged += (_, e) =>
+            {
+                if (e.PropertyName == nameof(ContractInvoiceViewModel.StatusMessage))
+                {
+                    statusMessages.Add(viewModel.StatusMessage);
+                }
+            };
+
             viewModel.SelectedReferralId = 4;
             viewModel.SelectedContractInvoice = contractInvoice;
 
@@ -766,7 +798,7 @@ namespace Open_lab.Tests.ViewModels
 
             // Assert
             contractMock.Verify(s => s.SettleContractInvoiceAsync(99), Times.Once);
-            viewModel.StatusMessage.Should().Contain("تم تسوية");
+            statusMessages.Should().Contain(m => m.Contains("تم تسوية"));
         }
 
         [Fact]

@@ -205,7 +205,9 @@ namespace Open_lab.Tests
             _db.Tests.Add(test);
             await _db.SaveChangesAsync();
 
-            var range = new TestReferenceRange { TestId = 30, Gender = "All", LowValue = 70m, HighValue = 100m };
+            // ValidateResultAsync filters ranges by `r.Gender == null || r.Gender == gender`.
+            // Use null gender so the range matches any patient gender (the documented "any" sentinel).
+            var range = new TestReferenceRange { TestId = 30, Gender = null, LowValue = 70m, HighValue = 100m };
             _db.TestReferenceRanges.Add(range);
             await _db.SaveChangesAsync();
 

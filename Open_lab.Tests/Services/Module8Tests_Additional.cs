@@ -579,7 +579,7 @@ namespace Open_lab.Tests
             _db.ExternalLabQueues.AddRange(
                 new ExternalLabQueue { VisitTestId = vt1.VisitTestId, ReferralId = referral.ReferralId, Status = "Shipped" },
                 new ExternalLabQueue { VisitTestId = vt2.VisitTestId, ReferralId = referral.ReferralId, Status = "Shipped" },
-                new ExternalLabQueue { VisitTestId = vt3.VisitTestId, ReferralId = referral.ReferralId, Status = "ResultReceived" });
+                new ExternalLabQueue { VisitTestId = vt3.VisitTestId, ReferralId = referral.ReferralId, Status = "Received" });
             await _db.SaveChangesAsync();
 
             // Act - Total profit = (100-20) + (150-30) + (125-25) = 80 + 120 + 100 = 300
@@ -610,7 +610,7 @@ namespace Open_lab.Tests
             {
                 VisitTestId = vt.VisitTestId,
                 ReferralId = referral.ReferralId,
-                Status = "ResultReceived"
+                Status = "Received"
             });
             await _db.SaveChangesAsync();
 

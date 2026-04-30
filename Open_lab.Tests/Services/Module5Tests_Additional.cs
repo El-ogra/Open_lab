@@ -642,7 +642,9 @@ namespace Open_lab.Tests
 
             await _viewModel.InvokePrivateAsync("AddCultureAsync");
 
-            _viewModel.StatusMessage.Should().Contain("خطأ:");
+            // Production validation message for empty culture name (no "خطأ:" prefix on validation guards).
+            _viewModel.StatusMessage.Should().Contain("أدخل اسم المزرعة");
+            _serviceMock.Verify(s => s.CreateCultureAsync(It.IsAny<Culture>()), Times.Never);
         }
 
         [Fact]
@@ -677,7 +679,8 @@ namespace Open_lab.Tests
 
             await _viewModel.InvokePrivateAsync("AddAntibioticAsync");
 
-            _viewModel.StatusMessage.Should().Contain("خطأ:");
+            // Production validation message for empty antibiotic name (no "خطأ:" prefix on validation guards).
+            _viewModel.StatusMessage.Should().Contain("أدخل اسم المضاد الحيوي");
             _serviceMock.Verify(s => s.CreateAntibioticAsync(It.IsAny<Antibiotic>()), Times.Never);
         }
 
@@ -941,9 +944,11 @@ namespace Open_lab.Tests
             _serviceMock.Setup(s => s.SearchCultureVisitTestsAsync("LAB123", It.IsAny<DateTime>(), It.IsAny<DateTime>()))
                 .ReturnsAsync(searchResults);
 
-            await _viewModel.InvokePrivateAsync("SearchCommand");
+            // The CultureSensitivityViewModel exposes the LabId-based search through LoadVisitTestsAsync (bound to LoadVisitTestsCommand).
+            await _viewModel.InvokePrivateAsync("LoadVisitTestsAsync");
 
             _serviceMock.Verify(s => s.SearchCultureVisitTestsAsync("LAB123", It.IsAny<DateTime>(), It.IsAny<DateTime>()), Times.Once);
+            _viewModel.VisitTests.Should().ContainSingle(r => r.LabId == "LAB123");
         }
 
         [Fact]
@@ -955,9 +960,12 @@ namespace Open_lab.Tests
             _serviceMock.Setup(s => s.SearchCultureVisitTestsAsync("NONEXISTENT", It.IsAny<DateTime>(), It.IsAny<DateTime>()))
                 .ReturnsAsync(new List<CultureVisitTestRow>());
 
-            await _viewModel.InvokePrivateAsync("SearchCommand");
+            // The CultureSensitivityViewModel exposes the LabId-based search through LoadVisitTestsAsync (bound to LoadVisitTestsCommand).
+            await _viewModel.InvokePrivateAsync("LoadVisitTestsAsync");
 
-            _viewModel.StatusMessage.Should().Contain("لم يتم العثور");
+            // Production reports the empty result-set with the load-count message (zero requests found).
+            _viewModel.StatusMessage.Should().Contain("تم تحميل 0");
+            _viewModel.VisitTests.Should().BeEmpty();
         }
 
         #endregion

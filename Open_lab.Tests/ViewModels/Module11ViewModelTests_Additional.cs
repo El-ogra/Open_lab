@@ -82,14 +82,24 @@ namespace Open_lab.Tests.ViewModels
                 .ReturnsAsync(new AttendanceLog { AttendanceLogId = 42, UserId = 7, LoginAt = DateTime.Now });
             var vm = CreateLogViewModel();
 
+            // Track StatusMessage transitions because ClockInAsync calls RefreshOpenLogAsync afterwards which overrides the success message.
+            var statusMessages = new List<string>();
+            vm.PropertyChanged += (_, e) =>
+            {
+                if (e.PropertyName == nameof(AttendanceLogViewModel.StatusMessage))
+                {
+                    statusMessages.Add(vm.StatusMessage);
+                }
+            };
+
             // Act
             vm.ClockInCommand.Execute(null);
             await Task.Delay(100);
 
             // Assert
             AppSession.AttendanceLogId.Should().Be(42);
-            vm.StatusMessage.Should().Contain("تم تسجيل الحضور");
-            vm.StatusMessage.Should().Contain("42");
+            statusMessages.Should().Contain(m => m.Contains("تم تسجيل الحضور"));
+            statusMessages.Should().Contain(m => m.Contains("42"));
             _attendanceServiceMock.Verify(
                 x => x.ClockInAsync(7, It.IsAny<DateTime?>(), It.IsAny<int?>(), It.IsAny<string?>()),
                 Times.Once);
@@ -145,13 +155,23 @@ namespace Open_lab.Tests.ViewModels
                 .ReturnsAsync(new AttendanceLog { AttendanceLogId = 100, UserId = 9, LoginAt = DateTime.Today.AddHours(8) });
             var vm = CreateLogViewModel();
 
+            // Track StatusMessage transitions because ClockInAsync calls RefreshOpenLogAsync afterwards which overrides the success message.
+            var statusMessages = new List<string>();
+            vm.PropertyChanged += (_, e) =>
+            {
+                if (e.PropertyName == nameof(AttendanceLogViewModel.StatusMessage))
+                {
+                    statusMessages.Add(vm.StatusMessage);
+                }
+            };
+
             // Act
             vm.ClockInCommand.Execute(null);
             await Task.Delay(100);
 
             // Assert
             AppSession.AttendanceLogId.Should().Be(100);
-            vm.StatusMessage.Should().Contain("100");
+            statusMessages.Should().Contain(m => m.Contains("100"));
         }
 
         // ────────────────────────────────────────────────────────────────────
@@ -170,14 +190,24 @@ namespace Open_lab.Tests.ViewModels
                 .ReturnsAsync(new AttendanceLog { AttendanceLogId = 55, UserId = 11, LogoutAt = DateTime.Now });
             var vm = CreateLogViewModel();
 
+            // Track StatusMessage transitions because ClockOutAsync calls RefreshOpenLogAsync afterwards which overrides the success message.
+            var statusMessages = new List<string>();
+            vm.PropertyChanged += (_, e) =>
+            {
+                if (e.PropertyName == nameof(AttendanceLogViewModel.StatusMessage))
+                {
+                    statusMessages.Add(vm.StatusMessage);
+                }
+            };
+
             // Act
             vm.ClockOutCommand.Execute(null);
             await Task.Delay(100);
 
             // Assert
             AppSession.AttendanceLogId.Should().Be(0);
-            vm.StatusMessage.Should().Contain("تم تسجيل الانصراف");
-            vm.StatusMessage.Should().Contain("55");
+            statusMessages.Should().Contain(m => m.Contains("تم تسجيل الانصراف"));
+            statusMessages.Should().Contain(m => m.Contains("55"));
             _attendanceServiceMock.Verify(x => x.ClockOutAsync(11, It.IsAny<DateTime?>()), Times.Once);
         }
 
