@@ -139,12 +139,12 @@
 
 | رقم الوظيفة | اسم الوظيفة | Service ✅/❌ | ViewModel ✅/❌ | الحالة | أسماء الاختبارات المكتوبة |
 |-------------|-------------|--------------|----------------|--------|--------------------------|
-| 9.1 | توزيع المرضى حسب الجنس — Patient Count by Gender | ❌ | ❌ | ❌ لم يبدأ | |
-| 9.2 | توزيع المرضى حسب الشهر — Patient Count by Month | ❌ | ❌ | ❌ لم يبدأ | |
-| 9.3 | تحليل الطلب على التحاليل — Test Demand Analysis | ❌ | ❌ | ❌ لم يبدأ | |
-| 9.4 | عدد العينات سنوياً — Sample Count per Year | ❌ | ❌ | ❌ لم يبدأ | |
-| 9.5 | تحليل مصادر الإحالة — Referral Source Analysis | ❌ | ❌ | ❌ لم يبدأ | |
-| 9.6 | تقرير إنتاجية المستخدمين — User Productivity Report | ❌ | ❌ | ❌ لم يبدأ | |
+| 9.1 | توزيع المرضى حسب الجنس — Patient Count by Gender | ✅ | ✅ | ✅ مكتمل | **Service:** PatientCountByGender_WithMaleAndFemalePatients_ShouldReturnCorrectGenderDistribution · PatientCountByGender_WithGenderFilter_ShouldExcludeOtherGenders · PatientCountByGender_WithNoPatientsInPeriod_ShouldReturnEmptyGenderList · PatientCountByGender_WithUnspecifiedGender_ShouldGroupAsUnspecified · GetSnapshotAsync_ShouldCalculateTotalPatientsAndVisitsSeparately \| **ViewModel:** PatientCountByGender_LoadCommand_ShouldPopulateByGenderCollection_Success · PatientCountByGender_WhenServiceReturnsEmpty_ShouldKeepByGenderCollectionEmpty_Edge · PatientCountByGender_WhenServiceThrows_ShouldSetErrorStatusMessage_Failure · PatientCountByGender_LoadCommand_ShouldUpdateSummaryCountsCorrectly |
+| 9.2 | توزيع المرضى حسب الشهر — Patient Count by Month | ✅ | ✅ | ✅ مكتمل | **Service:** PatientCountByMonth_WithVisitsInSpecificMonth_ShouldReturnCorrectMonthlyCount · PatientCountByMonth_WithNoVisitsInYear_ShouldReturn12MonthsWithZeroCounts · PatientCountByMonth_ShouldIncludeArabicMonthNames · PatientCountByMonth_WithVisitsAndTests_ShouldAggregateTestCountAndRevenue \| **ViewModel:** PatientCountByMonth_LoadCommand_ShouldPopulateMonthlyAnalysisCollection_Success · PatientCountByMonth_WhenServiceReturnsEmpty_ShouldHaveEmptyMonthlyCollection_Edge · PatientCountByMonth_LoadCommand_ShouldCallGetMonthlyAnalysisWithCurrentYear_Verify |
+| 9.3 | تحليل الطلب على التحاليل — Test Demand Analysis | ✅ | ✅ | ✅ مكتمل | **Service:** TestDemandAnalysis_WithMultipleTests_ShouldReturnTop10OrderedByDemand · TestDemandAnalysis_WithMoreThan10Tests_ShouldReturnOnly10 · TestDemandAnalysis_WithNoTestsInPeriod_ShouldReturnEmptyList · TestDemandAnalysis_ShouldCalculateTotalRevenuePerTest \| **ViewModel:** TestDemandAnalysis_LoadCommand_ShouldPopulateTopTestsCollection_Success · TestDemandAnalysis_WhenServiceThrows_ShouldSetErrorMessage_Failure · TestDemandAnalysis_WhenServiceReturnsEmptyList_ShouldKeepTopTestsEmpty_Edge · TestDemandAnalysis_LoadCommand_ShouldPassDateRangeToService_Verify |
+| 9.4 | عدد العينات سنوياً — Sample Count per Year | ✅ | ✅ | ✅ مكتمل | **Service:** SampleCountPerYear_WithDataForCurrentYear_ShouldReturnCorrectYearlyCount · SampleCountPerYear_WithDefaultYearsBack_ShouldReturnFiveYears · SampleCountPerYear_WithZeroYearsBack_ShouldDefaultToFiveYears · SampleCountPerYear_WithNegativeYearsBack_ShouldDefaultToFiveYears · SampleCountPerYear_WithDataAcrossMultipleYears_ShouldReturnCorrectCountPerYear · SampleCountPerYear_ShouldReturnRowsOrderedByYearAscending \| **ViewModel:** SampleCountPerYear_LoadCommand_ShouldPopulateYearlySamplesCollection_Success · SampleCountPerYear_WhenServiceReturnsEmpty_ShouldKeepYearlySamplesEmpty_Edge · SampleCountPerYear_WhenServiceThrows_ShouldSetErrorMessage_Failure · SampleCountPerYear_LoadCommand_ShouldCallGetSampleCountPerYearWithCorrectParameter_Verify |
+| 9.5 | تحليل مصادر الإحالة — Referral Source Analysis | ✅ | ✅ | ✅ مكتمل | **Service:** ReferralSourceAnalysis_WithMultipleReferrals_ShouldReturnCorrectDistribution · ReferralSourceAnalysis_WithReferralFilter_ShouldReturnOnlySelectedReferral · ReferralSourceAnalysis_WithNoReferral_ShouldGroupAsBadoonJiha · GetReferralsAsync_ShouldReturnAllReferralsOrderedByName · GetReferralsAsync_WithNoReferrals_ShouldReturnEmptyList · GetSnapshotAsync_WithBothGenderAndReferralFilters_ShouldApplyBothFilters \| **ViewModel:** ReferralSourceAnalysis_LoadCommand_ShouldPopulateByReferralCollection_Success · ReferralSourceAnalysis_OnInitialize_ShouldPopulateReferralsDropdownList_Success · ReferralSourceAnalysis_WhenServiceReturnsEmpty_ShouldKeepByReferralEmpty_Edge · ReferralSourceAnalysis_LoadCommand_ShouldCallGetSnapshotWithSelectedReferral_Verify |
+| 9.6 | تقرير إنتاجية المستخدمين — User Productivity Report | ✅ | ✅ | ✅ مكتمل | **Service:** UserProductivityReport_WithVerifiedTests_ShouldCountDistinctTestsPerUser · UserProductivityReport_WithSameVisitTestMultipleParameters_ShouldCountOnce · UserProductivityReport_WithVerificationsOutsidePeriod_ShouldNotIncludeThem · UserProductivityReport_ShouldReturnRowsOrderedByCompletedTestsDescending · UserProductivityReport_WithUnknownVerifier_ShouldLabelAsUnknown · UserProductivityReport_WithNoVerifications_ShouldReturnEmptyList \| **ViewModel:** UserProductivityReport_LoadCommand_ShouldPopulateUserProductivityCollection_Success · UserProductivityReport_WhenServiceThrows_ShouldSetErrorMessage_Failure · UserProductivityReport_WhenServiceReturnsEmpty_ShouldKeepProductivityCollectionEmpty_Edge · UserProductivityReport_LoadCommand_ShouldCallGetUserPerformanceWithDateRange_Verify · PrintCommand_WhenDataLoaded_ShouldCallPrintServiceWithCorrectReport_Success · PrintCommand_WhenPrintServiceThrows_ShouldSetErrorMessage_Edge · LoadCommand_WhenUserHasNoPermission_ShouldBeDisabled_Failure · PrintCommand_WhenUserHasNoPermission_ShouldBeDisabled_Failure · AllModule9Data_LoadCommand_ShouldPopulateAllCollectionsInSingleCall_Success |
 
 ---
 
@@ -218,12 +218,12 @@
 | 6 — سحب العينات | 4 | 4 | 0 | 0 | 0 |
 | 7 — أوراق العمل | 4 | 4 | 0 | 0 | 0 |
 | 8 — المعامل الخارجية | 7 | 7 | 0 | 0 | 0 |
-| 9 — الإحصائيات والتحليلات | 6 | 0 | 0 | 6 | 0 |
+| 9 — الإحصائيات والتحليلات | 6 | 6 | 0 | 0 | 0 |
 | 10 — إدارة المستخدمين | 8 | 8 | 8 | 0 | 8 |
 | 11 — الحضور والانصراف | 5 | 0 | 0 | 5 | 0 |
 | 12 — جهات التعاقد والإحالة | 9 | 0 | 0 | 9 | 0 |
 | 13 — إعدادات النظام | 8 | 0 | 0 | 8 | 0 |
-| **الإجمالي** | **97** | **68** | **8** | **25** | **9** |
+| **الإجمالي** | **97** | **74** | **8** | **19** | **9** |
 
 ---
 
