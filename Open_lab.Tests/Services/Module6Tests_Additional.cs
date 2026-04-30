@@ -462,7 +462,7 @@ namespace Open_lab.Tests
         }
 
         [Fact]
-        public async Task MarkCollectedCommand_CanExecute_When_Row_Null_Should_Return_False_EdgeGuard()
+        public void MarkCollectedCommand_CanExecute_When_Row_Null_Should_Return_False_EdgeGuard()
         {
             // Function: 6.1 — Register Sample Collection (Null Selection Guard)
             _viewModel.SelectedRow = null;
@@ -493,7 +493,7 @@ namespace Open_lab.Tests
         {
             // Function: 6.2 — Record Sample Separation (Null Separation Type)
             _viewModel.SelectedRow = new SampleCollectionRow { VisitTestId = 200 };
-            _viewModel.SeparationType = null;
+            _viewModel.SeparationType = string.Empty;
 
             _collectionServiceMock.Setup(x => x.MarkSeparatedAsync(200, It.IsAny<string>()))
                 .Returns(Task.CompletedTask);
@@ -506,11 +506,11 @@ namespace Open_lab.Tests
         }
 
         [Fact]
-        public async Task MarkSeparatedCommand_CanExecute_When_No_SeparationType_Should_Return_False_EdgeGuard()
+        public void MarkSeparatedCommand_CanExecute_When_No_SeparationType_Should_Return_False_EdgeGuard()
         {
             // Function: 6.2 — Record Sample Separation (No Separation Type Edge Case)
             _viewModel.SelectedRow = new SampleCollectionRow { VisitTestId = 201 };
-            _viewModel.SeparationType = null;
+            _viewModel.SeparationType = string.Empty;
 
             // MarkSeparatedCommand may or may not be enabled based on ViewModel logic
         }

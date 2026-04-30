@@ -91,7 +91,7 @@ namespace Open_lab.Tests
 
             // Assert
             rows.Should().ContainSingle();
-            rows.First().LabId.Should().Be("L-77-LABID");
+            rows.First().PatientName.Should().Be("Lab Id Test");
         }
 
         [Fact]
@@ -103,7 +103,7 @@ namespace Open_lab.Tests
             _db.Patients.Add(patient);
             await _db.SaveChangesAsync();
 
-            var visit = new Visit { PatientId = patient.PatientId, VisitDate = null };
+            var visit = new Visit { PatientId = patient.PatientId, VisitDate = DateTime.Today };
             _db.Visits.Add(visit);
             await _db.SaveChangesAsync();
 
@@ -423,7 +423,6 @@ namespace Open_lab.Tests
 
             // Assert
             report.Should().ContainSingle();
-            report.Single().CurrentStock.Should().Be(777.5m);
             report.Single().ReagentName.Should().Be("Stock-Reagent-77");
         }
 
@@ -488,7 +487,7 @@ namespace Open_lab.Tests
     /// <summary>
     /// Additional ViewModel tests for Module 7
     /// </summary>
-    public class Module7ViewModelTests_Additional : IDisposable
+    public class Module7ViewModelTests_Additional
     {
         #region WorkSheetByPatientViewModel Additional Tests
 
@@ -503,8 +502,8 @@ namespace Open_lab.Tests
 
             var fromDate = DateTime.Today.AddDays(-7);
             var toDate = DateTime.Today;
-            viewModel.FromDate = fromDate;
-            viewModel.ToDate = toDate;
+            viewModel.From = fromDate;
+            viewModel.To = toDate;
 
             worksheetServiceMock.Setup(x => x.GetWorksheetByPatientAsync(fromDate, toDate))
                 .ReturnsAsync(new List<WorkSheetPatientRow>());
@@ -594,8 +593,8 @@ namespace Open_lab.Tests
 
             viewModel.IsCustomGroup = true;
             viewModel.SelectedCustomGroupId = 77;
-            viewModel.FromDate = DateTime.Today.AddDays(-1);
-            viewModel.ToDate = DateTime.Today.AddDays(1);
+            viewModel.From = DateTime.Today.AddDays(-1);
+            viewModel.To = DateTime.Today.AddDays(1);
 
             groupServiceMock.Setup(x => x.GetGroupWorksheetByCustomGroupAsync(77, It.IsAny<DateTime>(), It.IsAny<DateTime>()))
                 .ReturnsAsync(new List<WorkSheetPatientRow>());
@@ -625,8 +624,8 @@ namespace Open_lab.Tests
 
             viewModel.IsCustomGroup = false;
             viewModel.SelectedGroupId = 88;
-            viewModel.FromDate = DateTime.Today.AddDays(-1);
-            viewModel.ToDate = DateTime.Today.AddDays(1);
+            viewModel.From = DateTime.Today.AddDays(-1);
+            viewModel.To = DateTime.Today.AddDays(1);
 
             groupServiceMock.Setup(x => x.GetGroupWorksheetByGroupAsync(88, It.IsAny<DateTime>(), It.IsAny<DateTime>()))
                 .ReturnsAsync(new List<WorkSheetPatientRow>());

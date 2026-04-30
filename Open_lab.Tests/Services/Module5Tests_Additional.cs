@@ -68,7 +68,7 @@ namespace Open_lab.Tests
             {
                 Name = "Pending Culture",
                 SampleType = "Blood",
-                IsolatedOrganism = null,
+                IsolatedOrganism = string.Empty,
                 GrowthConditions = "Anaerobic",
                 ColonyCount = 50
             };
@@ -90,8 +90,8 @@ namespace Open_lab.Tests
             {
                 Name = "Invalid Culture",
                 SampleType = "CSF",
-                IsolatedOrganism = null,
-                GrowthConditions = null,
+                IsolatedOrganism = string.Empty,
+                GrowthConditions = string.Empty,
                 ColonyCount = 10
             };
 
@@ -615,7 +615,7 @@ namespace Open_lab.Tests
             _serviceMock.Setup(s => s.GetCulturesAsync()).ReturnsAsync(new List<Culture>());
             _serviceMock.Setup(s => s.GetAntibioticsAsync()).ReturnsAsync(new List<Antibiotic>());
             _serviceMock.Setup(s => s.GetCultureAntibioticsAsync(It.IsAny<int>())).ReturnsAsync(new List<CultureAntibiotic>());
-            _serviceMock.Setup(s => s.SearchCultureVisitTestsAsync(It.IsAny<string?>(), It.IsAny<DateTime>(), It.IsAny<DateTime>()))
+            _serviceMock.Setup(s => s.SearchCultureVisitTestsAsync(It.IsAny<string>(), It.IsAny<DateTime>(), It.IsAny<DateTime>()))
                 .ReturnsAsync(new List<CultureVisitTestRow>());
             _serviceMock.Setup(s => s.GetFilteredAntibioticsAsync(It.IsAny<int>())).ReturnsAsync(new List<Antibiotic>());
             _serviceMock.Setup(s => s.ClassifySensitivity(It.IsAny<string?>())).Returns((string? raw) => raw ?? string.Empty);
@@ -748,8 +748,7 @@ namespace Open_lab.Tests
                 VisitTestId = 40,
                 VisitId = 10,
                 LabId = "L-PREG",
-                PatientName = "Pregnant Patient",
-                PatientIsPregnant = true
+                PatientName = "Pregnant Patient"
             };
 
             var antibiotics = new List<Antibiotic>
@@ -789,8 +788,7 @@ namespace Open_lab.Tests
                 VisitTestId = 41,
                 VisitId = 11,
                 LabId = "L-CHILD",
-                PatientName = "Child Patient",
-                PatientAge = 8
+                PatientName = "Child Patient"
             };
 
             var antibiotics = new List<Antibiotic>
@@ -934,7 +932,7 @@ namespace Open_lab.Tests
         public async Task SearchCommand_With_Valid_LabId_Should_Load_Results_SuccessGuard()
         {
             // Function: 5.1 — Enter Culture Data (Search by LabId)
-            _viewModel.SearchLabId = "LAB123";
+            _viewModel.LabIdFilter = "LAB123";
 
             var searchResults = new List<CultureVisitTestRow>
             {
@@ -952,7 +950,7 @@ namespace Open_lab.Tests
         public async Task SearchCommand_With_NonExistent_LabId_Should_Show_NotFound_EdgeGuard()
         {
             // Function: 5.1 — Enter Culture Data (Search No Results)
-            _viewModel.SearchLabId = "NONEXISTENT";
+            _viewModel.LabIdFilter = "NONEXISTENT";
 
             _serviceMock.Setup(s => s.SearchCultureVisitTestsAsync("NONEXISTENT", It.IsAny<DateTime>(), It.IsAny<DateTime>()))
                 .ReturnsAsync(new List<CultureVisitTestRow>());

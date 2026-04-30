@@ -697,7 +697,7 @@ namespace Open_lab.Tests
     /// <summary>
     /// Additional ViewModel tests for Module 8
     /// </summary>
-    public class Module8ViewModelTests_Additional : IDisposable
+    public class Module8ViewModelTests_Additional
     {
         #region Authentication Tests
 

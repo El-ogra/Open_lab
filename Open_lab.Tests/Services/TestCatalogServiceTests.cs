@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Open_lab.Tests.Services
 {
-    public class TestCatalogServiceTests : IDisposable
+    public partial class TestCatalogServiceTests : IDisposable
     {
         private readonly Open_lab.Data.OpenLabDbContext _db;
         private readonly TestCatalogService _service;

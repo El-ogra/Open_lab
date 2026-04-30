@@ -705,15 +705,13 @@ namespace Open_lab.Tests
             var report = CreateSampleReport(100);
             _reportServiceMock.Setup(x => x.GetVisitReportAsync(100)).ReturnsAsync(report);
             viewModel.VisitId = 100;
-            viewModel.PatientName = "Patient";
-            viewModel.LabId = "L-100";
 
-            _printServiceMock.Setup(x => x.PrintBlankReportAsync(It.IsAny<VisitReportData>()))
+            _printServiceMock.Setup(x => x.PrintTextReportAsync(It.IsAny<string>(), It.IsAny<IReadOnlyCollection<string>>(), It.IsAny<string>()))
                 .Returns(Task.CompletedTask);
 
             await viewModel.InvokePrivateAsync("PrintBlankAsync");
 
-            _printServiceMock.Verify(x => x.PrintBlankReportAsync(It.IsAny<VisitReportData>()), Times.Once);
+            _printServiceMock.Verify(x => x.PrintTextReportAsync(It.IsAny<string>(), It.IsAny<IReadOnlyCollection<string>>(), It.IsAny<string>()), Times.Once);
             viewModel.StatusMessage.Should().Contain("تم إرسال النموذج");
         }
 
