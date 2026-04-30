@@ -57,15 +57,15 @@
 
 | رقم الوظيفة | اسم الوظيفة | Service ✅/❌ | ViewModel ✅/❌ | الحالة | أسماء الاختبارات المكتوبة |
 |-------------|-------------|--------------|----------------|--------|--------------------------|
-| 3.1 | إضافة تحليل جديد — Add New Test | ❌ | ❌ | ❌ لم يبدأ | |
-| 3.2 | تعديل بيانات تحليل — Edit Test Data | ❌ | ❌ | ❌ لم يبدأ | |
-| 3.3 | تحديد القيم المرجعية — Set Reference Values | ❌ | ❌ | ❌ لم يبدأ | |
-| 3.4 | إضافة تعليقات القيم المرتفعة/المنخفضة — Add Low/High Comments | ❌ | ❌ | ❌ لم يبدأ | |
-| 3.5 | إنشاء مجموعة مخصصة — Create Custom Group | ❌ | ❌ | ❌ لم يبدأ | |
-| 3.6 | إضافة تعليقات التحليل — Add Test Comments | ❌ | ❌ | ❌ لم يبدأ | |
-| 3.7 | إنشاء قائمة أسعار — Create Price List | ❌ | ❌ | ❌ لم يبدأ | |
-| 3.8 | تحديث الأسعار — Update Prices | ❌ | ❌ | ❌ لم يبدأ | |
-| 3.9 | تحديد تحليل كخارجي — Mark as Outsourced | ❌ | ❌ | ❌ لم يبدأ | |
+| 3.1 | إضافة تحليل جديد — Add New Test | ✅ | ✅ | ✅ مكتمل | TestCatalogServiceTests_Additional: CreateTestAsync_WithAllFields_ShouldPersistCorrectly, CreateTestAsync_WithNullFields_ShouldSucceed, CreateTestAsync_WithEmptyCode_ShouldThrow, CreateTestAsync_WithEmptyName_ShouldThrow, CreateTestAsync_WithDuplicateCode_ShouldThrow, CreateTestAsync_WithZeroPrice_ShouldSucceed, CreateTestAsync_WithNegativePrice_ShouldThrow + TestCatalogViewModelTests: SaveAsync_Without_SelectedTest_Should_Create + Module3ViewModelTests_Additional: SaveAsync_With_AllFields_Should_Persist_Correctly |
+| 3.2 | تعديل بيانات تحليل — Edit Test Data | ✅ | ✅ | ✅ مكتمل (BR-VAL-005) | TestCatalogServiceTests: UpdateTestAsync_WithValidData_ShouldUpdateSuccessfully, UpdateTestAsync_WithNullData_ShouldThrow, UpdateTestAsync_WithNonExistentId_ShouldThrow, UpdateTestAsync_WithDuplicateCode_ShouldThrow + TestCatalogViewModelTests: SaveAsync_With_SelectedTest_Should_Update + Module3ViewModelTests_Additional: UpdateTestAsync_Should_Modify_SelectedTest_Fields_SuccessGuard |
+| 3.3 | تحديد القيم المرجعية — Set Reference Values | ✅ | ✅ | ✅ مكتمل (BR-MED-001) | TestCatalogServiceTests: CreateReferenceRangeAsync_WithValidRange_ShouldSucceed, CreateReferenceRangeAsync_WithNullTestId_ShouldThrow, CreateReferenceRangeAsync_WithInvalidRange_ShouldThrow, GetReferenceRangesAsync_WithValidTestId_ShouldReturnRanges, UpdateReferenceRangeAsync_WithValidData_ShouldSucceed, DeleteReferenceRangeAsync_WithValidId_ShouldSucceed + ReferenceRangesViewModelTests: SaveAsync_NewRange_Should_Call_CreateRange, SaveAsync_Without_SelectedTest_Should_NotCall_Service_FailureGuard + Module3ViewModelTests_Additional: LoadRangesAsync_Should_Populate_Ranges_SuccessGuard, UpdateRangeAsync_Should_Call_Update_Service_SuccessGuard, DeleteAsync_Should_Remove_Range_And_Clear_Selection_SuccessGuard |
+| 3.4 | إضافة تعليقات القيم المرتفعة/المنخفضة — Add Low/High Comments | ✅ | ✅ | ✅ مكتمل (BR-MED-002) | TestCatalogServiceTests: CreateTestCommentAsync_WithValidData_ShouldSucceed, CreateTestCommentAsync_WithEmptyText_ShouldThrow, GetTestCommentsAsync_ShouldReturnComments, DeleteTestCommentAsync_WithValidId_ShouldSucceed + TestCommentsViewModelTests: SaveAsync_Should_Persist_Low_High_Comments_LogicGuard + Module3ViewModelTests_Additional: SaveAsync_Update_Existing_Comment_Should_Call_Update_Service_SuccessGuard |
+| 3.5 | إنشاء مجموعة مخصصة — Create Custom Group | ✅ | ✅ | ✅ مكتمل | TestCatalogServiceTests: CreateCustomGroupAsync_WithValidData_ShouldSucceed, CreateCustomGroupAsync_WithEmptyName_ShouldThrow, CreateCustomGroupAsync_WithDuplicateName_ShouldThrow, CreateCustomGroupAsync_WithZeroPrice_ShouldSucceed + CustomGroupsViewModelTests: SaveGroupAsync_Should_Create_Group, SaveGroupAsync_With_EmptyName_Should_NotCall_Service_FailureGuard + Module3ViewModelTests_Additional: SaveGroupAsync_With_Zero_Price_Should_Allow_EdgeGuard, AddItemAsync_With_Existing_Item_Should_Set_Test_Reference_SuccessGuard |
+| 3.6 | إضافة تعليقات التحليل — Add Test Comments | ✅ | ✅ | ✅ مكتمل | (Shared with 3.4 - same service methods) |
+| 3.7 | إنشاء قائمة أسعار — Create Price List | ✅ | ✅ | ✅ مكتمل | TestCatalogServiceTests: CreatePriceListAsync_WithValidData_ShouldSucceed, CreatePriceListAsync_WithEmptyName_ShouldThrow, CreatePriceListAsync_WithNullReferral_ShouldSucceed, GetPriceListsAsync_ShouldReturnLists, UpdatePriceListAsync_WithValidData_ShouldSucceed, DeletePriceListAsync_WithValidId_ShouldSucceed + PriceListsViewModelTests: SaveListAsync_Should_Create_PriceList, SaveListAsync_With_EmptyName_Should_NotCall_Service_FailureGuard + Module3ViewModelTests_Additional: UpdateListAsync_Should_Call_Update_Service_SuccessGuard, PrintListAsync_Should_Call_PrintService_SuccessGuard |
+| 3.8 | تحديث الأسعار — Update Prices | ✅ | ✅ | ✅ مكتمل | TestCatalogServiceTests: AddPriceListItemAsync_WithValidData_ShouldSucceed, AddPriceListItemAsync_WithNegativePrice_ShouldThrow, AddPriceListItemAsync_WithDuplicateItem_ShouldThrow, UpdatePriceListItemAsync_WithValidData_ShouldSucceed, GetPriceListItemsAsync_ShouldReturnItems, DeletePriceListItemAsync_WithValidId_ShouldSucceed + PriceListsViewModelTests: AddItemAsync_Should_Add_Test_To_PriceList, AddItemAsync_When_PriceZero_Should_Fallback_To_TestPrice_EdgeGuard + Module3ViewModelTests_Additional: UpdateItemAsync_Should_Change_Price_SuccessGuard, DeleteItemAsync_Should_Remove_Item_SuccessGuard |
+| 3.9 | تحديد تحليل كخارجي — Mark as Outsourced | ✅ | ✅ | ✅ مكتمل (BR-ACC-007) | TestCatalogServiceTests: CreateTestAsync_WithIsSendOutTrue_ShouldPersistFlags, CreateTestAsync_WithNullCostAndPatientPrices_ShouldSucceed + TestCatalogViewModelTests: SaveAsync_With_OutsourceData_Should_Persist_Pricing_LogicGuard + Module3ViewModelTests_Additional: SaveAsync_With_IsSendOut_True_Should_Include_Pricing_Fields_BR_ACC_007 |
 
 ---
 
@@ -212,7 +212,7 @@
 |----------|---------------|---------|---------|-----------|----------------|
 | 1 — إدارة المرضى | 8 | 7 | 0 | 0 | 1 |
 | 2 — المحاسبة والمالية | 13 | 13 | 0 | 0 | 0 |
-| 3 — إدارة التحاليل والأسعار | 9 | 0 | 0 | 9 | 0 |
+| 3 — إدارة التحاليل والأسعار | 9 | 9 | 0 | 0 | 0 |
 | 4 — إدخال النتائج والتقارير | 9 | 0 | 0 | 9 | 0 |
 | 5 — المزارع والحساسية | 7 | 0 | 0 | 7 | 0 |
 | 6 — سحب العينات | 4 | 0 | 0 | 4 | 0 |
@@ -223,7 +223,7 @@
 | 11 — الحضور والانصراف | 5 | 0 | 0 | 5 | 0 |
 | 12 — جهات التعاقد والإحالة | 9 | 0 | 0 | 9 | 0 |
 | 13 — إعدادات النظام | 8 | 0 | 0 | 8 | 0 |
-| **الإجمالي** | **97** | **28** | **8** | **68** | **9** |
+| **الإجمالي** | **97** | **37** | **8** | **59** | **9** |
 
 ---
 

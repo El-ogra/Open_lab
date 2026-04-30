@@ -39,5 +39,18 @@ namespace Open_lab.Tests.Infrastructure
 
             method.Invoke(instance, parameters);
         }
+
+        public static T? InvokePrivateMethod<T>(this object instance, string methodName, params object?[] parameters)
+        {
+            var method = instance.GetType().GetMethod(methodName, BindingFlags.NonPublic | BindingFlags.Instance);
+            if (method == null)
+                throw new TargetException($"Method '{methodName}' not found on type '{instance.GetType().Name}'.");
+
+            var result = method.Invoke(instance, parameters);
+            if (result is T typedResult)
+                return typedResult;
+
+            return default;
+        }
     }
 }
