@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using FluentAssertions;
 using Xunit;
 
@@ -14,18 +15,19 @@ namespace Open_lab.Tests.Services
             var path = GetCoverageTrackerPath();
             var lines = File.ReadAllLines(path);
 
-            var completeRows = lines
-                .Where(l => l.Contains("|") && l.Contains("✅") && !l.Contains("رقم الوظيفة"))
+            var functionRowRegex = new Regex(@"^\|\s*\d+\.\d+\s*\|", RegexOptions.Compiled);
+            var functionRows = lines
+                .Where(l => functionRowRegex.IsMatch(l))
                 .ToList();
 
-            foreach (var row in completeRows)
+            foreach (var row in functionRows)
             {
-                var parts = row.Split('|').Select(p => p.Trim()).ToArray();
-                parts.Length.Should().BeGreaterThan(6, $"row should have all columns: {row}");
+                var cells = row.Trim().Trim('|').Split('|').Select(p => p.Trim()).ToArray();
+                cells.Length.Should().BeGreaterOrEqualTo(6, $"row should have all columns: {row}");
 
-                var functionId = parts[1];
-                var statusColumn = parts[5];
-                var testsColumn = parts[6];
+                var functionId = cells[0];
+                var statusColumn = cells[4];
+                var testsColumn = cells[5];
 
                 if (statusColumn.StartsWith("✅", StringComparison.Ordinal))
                 {
@@ -52,4 +54,3 @@ namespace Open_lab.Tests.Services
         }
     }
 }
-
