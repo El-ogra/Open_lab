@@ -495,6 +495,7 @@ namespace Open_lab.Tests
         public async Task LoadCommand_With_Specific_Date_Range_Should_Pass_Range_To_Service_SuccessGuard()
         {
             // Function: 7.1 — Generate Patient Worksheet (Date Range from ViewModel)
+            // Production normalises the range to From.Date → To.Date end-of-day (To.Date.AddDays(1).AddSeconds(-1)).
             AppSessionTestHelper.ResetToAdmin();
             var worksheetServiceMock = new Mock<IWorksheetService>();
             var printServiceMock = new Mock<IPrintService>();
@@ -505,7 +506,10 @@ namespace Open_lab.Tests
             viewModel.From = fromDate;
             viewModel.To = toDate;
 
-            worksheetServiceMock.Setup(x => x.GetWorksheetByPatientAsync(fromDate, toDate))
+            var expectedFrom = fromDate.Date;
+            var expectedTo = toDate.Date.AddDays(1).AddSeconds(-1);
+
+            worksheetServiceMock.Setup(x => x.GetWorksheetByPatientAsync(expectedFrom, expectedTo))
                 .ReturnsAsync(new List<WorkSheetPatientRow>());
 
             // Act
@@ -513,7 +517,7 @@ namespace Open_lab.Tests
             await Task.Delay(50);
 
             // Assert
-            worksheetServiceMock.Verify(x => x.GetWorksheetByPatientAsync(fromDate, toDate), Times.Once);
+            worksheetServiceMock.Verify(x => x.GetWorksheetByPatientAsync(expectedFrom, expectedTo), Times.Once);
             AppSessionTestHelper.Reset();
         }
 

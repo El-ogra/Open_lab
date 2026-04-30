@@ -467,10 +467,11 @@ namespace Open_lab.Tests
             var results = await _service.GetResultsForVisitTestAsync(8);
 
             // Assert
+            // Production GetResultsForVisitTestAsync returns all stored results without enforcing
+            // a specific order; verify by content rather than positional index.
             results.Should().HaveCount(3);
-            results[0].ParameterId.Should().Be(60);
-            results[1].ParameterId.Should().Be(61);
-            results[2].ParameterId.Should().Be(62);
+            results.Select(r => r.ParameterId).Should().BeEquivalentTo(new[] { 60, 61, 62 });
+            results.Select(r => r.Value).Should().BeEquivalentTo(new[] { "A", "B", "C" });
         }
 
         #endregion

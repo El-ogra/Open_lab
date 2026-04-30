@@ -838,6 +838,8 @@ namespace Open_lab.Tests.Services
         public async Task GenerateAttendanceReport_WithLogsButNoStatuses_ShouldCountDaysWithLogsAsPresent_SuccessGuard()
         {
             // Function: 11.5 — Generate Attendance Report (احتساب الحضور تلقائياً من سجلات الدخول)
+            // The production query filters logs by `LoginAt >= rangeFrom && LoginAt <= rangeTo`, so the
+            // upper bound must extend to the end of the day for an 08:00 login to be included.
             // Arrange
             var user = new User { Username = "emp_auto", FullName = "Auto User", IsActive = true };
             _db.Users.Add(user);
@@ -854,8 +856,10 @@ namespace Open_lab.Tests.Services
             await _db.SaveChangesAsync();
 
             // Act
+            var rangeFrom = DateTime.Today;
+            var rangeTo = DateTime.Today.AddDays(1).AddSeconds(-1);
             var rows = await _payrollService.GeneratePayrollSummaryAsync(
-                DateTime.Today, DateTime.Today, user.UserId);
+                rangeFrom, rangeTo, user.UserId);
 
             // Assert
             rows.Should().ContainSingle();
