@@ -68,6 +68,11 @@ namespace Open_lab.ViewModels
 
         private async Task LoadVisitTestsAsync()
         {
+            await LoadVisitTestsCoreAsync(true);
+        }
+
+        private async Task LoadVisitTestsCoreAsync(bool updateStatus)
+        {
             try
             {
                 var visitTests = await _resultsService.GetVisitTestsByDateAsync(DateFrom, DateTo.AddDays(1).AddSeconds(-1));
@@ -88,7 +93,10 @@ namespace Open_lab.ViewModels
                     });
                 }
 
-                StatusMessage = $"تم تحميل {VisitTests.Count} تحليل.";
+                if (updateStatus)
+                {
+                    StatusMessage = $"تم تحميل {VisitTests.Count} تحليل.";
+                }
             }
             catch (Exception ex)
             {
@@ -140,9 +148,9 @@ namespace Open_lab.ViewModels
             try
             {
                 var validation = await _resultsService.ValidateResultAsync(
-                    SelectedVisitTest.TestId, 
-                    item.Value, 
-                    SelectedVisitTest.PatientGender, 
+                    SelectedVisitTest.TestId,
+                    item.Value,
+                    SelectedVisitTest.PatientGender,
                     SelectedVisitTest.PatientAge);
 
                 item.Flag = validation.Flag;
@@ -212,7 +220,7 @@ namespace Open_lab.ViewModels
                 SelectedVisitTest.Status = "InProgress";
                 RaiseCommandStates();
                 StatusMessage = "تم إعادة فتح النتائج للتعديل.";
-                await LoadVisitTestsAsync();
+                await LoadVisitTestsCoreAsync(false);
             }
             catch (Exception ex)
             {

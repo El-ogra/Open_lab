@@ -70,6 +70,12 @@ namespace Open_lab.Services
                 throw new ArgumentNullException(nameof(user));
             }
 
+            var originalUsername = await _db.Users
+                .AsNoTracking()
+                .Where(u => u.UserId == user.UserId)
+                .Select(u => u.Username)
+                .FirstAsync();
+
             var current = await _db.Users.FirstAsync(u => u.UserId == user.UserId);
             var normalizedUsername = user.Username.Trim();
             if (string.IsNullOrWhiteSpace(normalizedUsername))
@@ -77,7 +83,7 @@ namespace Open_lab.Services
                 throw new InvalidOperationException("اسم المستخدم مطلوب.");
             }
 
-            if (string.Equals(current.Username, AdminUsername, StringComparison.OrdinalIgnoreCase) &&
+            if (string.Equals(originalUsername, AdminUsername, StringComparison.OrdinalIgnoreCase) &&
                 !string.Equals(normalizedUsername, AdminUsername, StringComparison.OrdinalIgnoreCase))
             {
                 throw new InvalidOperationException("لا يمكن تغيير اسم مستخدم admin.");

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -48,11 +49,17 @@ namespace Open_lab.ViewModels
 
         private async Task LoadAsync()
         {
+            if (AppSession.UserId <= 0)
+            {
+                StatusMessage = "يجب تسجيل الدخول أولًا.";
+                return;
+            }
+
             try
             {
                 var from = From.Date;
                 var to = To.Date.AddDays(1).AddSeconds(-1);
-                var rows = await _worksheetService.GetWorksheetByPatientAsync(from, to);
+                var rows = await _worksheetService.GetWorksheetByPatientAsync(from, to) ?? new List<WorkSheetPatientRow>();
 
                 Rows.Clear();
                 foreach (var row in rows)
@@ -71,6 +78,12 @@ namespace Open_lab.ViewModels
 
         private async Task PrintAsync()
         {
+            if (AppSession.UserId <= 0)
+            {
+                StatusMessage = "يجب تسجيل الدخول أولًا.";
+                return;
+            }
+
             try
             {
                 await _printService.PrintWorksheetByPatientAsync(From.Date, To.Date, Rows);

@@ -143,6 +143,12 @@ namespace Open_lab.ViewModels
             {
                 if (SelectedComment == null || SelectedComment.CommentId == 0)
                 {
+                    if (string.IsNullOrWhiteSpace(CommentText))
+                    {
+                        StatusMessage = "أدخل نص التعليق.";
+                        return;
+                    }
+
                     var comment = await _testCatalogService.CreateTestCommentAsync(new TestComment
                     {
                         TestId = SelectedTest.TestId,
@@ -196,4 +202,3 @@ namespace Open_lab.ViewModels
         }
     }
 }
-

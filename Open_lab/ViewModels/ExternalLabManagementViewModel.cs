@@ -1,9 +1,10 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using System.Collections.Specialized;
 using Open_lab.Models;
 using Open_lab.Services;
 
@@ -168,9 +169,15 @@ namespace Open_lab.ViewModels
 
         private async Task LoadReferralsAsync()
         {
+            if (AppSession.UserId <= 0)
+            {
+                StatusMessage = "يجب تسجيل الدخول أولًا.";
+                return;
+            }
+
             try
             {
-                var referrals = await _testCatalogService.GetReferralsAsync();
+                var referrals = await _testCatalogService.GetReferralsAsync() ?? new List<Referral>();
                 Referrals.Clear();
                 foreach (var referral in referrals.Where(r => r.ReferralType == "ExternalLab"))
                 {
@@ -186,9 +193,15 @@ namespace Open_lab.ViewModels
 
         private async Task LoadQueueAsync()
         {
+            if (AppSession.UserId <= 0)
+            {
+                StatusMessage = "يجب تسجيل الدخول أولًا.";
+                return;
+            }
+
             try
             {
-                var queue = await _externalLabService.GetPendingQueueAsync();
+                var queue = await _externalLabService.GetPendingQueueAsync() ?? new List<ExternalLabQueue>();
                 PendingQueue.Clear();
                 foreach (var item in queue)
                 {
@@ -215,9 +228,15 @@ namespace Open_lab.ViewModels
 
         private async Task LoadManifestsAsync()
         {
+            if (AppSession.UserId <= 0)
+            {
+                StatusMessage = "يجب تسجيل الدخول أولًا.";
+                return;
+            }
+
             try
             {
-                var manifests = await _externalLabService.GetAllManifestsAsync();
+                var manifests = await _externalLabService.GetAllManifestsAsync() ?? new List<ShipmentManifest>();
                 Manifests.Clear();
                 foreach (var manifest in manifests)
                 {
@@ -232,6 +251,12 @@ namespace Open_lab.ViewModels
 
         private async Task CreateManifestAsync()
         {
+            if (AppSession.UserId <= 0)
+            {
+                StatusMessage = "يجب تسجيل الدخول أولًا.";
+                return;
+            }
+
             if (!SelectedReferralId.HasValue || SelectedQueueIds.Count == 0)
                 return;
 
@@ -252,12 +277,17 @@ namespace Open_lab.ViewModels
 
         private async Task UpdateStatusAsync()
         {
+            if (AppSession.UserId <= 0)
+            {
+                StatusMessage = "يجب تسجيل الدخول أولًا.";
+                return;
+            }
+
             if (SelectedQueueItem == null)
                 return;
 
             try
             {
-                // Cycle through statuses: Pending -> InManifest -> Shipped -> Received
                 string newStatus = SelectedQueueItem.Status switch
                 {
                     "Pending" => "InManifest",
@@ -278,14 +308,20 @@ namespace Open_lab.ViewModels
 
         private async Task LoadSettlementAsync()
         {
+            if (AppSession.UserId <= 0)
+            {
+                StatusMessage = "يجب تسجيل الدخول أولًا.";
+                return;
+            }
+
             if (!SelectedReferralId.HasValue)
                 return;
 
             try
             {
                 var pendingBalance = await _externalSettlementService.GetPendingBalanceAsync(SelectedReferralId.Value);
-                var history = await _externalSettlementService.GetSettlementHistoryAsync(SelectedReferralId.Value);
-                
+                var history = await _externalSettlementService.GetSettlementHistoryAsync(SelectedReferralId.Value) ?? new List<ExternalLabSettlement>();
+
                 SettlementHistory.Clear();
                 foreach (var settlement in history)
                 {
@@ -304,6 +340,12 @@ namespace Open_lab.ViewModels
 
         private async Task CreateSettlementAsync()
         {
+            if (AppSession.UserId <= 0)
+            {
+                StatusMessage = "يجب تسجيل الدخول أولًا.";
+                return;
+            }
+
             if (!SelectedReferralId.HasValue || SettlementAmount <= 0)
                 return;
 
@@ -323,6 +365,12 @@ namespace Open_lab.ViewModels
 
         private async Task EnterExternalResultAsync()
         {
+            if (AppSession.UserId <= 0)
+            {
+                StatusMessage = "يجب تسجيل الدخول أولًا.";
+                return;
+            }
+
             if (SelectedQueueItem == null || string.IsNullOrWhiteSpace(ExternalResultValue))
             {
                 return;
@@ -349,6 +397,12 @@ namespace Open_lab.ViewModels
 
         private async Task PrintExternalReportAsync()
         {
+            if (AppSession.UserId <= 0)
+            {
+                StatusMessage = "يجب تسجيل الدخول أولًا.";
+                return;
+            }
+
             if (SelectedQueueItem == null)
             {
                 return;
@@ -390,5 +444,4 @@ namespace Open_lab.ViewModels
         public string PatientName { get; set; } = string.Empty;
         public string TestName { get; set; } = string.Empty;
     }
-
 }

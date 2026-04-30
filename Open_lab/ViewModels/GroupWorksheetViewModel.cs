@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -111,16 +112,22 @@ namespace Open_lab.ViewModels
 
         private async Task LoadGroupsAsync()
         {
+            if (AppSession.UserId <= 0)
+            {
+                StatusMessage = "يجب تسجيل الدخول أولًا.";
+                return;
+            }
+
             try
             {
-                var groups = await _testCatalogService.GetTestGroupsAsync();
+                var groups = await _testCatalogService.GetTestGroupsAsync() ?? new List<TestGroup>();
                 Groups.Clear();
                 foreach (var group in groups)
                 {
                     Groups.Add(new TestGroupItem { GroupId = group.GroupId, GroupName = group.GroupName });
                 }
 
-                var customGroups = await _testCatalogService.GetCustomGroupsAsync();
+                var customGroups = await _testCatalogService.GetCustomGroupsAsync() ?? new List<CustomGroup>();
                 CustomGroups.Clear();
                 foreach (var cg in customGroups)
                 {
@@ -137,6 +144,12 @@ namespace Open_lab.ViewModels
 
         private async Task LoadWorksheetAsync()
         {
+            if (AppSession.UserId <= 0)
+            {
+                StatusMessage = "يجب تسجيل الدخول أولًا.";
+                return;
+            }
+
             try
             {
                 var from = From.Date;
@@ -145,11 +158,13 @@ namespace Open_lab.ViewModels
                 List<WorkSheetPatientRow> rows;
                 if (IsCustomGroup && SelectedCustomGroupId.HasValue)
                 {
-                    rows = await _groupWorksheetService.GetGroupWorksheetByCustomGroupAsync(SelectedCustomGroupId.Value, from, to);
+                    rows = await _groupWorksheetService.GetGroupWorksheetByCustomGroupAsync(SelectedCustomGroupId.Value, from, to)
+                        ?? new List<WorkSheetPatientRow>();
                 }
                 else if (SelectedGroupId.HasValue)
                 {
-                    rows = await _groupWorksheetService.GetGroupWorksheetByGroupAsync(SelectedGroupId.Value, from, to);
+                    rows = await _groupWorksheetService.GetGroupWorksheetByGroupAsync(SelectedGroupId.Value, from, to)
+                        ?? new List<WorkSheetPatientRow>();
                 }
                 else
                 {
@@ -173,6 +188,12 @@ namespace Open_lab.ViewModels
 
         private async Task PrintAsync()
         {
+            if (AppSession.UserId <= 0)
+            {
+                StatusMessage = "يجب تسجيل الدخول أولًا.";
+                return;
+            }
+
             try
             {
                 await _printService.PrintWorksheetByPatientAsync(From.Date, To.Date, Rows);

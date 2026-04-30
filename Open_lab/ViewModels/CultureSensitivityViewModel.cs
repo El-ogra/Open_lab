@@ -485,6 +485,12 @@ namespace Open_lab.ViewModels
                     })
                     .ToList();
 
+                if (values.Count == 0)
+                {
+                    StatusMessage = "لا توجد نتائج لحفظها.";
+                    return;
+                }
+
                 await _service.SaveCultureResultAsync(SelectedVisitTest.VisitTestId, SelectedCulture.CultureId, values);
                 StatusMessage = "تم حفظ نتيجة المزرعة وربطها بالزيارة بنجاح.";
                 await LoadVisitTestsAsync();

@@ -46,7 +46,7 @@ namespace Open_lab.Services
                 .ThenInclude(v => v.Patient)
                 .Include(sc => sc.VisitTest)
                 .ThenInclude(vt => vt.Test)
-                .Where(sc => !sc.IsSeparated || sc.Status != "Verified") // Sample is still in process
+                .Where(sc => !sc.IsSeparated)
                 .OrderByDescending(sc => sc.CollectedAt)
                 .ToListAsync();
         }

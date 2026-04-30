@@ -4,17 +4,25 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using Moq;
 using Open_lab.Services;
+using Open_lab.Tests.Infrastructure;
 using Open_lab.ViewModels;
 using Xunit;
 
 namespace Open_lab.Tests.ViewModels
 {
-    public class WorkSheetByPatientViewModelCommandMatrixTests
+    public class WorkSheetByPatientViewModelCommandMatrixTests : IDisposable
     {
+        public void Dispose()
+        {
+            AppSessionTestHelper.Reset();
+        }
+
         [Fact]
         public async Task LoadCommand_Should_Load_Rows_Success()
         {
             // Arrange
+            AppSessionTestHelper.ResetToAdmin();
+
             var worksheet = new Mock<IWorksheetService>();
             var print = new Mock<IPrintService>();
             worksheet.Setup(x => x.GetWorksheetByPatientAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>()))
@@ -33,6 +41,8 @@ namespace Open_lab.Tests.ViewModels
         public async Task LoadCommand_When_Service_Throws_Should_Set_Error_Failure()
         {
             // Arrange
+            AppSessionTestHelper.ResetToAdmin();
+
             var worksheet = new Mock<IWorksheetService>();
             var print = new Mock<IPrintService>();
             worksheet.Setup(x => x.GetWorksheetByPatientAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>()))
