@@ -398,6 +398,39 @@ namespace Open_lab.Tests.Services
         }
 
         // ────────────────────────────────────────────────────────────────────────
+        // 2.3 — Record Payment — missing: Success guard
+        // ────────────────────────────────────────────────────────────────────────
+        [Fact]
+        public async Task AddPaymentAsync_With_Valid_Data_Should_RecordPayment_SuccessGuard()
+        {
+            // Function: 2.3 — Record Payment
+            // Arrange
+            var invoice = new Invoice
+            {
+                VisitId = 5,
+                Total = 500m,
+                Discount = 0m,
+                NetTotal = 500m,
+                Paid = 0m,
+                Balance = 500m
+            };
+            _db.Invoices.Add(invoice);
+            await _db.SaveChangesAsync();
+
+            // Act
+            var payment = await _invoiceService.AddPaymentAsync(invoice.InvoiceId, 200m, "Cash", 1);
+
+            // Assert
+            payment.Should().NotBeNull();
+            payment.Amount.Should().Be(200m);
+            payment.PaymentMethod.Should().Be("Cash");
+
+            var updatedInvoice = await _db.Invoices.FindAsync(invoice.InvoiceId);
+            updatedInvoice!.Paid.Should().Be(200m);
+            updatedInvoice.Balance.Should().Be(300m);
+        }
+
+        // ────────────────────────────────────────────────────────────────────────
         // 2.5 — Edit Payment — missing Success edge: edit to higher amount
         // ────────────────────────────────────────────────────────────────────────
 

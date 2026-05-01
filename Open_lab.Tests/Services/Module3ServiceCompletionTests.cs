@@ -57,6 +57,55 @@ namespace Open_lab.Tests.Services
         }
 
         [Fact]
+        public async Task CreateTest_WithDuplicateCode_ShouldThrow_FailureGuard()
+        {
+            // Function: 3.1 — Add New Test (Failure: duplicate code)
+            // Arrange
+            _db.Tests.Add(new Test { Code = "DUP", NameReport = "T1", NameReceipt = "T1", Price = 1 });
+            await _db.SaveChangesAsync();
+
+            var newTest = new Test { Code = "DUP", NameReport = "T2", NameReceipt = "T2", Price = 1 };
+
+            // Act
+            Func<Task> act = async () => await _service.CreateTestAsync(newTest);
+
+            // Assert
+            await act.Should().ThrowAsync<InvalidOperationException>().WithMessage("*exists*");
+        }
+
+        [Fact]
+        public async Task UpdateTest_WithNonExistentId_ShouldThrow_FailureGuard()
+        {
+            // Function: 3.2 — Edit Test Data (Failure: not found)
+            // Arrange
+            var test = new Test { TestId = 9999, Code = "NF", NameReport = "NF", NameReceipt = "NF" };
+
+            // Act
+            Func<Task> act = async () => await _service.UpdateTestAsync(test);
+
+            // Assert
+            await act.Should().ThrowAsync<InvalidOperationException>().WithMessage("*not found*");
+        }
+
+        [Fact]
+        public async Task UpdateTest_WithNegativePrice_ShouldThrow_EdgeGuard()
+        {
+            // Function: 3.2 — Edit Test Data (Edge: negative price)
+            // Arrange
+            var test = new Test { Code = "NEG", NameReport = "N", NameReceipt = "N", Price = 10m };
+            _db.Tests.Add(test);
+            await _db.SaveChangesAsync();
+
+            test.Price = -5m;
+
+            // Act
+            Func<Task> act = async () => await _service.UpdateTestAsync(test);
+
+            // Assert
+            await act.Should().ThrowAsync<ArgumentException>().WithMessage("*negative*");
+        }
+
+        [Fact]
         public async Task CreateParameter_Should_Persist_Correctly_SuccessGuard()
         {
             // Function: 3.1 — Add New Test (Parameters)
@@ -160,6 +209,35 @@ namespace Open_lab.Tests.Services
             exists.Should().BeFalse();
         }
 
+        [Fact]
+        public async Task UpdateTestComment_WithEmptyText_ShouldThrow_FailureGuard()
+        {
+            // Function: 3.6 — Add Test Comments (Failure: empty text)
+            // Arrange
+            var comment = new TestComment { TestId = 1, CommentText = "Original" };
+            _db.TestComments.Add(comment);
+            await _db.SaveChangesAsync();
+
+            comment.CommentText = "";
+
+            // Act
+            Func<Task> act = async () => await _service.UpdateTestCommentAsync(comment);
+
+            // Assert
+            await act.Should().ThrowAsync<ArgumentException>();
+        }
+
+        [Fact]
+        public async Task DeleteTestComment_WhenNotExists_ShouldNotThrow_EdgeGuard()
+        {
+            // Function: 3.6 — Add Test Comments (Edge: non-existent)
+            // Act
+            Func<Task> act = async () => await _service.DeleteTestCommentAsync(99999);
+
+            // Assert
+            await act.Should().NotThrowAsync();
+        }
+
         // ────────────────────────────────────────────────────────────────────────
         // 3.5 — Create Custom Group
         // ────────────────────────────────────────────────────────────────────────
@@ -178,6 +256,34 @@ namespace Open_lab.Tests.Services
 
             // Assert
             (await _db.CustomGroupItems.AnyAsync(i => i.CustomGroupItemId == item.CustomGroupItemId)).Should().BeFalse();
+        }
+
+        [Fact]
+        public async Task CreateCustomGroup_WithDuplicateName_ShouldThrow_FailureGuard()
+        {
+            // Function: 3.5 — Create Custom Group (Failure: duplicate name)
+            // Arrange
+            _db.CustomGroups.Add(new CustomGroup { Name = "DUPLICATE", Price = 100 });
+            await _db.SaveChangesAsync();
+
+            var newGroup = new CustomGroup { Name = "DUPLICATE", Price = 200 };
+
+            // Act
+            Func<Task> act = async () => await _service.CreateCustomGroupAsync(newGroup);
+
+            // Assert
+            await act.Should().ThrowAsync<InvalidOperationException>().WithMessage("*exists*");
+        }
+
+        [Fact]
+        public async Task DeleteCustomGroupItem_WithInvalidId_ShouldNotThrow_EdgeGuard()
+        {
+            // Function: 3.5 — Create Custom Group (Edge: invalid ID)
+            // Act
+            Func<Task> act = async () => await _service.DeleteCustomGroupItemAsync(99999);
+
+            // Assert
+            await act.Should().NotThrowAsync();
         }
 
         // ────────────────────────────────────────────────────────────────────────

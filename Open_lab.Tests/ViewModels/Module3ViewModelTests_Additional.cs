@@ -256,6 +256,41 @@ namespace Open_lab.Tests.ViewModels
                     t.Price == 75m
                 )), Times.Once);
             }
+
+            [Fact]
+            public async Task UpdateTestAsync_When_ServiceThrows_Should_Show_Error_FailureGuard()
+            {
+                // Function: 3.2 — Edit Test Data (Failure: service error)
+                // Arrange
+                _viewModel.SelectedTest = new Test { TestId = 101, Code = "E1" };
+                _viewModel.Code = "E2";
+                _testCatalogServiceMock.Setup(x => x.UpdateTestAsync(It.IsAny<Test>()))
+                    .ThrowsAsync(new Exception("update-failed"));
+
+                // Act
+                await _viewModel.InvokePrivateAsync("SaveAsync");
+
+                // Assert
+                _viewModel.StatusMessage.Should().Contain("خطأ:");
+                _viewModel.StatusMessage.Should().Contain("update-failed");
+            }
+
+            [Fact]
+            public async Task UpdateTestAsync_When_NoSelection_Should_Return_EdgeGuard()
+            {
+                // Function: 3.2 — Edit Test Data (Edge: no selection)
+                // Arrange
+                _viewModel.SelectedTest = null;
+                _viewModel.Code = "NEWCODE";
+
+                // Act
+                await _viewModel.InvokePrivateAsync("SaveAsync");
+
+                // Assert
+                // When SelectedTest is null, SaveAsync should call CreateTestAsync, not UpdateTestAsync.
+                // We verify UpdateTestAsync is NOT called.
+                _testCatalogServiceMock.Verify(x => x.UpdateTestAsync(It.IsAny<Test>()), Times.Never);
+            }
         }
 
         #endregion
