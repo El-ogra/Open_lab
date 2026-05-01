@@ -1,0 +1,687 @@
+[
+  {
+    "fid": "1.1",
+    "Service_success": {
+      "method": "Patient_And_Visit_Functions_Should_Work_EndToEnd",
+      "file": "/workspace/Open_lab.Tests/Services/FunctionCoverageGapTests.cs",
+      "line": 32
+    },
+    "Service_failure": {
+      "method": "AddNewPatient_WithInvalidGender_ShouldThrowArgumentException",
+      "file": "/workspace/Open_lab.Tests/Services/PatientServiceTests.cs",
+      "line": 51
+    },
+    "Service_edge": {
+      "method": "AddNewPatient_WithWhitespacePhone_ShouldStoreNullPhone_EdgeCase",
+      "file": "/workspace/Open_lab.Tests/Services/PatientServiceTests.cs",
+      "line": 107
+    },
+    "ViewModel_success": {
+      "method": "Constructor_Should_Generate_LabId_Automatically_LogicGuard",
+      "file": "/workspace/Open_lab.Tests/ViewModels/PatientRegistrationViewModelTests.cs",
+      "line": 29
+    },
+    "ViewModel_failure": {
+      "method": "SaveAsync_When_Service_Throws_Should_Set_Error_StatusMessage",
+      "file": "/workspace/Open_lab.Tests/ViewModels/PatientRegistrationViewModelTests.cs",
+      "line": 108
+    },
+    "ViewModel_edge": {
+      "method": "ClearFormAsync_When_PatientExists_Should_Reset_Fields_And_Generate_NewLabId_EdgeGuard",
+      "file": "/workspace/Open_lab.Tests/ViewModels/PatientRegistrationViewModelTests.cs",
+      "line": 556
+    }
+  },
+  {
+    "fid": "1.2",
+    "Service_success": {
+      "method": "UpdateAsync_Should_Update_All_Fields",
+      "file": "/workspace/Open_lab.Tests/Services/PatientServiceTests.cs",
+      "line": 148
+    },
+    "Service_failure": {
+      "method": "DeleteAsync_With_Visits_Should_Throw",
+      "file": "/workspace/Open_lab.Tests/Services/PatientServiceTests.cs",
+      "line": 128
+    },
+    "Service_edge": {
+      "method": "DeleteAsync_When_PatientNotFound_Should_NotThrow_And_KeepData_EdgeGuard",
+      "file": "/workspace/Open_lab.Tests/Services/PatientServiceTests.cs",
+      "line": 500
+    },
+    "ViewModel_success": {
+      "method": "LoadByLabIdAsync_With_Empty_LabId_Should_Set_StatusMessage",
+      "file": "/workspace/Open_lab.Tests/ViewModels/PatientRegistrationViewModelTests.cs",
+      "line": 126
+    },
+    "ViewModel_failure": {
+      "method": "DeleteAsync_When_DeleteServiceThrows_Should_Set_ErrorMessage_FailureGuard",
+      "file": "/workspace/Open_lab.Tests/ViewModels/PatientRegistrationViewModelTests.cs",
+      "line": 537
+    },
+    "ViewModel_edge": {
+      "method": "DeleteAsync_With_PatientId_Zero_Should_Not_Call_Service_LogicGuard",
+      "file": "/workspace/Open_lab.Tests/ViewModels/PatientRegistrationViewModelTests.cs",
+      "line": 216
+    }
+  },
+  {
+    "fid": "1.3",
+    "Service_success": {
+      "method": "AddTestToVisitAsync_Should_Add_VisitTest_With_Price",
+      "file": "/workspace/Open_lab.Tests/Services/VisitServiceTests.cs",
+      "line": 31
+    },
+    "Service_failure": {
+      "method": "AddTestToVisitAsync_Duplicate_Should_Throw",
+      "file": "/workspace/Open_lab.Tests/Services/VisitServiceTests.cs",
+      "line": 97
+    },
+    "Service_edge": {
+      "method": "AddTestsToPatient_When_NoPriceListsExist_Should_Use_BaseTestPrice_EdgeGuard",
+      "file": "/workspace/Open_lab.Tests/Services/VisitServiceTests.cs",
+      "line": 389
+    },
+    "ViewModel_success": {
+      "method": "LoadPatientCommand_Should_Load_Patient_Data_LogicGuard",
+      "file": "/workspace/Open_lab.Tests/ViewModels/PatientTestsSelectionViewModelTests.cs",
+      "line": 40
+    },
+    "ViewModel_failure": {
+      "method": "AddTestCommand_When_Service_Throws_Should_Set_Error_StatusMessage",
+      "file": "/workspace/Open_lab.Tests/ViewModels/PatientTestsSelectionViewModelTests.cs",
+      "line": 90
+    },
+    "ViewModel_edge": {
+      "method": "RefreshTestsCommand_When_TestCatalogThrows_Should_Set_ErrorMessage_EdgeGuard",
+      "file": "/workspace/Open_lab.Tests/ViewModels/PatientTestsSelectionViewModelTests.cs",
+      "line": 287
+    }
+  },
+  {
+    "fid": "1.4",
+    "Service_success": {
+      "method": "RemoveVisitTestAsync_Pending_Should_Delete_Successfully",
+      "file": "/workspace/Open_lab.Tests/Services/VisitServiceTests.cs",
+      "line": 212
+    },
+    "Service_failure": {
+      "method": "RemoveVisitTestAsync_Verified_Should_Throw",
+      "file": "/workspace/Open_lab.Tests/Services/VisitServiceTests.cs",
+      "line": 186
+    },
+    "Service_edge": {
+      "method": "RemoveVisitTest_WhenLastTestInVisit_ShouldLeaveVisitEmpty_EdgeGuard",
+      "file": "/workspace/Open_lab.Tests/Services/Module1And2ServiceCompletionTests.cs",
+      "line": 167
+    },
+    "ViewModel_success": {
+      "method": "RemoveTestCommand_Should_Remove_Test_LogicGuard",
+      "file": "/workspace/Open_lab.Tests/ViewModels/PatientTestsSelectionViewModelTests.cs",
+      "line": 126
+    },
+    "ViewModel_failure": {
+      "method": "RemoveTestCommand_When_Service_Throws_Should_Set_Error_StatusMessage",
+      "file": "/workspace/Open_lab.Tests/ViewModels/PatientTestsSelectionViewModelTests.cs",
+      "line": 151
+    },
+    "ViewModel_edge": {
+      "method": "RemoveTestCommand_WhenSelectedVisitTestIsNull_ShouldBeDisabled_EdgeGuard",
+      "file": "/workspace/Open_lab.Tests/ViewModels/Module1And2ViewModelCompletionTests.cs",
+      "line": 168
+    }
+  },
+  {
+    "fid": "1.5",
+    "Service_success": {
+      "method": "SearchPatient_WithMatchingLabId_ShouldReturnPatient",
+      "file": "/workspace/Open_lab.Tests/Services/PatientSearchServiceTests.cs",
+      "line": 31
+    },
+    "Service_failure": {
+      "method": "GetByLabIdAsync_When_LabIdIsWhitespace_Should_Throw_FailureGuard",
+      "file": "/workspace/Open_lab.Tests/Services/PatientServiceTests.cs",
+      "line": 489
+    },
+    "Service_edge": {
+      "method": "GetByLabIdAsync_When_LabIdHasWhitespace_Should_Trim_And_Return_Patient_EdgeGuard",
+      "file": "/workspace/Open_lab.Tests/Services/PatientServiceTests.cs",
+      "line": 473
+    },
+    "ViewModel_success": {
+      "method": "SearchAsync_Should_Populate_Results_LogicGuard",
+      "file": "/workspace/Open_lab.Tests/ViewModels/PatientRegistrationViewModelTests.cs",
+      "line": 187
+    },
+    "ViewModel_failure": {
+      "method": "SearchAsync_Should_Handle_Exceptions_Gracefully",
+      "file": "/workspace/Open_lab.Tests/ViewModels/PatientSearchViewModelTests.cs",
+      "line": 105
+    },
+    "ViewModel_edge": {
+      "method": "SearchPatient_WhenNoResults_ShouldShowZeroCountInStatus_EdgeGuard",
+      "file": "/workspace/Open_lab.Tests/ViewModels/Module1And2ViewModelCompletionTests.cs",
+      "line": 185
+    }
+  },
+  {
+    "fid": "1.6",
+    "Service_success": {
+      "method": "ViewPatientHistory_WhenVisitsExist_ShouldReturnDescendingByVisitDate",
+      "file": "/workspace/Open_lab.Tests/Services/PatientSearchServiceTests.cs",
+      "line": 83
+    },
+    "Service_failure": {
+      "method": "GetMedicalHistoryAsync_InvalidPatientId_Should_Throw",
+      "file": "/workspace/Open_lab.Tests/Services/PatientServiceTests.cs",
+      "line": 320
+    },
+    "Service_edge": {
+      "method": "GetMedicalHistoryAsync_When_NoHistoryExists_Should_Return_Null_EdgeGuard",
+      "file": "/workspace/Open_lab.Tests/Services/PatientServiceTests.cs",
+      "line": 331
+    },
+    "ViewModel_success": {
+      "method": "LoadHistoryCommand_Should_Populate_Visits_LogicGuard",
+      "file": "/workspace/Open_lab.Tests/ViewModels/PatientHistoryViewModelTests.cs",
+      "line": 33
+    },
+    "ViewModel_failure": {
+      "method": "LoadHistoryAsync_When_ReportService_Throws_Should_Set_Error",
+      "file": "/workspace/Open_lab.Tests/ViewModels/PatientHistoryViewModelTests.cs",
+      "line": 74
+    },
+    "ViewModel_edge": {
+      "method": "PrintHistoryAsync_When_HistoryIsNull_Should_NotCall_PrintService_EdgeGuard",
+      "file": "/workspace/Open_lab.Tests/ViewModels/PatientHistoryViewModelTests.cs",
+      "line": 108
+    }
+  },
+  {
+    "fid": "1.7",
+    "Service_success": {
+      "method": "SaveMedicalHistoryAsync_Should_Create_New_History",
+      "file": "/workspace/Open_lab.Tests/Services/PatientServiceTests.cs",
+      "line": 347
+    },
+    "Service_failure": {
+      "method": "SaveMedicalHistoryAsync_NonExistentPatient_Should_Throw",
+      "file": "/workspace/Open_lab.Tests/Services/PatientServiceTests.cs",
+      "line": 416
+    },
+    "Service_edge": {
+      "method": "AddMedicalHistory_WithNullHistory_ShouldThrowArgumentNullException",
+      "file": "/workspace/Open_lab.Tests/Services/PatientServiceTests.cs",
+      "line": 430
+    },
+    "ViewModel_success": {
+      "method": "SaveAsync_With_MedicalHistory_Should_Save_Complete_History_LogicGuard",
+      "file": "/workspace/Open_lab.Tests/ViewModels/PatientRegistrationViewModelTests.cs",
+      "line": 380
+    },
+    "ViewModel_failure": {
+      "method": "SaveAsync_When_MedicalHistorySaveFails_Should_Set_Error_Message_FailureGuard",
+      "file": "/workspace/Open_lab.Tests/ViewModels/PatientRegistrationViewModelTests.cs",
+      "line": 418
+    },
+    "ViewModel_edge": {
+      "method": "SaveAsync_With_Empty_MedicalHistoryFields_Should_Save_Without_Throw_EdgeGuard",
+      "file": "/workspace/Open_lab.Tests/ViewModels/PatientRegistrationViewModelTests.cs",
+      "line": 439
+    }
+  },
+  {
+    "fid": "1.8",
+    "Service_success": {
+      "method": "VisitService_AddCustomGroup_Should_Add_All_Tests",
+      "file": "/workspace/Open_lab.Tests/Services/AdditionalFunctionalityTests.cs",
+      "line": 285
+    },
+    "Service_failure": {
+      "method": "AddCustomGroupToVisitAsync_Visit_Not_Found_Should_Throw",
+      "file": "/workspace/Open_lab.Tests/Services/VisitServiceTests.cs",
+      "line": 500
+    },
+    "Service_edge": {
+      "method": "AddGroupOfTests_WhenSomeTestsAlreadyInVisit_Should_AddOnlyMissingOnes_EdgeGuard",
+      "file": "/workspace/Open_lab.Tests/Services/VisitServiceTests.cs",
+      "line": 619
+    },
+    "ViewModel_success": {
+      "method": "AddCustomGroupCommand_Should_Add_All_Tests_In_Group_LogicGuard",
+      "file": "/workspace/Open_lab.Tests/ViewModels/PatientTestsSelectionViewModelTests.cs",
+      "line": 188
+    },
+    "ViewModel_failure": {
+      "method": "AddCustomGroupCommand_When_Service_Throws_Should_Set_Error_StatusMessage",
+      "file": "/workspace/Open_lab.Tests/ViewModels/PatientTestsSelectionViewModelTests.cs",
+      "line": 214
+    },
+    "ViewModel_edge": {
+      "method": "AddGroupOfTests_WhenNoVisitCreated_ShouldNotCallService_EdgeGuard",
+      "file": "/workspace/Open_lab.Tests/ViewModels/Module1And2ViewModelCompletionTests.cs",
+      "line": 296
+    }
+  },
+  {
+    "fid": "2.1",
+    "Service_success": {
+      "method": "Finance_Gap_Functions_Should_Work",
+      "file": "/workspace/Open_lab.Tests/Services/FunctionCoverageGapTests.cs",
+      "line": 52
+    },
+    "Service_failure": null,
+    "Service_edge": {
+      "method": "GetVisitTotalAsync_When_VisitNotFound_Should_Return_Zero_FailureGuard",
+      "file": "/workspace/Open_lab.Tests/Services/InvoiceServiceTests.cs",
+      "line": 141
+    },
+    "ViewModel_success": {
+      "method": "CalculateTotalAsync_Should_Call_GetVisitTotalAsync_Directly",
+      "file": "/workspace/Open_lab.Tests/ViewModels/PatientBillingViewModelTests.cs",
+      "line": 495
+    },
+    "ViewModel_failure": {
+      "method": "LoadVisitCommand_When_VisitNotFound_Should_Show_Error_FailureGuard",
+      "file": "/workspace/Open_lab.Tests/ViewModels/PatientBillingViewModelTests.cs",
+      "line": 512
+    },
+    "ViewModel_edge": {
+      "method": "LoadVisitCommand_When_VisitHasNoTests_Should_Return_Zero_EdgeGuard",
+      "file": "/workspace/Open_lab.Tests/ViewModels/PatientBillingViewModelTests.cs",
+      "line": 529
+    }
+  },
+  {
+    "fid": "2.2",
+    "Service_success": {
+      "method": "CreateOrUpdateInvoiceAsync_WithZeroDiscount_Should_Calculate_Correctly",
+      "file": "/workspace/Open_lab.Tests/Services/InvoiceServiceTests.cs",
+      "line": 297
+    },
+    "Service_failure": {
+      "method": "CreateOrUpdateInvoiceAsync_NegativeDiscount_Should_Throw",
+      "file": "/workspace/Open_lab.Tests/Services/InvoiceServiceTests.cs",
+      "line": 349
+    },
+    "Service_edge": {
+      "method": "CalculateReferralDiscountAsync_When_ReferralMissing_Should_Return_Zero_EdgeGuard",
+      "file": "/workspace/Open_lab.Tests/Services/InvoiceServiceTests.cs",
+      "line": 701
+    },
+    "ViewModel_success": {
+      "method": "ApplyDiscountAsync_Should_Update_NetTotal_Directly",
+      "file": "/workspace/Open_lab.Tests/ViewModels/PatientBillingViewModelTests.cs",
+      "line": 546
+    },
+    "ViewModel_failure": {
+      "method": "ApplyDiscountAsync_When_DiscountExceedsTotal_Should_Throw_FailureGuard",
+      "file": "/workspace/Open_lab.Tests/ViewModels/PatientBillingViewModelTests.cs",
+      "line": 565
+    },
+    "ViewModel_edge": {
+      "method": "ApplyDiscountAsync_With_ZeroDiscount_Should_Calculate_Correctly_EdgeGuard",
+      "file": "/workspace/Open_lab.Tests/ViewModels/PatientBillingViewModelTests.cs",
+      "line": 584
+    }
+  },
+  {
+    "fid": "2.3",
+    "Service_success": {
+      "method": "CreateOrUpdateInvoiceAsync_PartialPayment_Should_Set_Status_To_Partial",
+      "file": "/workspace/Open_lab.Tests/Services/InvoiceServiceTests.cs",
+      "line": 442
+    },
+    "Service_failure": {
+      "method": "AddPaymentAsync_InvalidAmount_Should_Throw_LogicGuard",
+      "file": "/workspace/Open_lab.Tests/Services/InvoiceServiceTests.cs",
+      "line": 63
+    },
+    "Service_edge": {
+      "method": "AddPaymentAsync_When_PaymentExceedsBalance_Should_Allow_Overpayment_EdgeGuard",
+      "file": "/workspace/Open_lab.Tests/Services/InvoiceServiceTests.cs",
+      "line": 486
+    },
+    "ViewModel_success": {
+      "method": "AddPaymentAsync_With_ValidPayment_Should_RecordPayment_SuccessGuard",
+      "file": "/workspace/Open_lab.Tests/ViewModels/PatientBillingViewModelTests.cs",
+      "line": 603
+    },
+    "ViewModel_failure": {
+      "method": "AddPaymentAsync_When_ServiceThrows_Should_Show_Error_FailureGuard",
+      "file": "/workspace/Open_lab.Tests/ViewModels/PatientBillingViewModelTests.cs",
+      "line": 169
+    },
+    "ViewModel_edge": {
+      "method": "AddPaymentAsync_With_Paid_Zero_Should_Set_StatusMessage",
+      "file": "/workspace/Open_lab.Tests/ViewModels/PatientBillingViewModelTests.cs",
+      "line": 153
+    }
+  },
+  {
+    "fid": "2.4",
+    "Service_success": {
+      "method": "CreateOrUpdateInvoiceAsync_FullPayment_Should_Set_Status_To_Paid",
+      "file": "/workspace/Open_lab.Tests/Services/InvoiceServiceTests.cs",
+      "line": 418
+    },
+    "Service_failure": {
+      "method": "SettleAccountAsync_When_BalanceRemaining_Should_Throw_FailureGuard",
+      "file": "/workspace/Open_lab.Tests/Services/InvoiceServiceTests.cs",
+      "line": 654
+    },
+    "Service_edge": {
+      "method": "SettleAccountAsync_When_FullyPaid_Should_CloseVisit_EdgeGuard",
+      "file": "/workspace/Open_lab.Tests/Services/InvoiceServiceTests.cs",
+      "line": 676
+    },
+    "ViewModel_success": {
+      "method": "SettleAccountAsync_With_FullyPaidInvoice_Should_Settle_SuccessGuard",
+      "file": "/workspace/Open_lab.Tests/ViewModels/PatientBillingViewModelTests.cs",
+      "line": 626
+    },
+    "ViewModel_failure": {
+      "method": "SettleAccountAsync_When_ServiceThrows_Should_Set_ErrorStatus_FailureGuard",
+      "file": "/workspace/Open_lab.Tests/ViewModels/PatientBillingViewModelTests.cs",
+      "line": 431
+    },
+    "ViewModel_edge": {
+      "method": "SettleAccountAsync_When_AlreadySettled_Should_Handle_Gracefully_EdgeGuard",
+      "file": "/workspace/Open_lab.Tests/ViewModels/PatientBillingViewModelTests.cs",
+      "line": 449
+    }
+  },
+  {
+    "fid": "2.5",
+    "Service_success": {
+      "method": "EditPaymentAsync_Should_Update_Amount_And_Recalculate_Invoice_LogicGuard",
+      "file": "/workspace/Open_lab.Tests/Services/InvoiceServiceTests.cs",
+      "line": 175
+    },
+    "Service_failure": {
+      "method": "EditPaymentAsync_When_PaymentNotFound_Should_Throw_FailureGuard",
+      "file": "/workspace/Open_lab.Tests/Services/InvoiceServiceTests.cs",
+      "line": 767
+    },
+    "Service_edge": {
+      "method": "EditPaymentAsync_When_ReasonWhitespace_Should_Throw_EdgeGuard",
+      "file": "/workspace/Open_lab.Tests/Services/InvoiceServiceTests.cs",
+      "line": 778
+    },
+    "ViewModel_success": {
+      "method": "EditPaymentAsync_With_ValidAmount_Should_EditPayment_SuccessGuard",
+      "file": "/workspace/Open_lab.Tests/ViewModels/PatientBillingViewModelTests.cs",
+      "line": 647
+    },
+    "ViewModel_failure": {
+      "method": "EditPaymentAsync_When_ServiceThrows_Should_Show_Error_FailureGuard",
+      "file": "/workspace/Open_lab.Tests/ViewModels/PatientBillingViewModelTests.cs",
+      "line": 226
+    },
+    "ViewModel_edge": {
+      "method": "EditPaymentAsync_When_EditingToSameAmount_Should_Handle_NoChange_EdgeGuard",
+      "file": "/workspace/Open_lab.Tests/ViewModels/PatientBillingViewModelTests.cs",
+      "line": 245
+    }
+  },
+  {
+    "fid": "2.6",
+    "Service_success": {
+      "method": "DeletePaymentAsync_Should_Recalculate_Balance",
+      "file": "/workspace/Open_lab.Tests/Services/InvoiceServiceTests.cs",
+      "line": 510
+    },
+    "Service_failure": {
+      "method": "DeletePaymentAsync_Without_Reason_Should_Throw",
+      "file": "/workspace/Open_lab.Tests/Services/InvoiceServiceTests.cs",
+      "line": 558
+    },
+    "Service_edge": {
+      "method": "DeletePayment_WithWhitespaceReason_ShouldThrow_EdgeGuard",
+      "file": "/workspace/Open_lab.Tests/Services/Module1And2ServiceCompletionTests.cs",
+      "line": 587
+    },
+    "ViewModel_success": {
+      "method": "DeletePaymentAsync_With_Valid_SelectedPayment_Should_Delete",
+      "file": "/workspace/Open_lab.Tests/ViewModels/PatientBillingViewModelTests.cs",
+      "line": 267
+    },
+    "ViewModel_failure": {
+      "method": "DeletePaymentAsync_When_ServiceThrows_Should_Show_Error_FailureGuard",
+      "file": "/workspace/Open_lab.Tests/ViewModels/PatientBillingViewModelTests.cs",
+      "line": 288
+    },
+    "ViewModel_edge": {
+      "method": "DeletePaymentAsync_With_Null_SelectedPayment_Should_Return",
+      "file": "/workspace/Open_lab.Tests/ViewModels/PatientBillingViewModelTests.cs",
+      "line": 212
+    }
+  },
+  {
+    "fid": "2.7",
+    "Service_success": {
+      "method": "AddAdditionalChargeAsync_Should_Create_Charge_Record",
+      "file": "/workspace/Open_lab.Tests/Services/InvoiceServiceTests.cs",
+      "line": 577
+    },
+    "Service_failure": {
+      "method": "AddAdditionalChargeAsync_InvalidDescription_Should_Throw_LogicGuard",
+      "file": "/workspace/Open_lab.Tests/Services/InvoiceServiceTests.cs",
+      "line": 83
+    },
+    "Service_edge": {
+      "method": "AddAdditionalChargeAsync_With_DescriptionWhitespaceAround_Should_Trim_EdgeGuard",
+      "file": "/workspace/Open_lab.Tests/Services/InvoiceServiceTests.cs",
+      "line": 797
+    },
+    "ViewModel_success": {
+      "method": "AddChargeAsync_With_Valid_Data_Should_Add_Charge",
+      "file": "/workspace/Open_lab.Tests/ViewModels/PatientBillingViewModelTests.cs",
+      "line": 343
+    },
+    "ViewModel_failure": {
+      "method": "AddChargeAsync_When_ServiceThrows_Should_Show_Error_FailureGuard",
+      "file": "/workspace/Open_lab.Tests/ViewModels/PatientBillingViewModelTests.cs",
+      "line": 368
+    },
+    "ViewModel_edge": {
+      "method": "AddChargeAsync_With_VisitId_Zero_Should_Return",
+      "file": "/workspace/Open_lab.Tests/ViewModels/PatientBillingViewModelTests.cs",
+      "line": 328
+    }
+  },
+  {
+    "fid": "2.8",
+    "Service_success": {
+      "method": "CreateOrUpdateInvoiceAsync_Should_Create_Invoice_With_Correct_Totals_LogicGuard",
+      "file": "/workspace/Open_lab.Tests/Services/InvoiceServiceTests.cs",
+      "line": 31
+    },
+    "Service_failure": {
+      "method": "LogInvoicePrintedAsync_With_InvalidInvoiceId_Should_Still_Create_Log_FailureGuard",
+      "file": "/workspace/Open_lab.Tests/Services/InvoiceServiceTests.cs",
+      "line": 637
+    },
+    "Service_edge": {
+      "method": "LogInvoicePrintedAsync_With_ZeroUserId_Should_Create_Log_EdgeGuard",
+      "file": "/workspace/Open_lab.Tests/Services/InvoiceServiceTests.cs",
+      "line": 813
+    },
+    "ViewModel_success": {
+      "method": "SaveInvoiceAsync_With_Valid_Visit_Should_Save",
+      "file": "/workspace/Open_lab.Tests/ViewModels/PatientBillingViewModelTests.cs",
+      "line": 131
+    },
+    "ViewModel_failure": {
+      "method": "PrintInvoiceAsync_When_LogThrows_Should_Set_ErrorStatus_FailureGuard",
+      "file": "/workspace/Open_lab.Tests/ViewModels/PatientBillingViewModelTests.cs",
+      "line": 670
+    },
+    "ViewModel_edge": {
+      "method": "SaveInvoiceAsync_With_VisitId_Zero_Should_Set_StatusMessage",
+      "file": "/workspace/Open_lab.Tests/ViewModels/PatientBillingViewModelTests.cs",
+      "line": 117
+    }
+  },
+  {
+    "fid": "2.9",
+    "Service_success": {
+      "method": "GetPatientAccount_ByDate_Should_Return_Invoices_And_Payments_For_Same_Patient_LogicGuard",
+      "file": "/workspace/Open_lab.Tests/Services/InvoiceServiceTests.cs",
+      "line": 214
+    },
+    "Service_failure": {
+      "method": "GetPatientAccount_When_PatientNotFound_Should_Return_Empty_FailureGuard",
+      "file": "/workspace/Open_lab.Tests/Services/InvoiceServiceTests.cs",
+      "line": 255
+    },
+    "Service_edge": {
+      "method": "GetPatientAccount_With_DateRangeOutside_VisitDate_Should_Return_Empty_EdgeGuard",
+      "file": "/workspace/Open_lab.Tests/Services/InvoiceServiceTests.cs",
+      "line": 271
+    },
+    "ViewModel_success": {
+      "method": "Commands_When_Admin_Should_Be_Enabled",
+      "file": "/workspace/Open_lab.Tests/ViewModels/PatientBillingViewModelTests.cs",
+      "line": 28
+    },
+    "ViewModel_failure": {
+      "method": "LoadVisitAsync_When_ServiceThrows_Should_Set_StatusMessage_FailureGuard",
+      "file": "/workspace/Open_lab.Tests/ViewModels/PatientBillingViewModelTests.cs",
+      "line": 100
+    },
+    "ViewModel_edge": {
+      "method": "LoadVisitAsync_With_VisitId_Zero_Should_Set_StatusMessage",
+      "file": "/workspace/Open_lab.Tests/ViewModels/PatientBillingViewModelTests.cs",
+      "line": 37
+    }
+  },
+  {
+    "fid": "2.10",
+    "Service_success": {
+      "method": "GetSnapshotAsync_Overall_Should_Aggregate_Invoices_And_Payments_LogicGuard",
+      "file": "/workspace/Open_lab.Tests/Services/AccountsTreasuryServiceTests.cs",
+      "line": 33
+    },
+    "Service_failure": {
+      "method": "GetSnapshotAsync_WithInvalidDates_ShouldThrowException_FailureGuard",
+      "file": "/workspace/Open_lab.Tests/Services/AccountsTreasuryServiceTests.cs",
+      "line": 205
+    },
+    "Service_edge": {
+      "method": "GetSnapshotAsync_When_NoDataInRange_Should_Return_ZeroedSnapshot_EdgeGuard",
+      "file": "/workspace/Open_lab.Tests/Services/AccountsTreasuryServiceTests.cs",
+      "line": 221
+    },
+    "ViewModel_success": {
+      "method": "LoadCommand_Should_SetIsLoading_And_LoadData_SuccessGuard",
+      "file": "/workspace/Open_lab.Tests/ViewModels/AccountsTreasuryViewModelTests.cs",
+      "line": 24
+    },
+    "ViewModel_failure": {
+      "method": "LoadCommand_Failure_Should_HandleException_FailureGuard",
+      "file": "/workspace/Open_lab.Tests/ViewModels/AccountsTreasuryViewModelTests.cs",
+      "line": 60
+    },
+    "ViewModel_edge": {
+      "method": "LoadCommand_With_EmptySnapshot_Should_Keep_ZeroTotals_EdgeGuard",
+      "file": "/workspace/Open_lab.Tests/ViewModels/AccountsTreasuryViewModelTests.cs",
+      "line": 157
+    }
+  },
+  {
+    "fid": "2.11",
+    "Service_success": {
+      "method": "GetSnapshotAsync_With_BranchFilter_Should_Isolate_Branch_Data_LogicGuard",
+      "file": "/workspace/Open_lab.Tests/Services/AccountsTreasuryServiceTests.cs",
+      "line": 65
+    },
+    "Service_failure": {
+      "method": "GetSnapshotAsync_With_NonExistentBranch_Should_Return_ZeroedSnapshot_FailureGuard",
+      "file": "/workspace/Open_lab.Tests/Services/AccountsTreasuryServiceTests.cs",
+      "line": 100
+    },
+    "Service_edge": {
+      "method": "GetSnapshotAsync_With_BranchFilter_And_NoData_Should_Return_ZeroedSnapshot_EdgeGuard",
+      "file": "/workspace/Open_lab.Tests/Services/AccountsTreasuryServiceTests.cs",
+      "line": 117
+    },
+    "ViewModel_success": {
+      "method": "LoadCommand_With_BranchFilter_Should_Call_GetSnapshotAsync_With_BranchId",
+      "file": "/workspace/Open_lab.Tests/ViewModels/AccountsTreasuryViewModelTests.cs",
+      "line": 269
+    },
+    "ViewModel_failure": {
+      "method": "LoadCommand_With_BranchFilter_When_ServiceThrows_Should_Show_Error_FailureGuard",
+      "file": "/workspace/Open_lab.Tests/ViewModels/AccountsTreasuryViewModelTests.cs",
+      "line": 305
+    },
+    "ViewModel_edge": {
+      "method": "LoadCommand_With_NoBranchSelected_Should_Load_AllBranches_EdgeGuard",
+      "file": "/workspace/Open_lab.Tests/ViewModels/AccountsTreasuryViewModelTests.cs",
+      "line": 330
+    }
+  },
+  {
+    "fid": "2.12",
+    "Service_success": {
+      "method": "GetSnapshotAsync_Should_Calculate_Doctor_Commissions_LogicGuard",
+      "file": "/workspace/Open_lab.Tests/Services/AccountsTreasuryServiceTests.cs",
+      "line": 136
+    },
+    "Service_failure": {
+      "method": "GetSnapshotAsync_DoctorWise_When_DateRangeInvalid_Should_Throw_FailureGuard",
+      "file": "/workspace/Open_lab.Tests/Services/AccountsTreasuryServiceTests.cs",
+      "line": 190
+    },
+    "Service_edge": {
+      "method": "GetSnapshotAsync_With_ZeroCommissionPercentage_Should_Calculate_ZeroCommission_EdgeGuard",
+      "file": "/workspace/Open_lab.Tests/Services/AccountsTreasuryServiceTests.cs",
+      "line": 163
+    },
+    "ViewModel_success": {
+      "method": "LoadCommand_Should_Calculate_Doctor_Commissions_Directly",
+      "file": "/workspace/Open_lab.Tests/ViewModels/AccountsTreasuryViewModelTests.cs",
+      "line": 369
+    },
+    "ViewModel_failure": {
+      "method": "LoadCommand_When_ServiceThrows_DoctorCommissions_Should_Show_Error_FailureGuard",
+      "file": "/workspace/Open_lab.Tests/ViewModels/AccountsTreasuryViewModelTests.cs",
+      "line": 405
+    },
+    "ViewModel_edge": {
+      "method": "LoadCommand_With_NoDoctorCommissions_Should_Return_EmptyList_EdgeGuard",
+      "file": "/workspace/Open_lab.Tests/ViewModels/AccountsTreasuryViewModelTests.cs",
+      "line": 429
+    }
+  },
+  {
+    "fid": "2.13",
+    "Service_success": {
+      "method": "ExternalSettlementService_Should_Calculate_Correct_Balance",
+      "file": "/workspace/Open_lab.Tests/Services/AdditionalFunctionalityTests.cs",
+      "line": 64
+    },
+    "Service_failure": null,
+    "Service_edge": {
+      "method": "GetPendingBalanceAsync_When_NoQueueOrPayments_Should_Return_Zero_FailureGuard",
+      "file": "/workspace/Open_lab.Tests/Services/ExternalSettlementServiceTests.cs",
+      "line": 102
+    },
+    "ViewModel_success": {
+      "method": "LoadQueueAsync_Should_Map_Row_With_VisitTest_For_Printing",
+      "file": "/workspace/Open_lab.Tests/ViewModels/ExternalLabManagementViewModelTests.cs",
+      "line": 47
+    },
+    "ViewModel_failure": {
+      "method": "LoadReferralsCommand_When_Service_Throws_Should_Set_Error_Message_Failure",
+      "file": "/workspace/Open_lab.Tests/ViewModels/ExternalLabManagementViewModelTests.cs",
+      "line": 79
+    },
+    "ViewModel_edge": {
+      "method": "CreateSettlementAsync_When_AmountIsZero_Should_NotCall_Service_EdgeGuard",
+      "file": "/workspace/Open_lab.Tests/ViewModels/ExternalLabManagementViewModelTests.cs",
+      "line": 383
+    }
+  }
+]
