@@ -149,6 +149,28 @@ namespace Open_lab.Tests.Services
             unspecifiedRow!.VisitsCount.Should().Be(1);
         }
 
+        [Fact]
+        public async Task PatientCountByGender_WithInvalidDateRange_ShouldReturnZeroSnapshot_FailureGuard()
+        {
+            // Function: 9.1 — Patient Count by Gender
+            var male = new Patient { LabId = "INV01", FullName = "مريض", Gender = "ذكر" };
+            _db.Patients.Add(male);
+            await _db.SaveChangesAsync();
+            _db.Visits.Add(new Visit { PatientId = male.PatientId, VisitDate = DateTime.Today });
+            await _db.SaveChangesAsync();
+
+            var snapshot = await _statsService.GetSnapshotAsync(
+                DateTime.Today.AddDays(1),
+                DateTime.Today.AddDays(-1),
+                "الكل",
+                null);
+
+            snapshot.Summary.VisitCount.Should().Be(0);
+            snapshot.Summary.PatientCount.Should().Be(0);
+            snapshot.ByGender.Should().BeEmpty();
+            snapshot.ByReferral.Should().BeEmpty();
+        }
+
         // ===================================================================
         // 9.2 توزيع المرضى حسب الشهر — Patient Count by Month
         // ===================================================================
@@ -251,6 +273,14 @@ namespace Open_lab.Tests.Services
             may.VisitCount.Should().Be(1);
             may.TestCount.Should().Be(2);
             may.Revenue.Should().Be(125m);
+        }
+
+        [Fact]
+        public async Task PatientCountByMonth_WithInvalidYear_ShouldThrowArgumentOutOfRangeException_FailureGuard()
+        {
+            // Function: 9.2 — Patient Count by Month
+            Func<Task> act = async () => await _statsService.GetMonthlyAnalysisAsync(0);
+            await act.Should().ThrowAsync<ArgumentOutOfRangeException>();
         }
 
         // ===================================================================
@@ -386,6 +416,14 @@ namespace Open_lab.Tests.Services
             top[0].DemandCount.Should().Be(2);
         }
 
+        [Fact]
+        public async Task TestDemandAnalysis_WithInvalidDateRange_ShouldReturnEmptyList_FailureGuard()
+        {
+            // Function: 9.3 — Test Demand Analysis
+            var list = await _statsService.GetTop10TestsAsync(DateTime.Today.AddDays(1), DateTime.Today.AddDays(-1));
+            list.Should().BeEmpty();
+        }
+
         // ===================================================================
         // 9.4 عدد العينات سنوياً — Sample Count per Year
         // ===================================================================
@@ -437,7 +475,7 @@ namespace Open_lab.Tests.Services
         }
 
         [Fact]
-        public async Task SampleCountPerYear_WithZeroYearsBack_ShouldDefaultToFiveYears()
+        public async Task SampleCountPerYear_WithZeroYearsBack_ShouldDefaultToFiveYears_FailureGuard()
         {
             // Function: 9.4 — Sample Count per Year
             // Arrange — قيمة صفر يجب أن تُعالَج وترجع 5 سنوات
@@ -510,6 +548,31 @@ namespace Open_lab.Tests.Services
 
             // Assert
             rows.Should().BeInAscendingOrder(r => r.Year, "النتائج يجب ترتيبها تصاعدياً حسب السنة");
+        }
+
+        [Fact]
+        public async Task ReferralSourceAnalysis_WithInvalidDateRange_ShouldReturnZeroSnapshot_FailureGuard()
+        {
+            // Function: 9.5 — Referral Source Analysis
+            var referral = new Referral { Name = "R-INV" };
+            _db.Referrals.Add(referral);
+            await _db.SaveChangesAsync();
+
+            var patient = new Patient { LabId = "RINV01", FullName = "مريض", Gender = "ذكر" };
+            _db.Patients.Add(patient);
+            await _db.SaveChangesAsync();
+
+            _db.Visits.Add(new Visit { PatientId = patient.PatientId, VisitDate = DateTime.Today, ReferralId = referral.ReferralId });
+            await _db.SaveChangesAsync();
+
+            var snapshot = await _statsService.GetSnapshotAsync(
+                DateTime.Today.AddDays(1),
+                DateTime.Today.AddDays(-1),
+                "الكل",
+                referral.ReferralId);
+
+            snapshot.Summary.VisitCount.Should().Be(0);
+            snapshot.ByReferral.Should().BeEmpty();
         }
 
         // ===================================================================

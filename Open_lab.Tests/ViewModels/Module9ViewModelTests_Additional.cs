@@ -239,6 +239,21 @@ namespace Open_lab.Tests.ViewModels
                 "يجب استدعاء GetMonthlyAnalysisAsync عند تحميل البيانات");
         }
 
+        [Fact]
+        public async Task PatientCountByMonth_WhenMonthlyServiceThrows_ShouldSetErrorStatusMessage_Failure()
+        {
+            // Function: 9.2 — Patient Count by Month
+            _statsMock
+                .Setup(x => x.GetMonthlyAnalysisAsync(It.IsAny<int>()))
+                .ThrowsAsync(new Exception("فشل التحليل الشهري"));
+
+            _viewModel.LoadCommand.Execute(null);
+            await Task.Delay(200);
+
+            _viewModel.StatusMessage.Should().Contain("خطأ:");
+            _viewModel.StatusMessage.Should().Contain("فشل التحليل الشهري");
+        }
+
         // ===================================================================
         // 9.3 تحليل الطلب على التحاليل — Test Demand Analysis
         // ===================================================================
@@ -460,6 +475,22 @@ namespace Open_lab.Tests.ViewModels
                     It.IsAny<int?>()),
                 Times.AtLeastOnce,
                 "يجب استدعاء GetSnapshotAsync عند تحميل بيانات مصادر الإحالة");
+        }
+
+        [Fact]
+        public async Task ReferralSourceAnalysis_WhenSnapshotServiceThrows_ShouldSetErrorStatusMessage_Failure()
+        {
+            // Function: 9.5 — Referral Source Analysis
+            _statsMock
+                .Setup(x => x.GetSnapshotAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>(),
+                    It.IsAny<string?>(), It.IsAny<int?>()))
+                .ThrowsAsync(new InvalidOperationException("فشل تحميل مصادر الإحالة"));
+
+            _viewModel.LoadCommand.Execute(null);
+            await Task.Delay(200);
+
+            _viewModel.StatusMessage.Should().Contain("خطأ:");
+            _viewModel.StatusMessage.Should().Contain("فشل تحميل مصادر الإحالة");
         }
 
         // ===================================================================

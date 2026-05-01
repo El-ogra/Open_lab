@@ -29,6 +29,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task GetUserPerformanceAsync_Should_Count_Distinct_Verified_Tests_Per_User()
         {
+            // Function: 9.6 — User Productivity Report
             var user1 = new User { Username = "tech1" };
             var user2 = new User { Username = "tech2" };
             _db.Users.AddRange(user1, user2);
@@ -57,7 +58,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task GetUserPerformanceAsync_When_NoVerificationsInRange_Should_Return_Empty_FailureGuard()
         {
-            // Arrange
+            // Function: 9.6 — User Productivity Report
             var user = new User { Username = "tech-empty" };
             _db.Users.Add(user);
             await _db.SaveChangesAsync();
@@ -81,7 +82,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task GetUserPerformanceAsync_When_VerifierMissingFromUsers_Should_Label_As_Unknown_EdgeGuard()
         {
-            // Arrange
+            // Function: 9.6 — User Productivity Report
             _db.ResultValues.Add(new ResultValue
             {
                 VisitTestId = 7,
