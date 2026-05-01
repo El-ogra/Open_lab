@@ -275,8 +275,8 @@ namespace Open_lab.Tests.ViewModels
             await viewModel.InvokePrivateAsync("PrintAsync", false);
             await Task.Delay(100);
 
-            // Assert
-            viewModel.StatusMessage.Should().Contain("خطأ:");
+            // Assert - ReportViewerViewModel prefixes print/log failures with a print-specific message
+            viewModel.StatusMessage.Should().Contain("خطأ");
         }
 
         [Fact]

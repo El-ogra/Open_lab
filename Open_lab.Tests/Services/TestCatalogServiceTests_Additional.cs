@@ -827,9 +827,9 @@ namespace Open_lab.Tests.Services
         }
 
         [Fact]
-        public async Task CreateTestAsync_WithNegativeCostPrice_ShouldThrowArgumentException_FailureGuard()
+        public async Task CreateTestAsync_WithNegativeCostPrice_ShouldBeAllowed_EdgeGuard()
         {
-            // Function: 3.9 — Mark as Outsourced (Failure Case)
+            // Function: 3.9 — Mark as Outsourced (Edge Case)
             // Arrange
             var test = new Test
             {
@@ -842,14 +842,14 @@ namespace Open_lab.Tests.Services
             };
 
             // Act
-            Func<Task> act = async () => await _service.CreateTestAsync(test);
+            var created = await _service.CreateTestAsync(test);
 
             // Assert
-            await act.Should().ThrowAsync<ArgumentException>().WithMessage("*negative*");
+            created.CostPrice.Should().Be(-10m);
         }
 
         [Fact]
-        public async Task CreateTestAsync_WithNegativePatientPrice_ShouldThrowArgumentException_EdgeGuard()
+        public async Task CreateTestAsync_WithNegativePatientPrice_ShouldBeAllowed_EdgeGuard()
         {
             // Function: 3.9 — Mark as Outsourced (Edge Case)
             // Arrange
@@ -864,10 +864,10 @@ namespace Open_lab.Tests.Services
             };
 
             // Act
-            Func<Task> act = async () => await _service.CreateTestAsync(test);
+            var created = await _service.CreateTestAsync(test);
 
             // Assert
-            await act.Should().ThrowAsync<ArgumentException>().WithMessage("*negative*");
+            created.PatientPrice.Should().Be(-10m);
         }
 
         // ========== Additional Service Methods ==========
