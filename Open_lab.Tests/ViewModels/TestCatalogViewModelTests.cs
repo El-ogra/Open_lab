@@ -132,6 +132,42 @@ namespace Open_lab.Tests.ViewModels
         }
 
         [Fact]
+        public async Task SaveAsync_With_OutsourceData_When_ServiceThrows_Should_Show_Error_FailureGuard()
+        {
+            // Function: 3.9 — Outsourced (Failure Case)
+            // Arrange
+            _viewModel.Code = "OUT_FAIL";
+            _viewModel.IsSendOut = true;
+            _testCatalogServiceMock.Setup(x => x.CreateTestAsync(It.IsAny<Test>()))
+                .ThrowsAsync(new Exception("outsource-save-failed"));
+
+            // Act
+            await _viewModel.InvokePrivateAsync("SaveAsync");
+
+            // Assert
+            _viewModel.StatusMessage.Should().Contain("خطأ:");
+            _viewModel.StatusMessage.Should().Contain("outsource-save-failed");
+        }
+
+        [Fact]
+        public async Task SaveAsync_With_OutsourceData_And_InvalidPricing_Should_Show_Error_EdgeGuard()
+        {
+            // Function: 3.9 — Outsourced (Edge Case)
+            // Arrange
+            _viewModel.Code = "OUT_EDGE";
+            _viewModel.IsSendOut = true;
+            _viewModel.CostPrice = -50m; // Invalid
+            _testCatalogServiceMock.Setup(x => x.CreateTestAsync(It.IsAny<Test>()))
+                .ThrowsAsync(new ArgumentException("cost cannot be negative"));
+
+            // Act
+            await _viewModel.InvokePrivateAsync("SaveAsync");
+
+            // Assert
+            _viewModel.StatusMessage.Should().Contain("خطأ:");
+        }
+
+        [Fact]
         public async Task DeleteAsync_With_Null_SelectedTest_Should_Do_Nothing()
         {
             _viewModel.SelectedTest = null;

@@ -92,6 +92,21 @@ namespace Open_lab.Tests.ViewModels
             vm.StatusMessage.Should().Contain("خطأ: age range invalid");
         }
 
+        [Fact]
+        public async Task ReferenceRanges_Load_WhenTestHasNoRanges_ShouldBeEmpty_EdgeGuard()
+        {
+            // Function: 3.3 — Set Reference Values (Edge Case)
+            var vm = new ReferenceRangesViewModel(_catalogMock.Object);
+            vm.SelectedTest = new Test { TestId = 2 };
+            
+            _catalogMock.Setup(x => x.GetReferenceRangesAsync(2))
+                .ReturnsAsync(new List<TestReferenceRange>());
+
+            await vm.InvokePrivateAsync("LoadRangesAsync");
+
+            vm.Ranges.Should().BeEmpty();
+        }
+
         // ────────────────────────────────────────────────────────────────────────
         // 3.4 / 3.6 — Test Comments (TestCommentsViewModel)
         // ────────────────────────────────────────────────────────────────────────
@@ -114,6 +129,40 @@ namespace Open_lab.Tests.ViewModels
             _catalogMock.Verify(x => x.CreateTestCommentAsync(It.Is<TestComment>(c => 
                 c.TestId == 5 && c.CommentText == "New Comment" && c.LowComment == "Low Msg" && c.HighComment == "High Msg")), Times.Once);
             vm.StatusMessage.Should().Contain("تم حفظ");
+        }
+
+        [Fact]
+        public async Task TestComments_Save_When_ServiceThrows_Should_Show_Error_FailureGuard()
+        {
+            // Function: 3.6 — Add Test Comments (Failure Case)
+            var vm = new TestCommentsViewModel(_catalogMock.Object);
+            vm.SelectedTest = new Test { TestId = 1 };
+            vm.CommentText = "Fail Comment";
+
+            _catalogMock.Setup(x => x.CreateTestCommentAsync(It.IsAny<TestComment>()))
+                .ThrowsAsync(new Exception("comment-save-failed"));
+
+            await vm.InvokePrivateAsync("SaveAsync");
+
+            vm.StatusMessage.Should().Contain("خطأ:");
+            vm.StatusMessage.Should().Contain("comment-save-failed");
+        }
+
+        [Fact]
+        public async Task TestComments_Save_WithWhitespaceText_Should_Be_SentToService_EdgeGuard()
+        {
+            // Function: 3.6 — Add Test Comments (Edge Case)
+            // The VM doesn't trim, but the Service does. We verify it's sent to the service.
+            var vm = new TestCommentsViewModel(_catalogMock.Object);
+            vm.SelectedTest = new Test { TestId = 1 };
+            vm.CommentText = "  Whitespace  ";
+
+            _catalogMock.Setup(x => x.CreateTestCommentAsync(It.IsAny<TestComment>()))
+                .ReturnsAsync((TestComment c) => { c.CommentId = 10; return c; });
+
+            await vm.InvokePrivateAsync("SaveAsync");
+
+            _catalogMock.Verify(x => x.CreateTestCommentAsync(It.Is<TestComment>(c => c.CommentText == "  Whitespace  ")), Times.Once);
         }
 
         [Fact]

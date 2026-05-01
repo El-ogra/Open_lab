@@ -54,6 +54,40 @@ namespace Open_lab.Tests.ViewModels
         }
 
         [Fact]
+        public async Task SaveListAsync_When_ServiceThrows_Should_Show_Error_FailureGuard()
+        {
+            // Function: 3.7 — Create Price List (Failure Case)
+            // Arrange
+            _viewModel.ListName = "Fail List";
+            _testCatalogServiceMock.Setup(x => x.CreatePriceListAsync(It.IsAny<PriceList>()))
+                .ThrowsAsync(new Exception("list-create-failed"));
+
+            // Act
+            await _viewModel.InvokePrivateAsync("SaveListAsync");
+
+            // Assert
+            _viewModel.StatusMessage.Should().Contain("خطأ:");
+            _viewModel.StatusMessage.Should().Contain("list-create-failed");
+        }
+
+        [Fact]
+        public async Task SaveListAsync_When_DuplicateName_Should_Show_Error_EdgeGuard()
+        {
+            // Function: 3.7 — Create Price List (Edge Case)
+            // Arrange
+            _viewModel.ListName = "Duplicate";
+            _testCatalogServiceMock.Setup(x => x.CreatePriceListAsync(It.IsAny<PriceList>()))
+                .ThrowsAsync(new InvalidOperationException("name exists"));
+
+            // Act
+            await _viewModel.InvokePrivateAsync("SaveListAsync");
+
+            // Assert
+            _viewModel.StatusMessage.Should().Contain("خطأ:");
+            _viewModel.StatusMessage.Should().Contain("name exists");
+        }
+
+        [Fact]
         public async Task AddItemAsync_Should_Add_Test_To_PriceList()
         {
             // Function: 3.8 — Update Prices - Logic Guard
@@ -74,6 +108,45 @@ namespace Open_lab.Tests.ViewModels
             )), Times.Once);
             
             _viewModel.Items.Should().HaveCount(1);
+        }
+
+        [Fact]
+        public async Task AddItemAsync_When_ServiceThrows_Should_Show_Error_FailureGuard()
+        {
+            // Function: 3.8 — Update Prices (Failure Case)
+            // Arrange
+            _viewModel.SelectedPriceList = new PriceList { PriceListId = 1 };
+            _viewModel.SelectedTest = new Test { TestId = 1 };
+            _testCatalogServiceMock.Setup(x => x.AddPriceListItemAsync(It.IsAny<PriceListItem>()))
+                .ThrowsAsync(new Exception("add-item-failed"));
+
+            // Act
+            await _viewModel.InvokePrivateAsync("AddItemAsync");
+
+            // Assert
+            _viewModel.StatusMessage.Should().Contain("خطأ:");
+            _viewModel.StatusMessage.Should().Contain("add-item-failed");
+        }
+
+        [Fact]
+        public async Task AddItemAsync_WithNegativePrice_Should_Fallback_To_TestPrice_EdgeGuard()
+        {
+            // Function: 3.8 — Update Prices (Edge Case)
+            // Arrange
+            _viewModel.SelectedPriceList = new PriceList { PriceListId = 1 };
+            _viewModel.SelectedTest = new Test { TestId = 1, Price = 100m };
+            _viewModel.Price = -10m; // Negative
+
+            _testCatalogServiceMock.Setup(x => x.AddPriceListItemAsync(It.IsAny<PriceListItem>()))
+                .ReturnsAsync(new PriceListItem { PriceListItemId = 10, Price = 100m });
+
+            // Act
+            await _viewModel.InvokePrivateAsync("AddItemAsync");
+
+            // Assert
+            // The VM logic (line 261) says: Price > 0 ? Price : SelectedTest.Price
+            // So if Price is -10, it should use 100m.
+            _testCatalogServiceMock.Verify(x => x.AddPriceListItemAsync(It.Is<PriceListItem>(i => i.Price == 100m)), Times.Once);
         }
 
         [Fact]

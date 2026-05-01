@@ -133,6 +133,42 @@ namespace Open_lab.Tests.ViewModels
             }
 
             [Fact]
+            public async Task SaveAsync_When_ServiceThrows_Should_Show_Error_FailureGuard()
+            {
+                // Function: 3.1 — Add New Test (Failure: service error)
+                // Arrange
+                _viewModel.Code = "ERR";
+                _viewModel.NameReport = "Error Test";
+                _testCatalogServiceMock.Setup(x => x.CreateTestAsync(It.IsAny<Test>()))
+                    .ThrowsAsync(new Exception("db-error"));
+
+                // Act
+                await _viewModel.InvokePrivateAsync("SaveAsync");
+
+                // Assert
+                _viewModel.StatusMessage.Should().Contain("خطأ:");
+                _viewModel.StatusMessage.Should().Contain("db-error");
+            }
+
+            [Fact]
+            public async Task SaveAsync_With_DuplicateCode_Should_Show_Error_EdgeGuard()
+            {
+                // Function: 3.1 — Add New Test (Edge: duplicate code)
+                // Arrange
+                _viewModel.Code = "DUP";
+                _viewModel.NameReport = "Duplicate Test";
+                _testCatalogServiceMock.Setup(x => x.CreateTestAsync(It.IsAny<Test>()))
+                    .ThrowsAsync(new InvalidOperationException("code exists"));
+
+                // Act
+                await _viewModel.InvokePrivateAsync("SaveAsync");
+
+                // Assert
+                _viewModel.StatusMessage.Should().Contain("خطأ:");
+                _viewModel.StatusMessage.Should().Contain("code exists");
+            }
+
+            [Fact]
             public async Task SaveAsync_With_IsSendOut_True_Should_Include_Pricing_Fields_BR_ACC_007()
             {
                 // Function: 3.9 — Mark as Outsourced (BR-ACC-007 Logic Guard)
@@ -518,6 +554,23 @@ namespace Open_lab.Tests.ViewModels
                 _testCatalogServiceMock.Verify(x => x.CreateCustomGroupAsync(It.Is<CustomGroup>(g =>
                     g.Name == "Free Screening" && g.Price == 0m
                 )), Times.Once);
+            }
+
+            [Fact]
+            public async Task SaveGroupAsync_When_ServiceThrows_Should_Show_Error_FailureGuard()
+            {
+                // Function: 3.5 — Create Custom Group (Failure: service error)
+                // Arrange
+                _viewModel.GroupName = "Error Group";
+                _testCatalogServiceMock.Setup(x => x.CreateCustomGroupAsync(It.IsAny<CustomGroup>()))
+                    .ThrowsAsync(new Exception("group-error"));
+
+                // Act
+                await _viewModel.InvokePrivateAsync("SaveGroupAsync");
+
+                // Assert
+                _viewModel.StatusMessage.Should().Contain("خطأ:");
+                _viewModel.StatusMessage.Should().Contain("group-error");
             }
 
             [Fact]

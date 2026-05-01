@@ -57,6 +57,40 @@ namespace Open_lab.Tests.ViewModels
         }
 
         [Fact]
+        public async Task SaveAsync_When_ServiceThrows_Should_Set_ErrorStatus_FailureGuard()
+        {
+            // Function: 3.4 — Low/High Comments (Failure Case)
+            // Arrange
+            _viewModel.SelectedTest = new Test { TestId = 1 };
+            _viewModel.CommentText = "New Comment";
+            _testCatalogServiceMock.Setup(x => x.CreateTestCommentAsync(It.IsAny<TestComment>()))
+                .ThrowsAsync(new Exception("save-comment-failed"));
+
+            // Act
+            await _viewModel.InvokePrivateAsync("SaveAsync");
+
+            // Assert
+            _viewModel.StatusMessage.Should().Contain("خطأ:");
+            _viewModel.StatusMessage.Should().Contain("save-comment-failed");
+        }
+
+        [Fact]
+        public async Task LoadCommentsAsync_When_NoComments_Should_Be_Empty_EdgeGuard()
+        {
+            // Function: 3.4 — Low/High Comments (Edge Case)
+            // Arrange
+            _viewModel.SelectedTest = new Test { TestId = 10 };
+            _testCatalogServiceMock.Setup(x => x.GetTestCommentsAsync(10))
+                .ReturnsAsync(new List<TestComment>());
+
+            // Act
+            await _viewModel.InvokePrivateAsync("LoadCommentsAsync");
+
+            // Assert
+            _viewModel.Comments.Should().BeEmpty();
+        }
+
+        [Fact]
         public void SelectedComment_Setter_Should_Load_Low_High_Comments()
         {
             // Arrange

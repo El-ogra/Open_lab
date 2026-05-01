@@ -826,6 +826,50 @@ namespace Open_lab.Tests.Services
             created.PatientPrice.Should().BeNull();
         }
 
+        [Fact]
+        public async Task CreateTestAsync_WithNegativeCostPrice_ShouldThrowArgumentException_FailureGuard()
+        {
+            // Function: 3.9 — Mark as Outsourced (Failure Case)
+            // Arrange
+            var test = new Test
+            {
+                Code = "NEGCOST",
+                NameReport = "Neg Cost",
+                NameReceipt = "Neg",
+                Price = 50m,
+                IsSendOut = true,
+                CostPrice = -10m
+            };
+
+            // Act
+            Func<Task> act = async () => await _service.CreateTestAsync(test);
+
+            // Assert
+            await act.Should().ThrowAsync<ArgumentException>().WithMessage("*negative*");
+        }
+
+        [Fact]
+        public async Task CreateTestAsync_WithNegativePatientPrice_ShouldThrowArgumentException_EdgeGuard()
+        {
+            // Function: 3.9 — Mark as Outsourced (Edge Case)
+            // Arrange
+            var test = new Test
+            {
+                Code = "NEGPAT",
+                NameReport = "Neg Pat",
+                NameReceipt = "Neg",
+                Price = 50m,
+                IsSendOut = true,
+                PatientPrice = -10m
+            };
+
+            // Act
+            Func<Task> act = async () => await _service.CreateTestAsync(test);
+
+            // Assert
+            await act.Should().ThrowAsync<ArgumentException>().WithMessage("*negative*");
+        }
+
         // ========== Additional Service Methods ==========
         [Fact]
         public async Task GetAllTestsAsync_ShouldReturnOrderedByNameReport()
