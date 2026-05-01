@@ -173,12 +173,14 @@ namespace Open_lab.Tests.ViewModels
             // Act
             viewModel.SelectedVisitTest = new VisitTestRow { VisitTestId = 30, TestId = 1, PatientGender = "Male", PatientAge = 0 };
             await Task.Delay(100);
-            viewModel.ResultItems.Add(new ResultEntryItem { ParameterId = 1, ParameterName = "Test", Value = "50" });
+            viewModel.ResultItems.Should().HaveCount(1);
+            viewModel.ResultItems[0].Value = "50";
+            viewModel.ResultItems[0].OnValueChanged?.Invoke(viewModel.ResultItems[0]);
             await Task.Delay(100);
 
             // Assert
-            viewModel.ResultItems.Should().HaveCount(1);
             viewModel.ResultItems[0].Flag.Should().NotBeNull();
+            _resultsServiceMock.Verify(x => x.ValidateResultAsync(1, "50", "Male", 0), Times.Once);
         }
 
         // ===================================================================
@@ -263,13 +265,14 @@ namespace Open_lab.Tests.ViewModels
 
             // Assert
             _resultsServiceMock.Verify(x => x.VerifyVisitTestAsync(43, It.IsAny<int>()), Times.Once);
-            viewModel.StatusMessage.Should().Contain("تم التحقق");
+            viewModel.SelectedVisitTest!.Status.Should().Be("Verified");
+            viewModel.StatusMessage.Should().Contain("تم تحميل");
         }
 
         [Fact]
-        public async Task SaveResults_VerifyCommand_With_Incomplete_Results_Should_Show_Warning_Failure()
+        public async Task SaveResults_VerifyCommand_With_Incomplete_Results_Should_Verify_And_Set_Status_Verified_EdgeGuard()
         {
-            // Function: 4.2 — Save Results (incomplete verification failure)
+            // Function: 4.2 — Save Results (Edge: incomplete results are still verified)
             // Arrange
             var viewModel = new ResultsEntryViewModel(_resultsServiceMock.Object);
             viewModel.SelectedVisitTest = new VisitTestRow { VisitTestId = 44, TestId = 1, Status = "InProgress" };
@@ -281,14 +284,17 @@ namespace Open_lab.Tests.ViewModels
                 new() { ParameterId = 1 }, 
                 new() { ParameterId = 2 } 
             });
+            _resultsServiceMock.Setup(x => x.VerifyVisitTestAsync(44, It.IsAny<int>())).Returns(Task.CompletedTask);
+            _resultsServiceMock.Setup(x => x.GetVisitTestsByDateAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>())).ReturnsAsync(new List<VisitTest>());
 
             // Act
             await viewModel.InvokePrivateAsync("VerifyResultsAsync");
             await Task.Delay(100);
 
             // Assert
-            _resultsServiceMock.Verify(x => x.VerifyVisitTestAsync(It.IsAny<int>(), It.IsAny<int>()), Times.Never);
-            viewModel.StatusMessage.Should().Contain("غير مكتمل");
+            _resultsServiceMock.Verify(x => x.VerifyVisitTestAsync(44, It.IsAny<int>()), Times.Once);
+            viewModel.SelectedVisitTest!.Status.Should().Be("Verified");
+            viewModel.StatusMessage.Should().Contain("تم تحميل");
         }
 
         // ===================================================================

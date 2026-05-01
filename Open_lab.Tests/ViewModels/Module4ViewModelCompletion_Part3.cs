@@ -276,7 +276,8 @@ namespace Open_lab.Tests.ViewModels
             await Task.Delay(100);
 
             // Assert
-            viewModel.StatusMessage.Should().Contain("خطأ:");
+            viewModel.StatusMessage.Should().Contain("خطأ طباعة:");
+            viewModel.StatusMessage.Should().Contain("Audit log failed");
         }
 
         [Fact]

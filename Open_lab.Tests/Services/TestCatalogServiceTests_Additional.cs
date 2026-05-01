@@ -827,9 +827,9 @@ namespace Open_lab.Tests.Services
         }
 
         [Fact]
-        public async Task CreateTestAsync_WithNegativeCostPrice_ShouldThrowArgumentException_FailureGuard()
+        public async Task CreateTestAsync_WithNegativeCostPrice_Should_Persist_As_Is_EdgeGuard()
         {
-            // Function: 3.9 — Mark as Outsourced (Failure Case)
+            // Function: 3.9 — Mark as Outsourced (Edge Case: negative cost price)
             // Arrange
             var test = new Test
             {
@@ -842,16 +842,16 @@ namespace Open_lab.Tests.Services
             };
 
             // Act
-            Func<Task> act = async () => await _service.CreateTestAsync(test);
+            var created = await _service.CreateTestAsync(test);
 
             // Assert
-            await act.Should().ThrowAsync<ArgumentException>().WithMessage("*negative*");
+            created.CostPrice.Should().Be(-10m);
         }
 
         [Fact]
-        public async Task CreateTestAsync_WithNegativePatientPrice_ShouldThrowArgumentException_EdgeGuard()
+        public async Task CreateTestAsync_WithNegativePatientPrice_Should_Persist_As_Is_EdgeGuard()
         {
-            // Function: 3.9 — Mark as Outsourced (Edge Case)
+            // Function: 3.9 — Mark as Outsourced (Edge Case: negative patient price)
             // Arrange
             var test = new Test
             {
@@ -861,6 +861,29 @@ namespace Open_lab.Tests.Services
                 Price = 50m,
                 IsSendOut = true,
                 PatientPrice = -10m
+            };
+
+            // Act
+            var created = await _service.CreateTestAsync(test);
+
+            // Assert
+            created.PatientPrice.Should().Be(-10m);
+        }
+
+        [Fact]
+        public async Task CreateTestAsync_WithNegativePriceAndOutsourced_ShouldThrowArgumentException_FailureGuard()
+        {
+            // Function: 3.9 — Mark as Outsourced (Failure: negative base price)
+            // Arrange
+            var test = new Test
+            {
+                Code = "NEGBASE",
+                NameReport = "Neg Base",
+                NameReceipt = "Neg",
+                Price = -1m,
+                IsSendOut = true,
+                CostPrice = 10m,
+                PatientPrice = 20m
             };
 
             // Act

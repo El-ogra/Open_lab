@@ -222,7 +222,7 @@ namespace Open_lab.Tests.ViewModels
             viewModel.LoadHistoryCommand.Execute(null);
             await Task.Delay(100);
 
-            viewModel.StatusMessage.Should().Contain("اختيار");
+            viewModel.StatusMessage.Should().Contain("اختر التحليل");
         }
 
         [Fact]
@@ -265,6 +265,7 @@ namespace Open_lab.Tests.ViewModels
             viewModel.LoadPatientCommand.Execute(null);
             await Task.Delay(100);
             viewModel.SelectedTestId = 60;
+            viewModel.HistoryCount = 5;
             viewModel.LoadHistoryCommand.Execute(null);
             await Task.Delay(100);
 

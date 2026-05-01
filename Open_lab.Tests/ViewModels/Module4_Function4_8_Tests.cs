@@ -193,7 +193,9 @@ namespace Open_lab.Tests.ViewModels
             await viewModel.InvokePrivateAsync("LoadAsync");
             await Task.Delay(100);
 
-            viewModel.StatusMessage.Should().Contain("3");
+            viewModel.PatientName.Should().Be("Multi");
+            viewModel.StatusMessage.Should().Be("تم تحميل بيانات المريض.");
+            viewModel.PrintBlankCommand.CanExecute(null).Should().BeTrue();
         }
 
         [Fact]
