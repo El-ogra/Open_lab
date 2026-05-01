@@ -1,0 +1,239 @@
+[
+  {
+    "fid": "3.1",
+    "Service_success": {
+      "method": "Catalog_Gap_Functions_Should_Work",
+      "file": "/workspace/Open_lab.Tests/Services/FunctionCoverageGapTests.cs",
+      "line": 84
+    },
+    "Service_failure": {
+      "method": "CreateTestAsync_WithEmptyCode_ShouldThrowArgumentException",
+      "file": "/workspace/Open_lab.Tests/Services/TestCatalogServiceTests_Additional.cs",
+      "line": 64
+    },
+    "Service_edge": {
+      "method": "CreateTestAsync_WithNullTest_ShouldThrowArgumentNullException",
+      "file": "/workspace/Open_lab.Tests/Services/TestCatalogServiceTests_Additional.cs",
+      "line": 53
+    },
+    "ViewModel_success": {
+      "method": "TestCatalog_NewCommand_ShouldResetForm_SuccessGuard",
+      "file": "/workspace/Open_lab.Tests/ViewModels/Module3ViewModelCompletionTests.cs",
+      "line": 40
+    },
+    "ViewModel_failure": null,
+    "ViewModel_edge": null
+  },
+  {
+    "fid": "3.2",
+    "Service_success": {
+      "method": "UpdateTestAsync_WithValidData_ShouldUpdateAllFields",
+      "file": "/workspace/Open_lab.Tests/Services/TestCatalogServiceTests_Additional.cs",
+      "line": 123
+    },
+    "Service_failure": {
+      "method": "UpdateTestAsync_WithNonExistentTest_ShouldThrowInvalidOperationException",
+      "file": "/workspace/Open_lab.Tests/Services/TestCatalogServiceTests_Additional.cs",
+      "line": 165
+    },
+    "Service_edge": {
+      "method": "UpdateTestAsync_WithNullTest_ShouldThrowArgumentNullException",
+      "file": "/workspace/Open_lab.Tests/Services/TestCatalogServiceTests_Additional.cs",
+      "line": 154
+    },
+    "ViewModel_success": {
+      "method": "UpdateTestAsync_Should_Modify_SelectedTest_Fields_SuccessGuard",
+      "file": "/workspace/Open_lab.Tests/ViewModels/Module3ViewModelTests_Additional.cs",
+      "line": 235
+    },
+    "ViewModel_failure": {
+      "method": "UpdateTestAsync_When_ServiceThrows_Should_Show_Error_FailureGuard",
+      "file": "/workspace/Open_lab.Tests/ViewModels/Module3ViewModelTests_Additional.cs",
+      "line": 261
+    },
+    "ViewModel_edge": {
+      "method": "UpdateTestAsync_When_NoSelection_Should_Return_EdgeGuard",
+      "file": "/workspace/Open_lab.Tests/ViewModels/Module3ViewModelTests_Additional.cs",
+      "line": 279
+    }
+  },
+  {
+    "fid": "3.3",
+    "Service_success": {
+      "method": "SaveResultAsync_With_ReferenceRange_Should_Classify_Correctly_LogicGuard",
+      "file": "/workspace/Open_lab.Tests/Services/ResultsServiceTests.cs",
+      "line": 386
+    },
+    "Service_failure": {
+      "method": "CreateReferenceRangeAsync_WithInvalidAgeRange_ShouldThrowArgumentException",
+      "file": "/workspace/Open_lab.Tests/Services/TestCatalogServiceTests_Additional.cs",
+      "line": 248
+    },
+    "Service_edge": {
+      "method": "CreateReferenceRangeAsync_WithOnlyNormalText_ShouldSucceed_EdgeGuard",
+      "file": "/workspace/Open_lab.Tests/Services/TestCatalogServiceTests_Additional.cs",
+      "line": 207
+    },
+    "ViewModel_success": {
+      "method": "SaveAsync_NewRange_Should_Call_CreateRange",
+      "file": "/workspace/Open_lab.Tests/ViewModels/ReferenceRangesViewModelTests.cs",
+      "line": 29
+    },
+    "ViewModel_failure": {
+      "method": "ReferenceRanges_Save_WithInvalidBoundaries_ShouldShowError_FailureGuard",
+      "file": "/workspace/Open_lab.Tests/ViewModels/Module3ViewModelCompletionTests.cs",
+      "line": 79
+    },
+    "ViewModel_edge": null
+  },
+  {
+    "fid": "3.4",
+    "Service_success": {
+      "method": "CreateTestCommentAsync_ShouldTrimWhitespace",
+      "file": "/workspace/Open_lab.Tests/Services/TestCatalogServiceTests_Additional.cs",
+      "line": 426
+    },
+    "Service_failure": {
+      "method": "CreateTestCommentAsync_WithEmptyText_ShouldThrowArgumentException",
+      "file": "/workspace/Open_lab.Tests/Services/TestCatalogServiceTests_Additional.cs",
+      "line": 390
+    },
+    "Service_edge": {
+      "method": "CreateTestCommentAsync_WithNullText_ShouldThrowArgumentException",
+      "file": "/workspace/Open_lab.Tests/Services/TestCatalogServiceTests_Additional.cs",
+      "line": 408
+    },
+    "ViewModel_success": {
+      "method": "SaveAsync_Should_Persist_Low_High_Comments_LogicGuard",
+      "file": "/workspace/Open_lab.Tests/ViewModels/TestCommentsViewModelTests.cs",
+      "line": 29
+    },
+    "ViewModel_failure": null,
+    "ViewModel_edge": null
+  },
+  {
+    "fid": "3.5",
+    "Service_success": {
+      "method": "CreateTestGroupAsync_ShouldCreateGroup",
+      "file": "/workspace/Open_lab.Tests/Services/TestCatalogServiceTests_Additional.cs",
+      "line": 912
+    },
+    "Service_failure": {
+      "method": "CreateCustomGroupAsync_WithEmptyName_ShouldThrowArgumentException",
+      "file": "/workspace/Open_lab.Tests/Services/TestCatalogServiceTests_Additional.cs",
+      "line": 477
+    },
+    "Service_edge": {
+      "method": "CreateCustomGroupAsync_WithNullName_ShouldThrowArgumentException",
+      "file": "/workspace/Open_lab.Tests/Services/TestCatalogServiceTests_Additional.cs",
+      "line": 491
+    },
+    "ViewModel_success": {
+      "method": "SaveGroupAsync_Should_Create_Group",
+      "file": "/workspace/Open_lab.Tests/ViewModels/CustomGroupsViewModelTests.cs",
+      "line": 29
+    },
+    "ViewModel_failure": null,
+    "ViewModel_edge": {
+      "method": "SaveGroupAsync_With_Zero_Price_Should_Allow_EdgeGuard",
+      "file": "/workspace/Open_lab.Tests/ViewModels/Module3ViewModelTests_Additional.cs",
+      "line": 504
+    }
+  },
+  {
+    "fid": "3.6",
+    "Service_success": {
+      "method": "GetTestComments_ForSpecificTest_ShouldReturnOnlyRelevant_SuccessGuard",
+      "file": "/workspace/Open_lab.Tests/Services/Module3ServiceCompletionTests.cs",
+      "line": 177
+    },
+    "Service_failure": {
+      "method": "UpdateTestComment_WithEmptyText_ShouldThrow_FailureGuard",
+      "file": "/workspace/Open_lab.Tests/Services/Module3ServiceCompletionTests.cs",
+      "line": 213
+    },
+    "Service_edge": {
+      "method": "DeleteTestComment_WhenNotExists_ShouldNotThrow_EdgeGuard",
+      "file": "/workspace/Open_lab.Tests/Services/Module3ServiceCompletionTests.cs",
+      "line": 231
+    },
+    "ViewModel_success": {
+      "method": "TestComments_Save_WithValidComment_ShouldCallService_SuccessGuard",
+      "file": "/workspace/Open_lab.Tests/ViewModels/Module3ViewModelCompletionTests.cs",
+      "line": 100
+    },
+    "ViewModel_failure": null,
+    "ViewModel_edge": null
+  },
+  {
+    "fid": "3.7",
+    "Service_success": {
+      "method": "UpdatePriceListAsync_ShouldUpdateAllFields",
+      "file": "/workspace/Open_lab.Tests/Services/TestCatalogServiceTests_Additional.cs",
+      "line": 584
+    },
+    "Service_failure": {
+      "method": "CreatePriceListAsync_WithEmptyName_ShouldThrowArgumentException",
+      "file": "/workspace/Open_lab.Tests/Services/TestCatalogServiceTests_Additional.cs",
+      "line": 541
+    },
+    "Service_edge": {
+      "method": "CreatePriceListAsync_WithNullName_ShouldThrowArgumentException",
+      "file": "/workspace/Open_lab.Tests/Services/TestCatalogServiceTests_Additional.cs",
+      "line": 555
+    },
+    "ViewModel_success": {
+      "method": "SaveListAsync_Should_Create_PriceList",
+      "file": "/workspace/Open_lab.Tests/ViewModels/PriceListsViewModelTests.cs",
+      "line": 36
+    },
+    "ViewModel_failure": null,
+    "ViewModel_edge": null
+  },
+  {
+    "fid": "3.8",
+    "Service_success": {
+      "method": "UpdatePriceListItemAsync_ShouldUpdatePrice",
+      "file": "/workspace/Open_lab.Tests/Services/TestCatalogServiceTests_Additional.cs",
+      "line": 671
+    },
+    "Service_failure": {
+      "method": "AddPriceListItemAsync_WithNegativePrice_ShouldThrowArgumentException",
+      "file": "/workspace/Open_lab.Tests/Services/TestCatalogServiceTests_Additional.cs",
+      "line": 628
+    },
+    "Service_edge": {
+      "method": "DeletePriceListItemAsync_WhenNotFound_ShouldNotThrow_EdgeGuard",
+      "file": "/workspace/Open_lab.Tests/Services/TestCatalogServiceTests_Additional.cs",
+      "line": 742
+    },
+    "ViewModel_success": {
+      "method": "AddItemAsync_Should_Add_Test_To_PriceList",
+      "file": "/workspace/Open_lab.Tests/ViewModels/PriceListsViewModelTests.cs",
+      "line": 57
+    },
+    "ViewModel_failure": null,
+    "ViewModel_edge": null
+  },
+  {
+    "fid": "3.9",
+    "Service_success": {
+      "method": "CreateTestAsync_WithOutsourceFlags_ShouldPersist",
+      "file": "/workspace/Open_lab.Tests/Services/TestCatalogServiceTests_Additional.cs",
+      "line": 754
+    },
+    "Service_failure": null,
+    "Service_edge": {
+      "method": "CreateTestAsync_WithNullCostPrice_ShouldBeAllowed_EdgeGuard",
+      "file": "/workspace/Open_lab.Tests/Services/TestCatalogServiceTests_Additional.cs",
+      "line": 784
+    },
+    "ViewModel_success": {
+      "method": "SaveAsync_With_OutsourceData_Should_Persist_Pricing_LogicGuard",
+      "file": "/workspace/Open_lab.Tests/ViewModels/TestCatalogViewModelTests.cs",
+      "line": 109
+    },
+    "ViewModel_failure": null,
+    "ViewModel_edge": null
+  }
+]
