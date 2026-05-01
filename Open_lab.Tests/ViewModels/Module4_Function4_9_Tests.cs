@@ -75,10 +75,8 @@ namespace Open_lab.Tests.ViewModels
             var viewModel = new CompareWithHistoryViewModel(_compareServiceMock.Object, _patientServiceMock.Object, _catalogServiceMock.Object);
 
             viewModel.LabId = "";
-            viewModel.LoadPatientCommand.Execute(null);
-            await Task.Delay(100);
-
-            viewModel.StatusMessage.Should().Contain("يرجى إدخال");
+            viewModel.LoadPatientCommand.CanExecute(null).Should().BeFalse();
+            viewModel.StatusMessage.Should().BeEmpty();
         }
 
         [Fact]
@@ -99,6 +97,7 @@ namespace Open_lab.Tests.ViewModels
             viewModel.LoadPatientCommand.Execute(null);
             await Task.Delay(100);
             viewModel.SelectedTestId = 10;
+            viewModel.HistoryCount = 5;
             viewModel.LoadHistoryCommand.Execute(null);
             await Task.Delay(100);
 
@@ -120,6 +119,7 @@ namespace Open_lab.Tests.ViewModels
             viewModel.LoadPatientCommand.Execute(null);
             await Task.Delay(100);
             viewModel.SelectedTestId = 20;
+            viewModel.HistoryCount = 5;
             viewModel.LoadHistoryCommand.Execute(null);
             await Task.Delay(100);
 
@@ -141,6 +141,7 @@ namespace Open_lab.Tests.ViewModels
             viewModel.LoadPatientCommand.Execute(null);
             await Task.Delay(100);
             viewModel.SelectedTestId = 30;
+            viewModel.HistoryCount = 5;
             viewModel.LoadHistoryCommand.Execute(null);
             await Task.Delay(100);
 
@@ -166,6 +167,7 @@ namespace Open_lab.Tests.ViewModels
             viewModel.LoadPatientCommand.Execute(null);
             await Task.Delay(100);
             viewModel.SelectedTestId = 40;
+            viewModel.HistoryCount = 5;
             viewModel.LoadHistoryCommand.Execute(null);
             await Task.Delay(100);
 
