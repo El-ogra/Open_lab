@@ -115,7 +115,7 @@ namespace Open_lab.Tests.Services
         }
 
         [Fact]
-        public async Task GetUserActivityLog_ShouldRespectCountLimit()
+        public async Task GetUserActivityLog_WithCountLimit_ShouldRespectLimit()
         {
             // Function: 10.6 — View User Activity Log (edge: count limit respected)
             // Arrange
@@ -191,3 +191,4 @@ namespace Open_lab.Tests.Services
         }
     }
 }
+

@@ -449,7 +449,7 @@ namespace Open_lab.Tests.ViewModels
         }
 
         [Fact]
-        public async Task ReloadCommand_ShouldLoadUsersAndRoles()
+        public async Task ReloadCommand_WhenInvoked_ShouldLoadUsersAndRoles()
         {
             // Function: 10.1 — Create User (edge: reload list)
             // Arrange
@@ -472,3 +472,4 @@ namespace Open_lab.Tests.ViewModels
         public void Dispose() => AppSessionTestHelper.Reset();
     }
 }
+

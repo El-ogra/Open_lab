@@ -74,7 +74,7 @@ namespace Open_lab.Tests.Services
         }
 
         [Fact]
-        public async Task RecordAttendance_ShouldPersistLogInDatabase()
+        public async Task RecordAttendance_WithValidUser_ShouldPersistLogInDatabase()
         {
             // Function: 10.4 — Record Attendance (persistence check)
             // Arrange
@@ -254,3 +254,4 @@ namespace Open_lab.Tests.Services
         }
     }
 }
+

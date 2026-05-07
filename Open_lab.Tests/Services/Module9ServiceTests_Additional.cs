@@ -224,7 +224,7 @@ namespace Open_lab.Tests.Services
         }
 
         [Fact]
-        public async Task PatientCountByMonth_ShouldIncludeArabicMonthNames()
+        public async Task PatientCountByMonth_WhenLoaded_ShouldIncludeArabicMonthNames()
         {
             // Function: 9.2 — Patient Count by Month
             // Arrange
@@ -390,7 +390,7 @@ namespace Open_lab.Tests.Services
         }
 
         [Fact]
-        public async Task TestDemandAnalysis_ShouldCalculateTotalRevenuePerTest()
+        public async Task TestDemandAnalysis_WhenLoaded_ShouldCalculateTotalRevenuePerTest()
         {
             // Function: 9.3 — Test Demand Analysis
             // Arrange
@@ -547,7 +547,7 @@ namespace Open_lab.Tests.Services
         }
 
         [Fact]
-        public async Task SampleCountPerYear_ShouldReturnRowsOrderedByYearAscending()
+        public async Task SampleCountPerYear_WhenLoaded_ShouldReturnRowsOrderedByYearAscending()
         {
             // Function: 9.4 — Sample Count per Year
             // Arrange
@@ -695,7 +695,7 @@ namespace Open_lab.Tests.Services
         }
 
         [Fact]
-        public async Task GetReferralsAsync_ShouldReturnAllReferralsOrderedByName()
+        public async Task GetReferralsAsync_WhenCalled_ShouldReturnAllReferralsOrderedByName()
         {
             // Function: 9.5 — Referral Source Analysis
             // Arrange
@@ -818,7 +818,7 @@ namespace Open_lab.Tests.Services
         }
 
         [Fact]
-        public async Task UserProductivityReport_ShouldReturnRowsOrderedByCompletedTestsDescending()
+        public async Task UserProductivityReport_WhenLoaded_ShouldReturnRowsOrderedByCompletedTestsDescending()
         {
             // Function: 9.6 — User Productivity Report
             // Arrange
@@ -925,7 +925,7 @@ namespace Open_lab.Tests.Services
         }
 
         [Fact]
-        public async Task GetSnapshotAsync_ShouldCalculateTotalPatientsAndVisitsSeparately()
+        public async Task GetSnapshotAsync_WhenCalled_ShouldCalculateTotalPatientsAndVisitsSeparately()
         {
             // Function: 9.1 — Patient Count by Gender (عدد المرضى الفريدين)
             // Arrange — نفس المريض بزيارتين
@@ -951,3 +951,4 @@ namespace Open_lab.Tests.Services
         }
     }
 }
+

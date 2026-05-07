@@ -226,7 +226,7 @@ namespace Open_lab.Tests.ViewModels
         }
 
         [Fact]
-        public void TogglePasswordVisibilityCommand_ShouldToggleIsPasswordVisible()
+        public void TogglePasswordVisibilityCommand_WhenInvoked_ShouldToggleIsPasswordVisible()
         {
             // Function: 10.8 — Logout (password visibility toggle for login screen)
             // Arrange
@@ -300,3 +300,4 @@ namespace Open_lab.Tests.ViewModels
         }
     }
 }
+

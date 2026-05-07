@@ -424,7 +424,7 @@ namespace Open_lab.Tests.Services
         // ──────────────────────────────────────────────────────────────────
 
         [Fact]
-        public async Task GetUsers_ShouldReturnUsersOrderedByUsername()
+        public async Task GetUsers_WhenCalled_ShouldReturnUsersOrderedByUsername()
         {
             // Function: 10.1 — Create User (list)
             // Arrange
@@ -484,7 +484,7 @@ namespace Open_lab.Tests.Services
         }
 
         [Fact]
-        public async Task DeleteUser_ShouldRemoveUserAndUserRoles()
+        public async Task DeleteUser_WithExistingUser_ShouldRemoveUserAndUserRoles()
         {
             // Function: 10.1 — Create User (cascade delete roles)
             // Arrange
@@ -567,7 +567,7 @@ namespace Open_lab.Tests.Services
         }
 
         [Fact]
-        public async Task DeleteRole_ShouldRemoveRoleAndPermissions()
+        public async Task DeleteRole_WithExistingRole_ShouldRemoveRoleAndPermissions()
         {
             // Function: 10.2 — Set Permissions (cascade delete permissions)
             // Arrange
@@ -600,7 +600,7 @@ namespace Open_lab.Tests.Services
         }
 
         [Fact]
-        public async Task GetRoles_ShouldReturnRolesOrderedByName()
+        public async Task GetRoles_WhenCalled_ShouldReturnRolesOrderedByName()
         {
             // Function: 10.2 — Set Permissions (list roles)
             // Arrange
@@ -629,3 +629,4 @@ namespace Open_lab.Tests.Services
         }
     }
 }
+

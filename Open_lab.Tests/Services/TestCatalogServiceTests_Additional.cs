@@ -319,7 +319,7 @@ namespace Open_lab.Tests.Services
         }
 
         [Fact]
-        public async Task UpdateReferenceRangeAsync_ShouldPersistChanges()
+        public async Task UpdateReferenceRangeAsync_WithValidRange_ShouldPersistChanges()
         {
             // Function: 3.3 — Set Reference Values
             // Arrange
@@ -351,7 +351,7 @@ namespace Open_lab.Tests.Services
         }
 
         [Fact]
-        public async Task DeleteReferenceRangeAsync_ShouldRemoveRange()
+        public async Task DeleteReferenceRangeAsync_WithExistingRange_ShouldRemoveRange()
         {
             // Function: 3.3 — Set Reference Values
             // Arrange
@@ -426,7 +426,7 @@ namespace Open_lab.Tests.Services
         }
 
         [Fact]
-        public async Task CreateTestCommentAsync_ShouldTrimWhitespace()
+        public async Task CreateTestCommentAsync_WithWhitespaceInput_ShouldTrimWhitespace()
         {
             // Function: 3.4 — Add Low/High Comments
             // Arrange
@@ -444,7 +444,7 @@ namespace Open_lab.Tests.Services
         }
 
         [Fact]
-        public async Task DeleteTestCommentAsync_ShouldRemoveComment()
+        public async Task DeleteTestCommentAsync_WithExistingComment_ShouldRemoveComment()
         {
             // Function: 3.4 — Add Low/High Comments
             // Arrange
@@ -585,7 +585,7 @@ namespace Open_lab.Tests.Services
         }
 
         [Fact]
-        public async Task UpdatePriceListAsync_ShouldUpdateAllFields()
+        public async Task UpdatePriceListAsync_WithValidData_ShouldUpdateAllFields()
         {
             // Function: 3.7 — Create Price List
             // Arrange
@@ -672,7 +672,7 @@ namespace Open_lab.Tests.Services
         }
 
         [Fact]
-        public async Task UpdatePriceListItemAsync_ShouldUpdatePrice()
+        public async Task UpdatePriceListItemAsync_WithValidData_ShouldUpdatePrice()
         {
             // Function: 3.8 — Update Prices
             // Arrange
@@ -720,7 +720,7 @@ namespace Open_lab.Tests.Services
         }
 
         [Fact]
-        public async Task DeletePriceListItemAsync_ShouldRemoveItem()
+        public async Task DeletePriceListItemAsync_WithExistingItem_ShouldRemoveItem()
         {
             // Function: 3.8 — Update Prices
             // Arrange
@@ -877,7 +877,7 @@ namespace Open_lab.Tests.Services
 
         // ========== Additional Service Methods ==========
         [Fact]
-        public async Task GetAllTestsAsync_ShouldReturnOrderedByNameReport()
+        public async Task GetAllTestsAsync_WhenCalled_ShouldReturnOrderedByName()
         {
             // Function: 3.1 - Support Method
             // Arrange
@@ -960,7 +960,7 @@ namespace Open_lab.Tests.Services
 
         // ========== Get Test Groups ==========
         [Fact]
-        public async Task CreateTestGroupAsync_ShouldCreateGroup()
+        public async Task CreateTestGroupAsync_WithValidData_ShouldCreateGroup()
         {
             // Function: 3.5 - Support Method
             // Arrange
@@ -1008,7 +1008,7 @@ namespace Open_lab.Tests.Services
         }
 
         [Fact]
-        public async Task GetTestGroupsAsync_ShouldReturnOrderedGroups()
+        public async Task GetTestGroupsAsync_WhenCalled_ShouldReturnOrderedGroups()
         {
             // Function: 3.5 - Support Method
             // Arrange
@@ -1026,7 +1026,7 @@ namespace Open_lab.Tests.Services
 
         // ========== Sample Types ==========
         [Fact]
-        public async Task CreateSampleTypeAsync_ShouldCreateSampleType()
+        public async Task CreateSampleTypeAsync_WithValidData_ShouldCreateSampleType()
         {
             // Function: 3.1 - Support Method
             // Arrange
@@ -1056,7 +1056,7 @@ namespace Open_lab.Tests.Services
         }
 
         [Fact]
-        public async Task GetSampleTypesAsync_ShouldReturnOrderedSampleTypes()
+        public async Task GetSampleTypesAsync_WhenCalled_ShouldReturnOrderedSampleTypes()
         {
             // Function: 3.1 - Support Method
             // Arrange
@@ -1074,7 +1074,7 @@ namespace Open_lab.Tests.Services
 
         // ========== Units ==========
         [Fact]
-        public async Task CreateUnitAsync_ShouldCreateUnit()
+        public async Task CreateUnitAsync_WithValidData_ShouldCreateUnit()
         {
             // Function: 3.1 - Support Method
             // Arrange
@@ -1104,7 +1104,7 @@ namespace Open_lab.Tests.Services
         }
 
         [Fact]
-        public async Task GetUnitsAsync_ShouldReturnOrderedUnits()
+        public async Task GetUnitsAsync_WhenCalled_ShouldReturnOrderedUnits()
         {
             // Function: 3.1 - Support Method
             // Arrange
@@ -1120,3 +1120,4 @@ namespace Open_lab.Tests.Services
         }
     }
 }
+
