@@ -506,13 +506,19 @@ namespace Open_lab.Tests
         }
 
         [Fact]
-        public void MarkSeparatedCommand_CanExecute_When_No_SeparationType_Should_Return_False_EdgeGuard()
+        public void MarkSeparatedCommand_CanExecute_When_No_Permission_Should_Return_False_EdgeGuard()
         {
-            // Function: 6.2 — Record Sample Separation (No Separation Type Edge Case)
+            // Function: 6.2 — Record Sample Separation (No Permission Edge Case)
+            // Arrange
+            AppSessionTestHelper.Reset(); // No permissions
             _viewModel.SelectedRow = new SampleCollectionRow { VisitTestId = 201 };
             _viewModel.SeparationType = string.Empty;
 
-            // MarkSeparatedCommand may or may not be enabled based on ViewModel logic
+            // Act
+            var canExecute = _viewModel.MarkSeparatedCommand.CanExecute(null);
+
+            // Assert
+            Assert.False(canExecute);
         }
 
         #endregion

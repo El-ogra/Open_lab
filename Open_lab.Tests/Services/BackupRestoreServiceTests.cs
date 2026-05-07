@@ -127,22 +127,17 @@ namespace Open_lab.Tests.Services
         }
 
         [Fact]
-        public async Task RestoreAsync_ShouldExecuteSqlCommand_SuccessGuard()
+        public async Task RestoreAsync_WithValidPath_ShouldNotThrowArgumentException_SuccessGuard()
         {
-            // Note: Since this is InMemory, exact raw SQL execution testing is tricky,
-            // but we ensure the command doesn't throw ArgumentException for valid path.
+            // Function: 13.7 — Configure Backup (Restore with Valid Path)
+            // Arrange
             var validPath = Path.Combine(Path.GetTempPath(), "test.bak");
-            
-            try
-            {
-                // This might throw related to InMemory provider lacking relational support, 
-                // but at least it shouldn't throw ArgumentException
-                await _service.RestoreAsync(validPath);
-            }
-            catch (Exception ex) when (ex is not ArgumentException)
-            {
-                // Acceptable in InMemory context without full EF relational provider mockery
-            }
+
+            // Act
+            var exception = await Record.ExceptionAsync(async () => await _service.RestoreAsync(validPath));
+
+            // Assert - Should not throw ArgumentException for valid path (other exceptions acceptable due to InMemory limitations)
+            Assert.False(exception is ArgumentException, "Should not throw ArgumentException for valid path");
         }
 
         [Fact]
