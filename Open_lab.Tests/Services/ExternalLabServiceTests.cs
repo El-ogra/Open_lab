@@ -33,6 +33,7 @@ namespace Open_lab.Tests.Services
         public async Task AddToQueueAsync_Should_Add_And_Prevent_Duplicate_LogicGuard()
         {
             // Function: 8.5 — Enter External Lab Result
+            // Arrange
             // Refactored to Logic Guard - verifies queue creation and duplicate prevention
             var patient = new Patient { LabId = "LQ1", FullName = "P", Gender = "Male", Phone = "555-2222" };
             _db.Patients.Add(patient);
@@ -75,8 +76,11 @@ namespace Open_lab.Tests.Services
         public async Task AddToQueueAsync_When_VisitTest_Is_Missing_Should_Throw()
         {
             // Function: 8.5 — Enter External Lab Result
+            // Arrange
+            // Act
             Func<Task> act = async () => await _service.AddToQueueAsync(404, 1);
 
+            // Assert
             await act.Should().ThrowAsync<InvalidOperationException>()
                 .WithMessage("Visit test not found.");
         }
@@ -85,6 +89,8 @@ namespace Open_lab.Tests.Services
         public async Task CreateManifestAsync_Should_Create_Manifest_And_Items()
         {
             // Function: 8.5 — Enter External Lab Result
+            // Arrange
+            // Act
             var patient = new Patient { LabId = "LM1", FullName = "P2", Gender = "Female" };
             _db.Patients.Add(patient);
             await _db.SaveChangesAsync();
@@ -106,6 +112,7 @@ namespace Open_lab.Tests.Services
             await _db.SaveChangesAsync();
 
             var manifest = await _service.CreateManifestAsync(1, new List<int> { queue.QueueId }, "notes");
+            // Assert
             manifest.Should().NotBeNull();
             manifest!.Items.Should().ContainSingle();
 
@@ -118,6 +125,7 @@ namespace Open_lab.Tests.Services
         public async Task CreateManifestAsync_With_Empty_QueueIds_Should_Create_Manifest_Without_Items_Edge()
         {
             // Function: 8.5 — Enter External Lab Result
+            // Arrange
             // Act
             var manifest = await _service.CreateManifestAsync(7, new List<int>(), "empty");
 
@@ -131,8 +139,11 @@ namespace Open_lab.Tests.Services
         public async Task CreateManifestAsync_With_Null_QueueIds_Should_Throw_Failure()
         {
             // Function: 8.5 — Enter External Lab Result
+            // Arrange
+            // Act
             Func<Task> act = async () => await _service.CreateManifestAsync(1, null!, "notes");
 
+            // Assert
             await act.Should().ThrowAsync<NullReferenceException>();
         }
 
@@ -140,6 +151,7 @@ namespace Open_lab.Tests.Services
         public async Task UpdateQueueStatusAsync_Should_Update_LogicGuard()
         {
             // Function: 8.5 — Enter External Lab Result
+            // Arrange
             // Refactored to Logic Guard - verifies status update with complete data validation
             var queue = new ExternalLabQueue { VisitTestId = 1, ReferralId = 1, Status = "Pending", DateQueued = DateTime.Now };
             _db.ExternalLabQueues.Add(queue);
@@ -202,6 +214,8 @@ namespace Open_lab.Tests.Services
         public async Task GetPendingQueueAsync_Should_Include_Referral_Details()
         {
             // Function: 8.5 — Enter External Lab Result
+            // Arrange
+            // Act
             var patient = new Patient { FullName = "P", LabId = "L", Gender = "Male" };
             var referral = new Referral { Name = "Ref Lab", ReferralType = "ExternalLab" };
             var test = new Test { Code = "TX", NameReport = "External Test", Price = 10m };
@@ -229,6 +243,7 @@ namespace Open_lab.Tests.Services
 
             var queue = await _service.GetPendingQueueAsync();
 
+            // Assert
             queue.Should().ContainSingle();
             queue[0].Referral.Should().NotBeNull();
             queue[0].Referral!.Name.Should().Be("Ref Lab");
@@ -253,6 +268,8 @@ namespace Open_lab.Tests.Services
         public async Task UpdateQueueStatusAsync_Should_Save_External_Result_Reference()
         {
             // Function: 8.5 — Enter External Lab Result
+            // Arrange
+            // Act
             var queue = new ExternalLabQueue { VisitTestId = 1, ReferralId = 2, Status = "Shipped", DateQueued = DateTime.Now };
             _db.ExternalLabQueues.Add(queue);
             await _db.SaveChangesAsync();
@@ -260,6 +277,7 @@ namespace Open_lab.Tests.Services
             await _service.UpdateQueueStatusAsync(queue.QueueId, "Received", "EXT-RESULT-001");
 
             var updated = await _db.ExternalLabQueues.FindAsync(queue.QueueId);
+            // Assert
             updated.Should().NotBeNull();
             updated!.Status.Should().Be("Received");
             updated.ExternalReference.Should().Be("EXT-RESULT-001");
@@ -269,6 +287,8 @@ namespace Open_lab.Tests.Services
         public async Task EnterExternalLabResultAsync_Should_Create_Result_And_Update_Queue_State()
         {
             // Function: 8.5 — Enter External Lab Result
+            // Arrange
+            // Act
             var patient = new Patient { LabId = "LR1", FullName = "P", Gender = "Male" };
             var test = new Test { Code = "EXT-R", NameReport = "External Result Test", Price = 25m };
             _db.Patients.Add(patient);
@@ -299,6 +319,7 @@ namespace Open_lab.Tests.Services
             var updatedQueue = await _db.ExternalLabQueues.SingleAsync(q => q.QueueId == queue.QueueId);
             var updatedVisitTest = await _db.VisitTests.SingleAsync(vt => vt.VisitTestId == visitTest.VisitTestId);
 
+            // Assert
             result.Value.Should().Be("Positive");
             result.Comment.Should().Be("verified by ref lab");
             updatedQueue.Status.Should().Be("ResultReceived");
@@ -310,6 +331,8 @@ namespace Open_lab.Tests.Services
         public async Task EnterExternalLabResultAsync_Should_Update_Existing_Result_Without_Duplicating()
         {
             // Function: 8.5 — Enter External Lab Result
+            // Arrange
+            // Act
             var patient = new Patient { LabId = "LR2", FullName = "P2", Gender = "Female" };
             var test = new Test { Code = "EXT-U", NameReport = "External Update", Price = 20m };
             _db.Patients.Add(patient);
@@ -350,6 +373,7 @@ namespace Open_lab.Tests.Services
             await _service.EnterExternalLabResultAsync(queue.QueueId, "Updated", "new comment");
 
             var results = await _db.ResultValues.Where(r => r.VisitTestId == visitTest.VisitTestId).ToListAsync();
+            // Assert
             results.Should().ContainSingle();
             results[0].Value.Should().Be("Updated");
             results[0].Comment.Should().Be("new comment");
@@ -362,6 +386,7 @@ namespace Open_lab.Tests.Services
         public async Task EnterExternalLabResultAsync_With_Empty_Result_Should_Throw_ArgumentException_Failure()
         {
             // Function: 8.5 — Enter External Lab Result
+            // Arrange
             // Act
             Func<Task> act = async () => await _service.EnterExternalLabResultAsync(1, "   ");
 
@@ -374,6 +399,7 @@ namespace Open_lab.Tests.Services
         public async Task EnterExternalLabResultAsync_With_Invalid_QueueId_Should_Throw_InvalidOperationException_Failure()
         {
             // Function: 8.5 — Enter External Lab Result
+            // Arrange
             // Act
             Func<Task> act = async () => await _service.EnterExternalLabResultAsync(9999, "OK");
 
@@ -481,8 +507,11 @@ namespace Open_lab.Tests.Services
         public async Task GetAllManifestsAsync_When_None_Exist_Should_Return_Empty_Edge()
         {
             // Function: 8.6 — Print External Lab Report - Logic Guard: Verify report data integrity
+            // Arrange
+            // Act
             var manifests = await _service.GetAllManifestsAsync();
 
+            // Assert
             manifests.Should().BeEmpty();
         }
 

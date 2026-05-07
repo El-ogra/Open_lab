@@ -31,6 +31,8 @@ namespace Open_lab.Tests.Services
         public async Task CreateTestAsync_Should_Create_Test_When_Valid_LogicGuard()
         {
             // Function: X.X — To Be Determined
+            // Arrange
+            // Act
             // Refactored to Logic Guard - verifies all fields persisted
             var test = new Test { Code = "CBC", NameReport = "Complete Blood Count", NameReceipt = "CBC Receipt", Price = 50m };
 
@@ -170,6 +172,8 @@ namespace Open_lab.Tests.Services
         public async Task CreateCustomGroupAsync_Should_Persist_Group_LogicGuard()
         {
             // Function: X.X — To Be Determined
+            // Arrange
+            // Act
             // Refactored to Logic Guard - verifies all fields persisted
             var group = new CustomGroup { Name = "Profile A", Price = 25 };
             var result = await _service.CreateCustomGroupAsync(group);
@@ -187,6 +191,8 @@ namespace Open_lab.Tests.Services
         public async Task AddPriceListItemAsync_Should_Add_New_Item_LogicGuard()
         {
             // Function: X.X — To Be Determined
+            // Arrange
+            // Act
             // Refactored to Logic Guard - verifies price list item binding
             var pl = new PriceList { Name = "PL" };
             _db.PriceLists.Add(pl);
@@ -422,6 +428,8 @@ namespace Open_lab.Tests.Services
         public async Task CreateReferralAsync_Should_Create_Entity_For_Module12_1()
         {
             // Function: 12.1 — `Create Contract Entity`
+            // Arrange
+            // Act
             var referral = new Referral
             {
                 Name = "Insurance A",
@@ -432,6 +440,7 @@ namespace Open_lab.Tests.Services
 
             var created = await _service.CreateReferralAsync(referral);
 
+            // Assert
             created.ReferralId.Should().BeGreaterThan(0);
             var saved = await _db.Referrals.FindAsync(created.ReferralId);
             saved.Should().NotBeNull();
@@ -443,6 +452,8 @@ namespace Open_lab.Tests.Services
         public async Task UpdateReferralAsync_Should_Set_Discount_And_Commission_For_Module12_3_12_4()
         {
             // Function: 12.3 — `Set Entity Discount`
+            // Arrange
+            // Act
             var referral = new Referral { Name = "Company A", ReferralType = "Company" };
             _db.Referrals.Add(referral);
             await _db.SaveChangesAsync();
@@ -455,6 +466,7 @@ namespace Open_lab.Tests.Services
             await _service.UpdateReferralAsync(referral);
 
             var saved = await _db.Referrals.FindAsync(referral.ReferralId);
+            // Assert
             saved.Should().NotBeNull();
             saved!.DiscountPercentage.Should().Be(12.5m);
             saved.CommissionPercentage.Should().Be(7.5m);
@@ -466,12 +478,15 @@ namespace Open_lab.Tests.Services
         public async Task UpdateReferralAsync_Invalid_Discount_Or_Commission_Should_Throw()
         {
             // Function: 12.3 — `Set Entity Discount`
+            // Arrange
+            // Act
             var referral = new Referral { Name = "Company B", ReferralType = "Company" };
             _db.Referrals.Add(referral);
             await _db.SaveChangesAsync();
 
             referral.DiscountPercentage = 150m;
             Func<Task> discountAct = async () => await _service.UpdateReferralAsync(referral);
+            // Assert
             await discountAct.Should().ThrowAsync<ArgumentException>().WithMessage("*Discount percentage*");
 
             referral.DiscountPercentage = 10m;

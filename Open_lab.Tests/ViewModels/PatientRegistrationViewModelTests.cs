@@ -45,6 +45,8 @@ namespace Open_lab.Tests.ViewModels
         public void Commands_When_Admin_Should_All_Be_Enabled_LogicGuard()
         {
             // Function: 1.1 — Add New Patient
+            // Arrange
+            // Act
             // Assert - Logic Guard: Verify command states reflect actual business rules
             _viewModel.SaveCommand.CanExecute(null).Should().BeTrue("Save should be enabled for new patient");
             _viewModel.NewCommand.CanExecute(null).Should().BeTrue("New should always be enabled for admin");

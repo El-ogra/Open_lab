@@ -25,6 +25,7 @@ namespace Open_lab.Tests
         public async Task LoadQueueCommand_Without_Login_Should_Set_Auth_Error_EdgeGuard()
         {
             // Function: 8.1 — Mark Test as External (Authentication Required)
+            // Arrange
             AppSessionTestHelper.Reset();
             var extLabMock = new Mock<IExternalLabService>();
             var extSettleMock = new Mock<IExternalSettlementService>();
@@ -54,6 +55,7 @@ namespace Open_lab.Tests
         public async Task LoadSettlementCommand_Without_Login_Should_Set_Auth_Error_EdgeGuard()
         {
             // Function: 8.7 — Settle External Lab Account (Authentication Required)
+            // Arrange
             AppSessionTestHelper.Reset();
             var extLabMock = new Mock<IExternalLabService>();
             var extSettleMock = new Mock<IExternalSettlementService>();
@@ -87,6 +89,8 @@ namespace Open_lab.Tests
         public async Task Complete_External_Lab_Workflow_Should_Work_SuccessGuard()
         {
             // Function: 8.1-8.5 — Complete External Lab Workflow
+            // Arrange
+            // Act
             AppSessionTestHelper.ResetToAdmin();
             var extLabMock = new Mock<IExternalLabService>();
             var extSettleMock = new Mock<IExternalSettlementService>();
@@ -116,6 +120,7 @@ namespace Open_lab.Tests
             // Step 1: Load Referrals
             viewModel.LoadReferralsCommand.Execute(null);
             await Task.Delay(50);
+            // Assert
             viewModel.Referrals.Should().ContainSingle();
 
             // Step 2: Load Queue
@@ -139,6 +144,7 @@ namespace Open_lab.Tests
         public async Task CreateManifest_Then_Ship_Should_Update_Status_SuccessGuard()
         {
             // Function: 8.3 — Prepare External Sample (Workflow)
+            // Arrange
             AppSessionTestHelper.ResetToAdmin();
             var extLabMock = new Mock<IExternalLabService>();
             var extSettleMock = new Mock<IExternalSettlementService>();
@@ -193,6 +199,7 @@ namespace Open_lab.Tests
         public async Task EnterExternalResultCommand_With_Null_Queue_Item_Should_Not_Call_Service_EdgeGuard()
         {
             // Function: 8.5 — Enter External Lab Result (No Selection)
+            // Arrange
             AppSessionTestHelper.ResetToAdmin();
             var extLabMock = new Mock<IExternalLabService>();
             var extSettleMock = new Mock<IExternalSettlementService>();
@@ -230,6 +237,7 @@ namespace Open_lab.Tests
         public async Task CreateSettlementCommand_With_Negative_Amount_Should_Not_Call_Service_EdgeGuard()
         {
             // Function: 8.7 — Settle External Lab Account (Negative Amount)
+            // Arrange
             AppSessionTestHelper.ResetToAdmin();
             var extLabMock = new Mock<IExternalLabService>();
             var extSettleMock = new Mock<IExternalSettlementService>();
@@ -272,6 +280,7 @@ namespace Open_lab.Tests
         public async Task PrintExternalReportCommand_With_Valid_Data_Should_Call_Print_Service_SuccessGuard()
         {
             // Function: 8.6 — Print External Lab Report (Print)
+            // Arrange
             AppSessionTestHelper.ResetToAdmin();
             var extLabMock = new Mock<IExternalLabService>();
             var extSettleMock = new Mock<IExternalSettlementService>();

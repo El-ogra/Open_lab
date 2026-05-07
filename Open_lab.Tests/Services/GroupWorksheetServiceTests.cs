@@ -30,6 +30,8 @@ namespace Open_lab.Tests.Services
         public async Task GetGroupWorksheetByCustomGroupAsync_Should_Return_Visits_For_Custom_Group()
         {
             // Function: X.X — To Be Determined
+            // Arrange
+            // Act
             var customGroup = new CustomGroup { Name = "Package A" };
             var test = new Test { Code = "T1", NameReport = "CBC", Price = 10m };
             var patient = new Patient { LabId = "L1", FullName = "Patient 1", Gender = "Male" };
@@ -49,6 +51,7 @@ namespace Open_lab.Tests.Services
 
             var rows = await _service.GetGroupWorksheetByCustomGroupAsync(customGroup.CustomGroupId, DateTime.Today.AddDays(-1), DateTime.Today.AddDays(1));
 
+            // Assert
             rows.Should().ContainSingle();
             rows[0].PatientName.Should().Be("Patient 1");
             rows[0].TestsCount.Should().Be(1);
@@ -141,6 +144,7 @@ namespace Open_lab.Tests.Services
         public async Task GetGroupWorksheetByCustomGroupAsync_When_CustomGroup_Not_Found_Should_Return_Empty_FailureGuard()
         {
             // Function: X.X — To Be Determined
+            // Arrange
             // Act
             var rows = await _service.GetGroupWorksheetByCustomGroupAsync(9999, DateTime.Today.AddDays(-1), DateTime.Today.AddDays(1));
 

@@ -25,6 +25,7 @@ namespace Open_lab.Tests.Services
             AppSession.SetPermissions(Array.Empty<string>());
 
             // Act & Assert
+            // Assert
             AppSession.HasPermission("Any.Random.Permission").Should().BeTrue();
             AppSession.HasPermission(PermissionCodes.PatientsEdit).Should().BeTrue();
         }
@@ -38,6 +39,7 @@ namespace Open_lab.Tests.Services
             AppSession.SetPermissions(new[] { PermissionCodes.FullAccess });
 
             // Act & Assert
+            // Assert
             AppSession.HasPermission(PermissionCodes.AccountsEdit).Should().BeTrue();
             AppSession.HasPermission("Unknown").Should().BeTrue();
         }
@@ -51,6 +53,7 @@ namespace Open_lab.Tests.Services
             AppSession.SetPermissions(new[] { PermissionCodes.PatientsView, PermissionCodes.TestsEdit });
 
             // Act & Assert
+            // Assert
             AppSession.HasPermission(PermissionCodes.PatientsView).Should().BeTrue();
             AppSession.HasPermission(PermissionCodes.TestsEdit).Should().BeTrue();
             AppSession.HasPermission(PermissionCodes.PatientsEdit).Should().BeFalse();
@@ -66,6 +69,7 @@ namespace Open_lab.Tests.Services
             AppSession.SetPermissions(Array.Empty<string>());
 
             // Act & Assert
+            // Assert
             AppSession.HasPermission(PermissionCodes.PatientsView).Should().BeFalse();
             AppSession.HasPermission(PermissionCodes.TestsEdit).Should().BeFalse();
             AppSession.HasPermission("Any.Random.Permission").Should().BeFalse();

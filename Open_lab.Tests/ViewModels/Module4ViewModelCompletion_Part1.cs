@@ -151,6 +151,7 @@ namespace Open_lab.Tests.ViewModels
             var viewModel = new ResultsEntryViewModel(_resultsServiceMock.Object);
 
             // Act & Assert
+            // Assert
             viewModel.LoadVisitTestsCommand.CanExecute(null).Should().BeFalse();
             viewModel.SaveResultsCommand.CanExecute(null).Should().BeFalse();
             viewModel.VerifyResultsCommand.CanExecute(null).Should().BeFalse();
@@ -333,6 +334,7 @@ namespace Open_lab.Tests.ViewModels
             viewModel.SelectedVisitTest = new VisitTestRow { VisitTestId = 51, Status = "InProgress" };
 
             // Act & Assert
+            // Assert
             viewModel.ReopenResultsCommand.CanExecute(null).Should().BeFalse();
             return Task.CompletedTask;
         }

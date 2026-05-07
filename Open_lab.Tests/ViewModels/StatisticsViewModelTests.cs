@@ -84,8 +84,11 @@ namespace Open_lab.Tests.ViewModels
         public async Task LoadAsync_Should_Populate_All_Module9_Collections()
         {
             // Function: X.X — To Be Determined
+            // Arrange
+            // Act
             await _viewModel.InvokePrivateAsync("LoadAsync");
 
+            // Assert
             _viewModel.VisitCount.Should().Be(2);
             _viewModel.PatientCount.Should().Be(2);
             _viewModel.TestCount.Should().Be(3);
@@ -104,6 +107,7 @@ namespace Open_lab.Tests.ViewModels
         public async Task LoadCommand_When_Executed_Should_Load_Data_Success()
         {
             // Function: X.X — To Be Determined
+            // Arrange
             // Act
             _viewModel.LoadCommand.Execute(null);
             await Task.Delay(50);

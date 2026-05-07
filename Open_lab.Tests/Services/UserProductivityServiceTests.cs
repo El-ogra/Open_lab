@@ -30,6 +30,8 @@ namespace Open_lab.Tests.Services
         public async Task GetUserPerformanceAsync_Should_Count_Distinct_Verified_Tests_Per_User()
         {
             // Function: 9.6 — User Productivity Report
+            // Arrange
+            // Act
             var user1 = new User { Username = "tech1" };
             var user2 = new User { Username = "tech2" };
             _db.Users.AddRange(user1, user2);
@@ -48,6 +50,7 @@ namespace Open_lab.Tests.Services
 
             var rows = await _service.GetUserPerformanceAsync(from, to);
 
+            // Assert
             rows.Should().HaveCount(2);
             rows[0].Username.Should().Be("tech1");
             rows[0].CompletedTestsCount.Should().Be(2);
@@ -59,6 +62,7 @@ namespace Open_lab.Tests.Services
         public async Task GetUserPerformanceAsync_When_NoVerificationsInRange_Should_Return_Empty_FailureGuard()
         {
             // Function: 9.6 — User Productivity Report
+            // Arrange
             var user = new User { Username = "tech-empty" };
             _db.Users.Add(user);
             await _db.SaveChangesAsync();
@@ -83,6 +87,7 @@ namespace Open_lab.Tests.Services
         public async Task GetUserPerformanceAsync_When_VerifierMissingFromUsers_Should_Label_As_Unknown_EdgeGuard()
         {
             // Function: 9.6 — User Productivity Report
+            // Arrange
             _db.ResultValues.Add(new ResultValue
             {
                 VisitTestId = 7,

@@ -36,12 +36,15 @@ namespace Open_lab.Tests.ViewModels
         public async Task LoadWorksheetAsync_Should_Load_Group_Worksheet_Rows()
         {
             // Function: X.X — To Be Determined
+            // Arrange
+            // Act
             _groupWorksheetServiceMock.Setup(x => x.GetGroupWorksheetByGroupAsync(1, It.IsAny<DateTime>(), It.IsAny<DateTime>()))
                 .ReturnsAsync(new List<WorkSheetPatientRow> { new() { VisitId = 1, PatientName = "P1", TestsCount = 2 } });
 
             _viewModel.SelectedGroupId = 1;
             await _viewModel.InvokePrivateAsync("LoadWorksheetAsync");
 
+            // Assert
             _viewModel.Rows.Should().ContainSingle();
             _viewModel.Rows[0].PatientName.Should().Be("P1");
             _viewModel.StatusMessage.Should().Contain("تم تحميل 1 زيارة");
@@ -51,6 +54,7 @@ namespace Open_lab.Tests.ViewModels
         public async Task LoadGroupsCommand_When_Executed_Should_Load_Groups_Success()
         {
             // Function: X.X — To Be Determined
+            // Arrange
             // Act
             _viewModel.LoadGroupsCommand.Execute(null);
             await Task.Delay(50);
@@ -98,11 +102,14 @@ namespace Open_lab.Tests.ViewModels
         public async Task PrintAsync_Should_Send_Group_Worksheet_To_Print_Service()
         {
             // Function: X.X — To Be Determined
+            // Arrange
+            // Act
             _viewModel.Rows.Add(new WorkSheetPatientRow { VisitId = 1, PatientName = "P1", TestsCount = 1 });
 
             await _viewModel.InvokePrivateAsync("PrintAsync");
 
             _printServiceMock.Verify(x => x.PrintWorksheetByPatientAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<IReadOnlyCollection<WorkSheetPatientRow>>()), Times.Once);
+            // Assert
             _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 

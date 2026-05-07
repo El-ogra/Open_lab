@@ -22,6 +22,8 @@ namespace Open_lab.Tests.ViewModels
         public async Task LoadAsync_With_Valid_Visit_Should_Populate_Blank_Report_Data_LogicGuard()
         {
             // Function: 4.8 — Print Blank Report - Logic Guard: Verify all blank report fields are populated
+            // Arrange
+            // Act
             var patient = new Patient
             {
                 PatientId = 1,
@@ -59,10 +61,13 @@ namespace Open_lab.Tests.ViewModels
         public async Task LoadAsync_With_InvalidVisitId_Should_Set_Validation_Message_FailureGuard()
         {
             // Function: 4.8 — Print Blank Report - Logic Guard: Verify all blank report fields are populated
+            // Arrange
+            // Act
             _viewModel.VisitId = 0;
 
             await _viewModel.InvokePrivateAsync("LoadAsync");
 
+            // Assert
             _viewModel.StatusMessage.Should().Be("يرجى إدخال رقم الزيارة.");
             _reportServiceMock.Verify(x => x.GetVisitReportAsync(It.IsAny<int>()), Times.Never);
         }
@@ -71,11 +76,14 @@ namespace Open_lab.Tests.ViewModels
         public async Task LoadAsync_When_ReportData_NotFound_Should_Set_NotFound_Message_FailureGuard()
         {
             // Function: 4.8 — Print Blank Report - Logic Guard: Verify all blank report fields are populated
+            // Arrange
+            // Act
             _viewModel.VisitId = 42;
             _reportServiceMock.Setup(x => x.GetVisitReportAsync(42)).ReturnsAsync((VisitReportData?)null);
 
             await _viewModel.InvokePrivateAsync("LoadAsync");
 
+            // Assert
             _viewModel.StatusMessage.Should().Be("لم يتم العثور على بيانات.");
             _viewModel.PatientName.Should().BeEmpty();
         }
@@ -84,10 +92,13 @@ namespace Open_lab.Tests.ViewModels
         public async Task PrintBlankAsync_Without_PrintService_Should_Set_ServiceUnavailable_EdgeGuard()
         {
             // Function: 4.8 — Print Blank Report - Logic Guard: Verify all blank report fields are populated
+            // Arrange
+            // Act
             _viewModel.VisitId = 7;
 
             await _viewModel.InvokePrivateAsync("PrintBlankAsync");
 
+            // Assert
             _viewModel.StatusMessage.Should().Be("خدمة الطباعة غير متاحة.");
         }
     }

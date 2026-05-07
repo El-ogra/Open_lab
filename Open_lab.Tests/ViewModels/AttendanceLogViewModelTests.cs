@@ -26,6 +26,8 @@ namespace Open_lab.Tests.ViewModels
         public async Task LoadLogsAsync_Should_Map_Attendance_Log_Rows_With_Duration()
         {
             // Function: X.X — To Be Determined
+            // Arrange
+            // Act
             _attendanceServiceMock.Setup(x => x.GetLogsAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>()))
                 .ReturnsAsync(new List<AttendanceLog>
                 {
@@ -41,6 +43,7 @@ namespace Open_lab.Tests.ViewModels
 
             await _viewModel.InvokePrivateAsync("LoadLogsAsync");
 
+            // Assert
             _viewModel.Logs.Should().ContainSingle();
             _viewModel.Logs[0].Username.Should().Be("tech1");
             _viewModel.Logs[0].Duration.Should().Be("08:30");
@@ -68,12 +71,15 @@ namespace Open_lab.Tests.ViewModels
         public async Task LoadLogsCommand_When_Service_Returns_Empty_Should_Set_Zero_Status_Edge()
         {
             // Function: X.X — To Be Determined
+            // Arrange
+            // Act
             _attendanceServiceMock.Setup(x => x.GetLogsAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>()))
                 .ReturnsAsync(new List<AttendanceLog>());
 
             _viewModel.LoadLogsCommand.Execute(null);
             await Task.Delay(50);
 
+            // Assert
             _viewModel.Logs.Should().BeEmpty();
             _viewModel.StatusMessage.Should().Contain("تم تحميل 0 سجل");
         }
@@ -99,6 +105,8 @@ namespace Open_lab.Tests.ViewModels
         public async Task ClockOutCommand_When_OpenLog_Exists_Should_Reset_AttendanceLogId_Success()
         {
             // Function: X.X — To Be Determined
+            // Arrange
+            // Act
             AppSession.UserId = 11;
             AppSession.AttendanceLogId = 55;
             _attendanceServiceMock
@@ -109,6 +117,7 @@ namespace Open_lab.Tests.ViewModels
             _viewModel.ClockOutCommand.Execute(null);
             await Task.Delay(50);
 
+            // Assert
             AppSession.AttendanceLogId.Should().Be(0);
             _attendanceServiceMock.Verify(x => x.ClockOutAsync(AppSession.UserId, It.IsAny<DateTime?>()), Times.Once);
             _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
@@ -155,6 +164,8 @@ namespace Open_lab.Tests.ViewModels
         public async Task StartBreakCommand_When_Open_Log_Exists_Should_Set_Success_Message()
         {
             // Function: X.X — To Be Determined
+            // Arrange
+            // Act
             AppSession.UserId = 22;
             _viewModel.BreakNote = "break note";
             _attendanceServiceMock.Setup(x => x.StartBreakAsync(AppSession.UserId, It.IsAny<string>(), It.IsAny<DateTime?>(), It.IsAny<string?>()))
@@ -165,6 +176,7 @@ namespace Open_lab.Tests.ViewModels
             await Task.Delay(50);
 
             _attendanceServiceMock.Verify(x => x.StartBreakAsync(AppSession.UserId, It.IsAny<string>(), It.IsAny<DateTime?>(), It.IsAny<string?>()), Times.Once);
+            // Assert
             _viewModel.BreakNote.Should().BeEmpty();
             _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
@@ -192,6 +204,8 @@ namespace Open_lab.Tests.ViewModels
         public async Task EndBreakCommand_When_No_Open_Break_Should_Set_Failure_Message()
         {
             // Function: X.X — To Be Determined
+            // Arrange
+            // Act
             AppSession.UserId = 30;
             _attendanceServiceMock.Setup(x => x.EndBreakAsync(AppSession.UserId, It.IsAny<DateTime?>()))
                 .ReturnsAsync((AttendanceBreak?)null);
@@ -199,6 +213,7 @@ namespace Open_lab.Tests.ViewModels
             _viewModel.EndBreakCommand.Execute(null);
             await Task.Delay(50);
 
+            // Assert
             _viewModel.StatusMessage.Should().Contain("لا توجد راحة مفتوحة");
         }
 
@@ -224,6 +239,8 @@ namespace Open_lab.Tests.ViewModels
         public async Task LoadDailySummaryCommand_When_Service_Returns_Data_Should_Set_Summary_Message_Success()
         {
             // Function: X.X — To Be Determined
+            // Arrange
+            // Act
             AppSession.UserId = 41;
             _attendanceServiceMock
                 .Setup(x => x.GetDailyWorkingSummaryAsync(AppSession.UserId, It.IsAny<DateTime>(), It.IsAny<DateTime?>()))
@@ -232,6 +249,7 @@ namespace Open_lab.Tests.ViewModels
             _viewModel.LoadDailySummaryCommand.Execute(null);
             await Task.Delay(50);
 
+            // Assert
             _viewModel.DailySummary.Should().NotBeNull();
             _viewModel.DailySummary!.NetMinutes.Should().Be(450);
             _viewModel.StatusMessage.Should().Contain("صافي 450 دقيقة");
@@ -268,6 +286,8 @@ namespace Open_lab.Tests.ViewModels
         public async Task RefreshOpenLogCommand_When_Service_Throws_Should_Set_Error_Message_Failure()
         {
             // Function: X.X — To Be Determined
+            // Arrange
+            // Act
             AppSession.UserId = 52;
             _attendanceServiceMock.Setup(x => x.GetOpenLogAsync(AppSession.UserId))
                 .ThrowsAsync(new InvalidOperationException("refresh-open-failed"));
@@ -275,6 +295,7 @@ namespace Open_lab.Tests.ViewModels
             _viewModel.RefreshOpenLogCommand.Execute(null);
             await Task.Delay(50);
 
+            // Assert
             _viewModel.StatusMessage.Should().Contain("refresh-open-failed");
         }
 

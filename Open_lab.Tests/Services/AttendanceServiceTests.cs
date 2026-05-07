@@ -111,6 +111,7 @@ namespace Open_lab.Tests.Services
         {
             // Function: 10.4 — Record Attendance (edge: no open session)
             // Arrange & Act
+            // Act
             var open = await _service.GetOpenLogAsync(9999);
 
             // Assert
@@ -159,6 +160,7 @@ namespace Open_lab.Tests.Services
         {
             // Function: 10.5 — Record Departure (failure: no open session to close)
             // Arrange & Act
+            // Act
             var result = await _service.ClockOutAsync(userId: 9999);
 
             // Assert
@@ -228,6 +230,7 @@ namespace Open_lab.Tests.Services
         {
             // Function: 10.4 — Record Attendance (edge: break requires open session)
             // Arrange & Act
+            // Act
             var br = await _service.StartBreakAsync(123);
 
             // Assert

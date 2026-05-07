@@ -33,6 +33,7 @@ namespace Open_lab.Tests.Services
         public async Task Function_4_4_Composite_Report_Structure_Validation()
         {
             // Function: 4.4 — `Create Composite Report`
+            // Arrange
             var visitId = 50;
             var patient = new Patient { PatientId = 5, FullName = "Bob" };
             _db.Patients.Add(patient);
@@ -59,6 +60,7 @@ namespace Open_lab.Tests.Services
         public async Task Function_4_5_Report_Manual_Ordering_Integrity()
         {
             // Function: 4.5 — `Arrange Report Order`
+            // Arrange
             var visitId = 60;
             _db.Patients.Add(new Patient { PatientId = 6, FullName = "Charlie" });
             _db.Visits.Add(new Visit { VisitId = visitId, PatientId = 6 });
@@ -83,6 +85,7 @@ namespace Open_lab.Tests.Services
         public async Task Function_4_9_Historical_History_Comparison_Validation()
         {
             // Function: 4.9 — `Compare with History`
+            // Arrange
             var patientId = 100;
             _db.Patients.Add(new Patient { PatientId = patientId, FullName = "History Patient" });
 
@@ -181,6 +184,7 @@ namespace Open_lab.Tests.Services
         public async Task GetVisitReportAsync_When_VisitNotFound_Should_Return_Null_FailureGuard()
         {
             // Function: 1.6 — View Patient History
+            // Arrange
             // Act
             var report = await _service.GetVisitReportAsync(99999);
 

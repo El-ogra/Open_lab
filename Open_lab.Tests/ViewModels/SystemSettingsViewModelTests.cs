@@ -45,8 +45,11 @@ namespace Open_lab.Tests.ViewModels
         public async Task LoadAsync_Should_Load_PaperSize_And_DefaultAccountType()
         {
             // Function: 13.2 — + 13.4
+            // Arrange
+            // Act
             await _viewModel.InvokePrivateAsync("LoadAsync");
 
+            // Assert
             _viewModel.ReportPaperSize.Should().Be("A5");
             _viewModel.DefaultAccountType.Should().Be("Credit");
         }
@@ -55,6 +58,8 @@ namespace Open_lab.Tests.ViewModels
         public async Task SaveProfileAsync_Should_Persist_PaperSize_And_DefaultAccountType()
         {
             // Function: 13.2 — + 13.4
+            // Arrange
+            // Act
             _viewModel.ReportPaperSize = "A4";
             _viewModel.DefaultAccountType = "Cash";
 
@@ -62,6 +67,7 @@ namespace Open_lab.Tests.ViewModels
 
             _settingsServiceMock.Verify(x => x.SaveProfileAsync(It.Is<SystemSettingsProfile>(p =>
                 p.ReportPaperSize == "A4" && p.DefaultAccountType == "Cash")), Times.AtLeastOnce);
+            // Assert
             _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
@@ -69,6 +75,8 @@ namespace Open_lab.Tests.ViewModels
         public async Task ChangeMasterPasswordAsync_When_ConfirmationMismatch_Should_Not_Call_Service()
         {
             // Function: 13.8 — Set System Password
+            // Arrange
+            // Act
             _viewModel.CurrentMasterPassword = "old";
             _viewModel.NewMasterPassword = "new1";
             _viewModel.ConfirmMasterPassword = "new2";
@@ -77,6 +85,7 @@ namespace Open_lab.Tests.ViewModels
 
             _settingsServiceMock.Verify(x => x.VerifyMasterPasswordAsync(It.IsAny<string>()), Times.Never);
             _settingsServiceMock.Verify(x => x.SetMasterPasswordAsync(It.IsAny<string>()), Times.Never);
+            // Assert
             _viewModel.StatusMessage.Should().Contain("غير مطابق");
         }
 
@@ -84,6 +93,8 @@ namespace Open_lab.Tests.ViewModels
         public async Task ChangeMasterPasswordAsync_With_Valid_CurrentPassword_Should_Update_And_Clear_Fields()
         {
             // Function: 13.8 — Set System Password
+            // Arrange
+            // Act
             _viewModel.CurrentMasterPassword = "old";
             _viewModel.NewMasterPassword = "newStrong";
             _viewModel.ConfirmMasterPassword = "newStrong";
@@ -92,6 +103,7 @@ namespace Open_lab.Tests.ViewModels
 
             _settingsServiceMock.Verify(x => x.VerifyMasterPasswordAsync("old"), Times.Once);
             _settingsServiceMock.Verify(x => x.SetMasterPasswordAsync("newStrong"), Times.Once);
+            // Assert
             _viewModel.CurrentMasterPassword.Should().BeEmpty();
             _viewModel.NewMasterPassword.Should().BeEmpty();
             _viewModel.ConfirmMasterPassword.Should().BeEmpty();
@@ -102,6 +114,7 @@ namespace Open_lab.Tests.ViewModels
         public async Task ReloadCommand_When_Executed_Should_Refresh_Profile_And_Settings_Success()
         {
             // Function: 13.8 — Set System Password
+            // Arrange
             // Act
             _viewModel.ReloadCommand.Execute(null);
             await Task.Delay(50);

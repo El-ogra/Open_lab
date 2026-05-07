@@ -31,6 +31,8 @@ namespace Open_lab.Tests.Services
         public async Task StatisticsService_BranchWiseInventory_Should_Filter_By_Branch()
         {
             // Function: 2.11 — Branch-wise Inventory
+            // Arrange
+            // Act
             var service = new StatisticsService(_db);
             var branch1 = new Branch { Name = "Branch 1" };
             var branch2 = new Branch { Name = "Branch 2" };
@@ -57,6 +59,7 @@ namespace Open_lab.Tests.Services
             // For now, let's test the existing GetSnapshotAsync and then consider branch filtering.
             
             var snapshot = await service.GetSnapshotAsync(DateTime.Today.AddDays(-1), DateTime.Today.AddDays(1), null, null);
+            // Assert
             snapshot.Summary.TotalRevenue.Should().Be(300);
         }
 
@@ -64,6 +67,8 @@ namespace Open_lab.Tests.Services
         public async Task ExternalSettlementService_Should_Calculate_Correct_Balance()
         {
             // Function: 2.13 — Lab-to-Lab Settlement
+            // Arrange
+            // Act
             var service = new ExternalSettlementService(_db);
             var lab = new Referral { Name = "External Lab", ReferralType = "Lab" };
             _db.Referrals.Add(lab);
@@ -87,6 +92,7 @@ namespace Open_lab.Tests.Services
             await _db.SaveChangesAsync();
 
             var balance = await service.GetPendingBalanceAsync(lab.ReferralId);
+            // Assert
             balance.Should().Be(50);
 
             await service.CreateSettlementAsync(lab.ReferralId, 30, "Partial payment");
@@ -99,6 +105,8 @@ namespace Open_lab.Tests.Services
         public async Task UserProductivityService_Should_Return_Correct_Counts()
         {
             // Function: 9.6 — User Productivity Report
+            // Arrange
+            // Act
             var service = new UserProductivityService(_db);
             var user = new User { Username = "tech1" };
             _db.Users.Add(user);
@@ -115,6 +123,7 @@ namespace Open_lab.Tests.Services
             await _db.SaveChangesAsync();
 
             var performance = await service.GetUserPerformanceAsync(DateTime.Today.AddDays(-1), DateTime.Today.AddDays(1));
+            // Assert
             performance.Should().ContainSingle();
             performance[0].Username.Should().Be("tech1");
             performance[0].CompletedTestsCount.Should().Be(1);
@@ -124,6 +133,8 @@ namespace Open_lab.Tests.Services
         public async Task CompareWithHistoryService_Should_Return_Historical_Results()
         {
             // Function: 4.9 — Compare with History
+            // Arrange
+            // Act
             var service = new CompareWithHistoryService(_db);
             var p = new Patient { FullName = "P1", LabId = "L1" };
             _db.Patients.Add(p);
@@ -149,6 +160,7 @@ namespace Open_lab.Tests.Services
             await _db.SaveChangesAsync();
 
             var history = await service.GetLastResultsAsync(p.PatientId, t.TestId);
+            // Assert
             history.Should().ContainSingle();
             history[0].Value.Should().Be("95");
             history[0].ParameterName.Should().Be("Level");
@@ -158,6 +170,8 @@ namespace Open_lab.Tests.Services
         public async Task TestClassificationService_Should_Calculate_Consumption()
         {
             // Function: 7.4 — Test Classification LOG
+            // Arrange
+            // Act
             var service = new TestClassificationService(_db);
             var reagent = new Reagent { Name = "R1", Unit = "ml", CurrentStock = 1000 };
             _db.Reagents.Add(reagent);
@@ -176,6 +190,7 @@ namespace Open_lab.Tests.Services
             await _db.SaveChangesAsync();
 
             var report = await service.GetConsumptionReportAsync(DateTime.Today.AddDays(-1), DateTime.Today.AddDays(1));
+            // Assert
             report.Should().ContainSingle();
             report[0].ReagentName.Should().Be("R1");
             report[0].TotalConsumed.Should().Be(5);
@@ -185,6 +200,8 @@ namespace Open_lab.Tests.Services
         public async Task SystemMonitorService_Should_Track_Active_Sessions()
         {
             // Function: 10.7 — Monitor System Usage
+            // Arrange
+            // Act
             var service = new SystemMonitorService(_db);
             var user = new User { Username = "active_user" };
             _db.Users.Add(user);
@@ -195,6 +212,7 @@ namespace Open_lab.Tests.Services
             await _db.SaveChangesAsync();
 
             var active = await service.GetActiveSessionsAsync();
+            // Assert
             active.Should().ContainSingle();
             active[0].Username.Should().Be("active_user");
 
@@ -210,6 +228,8 @@ namespace Open_lab.Tests.Services
         public async Task UserActivityService_Should_Return_Audit_Logs()
         {
             // Function: 10.6 — View User Activity Log
+            // Arrange
+            // Act
             var service = new UserActivityService(_db);
             var user = new User { Username = "admin" };
             _db.Users.Add(user);
@@ -227,6 +247,7 @@ namespace Open_lab.Tests.Services
             await _db.SaveChangesAsync();
 
             var activities = await service.GetRecentActivitiesAsync();
+            // Assert
             activities.Should().ContainSingle();
             activities[0].Username.Should().Be("admin");
             activities[0].ActivityDescription.Should().Contain("تعديل");
@@ -236,6 +257,8 @@ namespace Open_lab.Tests.Services
         public async Task GroupWorksheetService_Should_Return_Patients_In_Group()
         {
             // Function: 7.3 — Generate Group Worksheet
+            // Arrange
+            // Act
             var service = new GroupWorksheetService(_db);
             var group = new TestGroup { GroupName = "G1" };
             _db.TestGroups.Add(group);
@@ -255,6 +278,7 @@ namespace Open_lab.Tests.Services
             await _db.SaveChangesAsync();
 
             var worksheet = await service.GetGroupWorksheetByGroupAsync(group.GroupId, DateTime.Today.AddDays(-1), DateTime.Today.AddDays(1));
+            // Assert
             worksheet.Should().ContainSingle();
             worksheet[0].PatientName.Should().Be("P1");
         }
@@ -263,6 +287,8 @@ namespace Open_lab.Tests.Services
         public async Task AttendanceService_WorkingHours_Should_Be_Calculated()
         {
             // Function: 11.3 — Calculate Working Hours
+            // Arrange
+            // Act
             var service = new AttendanceService(_db);
             var user = new User { Username = "worker1" };
             _db.Users.Add(user);
@@ -276,6 +302,7 @@ namespace Open_lab.Tests.Services
             await _db.SaveChangesAsync();
 
             var logs = await service.GetLogsAsync(DateTime.Today.AddDays(-1), DateTime.Today.AddDays(1));
+            // Assert
             logs.Should().ContainSingle();
             var duration = logs[0].LogoutAt - logs[0].LoginAt;
             duration?.TotalHours.Should().Be(8);
@@ -285,6 +312,8 @@ namespace Open_lab.Tests.Services
         public async Task VisitService_AddCustomGroup_Should_Add_All_Tests()
         {
             // Function: 1.8 — Add Group of Tests (Profile)
+            // Arrange
+            // Act
             // Tested via ViewModel logic since service currently handles individual tests
             var visitService = new VisitService(_db);
             var group = new CustomGroup { Name = "Profile1", Price = 100 };
@@ -314,6 +343,7 @@ namespace Open_lab.Tests.Services
             }
 
             var visitTests = await _db.VisitTests.Where(vt => vt.VisitId == v.VisitId).ToListAsync();
+            // Assert
             visitTests.Should().HaveCount(2);
         }
 
@@ -321,12 +351,15 @@ namespace Open_lab.Tests.Services
         public async Task Test_ReportOrder_Should_Be_Respected()
         {
             // Function: 4.5 — Arrange Report Order
+            // Arrange
+            // Act
             var t1 = new Test { NameReport = "A", Code = "A", Price = 10, ReportOrder = 2 };
             var t2 = new Test { NameReport = "B", Code = "B", Price = 10, ReportOrder = 1 };
             _db.Tests.AddRange(t1, t2);
             await _db.SaveChangesAsync();
 
             var tests = await _db.Tests.OrderBy(t => t.ReportOrder).ToListAsync();
+            // Assert
             tests[0].NameReport.Should().Be("B");
             tests[1].NameReport.Should().Be("A");
         }
@@ -335,6 +368,8 @@ namespace Open_lab.Tests.Services
         public void Referral_Properties_Should_Store_Values()
         {
             // Function: 12.3 — Set Entity Discount
+            // Arrange
+            // Act
             var referral = new Referral
             {
                 Name = "Entity1",
@@ -342,6 +377,7 @@ namespace Open_lab.Tests.Services
                 CommissionPercentage = 10.0m
             };
 
+            // Assert
             referral.DiscountPercentage.Should().Be(15.5m);
             referral.CommissionPercentage.Should().Be(10.0m);
         }
@@ -350,6 +386,8 @@ namespace Open_lab.Tests.Services
         public async Task Visit_AssignReferral_Should_Store_Correctly()
         {
             // Function: 12.5 — Assign Patient to Contract
+            // Arrange
+            // Act
             var p = new Patient { FullName = "P", LabId = "L" };
             var ref1 = new Referral { Name = "Contract A" };
             _db.Patients.Add(p);
@@ -361,6 +399,7 @@ namespace Open_lab.Tests.Services
             await _db.SaveChangesAsync();
 
             var saved = await _db.Visits.FindAsync(visit.VisitId);
+            // Assert
             saved!.ReferralId.Should().Be(ref1.ReferralId);
         }
 
@@ -368,6 +407,8 @@ namespace Open_lab.Tests.Services
         public async Task SettingsService_PrinterConfiguration_Should_Work()
         {
             // Function: 13.5 — Configure Printers
+            // Arrange
+            // Act
             var service = new SettingsService(_db);
             await service.SetReceiptPrinterAsync("Epson TM-T20");
             await service.SetReportPrinterAsync("HP LaserJet");
@@ -375,6 +416,7 @@ namespace Open_lab.Tests.Services
             var receiptPrinter = await service.GetReceiptPrinterAsync();
             var reportPrinter = await service.GetReportPrinterAsync();
 
+            // Assert
             receiptPrinter.Should().Be("Epson TM-T20");
             reportPrinter.Should().Be("HP LaserJet");
         }
@@ -590,6 +632,7 @@ namespace Open_lab.Tests.Services
             Open_lab.ViewModels.AppSession.Clear();
 
             // Act & Assert
+            // Assert
             Open_lab.ViewModels.AppSession.HasPermission("ADMIN_ACCESS").Should().BeFalse();
             Open_lab.ViewModels.AppSession.HasPermission("USER_ACCESS").Should().BeFalse();
         }
@@ -616,6 +659,8 @@ namespace Open_lab.Tests.Services
         public async Task Patient_With_MedicalHistory_Should_Maintain_Data_Integrity()
         {
             // Function: 13.5 — Configure Printers
+            // Arrange
+            // Act
             // Cross-validation between Patient and Medical History
             var patient = new Patient { LabId = "LAD1", FullName = "Patient with History", Gender = "Female" };
             _db.Patients.Add(patient);
@@ -633,6 +678,7 @@ namespace Open_lab.Tests.Services
 
             // Verify relationship integrity
             var retrievedPatient = await _db.Patients.Include(p => p.MedicalHistory).FirstOrDefaultAsync(p => p.PatientId == patient.PatientId);
+            // Assert
             retrievedPatient.Should().NotBeNull();
             retrievedPatient!.MedicalHistory.Should().NotBeNull();
             retrievedPatient.MedicalHistory!.ChronicDiseases.Should().Be("Diabetes");
@@ -642,6 +688,8 @@ namespace Open_lab.Tests.Services
         public async Task Physician_PriceList_Assignment_Should_Prioritize_Correctly()
         {
             // Function: 13.5 — Configure Printers
+            // Arrange
+            // Act
             // Cross-validation between Physician and PriceList
             var priceList = new PriceList { Name = "Doctor PL" };
             _db.PriceLists.Add(priceList);
@@ -672,6 +720,7 @@ namespace Open_lab.Tests.Services
             // Verify price list priority logic
             var priceService = new PriceResolutionService(_db);
             var (price, source, sourceName) = await priceService.GetPriceSourceAsync(test.TestId, physician.PhysicianId, null);
+            // Assert
             price.Should().Be(80m);
             source.Should().Be("PhysicianPriceList");
             sourceName.Should().Be("Doctor PL");
@@ -681,6 +730,8 @@ namespace Open_lab.Tests.Services
         public async Task External_Sample_Flag_Should_Not_Affect_Internal_Samples()
         {
             // Function: 13.5 — Configure Printers
+            // Arrange
+            // Act
             // Cross-validation of sample collection flagging
             var patient = new Patient { LabId = "LAD2", FullName = "Patient", Gender = "Male" };
             _db.Patients.Add(patient);
@@ -706,6 +757,7 @@ namespace Open_lab.Tests.Services
 
             // Verify flags are independent
             var samples = await _db.SampleCollections.ToListAsync();
+            // Assert
             samples.Should().HaveCount(2);
             samples.Should().Contain(s => s.VisitTestId == vt1.VisitTestId && s.IsExternalSample == true);
             samples.Should().Contain(s => s.VisitTestId == vt2.VisitTestId && s.IsExternalSample == false);

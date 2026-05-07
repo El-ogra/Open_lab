@@ -86,6 +86,7 @@ namespace Open_lab.Tests.Services
         {
             // Function: 10.1 — Create User
             // Arrange & Act
+            // Act
             Func<Task> act = async () => await _service.CreateUserAsync(null!, "pass");
 
             // Assert
@@ -189,6 +190,7 @@ namespace Open_lab.Tests.Services
         {
             // Function: 10.2 — Set Permissions (edge: no permissions assigned)
             // Arrange & Act
+            // Act
             var codes = await _service.GetRolePermissionCodesAsync(9999);
 
             // Assert
@@ -246,6 +248,7 @@ namespace Open_lab.Tests.Services
         {
             // Function: 10.2 — Set Permissions (failure: user/role not found)
             // Arrange & Act
+            // Act
             Func<Task> act = async () => await _service.AssignSingleRoleAsync(999, 888);
 
             // Assert
@@ -258,6 +261,7 @@ namespace Open_lab.Tests.Services
         {
             // Function: 10.2 — Set Permissions (edge: role not assigned)
             // Arrange & Act
+            // Act
             Func<Task> act = async () => await _service.RemoveUserRoleAsync(1, 1);
 
             // Assert
@@ -441,6 +445,7 @@ namespace Open_lab.Tests.Services
         {
             // Function: 10.1 — Create User (edge: empty list)
             // Arrange & Act
+            // Act
             var users = await _service.GetUsersAsync();
 
             // Assert
@@ -470,6 +475,7 @@ namespace Open_lab.Tests.Services
         {
             // Function: 10.1 — Create User (edge: delete non-existent)
             // Arrange & Act
+            // Act
             Func<Task> act = async () => await _service.DeleteUserAsync(404);
 
             // Assert
@@ -503,6 +509,7 @@ namespace Open_lab.Tests.Services
         {
             // Function: 10.2 — Set Permissions (create role)
             // Arrange & Act
+            // Act
             var role = await _service.CreateRoleAsync("Cashier");
 
             // Assert
@@ -531,6 +538,7 @@ namespace Open_lab.Tests.Services
         {
             // Function: 10.2 — Set Permissions (edge: blank role name)
             // Arrange & Act
+            // Act
             Func<Task> act = async () => await _service.CreateRoleAsync("   ");
 
             // Assert
@@ -583,6 +591,7 @@ namespace Open_lab.Tests.Services
         {
             // Function: 10.2 — Set Permissions (edge: non-existent role)
             // Arrange & Act
+            // Act
             Func<Task> act = async () => await _service.DeleteRoleAsync(404);
 
             // Assert
@@ -612,6 +621,7 @@ namespace Open_lab.Tests.Services
         {
             // Function: 10.2 — Set Permissions (edge: no roles)
             // Arrange & Act
+            // Act
             var roles = await _service.GetRolesAsync();
 
             // Assert

@@ -33,6 +33,8 @@ namespace Open_lab.Tests.Services
         public async Task CreateAsync_Should_Create_Physician_With_All_Fields()
         {
             // Function: X.X — To Be Determined
+            // Arrange
+            // Act
             var physician = new Physician
             {
                 FullName = "Dr. John Smith",
@@ -45,6 +47,7 @@ namespace Open_lab.Tests.Services
 
             var created = await _service.CreateAsync(physician);
 
+            // Assert
             created.PhysicianId.Should().BeGreaterThan(0);
             var saved = await _db.Physicians.FindAsync(created.PhysicianId);
             saved.Should().NotBeNull();
@@ -60,8 +63,11 @@ namespace Open_lab.Tests.Services
         public async Task CreateAsync_Should_Create_Physician()
         {
             // Function: X.X — To Be Determined
+            // Arrange
+            // Act
             var physician = new Physician { FullName = "Dr. Smith", CommissionPercentage = 10m };
             var created = await _service.CreateAsync(physician);
+            // Assert
             created.PhysicianId.Should().BeGreaterThan(0);
             var saved = await _db.Physicians.FindAsync(created.PhysicianId);
             saved.Should().NotBeNull();
@@ -72,6 +78,8 @@ namespace Open_lab.Tests.Services
         public async Task CreateAsync_WithPriceList_Should_Link_PriceList()
         {
             // Function: X.X — To Be Determined
+            // Arrange
+            // Act
             var priceList = new PriceList { Name = "Doctor PL" };
             _db.PriceLists.Add(priceList);
             await _db.SaveChangesAsync();
@@ -86,6 +94,7 @@ namespace Open_lab.Tests.Services
             var created = await _service.CreateAsync(physician);
 
             var saved = await _db.Physicians.Include(p => p.PriceList).FirstOrDefaultAsync(p => p.PhysicianId == created.PhysicianId);
+            // Assert
             saved.Should().NotBeNull();
             saved!.PriceListId.Should().Be(priceList.PriceListId);
             saved.PriceList.Should().NotBeNull();
@@ -97,6 +106,8 @@ namespace Open_lab.Tests.Services
         public async Task UpdatePhysicianAsync_Should_Update_All_Fields()
         {
             // Function: X.X — To Be Determined
+            // Arrange
+            // Act
             var physician = new Physician
             {
                 FullName = "Dr. Old Name",
@@ -119,6 +130,7 @@ namespace Open_lab.Tests.Services
             await _service.UpdateAsync(physician);
 
             var saved = await _db.Physicians.FindAsync(physician.PhysicianId);
+            // Assert
             saved.Should().NotBeNull();
             saved!.FullName.Should().Be("Dr. New Name");
             saved.Phone.Should().Be("2222222222");
@@ -132,6 +144,8 @@ namespace Open_lab.Tests.Services
         public async Task UpdateAsync_Should_Assign_PriceList()
         {
             // Function: X.X — To Be Determined
+            // Arrange
+            // Act
             var priceList = new PriceList { Name = "PL" };
             _db.PriceLists.Add(priceList);
             await _db.SaveChangesAsync();
@@ -144,6 +158,7 @@ namespace Open_lab.Tests.Services
             await _service.UpdateAsync(physician);
 
             var saved = await _db.Physicians.FindAsync(physician.PhysicianId);
+            // Assert
             saved!.PriceListId.Should().Be(priceList.PriceListId);
         }
 
@@ -151,6 +166,8 @@ namespace Open_lab.Tests.Services
         public async Task UpdateAsync_Should_Remove_PriceList_When_Set_To_Null()
         {
             // Function: X.X — To Be Determined
+            // Arrange
+            // Act
             var priceList = new PriceList { Name = "Old PL" };
             _db.PriceLists.Add(priceList);
             await _db.SaveChangesAsync();
@@ -168,6 +185,7 @@ namespace Open_lab.Tests.Services
             await _service.UpdateAsync(physician);
 
             var saved = await _db.Physicians.FindAsync(physician.PhysicianId);
+            // Assert
             saved.Should().NotBeNull();
             saved!.PriceListId.Should().BeNull();
         }
@@ -176,6 +194,8 @@ namespace Open_lab.Tests.Services
         public async Task UpdateAsync_Should_Update_CommissionPercentage()
         {
             // Function: X.X — To Be Determined
+            // Arrange
+            // Act
             var physician = new Physician
             {
                 FullName = "Dr. Williams",
@@ -188,6 +208,7 @@ namespace Open_lab.Tests.Services
             await _service.UpdateAsync(physician);
 
             var saved = await _db.Physicians.FindAsync(physician.PhysicianId);
+            // Assert
             saved.Should().NotBeNull();
             saved!.CommissionPercentage.Should().Be(25m);
         }
@@ -232,6 +253,7 @@ namespace Open_lab.Tests.Services
         public async Task GetByIdAsync_When_Not_Found_Should_Return_Null_Edge()
         {
             // Function: X.X — To Be Determined
+            // Arrange
             // Act
             var physician = await _service.GetByIdAsync(9999);
 

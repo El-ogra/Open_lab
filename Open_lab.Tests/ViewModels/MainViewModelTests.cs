@@ -15,6 +15,8 @@ namespace Open_lab.Tests.ViewModels
         public async Task LogoutAsync_Should_Close_Attendance_And_Clear_Session()
         {
             // Function: X.X — To Be Determined
+            // Arrange
+            // Act
             AppSessionTestHelper.ResetToAdmin();
 
             var navigationServiceMock = new Mock<INavigationService>();
@@ -36,6 +38,7 @@ namespace Open_lab.Tests.ViewModels
             await viewModel.InvokePrivateAsync("LogoutAsync");
 
             attendanceServiceMock.Verify(x => x.CloseAsync(42), Times.Once);
+            // Assert
             AppSession.AttendanceLogId.Should().Be(0);
             AppSession.UserId.Should().Be(0);
             viewModel.IsLoggedIn.Should().BeFalse();

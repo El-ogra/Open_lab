@@ -21,10 +21,13 @@ namespace Open_lab.Tests.Integration
         public void OpenLabModulesDocumentation_Should_Define_13_Modules_And_97_Functions()
         {
             // Function: X.X — To Be Determined
+            // Arrange
+            // Act
             var markdown = File.ReadAllText(GetModulesDocPath());
             var moduleCount = ModuleRegex.Matches(markdown).Count;
             var functionIds = ExtractFunctionIds(markdown);
 
+            // Assert
             moduleCount.Should().Be(13);
             functionIds.Should().HaveCount(97);
             functionIds.Distinct().Should().HaveCount(97);
@@ -34,9 +37,12 @@ namespace Open_lab.Tests.Integration
         public void Every_Documented_Function_Should_Have_Model_Service_ViewModel_Mapping()
         {
             // Function: X.X — To Be Determined
+            // Arrange
+            // Act
             var documentedIds = ExtractFunctionIds(File.ReadAllText(GetModulesDocPath()));
             var mapped = BuildCases();
 
+            // Assert
             mapped.Select(x => x.FunctionId).Should().BeEquivalentTo(documentedIds);
             mapped.Should().OnlyContain(x => x.ModelType.Namespace != null && x.ModelType.Namespace.StartsWith("Open_lab.Models"));
             mapped.Should().OnlyContain(x => x.ServiceType.Namespace != null && x.ServiceType.Namespace.StartsWith("Open_lab.Services"));
@@ -47,9 +53,12 @@ namespace Open_lab.Tests.Integration
         public void Every_Function_Mapping_Should_Have_Service_Interface_And_ViewModel_Commands()
         {
             // Function: X.X — To Be Determined
+            // Arrange
+            // Act
             foreach (var item in BuildCases())
             {
                 var interfaceType = item.ServiceType.GetInterface($"I{item.ServiceType.Name}");
+                // Assert
                 interfaceType.Should().NotBeNull($"{item.FunctionId} requires a service contract");
 
                 var serviceMethods = item.ServiceType
@@ -70,6 +79,8 @@ namespace Open_lab.Tests.Integration
         public void Every_Function_Mapping_Should_Have_Service_And_ViewModel_Test_Evidence()
         {
             // Function: X.X — To Be Determined
+            // Arrange
+            // Act
             var serviceTestTexts = Directory.GetFiles(Path.Combine(GetRepositoryRoot(), "Open_lab.Tests", "Services"), "*.cs", SearchOption.AllDirectories)
                 .Select(File.ReadAllText)
                 .ToList();
@@ -79,6 +90,7 @@ namespace Open_lab.Tests.Integration
 
             foreach (var item in BuildCases())
             {
+                // Assert
                 serviceTestTexts.Any(t => t.Contains(item.ServiceType.Name, StringComparison.Ordinal)).Should()
                     .BeTrue($"{item.FunctionId} requires service test evidence for {item.ServiceType.Name}");
                 viewModelTestTexts.Any(t => t.Contains(item.ViewModelType.Name, StringComparison.Ordinal)).Should()

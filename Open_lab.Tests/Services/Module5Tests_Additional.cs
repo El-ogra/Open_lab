@@ -132,8 +132,10 @@ namespace Open_lab.Tests
         public async Task DeleteCultureAsync_With_NonExistent_Id_Should_NotThrow_EdgeGuard()
         {
             // Function: 5.1 — Enter Culture Data (Delete Non-Existent Edge Case)
+            // Arrange
             // Act & Assert
             Func<Task> act = async () => await _service.DeleteCultureAsync(9999);
+            // Assert
             await act.Should().NotThrowAsync();
         }
 
@@ -202,8 +204,10 @@ namespace Open_lab.Tests
         public async Task DeleteAntibioticAsync_With_NonExistent_Id_Should_NotThrow_EdgeGuard()
         {
             // Function: 5.2 — Add Antibiotics (Delete Non-Existent Edge Case)
+            // Arrange
             // Act & Assert
             Func<Task> act = async () => await _service.DeleteAntibioticAsync(8888);
+            // Assert
             await act.Should().NotThrowAsync();
         }
 
@@ -273,6 +277,7 @@ namespace Open_lab.Tests
         public void ClassifySensitivity_Should_Handle_Case_Insensitive_SuccessGuard(string raw, string expected)
         {
             // Function: 5.4 — Classify Sensitivity (BR-MED-005: Case Insensitive)
+            // Arrange
             // Act
             var result = _service.ClassifySensitivity(raw);
 
@@ -287,6 +292,7 @@ namespace Open_lab.Tests
         public void ClassifySensitivity_Should_Handle_Arabic_Input_SuccessGuard(string raw, string expected)
         {
             // Function: 5.4 — Classify Sensitivity (BR-MED-005: Arabic Support)
+            // Arrange
             // Production supports the canonical Arabic terms: حساس / متوسط / مقاوم.
             // Act
             var result = _service.ClassifySensitivity(raw);
@@ -299,6 +305,7 @@ namespace Open_lab.Tests
         public void ClassifySensitivity_With_Empty_String_Should_Return_Empty_EdgeGuard()
         {
             // Function: 5.4 — Classify Sensitivity (Empty String Edge Case)
+            // Arrange
             // Act
             var result = _service.ClassifySensitivity("");
 
@@ -310,6 +317,7 @@ namespace Open_lab.Tests
         public void ClassifySensitivity_With_Invalid_Value_Should_Throw_FailureGuard()
         {
             // Function: 5.4 — Classify Sensitivity (BR-MED-005: Invalid Classification)
+            // Arrange
             // Act
             Action act = () => _service.ClassifySensitivity("INVALID");
 
@@ -321,6 +329,7 @@ namespace Open_lab.Tests
         public void ClassifySensitivity_With_Null_Should_Return_Empty_EdgeGuard()
         {
             // Function: 5.4 — Classify Sensitivity (Null Edge Case)
+            // Arrange
             // Act
             var result = _service.ClassifySensitivity(null);
 
@@ -520,6 +529,7 @@ namespace Open_lab.Tests
         public async Task SearchCultureVisitTestsAsync_With_NonExistent_LabId_Should_Return_Empty_EdgeGuard()
         {
             // Function: 5.7 — Print Culture Report (No Results Edge Case)
+            // Arrange
             // Act
             var results = await _service.SearchCultureVisitTestsAsync("NONEXISTENT", DateTime.Today.AddDays(-1), DateTime.Today.AddDays(1));
 

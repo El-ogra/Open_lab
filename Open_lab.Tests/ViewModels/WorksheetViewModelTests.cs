@@ -26,6 +26,8 @@ namespace Open_lab.Tests.ViewModels
         public async Task LoadAsync_Should_Populate_Patient_Worksheet_Rows()
         {
             // Function: X.X — To Be Determined
+            // Arrange
+            // Act
             _worksheetServiceMock.Setup(x => x.GetWorksheetByPatientAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>()))
                 .ReturnsAsync(new List<WorkSheetPatientRow>
                 {
@@ -34,6 +36,7 @@ namespace Open_lab.Tests.ViewModels
 
             await _viewModel.InvokePrivateAsync("LoadAsync");
 
+            // Assert
             _viewModel.Rows.Should().ContainSingle();
             _viewModel.Rows[0].PatientName.Should().Be("P1");
             _viewModel.StatusMessage.Should().Contain("تم تحميل 1 زيارة");
@@ -43,11 +46,14 @@ namespace Open_lab.Tests.ViewModels
         public async Task PrintAsync_Should_Send_Patient_Worksheet_To_Print_Service()
         {
             // Function: X.X — To Be Determined
+            // Arrange
+            // Act
             _viewModel.Rows.Add(new WorkSheetPatientRow { VisitId = 1, PatientName = "P1", VisitDate = DateTime.Today, TestsCount = 1 });
 
             await _viewModel.InvokePrivateAsync("PrintAsync");
 
             _printServiceMock.Verify(x => x.PrintWorksheetByPatientAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<IReadOnlyCollection<WorkSheetPatientRow>>()), Times.Once);
+            // Assert
             _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
@@ -155,6 +161,8 @@ namespace Open_lab.Tests.ViewModels
         public async Task LoadAsync_Should_Populate_Test_Worksheet_Rows()
         {
             // Function: X.X — To Be Determined
+            // Arrange
+            // Act
             _worksheetServiceMock.Setup(x => x.GetWorksheetByTestAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>()))
                 .ReturnsAsync(new List<WorkSheetTestRow>
                 {
@@ -163,6 +171,7 @@ namespace Open_lab.Tests.ViewModels
 
             await _viewModel.InvokePrivateAsync("LoadAsync");
 
+            // Assert
             _viewModel.Rows.Should().ContainSingle();
             _viewModel.Rows[0].TestName.Should().Be("CBC");
             _viewModel.StatusMessage.Should().Contain("تم تحميل 1 تحليل");
@@ -172,11 +181,14 @@ namespace Open_lab.Tests.ViewModels
         public async Task PrintAsync_Should_Send_Test_Worksheet_To_Print_Service()
         {
             // Function: X.X — To Be Determined
+            // Arrange
+            // Act
             _viewModel.Rows.Add(new WorkSheetTestRow { TestName = "CBC", Count = 3 });
 
             await _viewModel.InvokePrivateAsync("PrintAsync");
 
             _printServiceMock.Verify(x => x.PrintWorksheetByTestAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<IReadOnlyCollection<WorkSheetTestRow>>()), Times.Once);
+            // Assert
             _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 

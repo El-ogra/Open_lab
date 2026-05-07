@@ -767,6 +767,7 @@ namespace Open_lab.Tests.Services
         public async Task EditPaymentAsync_When_PaymentNotFound_Should_Throw_FailureGuard()
         {
             // Function: 2.5 — Edit Payment
+            // Arrange
             // Act
             Func<Task> act = async () => await _service.EditPaymentAsync(99999, 50m, 1, "Reason");
 
@@ -813,6 +814,7 @@ namespace Open_lab.Tests.Services
         public async Task LogInvoicePrintedAsync_With_ZeroUserId_Should_Create_Log_EdgeGuard()
         {
             // Function: 2.8 — Generate Invoice
+            // Arrange
             // Act
             await _service.LogInvoicePrintedAsync(200, 0);
 

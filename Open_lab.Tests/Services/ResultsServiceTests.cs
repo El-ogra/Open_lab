@@ -64,6 +64,7 @@ namespace Open_lab.Tests.Services
         public async Task SaveResultAsync_When_VisitTestNotFound_Should_Throw()
         {
             // Function: 4.4 — Create Composite Report - Logic Guard: Verify composite report structure
+            // Arrange
             // Act
             Func<Task> act = async () => await _service.SaveResultAsync(999, 1, "5", null, null);
 
@@ -468,6 +469,7 @@ namespace Open_lab.Tests.Services
         public async Task Function_4_1_Automated_Intelligence_Full_Verification()
         {
             // Function: 4.1 — `Enter Test Results`
+            // Arrange
             var patient = new Patient { PatientId = 1, Gender = "Female", Age = 25 };
             _db.Patients.Add(patient);
 
@@ -484,6 +486,7 @@ namespace Open_lab.Tests.Services
 
             // Act - Validate Low Value (10)
             var lowResult = await _service.ValidateResultAsync(testId, "10", "Female", 25);
+            // Assert
             lowResult.Flag.Should().Be("L");
             lowResult.RecommendedComment.Should().Be("Anemia Risk");
 
@@ -497,6 +500,7 @@ namespace Open_lab.Tests.Services
         public async Task Function_4_3_Audit_Trail_Integrity_Verification()
         {
             // Function: 4.3 — `Edit Results`
+            // Arrange
             var vtId = 5;
             var pId = 20;
             _db.VisitTests.Add(new VisitTest { VisitTestId = vtId, VisitId = 10, TestId = 10 });
@@ -518,6 +522,7 @@ namespace Open_lab.Tests.Services
         public async Task Function_4_7_Print_Audit_Logging_Verification()
         {
             // Function: 4.7 — `Print Report`
+            // Arrange
             var visitId = 70;
             var userId = 5;
 

@@ -122,6 +122,7 @@ namespace Open_lab.Tests.ViewModels
             vm.SelectedAvailableTest = new Test { TestId = 5, Code = "X1", Price = 50m };
 
             // Act & Assert
+            // Assert
             vm.AddTestCommand.CanExecute(null).Should().BeFalse("command should be disabled when VisitId is 0");
         }
 
@@ -176,6 +177,7 @@ namespace Open_lab.Tests.ViewModels
             vm.SelectedVisitTest = null;
 
             // Act & Assert
+            // Assert
             vm.RemoveTestCommand.CanExecute(null).Should().BeFalse("cannot remove a test when none is selected");
         }
 

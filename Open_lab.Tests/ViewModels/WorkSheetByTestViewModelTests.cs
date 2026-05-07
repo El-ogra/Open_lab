@@ -58,6 +58,7 @@ namespace Open_lab.Tests.ViewModels
             vm.Rows.Clear();
 
             // Act/Assert
+            // Assert
             vm.PrintCommand.CanExecute(null).Should().BeFalse();
         }
     }

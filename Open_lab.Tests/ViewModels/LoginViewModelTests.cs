@@ -84,6 +84,7 @@ namespace Open_lab.Tests.ViewModels
         {
             // Function: 10.4 — Record Attendance (command availability)
             // Arrange & Act
+            // Act
             var canExecute = _viewModel.LoginCommand.CanExecute(null);
 
             // Assert

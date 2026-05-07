@@ -9,6 +9,7 @@ namespace Open_lab.Tests.Services
         public void GenerateSalt_Should_Return_NonEmpty_Base64_String()
         {
             // Function: X.X — To Be Determined
+            // Arrange
             // Act
             var salt = PasswordSecurity.GenerateSalt();
 
@@ -21,6 +22,7 @@ namespace Open_lab.Tests.Services
         public void GenerateSalt_Should_Return_Different_Values_On_Multiple_Calls()
         {
             // Function: X.X — To Be Determined
+            // Arrange
             // Act
             var salt1 = PasswordSecurity.GenerateSalt();
             var salt2 = PasswordSecurity.GenerateSalt();

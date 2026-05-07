@@ -13,6 +13,8 @@ namespace Open_lab.Tests.Services
         public void CoverageTracker_When_FunctionMarkedComplete_Should_List_TestNames()
         {
             // Function: X.X — To Be Determined
+            // Arrange
+            // Act
             var path = GetCoverageTrackerPath();
             var lines = File.ReadAllLines(path);
 
@@ -24,6 +26,7 @@ namespace Open_lab.Tests.Services
             foreach (var row in functionRows)
             {
                 var cells = row.Trim().Trim('|').Split('|').Select(p => p.Trim()).ToArray();
+                // Assert
                 cells.Length.Should().BeGreaterOrEqualTo(6, $"row should have all columns: {row}");
 
                 var functionId = cells[0];

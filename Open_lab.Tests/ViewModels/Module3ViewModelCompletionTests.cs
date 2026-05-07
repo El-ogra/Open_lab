@@ -40,12 +40,15 @@ namespace Open_lab.Tests.ViewModels
         public void TestCatalog_NewCommand_ShouldResetForm_SuccessGuard()
         {
             // Function: 3.1 — Add New Test
+            // Arrange
+            // Act
             var vm = new TestCatalogViewModel(_catalogMock.Object, _barcodeMock.Object);
             vm.SelectedTest = new Test { TestId = 1, Code = "T1" };
             vm.Code = "T1";
 
             vm.NewCommand.Execute(null);
 
+            // Assert
             vm.SelectedTest.Should().BeNull();
             vm.Code.Should().BeEmpty();
         }
@@ -54,6 +57,8 @@ namespace Open_lab.Tests.ViewModels
         public async Task TestCatalog_Save_WhenIsSendOut_ShouldIncludePricing_LogicGuard()
         {
             // Function: 3.9 — Mark as Outsourced
+            // Arrange
+            // Act
             var vm = new TestCatalogViewModel(_catalogMock.Object, _barcodeMock.Object);
             vm.Code = "OUT1";
             vm.NameReport = "Outsource Test";
@@ -69,6 +74,7 @@ namespace Open_lab.Tests.ViewModels
 
             _catalogMock.Verify(x => x.CreateTestAsync(It.Is<Test>(t => 
                 t.IsSendOut && t.CostPrice == 100m && t.PatientPrice == 200m)), Times.Once);
+            // Assert
             vm.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
@@ -80,6 +86,8 @@ namespace Open_lab.Tests.ViewModels
         public async Task ReferenceRanges_Save_WithInvalidBoundaries_ShouldShowError_FailureGuard()
         {
             // Function: 3.3 — Set Reference Values
+            // Arrange
+            // Act
             var vm = new ReferenceRangesViewModel(_catalogMock.Object);
             vm.SelectedTest = new Test { TestId = 1 };
             vm.AgeFrom = 50;
@@ -90,6 +98,7 @@ namespace Open_lab.Tests.ViewModels
 
             await vm.InvokePrivateAsync("SaveAsync");
 
+            // Assert
             vm.StatusMessage.Should().Contain("خطأ: age range invalid");
         }
 
@@ -97,6 +106,8 @@ namespace Open_lab.Tests.ViewModels
         public async Task ReferenceRanges_Load_WhenTestHasNoRanges_ShouldBeEmpty_EdgeGuard()
         {
             // Function: 3.3 — Set Reference Values (Edge Case)
+            // Arrange
+            // Act
             var vm = new ReferenceRangesViewModel(_catalogMock.Object);
             vm.SelectedTest = new Test { TestId = 2 };
             
@@ -105,6 +116,7 @@ namespace Open_lab.Tests.ViewModels
 
             await vm.InvokePrivateAsync("LoadRangesAsync");
 
+            // Assert
             vm.Ranges.Should().BeEmpty();
         }
 
@@ -116,6 +128,8 @@ namespace Open_lab.Tests.ViewModels
         public async Task TestComments_Save_WithValidComment_ShouldCallService_SuccessGuard()
         {
             // Function: 3.6 — Add Test Comments
+            // Arrange
+            // Act
             var vm = new TestCommentsViewModel(_catalogMock.Object);
             vm.SelectedTest = new Test { TestId = 5 };
             vm.CommentText = "New Comment";
@@ -129,6 +143,7 @@ namespace Open_lab.Tests.ViewModels
 
             _catalogMock.Verify(x => x.CreateTestCommentAsync(It.Is<TestComment>(c => 
                 c.TestId == 5 && c.CommentText == "New Comment" && c.LowComment == "Low Msg" && c.HighComment == "High Msg")), Times.Once);
+            // Assert
             vm.StatusMessage.Should().Contain("تم حفظ");
         }
 
@@ -136,6 +151,8 @@ namespace Open_lab.Tests.ViewModels
         public async Task TestComments_Save_When_ServiceThrows_Should_Show_Error_FailureGuard()
         {
             // Function: 3.6 — Add Test Comments (Failure Case)
+            // Arrange
+            // Act
             var vm = new TestCommentsViewModel(_catalogMock.Object);
             vm.SelectedTest = new Test { TestId = 1 };
             vm.CommentText = "Fail Comment";
@@ -145,6 +162,7 @@ namespace Open_lab.Tests.ViewModels
 
             await vm.InvokePrivateAsync("SaveAsync");
 
+            // Assert
             vm.StatusMessage.Should().Contain("خطأ:");
             vm.StatusMessage.Should().Contain("comment-save-failed");
         }
@@ -153,6 +171,8 @@ namespace Open_lab.Tests.ViewModels
         public async Task TestComments_Save_WithWhitespaceText_Should_Be_SentToService_EdgeGuard()
         {
             // Function: 3.6 — Add Test Comments (Edge Case)
+            // Arrange
+            // Act
             // The VM doesn't trim, but the Service does. We verify it's sent to the service.
             var vm = new TestCommentsViewModel(_catalogMock.Object);
             vm.SelectedTest = new Test { TestId = 1 };
@@ -164,6 +184,7 @@ namespace Open_lab.Tests.ViewModels
             await vm.InvokePrivateAsync("SaveAsync");
 
             _catalogMock.Verify(x => x.CreateTestCommentAsync(It.Is<TestComment>(c => c.CommentText == "  Whitespace  ")), Times.Once);
+            // Assert
             vm.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
@@ -171,6 +192,8 @@ namespace Open_lab.Tests.ViewModels
         public async Task TestComments_Delete_WhenSelected_ShouldCallService_SuccessGuard()
         {
             // Function: 3.6 — Add Test Comments
+            // Arrange
+            // Act
             var vm = new TestCommentsViewModel(_catalogMock.Object);
             var comment = new TestComment { CommentId = 99 };
             vm.SelectedComment = comment;
@@ -178,6 +201,7 @@ namespace Open_lab.Tests.ViewModels
             await vm.InvokePrivateAsync("DeleteAsync");
 
             _catalogMock.Verify(x => x.DeleteTestCommentAsync(99), Times.Once);
+            // Assert
             vm.Comments.Should().NotContain(comment);
             vm.StatusMessage.Should().NotBeNullOrEmpty();
         }
@@ -190,6 +214,8 @@ namespace Open_lab.Tests.ViewModels
         public async Task CustomGroups_DeleteItem_WhenSelected_ShouldCallService_SuccessGuard()
         {
             // Function: 3.5 — Create Custom Group
+            // Arrange
+            // Act
             var vm = new CustomGroupsViewModel(_catalogMock.Object);
             var item = new CustomGroupItem { CustomGroupItemId = 12 };
             vm.SelectedItem = item; // Property is SelectedItem, not SelectedGroupItem
@@ -197,6 +223,7 @@ namespace Open_lab.Tests.ViewModels
             await vm.InvokePrivateAsync("DeleteItemAsync");
 
             _catalogMock.Verify(x => x.DeleteCustomGroupItemAsync(12), Times.Once);
+            // Assert
             vm.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
@@ -208,6 +235,8 @@ namespace Open_lab.Tests.ViewModels
         public async Task PriceLists_DeleteItem_WhenSelected_ShouldCallService_SuccessGuard()
         {
             // Function: 3.8 — Update Prices
+            // Arrange
+            // Act
             var vm = new PriceListsViewModel(_catalogMock.Object, _printMock.Object);
             var item = new PriceListItem { PriceListItemId = 44 };
             vm.SelectedItem = item;
@@ -215,6 +244,7 @@ namespace Open_lab.Tests.ViewModels
             await vm.InvokePrivateAsync("DeleteItemAsync");
 
             _catalogMock.Verify(x => x.DeletePriceListItemAsync(44), Times.Once);
+            // Assert
             vm.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
@@ -222,6 +252,8 @@ namespace Open_lab.Tests.ViewModels
         public async Task PriceLists_Print_ShouldCallPrintService_SuccessGuard()
         {
             // Function: 3.7 — Create Price List
+            // Arrange
+            // Act
             var vm = new PriceListsViewModel(_catalogMock.Object, _printMock.Object);
             var pl = new PriceList { PriceListId = 1, Name = "List" };
             vm.SelectedPriceList = pl;
@@ -230,6 +262,7 @@ namespace Open_lab.Tests.ViewModels
             await vm.InvokePrivateAsync("PrintListAsync");
 
             _printMock.Verify(x => x.PrintTextReportAsync(It.IsAny<string>(), It.IsAny<IReadOnlyCollection<string>>(), It.IsAny<string>()), Times.Once);
+            // Assert
             vm.StatusMessage.Should().NotBeNullOrEmpty();
         }
     }

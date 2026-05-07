@@ -28,6 +28,9 @@ namespace Open_lab.Tests.ViewModels
         public void PatientBilling_Commands_When_Admin_Should_Be_Enabled()
         {
             // Function: 2.9 — View Patient Account
+            // Arrange
+            // Act
+            // Assert
             _viewModel.LoadVisitCommand.CanExecute(null).Should().BeTrue();
             _viewModel.SaveInvoiceCommand.CanExecute(null).Should().BeTrue();
             _viewModel.AddPaymentCommand.CanExecute(null).Should().BeFalse();
@@ -126,6 +129,7 @@ namespace Open_lab.Tests.ViewModels
             _viewModel.SaveInvoiceCommand.Execute(null);
             await Task.Delay(100);
 
+            // Assert
             _viewModel.StatusMessage.Should().Contain("يرجى إدخال رقم الزيارة");
         }
 

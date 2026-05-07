@@ -30,6 +30,8 @@ namespace Open_lab.Tests.Services
         public async Task GeneratePayrollSummaryAsync_Should_Calculate_Time_And_Day_Statuses_For_Module11_5()
         {
             // Function: 11.5 — `Generate Attendance Report`
+            // Arrange
+            // Act
             var user = new User { Username = "u-payroll", FullName = "Payroll User" };
             _db.Users.Add(user);
 
@@ -72,6 +74,7 @@ namespace Open_lab.Tests.Services
 
             var rows = await _service.GeneratePayrollSummaryAsync(DateTime.Today, DateTime.Today.AddDays(1), user.UserId);
 
+            // Assert
             rows.Should().ContainSingle();
             var row = rows[0];
             row.UserId.Should().Be(user.UserId);

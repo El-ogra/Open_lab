@@ -77,6 +77,7 @@ namespace Open_lab.Tests.Services
         public async Task GetCompositeReportAsync_With_NonExistent_Visit_Should_Return_Null_Failure()
         {
             // Function: 4.4 — Create Composite Report
+            // Arrange
             // Act
             var report = await _reportService.GetCompositeReportAsync(99999);
 
@@ -263,6 +264,7 @@ namespace Open_lab.Tests.Services
         public async Task GetVisitReportAsync_With_InvalidVisitId_Should_Return_Null_Failure()
         {
             // Function: 4.6 — Preview Report
+            // Arrange
             // Act
             var report = await _reportService.GetVisitReportAsync(-1);
 
@@ -530,7 +532,9 @@ namespace Open_lab.Tests.Services
         public async Task GetPatientHistoryAsync_With_NonExistent_Patient_Should_Throw_Failure()
         {
             // Function: 4.9 — Compare with History (not found failure)
+            // Arrange
             // Act & Assert
+            // Assert
             await Assert.ThrowsAsync<InvalidOperationException>(() =>
                 _reportService.GetPatientHistoryAsync(99999, null, null));
         }

@@ -54,6 +54,8 @@ namespace Open_lab.Tests.ViewModels
         public async Task Function_4_8_LoadCommand_Should_Populate_Patient_Data_Success()
         {
             // Function: 4.8 — Print Blank Report (Success)
+            // Arrange
+            // Act
             var viewModel = new BlankReportViewModel(_reportServiceMock.Object, _printServiceMock.Object);
             var report = CreateBlankReport(800, "Test Patient");
             _reportServiceMock.Setup(x => x.GetVisitReportAsync(800)).ReturnsAsync(report);
@@ -62,6 +64,7 @@ namespace Open_lab.Tests.ViewModels
             await viewModel.InvokePrivateAsync("LoadAsync");
             await Task.Delay(100);
 
+            // Assert
             viewModel.PatientName.Should().Be("Test Patient");
             viewModel.LabId.Should().Be("L-800");
             viewModel.Gender.Should().Be("Male");
@@ -73,6 +76,8 @@ namespace Open_lab.Tests.ViewModels
         public async Task Function_4_8_LoadCommand_With_Null_Referral_Should_Handle_Edge()
         {
             // Function: 4.8 — Print Blank Report (Edge: null referral)
+            // Arrange
+            // Act
             var viewModel = new BlankReportViewModel(_reportServiceMock.Object, _printServiceMock.Object);
             var report = new VisitReportData
             {
@@ -86,6 +91,7 @@ namespace Open_lab.Tests.ViewModels
             await viewModel.InvokePrivateAsync("LoadAsync");
             await Task.Delay(100);
 
+            // Assert
             viewModel.ReferralName.Should().Be("—");
         }
 
@@ -93,6 +99,8 @@ namespace Open_lab.Tests.ViewModels
         public async Task Function_4_8_LoadCommand_With_NonExistent_Visit_Should_Show_Error_Failure()
         {
             // Function: 4.8 — Print Blank Report (Failure)
+            // Arrange
+            // Act
             var viewModel = new BlankReportViewModel(_reportServiceMock.Object, _printServiceMock.Object);
             _reportServiceMock.Setup(x => x.GetVisitReportAsync(899)).ReturnsAsync((VisitReportData?)null);
             viewModel.VisitId = 899;
@@ -100,6 +108,7 @@ namespace Open_lab.Tests.ViewModels
             await viewModel.InvokePrivateAsync("LoadAsync");
             await Task.Delay(100);
 
+            // Assert
             viewModel.StatusMessage.Should().Contain("لم يتم العثور");
         }
 
@@ -107,12 +116,15 @@ namespace Open_lab.Tests.ViewModels
         public async Task Function_4_8_LoadCommand_With_Zero_VisitId_Should_Validate_Edge()
         {
             // Function: 4.8 — Print Blank Report (Edge: invalid input)
+            // Arrange
+            // Act
             var viewModel = new BlankReportViewModel(_reportServiceMock.Object, _printServiceMock.Object);
             viewModel.VisitId = 0;
 
             await viewModel.InvokePrivateAsync("LoadAsync");
             await Task.Delay(100);
 
+            // Assert
             viewModel.StatusMessage.Should().Contain("إدخال");
         }
 
@@ -120,6 +132,8 @@ namespace Open_lab.Tests.ViewModels
         public async Task Function_4_8_PrintCommand_Should_Call_PrintService_Success()
         {
             // Function: 4.8 — Print Blank Report (Success)
+            // Arrange
+            // Act
             var viewModel = new BlankReportViewModel(_reportServiceMock.Object, _printServiceMock.Object);
             var report = CreateBlankReport(802);
             _reportServiceMock.Setup(x => x.GetVisitReportAsync(802)).ReturnsAsync(report);
@@ -133,6 +147,7 @@ namespace Open_lab.Tests.ViewModels
             await Task.Delay(100);
 
             _printServiceMock.Verify(x => x.PrintTextReportAsync("تقرير فارغ", It.IsAny<IReadOnlyCollection<string>>(), It.IsAny<string>()), Times.Once);
+            // Assert
             viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
@@ -140,6 +155,8 @@ namespace Open_lab.Tests.ViewModels
         public async Task Function_4_8_PrintCommand_Without_PrintService_Should_Show_Error_Edge()
         {
             // Function: 4.8 — Print Blank Report (Edge: no print service)
+            // Arrange
+            // Act
             var viewModel = new BlankReportViewModel(_reportServiceMock.Object, null);
             var report = CreateBlankReport(803);
             _reportServiceMock.Setup(x => x.GetVisitReportAsync(803)).ReturnsAsync(report);
@@ -150,6 +167,7 @@ namespace Open_lab.Tests.ViewModels
             await viewModel.InvokePrivateAsync("PrintBlankAsync");
             await Task.Delay(100);
 
+            // Assert
             viewModel.StatusMessage.Should().Contain("غير متاحة");
         }
 
@@ -157,6 +175,8 @@ namespace Open_lab.Tests.ViewModels
         public async Task Function_4_8_PrintCommand_When_ServiceThrows_Should_Show_Error_Failure()
         {
             // Function: 4.8 — Print Blank Report (Failure)
+            // Arrange
+            // Act
             var viewModel = new BlankReportViewModel(_reportServiceMock.Object, _printServiceMock.Object);
             var report = CreateBlankReport(804);
             _reportServiceMock.Setup(x => x.GetVisitReportAsync(804)).ReturnsAsync(report);
@@ -169,6 +189,7 @@ namespace Open_lab.Tests.ViewModels
             await viewModel.InvokePrivateAsync("PrintBlankAsync");
             await Task.Delay(100);
 
+            // Assert
             viewModel.StatusMessage.Should().Contain("خطأ:");
         }
 
@@ -176,6 +197,8 @@ namespace Open_lab.Tests.ViewModels
         public async Task Function_4_8_With_Multiple_Pending_Tests_Should_Show_All_Success()
         {
             // Function: 4.8 — Print Blank Report (multiple tests)
+            // Arrange
+            // Act
             var viewModel = new BlankReportViewModel(_reportServiceMock.Object, _printServiceMock.Object);
             var report = new VisitReportData
             {
@@ -195,6 +218,7 @@ namespace Open_lab.Tests.ViewModels
             await Task.Delay(100);
 
             // The VM sets a generic load message; ensure load succeeded instead of depending on count formatting
+            // Assert
             viewModel.StatusMessage.Should().Contain("تم تحميل");
         }
 
@@ -202,9 +226,12 @@ namespace Open_lab.Tests.ViewModels
         public Task Function_4_8_With_No_Permission_Should_Disable_Command_Failure()
         {
             // Function: 4.8 — Print Blank Report (Permission failure)
+            // Arrange
+            // Act
             AppSessionTestHelper.Reset();
             var viewModel = new BlankReportViewModel(_reportServiceMock.Object, _printServiceMock.Object);
 
+            // Assert
             viewModel.PrintBlankCommand.CanExecute(null).Should().BeFalse();
             return Task.CompletedTask;
         }

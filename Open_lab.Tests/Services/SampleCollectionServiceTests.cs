@@ -32,6 +32,7 @@ namespace Open_lab.Tests.Services
         public async Task GetRowsAsync_Should_Return_Rows_LogicGuard()
         {
             // Function: X.X — To Be Determined
+            // Arrange
             // Refactored to Logic Guard - verifies complete row data and filtering
             var patient = new Patient { LabId = "L1", FullName = "P", Gender = "Male", Phone = "555-1111" };
             _db.Patients.Add(patient);
@@ -65,6 +66,8 @@ namespace Open_lab.Tests.Services
         public async Task MarkCollectedAsync_Should_Create_SampleCollection_LogicGuard()
         {
             // Function: X.X — To Be Determined
+            // Arrange
+            // Act
             // Refactored to Logic Guard - verifies all fields and side effects
             var patient = new Patient { LabId = "L2", FullName = "P2", Gender = "Female" };
             _db.Patients.Add(patient);
@@ -85,6 +88,7 @@ namespace Open_lab.Tests.Services
             await _service.MarkCollectedAsync(vt.VisitTestId, userId: 7, isExternal: false, receivedBy: null);
 
             var sample = await _db.SampleCollections.FirstOrDefaultAsync(s => s.VisitTestId == vt.VisitTestId);
+            // Assert
             sample.Should().NotBeNull();
             sample!.Status.Should().Be("مسحوبة");
             sample.CollectedBy.Should().Be(7);
@@ -97,6 +101,8 @@ namespace Open_lab.Tests.Services
         public async Task MarkSeparatedAsync_Without_Sample_Should_Throw_LogicGuard()
         {
             // Function: X.X — To Be Determined
+            // Arrange
+            // Act
             // Refactored to Logic Guard - verifies exception message and side effect
             Func<Task> act = async () => await _service.MarkSeparatedAsync(999, "Centrifuge");
             
@@ -112,6 +118,8 @@ namespace Open_lab.Tests.Services
         public async Task MarkNotCollectedAsync_Should_Remove_Sample()
         {
             // Function: X.X — To Be Determined
+            // Arrange
+            // Act
             var patient = new Patient { LabId = "L3", FullName = "P3", Gender = "Male" };
             _db.Patients.Add(patient);
             await _db.SaveChangesAsync();
@@ -132,6 +140,7 @@ namespace Open_lab.Tests.Services
             await _db.SaveChangesAsync();
 
             await _service.MarkNotCollectedAsync(vt.VisitTestId);
+            // Assert
             (await _db.SampleCollections.FirstOrDefaultAsync(s => s.VisitTestId == vt.VisitTestId)).Should().BeNull();
         }
 
@@ -322,6 +331,7 @@ namespace Open_lab.Tests.Services
         public async Task MarkCollectedAsync_NonExistentVisitTest_Should_Throw()
         {
             // Function: X.X — To Be Determined
+            // Arrange
             // Act
             Func<Task> act = async () => await _service.MarkCollectedAsync(99999, userId: 1, isExternal: false, receivedBy: null);
 

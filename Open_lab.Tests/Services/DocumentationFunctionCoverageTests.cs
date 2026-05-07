@@ -21,9 +21,12 @@ namespace Open_lab.Tests.Services
         public void OpenLabModulesDocumentation_Should_Contain_Exactly_97_Functions()
         {
             // Function: X.X — To Be Determined
+            // Arrange
+            // Act
             var content = File.ReadAllText(GetModulesDocPath());
             var ids = ExtractFunctionIds(content);
 
+            // Assert
             ids.Count.Should().Be(97);
             ids.Distinct().Count().Should().Be(97);
         }
@@ -32,11 +35,14 @@ namespace Open_lab.Tests.Services
         public void JobsAndTestsGuide_Should_Reference_All_Documented_Functions()
         {
             // Function: X.X — To Be Determined
+            // Arrange
+            // Act
             var modulesIds = ExtractFunctionIds(File.ReadAllText(GetModulesDocPath()));
             var jobsText = File.ReadAllText(GetJobsGuidePath());
 
             foreach (var id in modulesIds)
             {
+                // Assert
                 jobsText.Should().Contain(id, $"function {id} must be traceable in the audit guide");
             }
         }
@@ -45,8 +51,11 @@ namespace Open_lab.Tests.Services
         public void Each_Function_Should_Map_To_Model_Service_ViewModel()
         {
             // Function: X.X — To Be Determined
+            // Arrange
+            // Act
             foreach (var item in BuildCases())
             {
+                // Assert
                 item.FunctionId.Should().NotBeNullOrWhiteSpace();
                 item.ModelType.Should().NotBeNull();
                 item.ServiceType.Should().NotBeNull();
@@ -73,7 +82,10 @@ namespace Open_lab.Tests.Services
         public void Function_Mapping_Should_Be_Complete_And_Aligned_With_Documentation()
         {
             // Function: X.X — To Be Determined
+            // Arrange
+            // Act
             var mapped = BuildCases().Select(x => x.FunctionId).ToList();
+            // Assert
             mapped.Should().HaveCount(97);
             mapped.Distinct().Count().Should().Be(97);
 

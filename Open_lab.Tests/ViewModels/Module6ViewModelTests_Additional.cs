@@ -48,6 +48,8 @@ namespace Open_lab.Tests
         public async Task MarkCollectedAsync_With_IsExternal_Flag_Should_Call_Service_With_External_True_SuccessGuard()
         {
             // Function: 6.4 — Mark Taken Outside Lab (External Flag from ViewModel)
+            // Arrange
+            // Act
             _viewModel.SelectedRow = new SampleCollectionRow { VisitTestId = 100 };
             _collectionServiceMock.Setup(x => x.MarkCollectedAsync(100, It.IsAny<int>(), true, It.IsAny<int?>()))
                 .Returns(Task.CompletedTask);
@@ -56,6 +58,7 @@ namespace Open_lab.Tests
             await Task.Delay(50);
 
             _collectionServiceMock.Verify(x => x.MarkCollectedAsync(100, It.IsAny<int>(), true, It.IsAny<int?>()), Times.Once);
+            // Assert
             _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
@@ -63,8 +66,11 @@ namespace Open_lab.Tests
         public void MarkCollectedCommand_CanExecute_When_Row_Null_Should_Return_False_EdgeGuard()
         {
             // Function: 6.1 — Register Sample Collection (Null Selection Guard)
+            // Arrange
+            // Act
             _viewModel.SelectedRow = null;
 
+            // Assert
             _viewModel.MarkCollectedCommand.CanExecute(null).Should().BeFalse();
         }
 
@@ -72,12 +78,15 @@ namespace Open_lab.Tests
         public async Task LoadCommand_With_Empty_Rows_Should_Set_Empty_Message_EdgeGuard()
         {
             // Function: 6.1 — Register Sample Collection (Empty Result Edge Case)
+            // Arrange
+            // Act
             _collectionServiceMock.Setup(x => x.GetRowsAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>()))
                 .ReturnsAsync(new List<SampleCollectionRow>());
 
             _viewModel.LoadCommand.Execute(null);
             await Task.Delay(50);
 
+            // Assert
             _viewModel.Items.Should().BeEmpty();
             _viewModel.StatusMessage.Should().Contain("تم تحميل");
         }
@@ -90,6 +99,8 @@ namespace Open_lab.Tests
         public async Task MarkSeparatedAsync_With_Null_SeparationType_Should_Set_Warning_EdgeGuard()
         {
             // Function: 6.2 — Record Sample Separation (Null Separation Type)
+            // Arrange
+            // Act
             _viewModel.SelectedRow = new SampleCollectionRow { VisitTestId = 200 };
             _viewModel.SeparationType = string.Empty;
 
@@ -101,6 +112,7 @@ namespace Open_lab.Tests
 
             // Separation type can be null - service handles it
             _collectionServiceMock.Verify(x => x.MarkSeparatedAsync(200, It.IsAny<string>()), Times.Once);
+            // Assert
             _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
@@ -128,12 +140,15 @@ namespace Open_lab.Tests
         public async Task RefreshSampleStatusAsync_With_Null_Tracking_Data_Should_Set_NotFound_Message_EdgeGuard()
         {
             // Function: 6.3 — Track Sample Status (No Tracking Data)
+            // Arrange
+            // Act
             _viewModel.SelectedRow = new SampleCollectionRow { VisitTestId = 300 };
             _trackingServiceMock.Setup(x => x.GetSampleStatusAsync(300)).ReturnsAsync((SampleCollection?)null);
 
             _viewModel.RefreshSampleStatusCommand.Execute(null);
             await Task.Delay(50);
 
+            // Assert
             _viewModel.SelectedSampleStatus.Should().Contain("لا يوجد سجل تتبع");
         }
 
@@ -141,6 +156,8 @@ namespace Open_lab.Tests
         public async Task RefreshSampleStatusAsync_With_Valid_Data_Should_Update_Status_SuccessGuard()
         {
             // Function: 6.3 — Track Sample Status (Valid Status Update)
+            // Arrange
+            // Act
             _viewModel.SelectedRow = new SampleCollectionRow { VisitTestId = 301 };
 
             var sampleData = new SampleCollection
@@ -154,6 +171,7 @@ namespace Open_lab.Tests
             _viewModel.RefreshSampleStatusCommand.Execute(null);
             await Task.Delay(50);
 
+            // Assert
             _viewModel.SelectedSampleStatus.Should().Contain("مسحوبة");
         }
 
@@ -161,6 +179,8 @@ namespace Open_lab.Tests
         public async Task RefreshSampleStatusAsync_With_Separated_Status_Should_Show_Separated_Message_SuccessGuard()
         {
             // Function: 6.3 — Track Sample Status (Separated Status)
+            // Arrange
+            // Act
             _viewModel.SelectedRow = new SampleCollectionRow { VisitTestId = 302 };
 
             var sampleData = new SampleCollection
@@ -174,6 +194,7 @@ namespace Open_lab.Tests
             _viewModel.RefreshSampleStatusCommand.Execute(null);
             await Task.Delay(50);
 
+            // Assert
             _viewModel.SelectedSampleStatus.Should().Contain("مفصولة");
         }
 
@@ -185,12 +206,15 @@ namespace Open_lab.Tests
         public async Task MarkExternalCollectedAsync_With_Null_SelectedRow_Should_Do_Nothing_EdgeGuard()
         {
             // Function: 6.4 — Mark Taken Outside Lab (Null Selection)
+            // Arrange
+            // Act
             _viewModel.SelectedRow = null;
 
             _viewModel.MarkExternalCollectedCommand.Execute(null);
             await Task.Delay(50);
 
             _collectionServiceMock.Verify(x => x.MarkCollectedAsync(It.IsAny<int>(), It.IsAny<int>(), true, It.IsAny<int?>()), Times.Never);
+            // Assert
             _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
@@ -198,6 +222,8 @@ namespace Open_lab.Tests
         public async Task MarkExternalCollectedAsync_When_Service_Succeeds_Should_Reload_Data_SuccessGuard()
         {
             // Function: 6.4 — Mark Taken Outside Lab (Success + Reload)
+            // Arrange
+            // Act
             _viewModel.SelectedRow = new SampleCollectionRow { VisitTestId = 400 };
 
             _collectionServiceMock.Setup(x => x.MarkCollectedAsync(400, It.IsAny<int>(), true, It.IsAny<int?>()))
@@ -209,6 +235,7 @@ namespace Open_lab.Tests
             await Task.Delay(50);
 
             _collectionServiceMock.Verify(x => x.GetRowsAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>()), Times.AtLeast(1));
+            // Assert
             _viewModel.StatusMessage.Should().Contain("تم تعليم العينة كخارجية");
         }
 
@@ -216,6 +243,8 @@ namespace Open_lab.Tests
         public async Task MarkExternalCollectedCommand_Without_Login_Should_Reject_FailureGuard()
         {
             // Function: 6.4 — Mark Taken Outside Lab (Authentication Required)
+            // Arrange
+            // Act
             AppSessionTestHelper.Reset();
             _viewModel.SelectedRow = new SampleCollectionRow { VisitTestId = 401 };
 
@@ -223,6 +252,7 @@ namespace Open_lab.Tests
             await Task.Delay(50);
 
             _collectionServiceMock.Verify(x => x.MarkCollectedAsync(It.IsAny<int>(), It.IsAny<int>(), true, It.IsAny<int?>()), Times.Never);
+            // Assert
             _viewModel.StatusMessage.Should().Contain("يجب تسجيل الدخول");
         }
 
@@ -234,6 +264,8 @@ namespace Open_lab.Tests
         public async Task MarkCollected_Followed_By_MarkSeparated_Should_Update_Status_SuccessGuard()
         {
             // Function: 6.1 + 6.2 — Complete Collection Then Separation
+            // Arrange
+            // Act
             _viewModel.SelectedRow = new SampleCollectionRow { VisitTestId = 500 };
             _viewModel.SeparationType = "Centrifuge";
 
@@ -251,6 +283,7 @@ namespace Open_lab.Tests
 
             _collectionServiceMock.Verify(x => x.MarkCollectedAsync(500, It.IsAny<int>(), false, It.IsAny<int?>()), Times.Once);
             _collectionServiceMock.Verify(x => x.MarkSeparatedAsync(500, "Centrifuge"), Times.Once);
+            // Assert
             _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
@@ -258,6 +291,8 @@ namespace Open_lab.Tests
         public async Task MarkNotCollectedAsync_Should_Call_Service_SuccessGuard()
         {
             // Function: 6.1 — Register Sample Collection (Cancel Collection)
+            // Arrange
+            // Act
             _viewModel.SelectedRow = new SampleCollectionRow { VisitTestId = 600 };
 
             _collectionServiceMock.Setup(x => x.MarkNotCollectedAsync(600)).Returns(Task.CompletedTask);
@@ -268,6 +303,7 @@ namespace Open_lab.Tests
             await Task.Delay(50);
 
             _collectionServiceMock.Verify(x => x.MarkNotCollectedAsync(600), Times.Once);
+            // Assert
             _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 

@@ -34,6 +34,8 @@ namespace Open_lab.Tests.Services
         public async Task GetReferralsAsync_Should_Return_List_LogicGuard()
         {
             // Function: X.X — To Be Determined
+            // Arrange
+            // Act
             // Refactored to Logic Guard - verifies data integrity
             _db.Referrals.Add(new Referral { Name = "Ref A" });
             _db.Referrals.Add(new Referral { Name = "Ref B" });
@@ -51,6 +53,7 @@ namespace Open_lab.Tests.Services
         public async Task GetReferralsAsync_When_No_Data_Should_Return_Empty_Edge()
         {
             // Function: X.X — To Be Determined
+            // Arrange
             // Act
             var list = await _service.GetReferralsAsync();
 
@@ -62,6 +65,8 @@ namespace Open_lab.Tests.Services
         public async Task GetMonthlyAnalysisAsync_Should_Return_12_Months_With_Correct_Counts_LogicGuard()
         {
             // Function: X.X — To Be Determined
+            // Arrange
+            // Act
             // Refactored to Logic Guard - verifies aggregation accuracy
             var patient = new Patient { LabId = "L1", FullName = "P1", Gender = "Male" };
             _db.Patients.Add(patient);
@@ -92,6 +97,8 @@ namespace Open_lab.Tests.Services
         public async Task GetTop10TestsAsync_Should_Group_By_TestName_LogicGuard()
         {
             // Function: X.X — To Be Determined
+            // Arrange
+            // Act
             // Refactored to Logic Guard - verifies grouping accuracy
             var patient = new Patient { LabId = "L2", FullName = "P2", Gender = "Female" };
             _db.Patients.Add(patient);
@@ -159,6 +166,8 @@ namespace Open_lab.Tests.Services
         public async Task GetSampleCountPerYear_Should_Return_Yearly_Ranges_LogicGuard()
         {
             // Function: X.X — To Be Determined
+            // Arrange
+            // Act
             // Refactored to Logic Guard - verifies aggregation accuracy
             var patient = new Patient { LabId = "L3", FullName = "P3", Gender = "Male" };
             _db.Patients.Add(patient);
@@ -185,6 +194,7 @@ namespace Open_lab.Tests.Services
         public async Task GetSampleCountPerYearAsync_When_YearsBack_Is_Zero_Should_Default_To_Five_Years_Edge()
         {
             // Function: X.X — To Be Determined
+            // Arrange
             // Act
             var rows = await _service.GetSampleCountPerYearAsync(0);
 

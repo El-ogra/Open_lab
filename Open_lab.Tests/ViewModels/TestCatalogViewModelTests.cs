@@ -30,6 +30,9 @@ namespace Open_lab.Tests.ViewModels
         public void TestCatalog_Commands_When_Admin_Should_Be_Enabled()
         {
             // Function: 3.9 — Outsourced - Logic Guard: Verify pricing fields are sent to service
+            // Arrange
+            // Act
+            // Assert
             _viewModel.SaveCommand.CanExecute(null).Should().BeTrue();
             _viewModel.NewCommand.CanExecute(null).Should().BeTrue();
             _viewModel.ReloadCommand.CanExecute(null).Should().BeTrue();
@@ -40,7 +43,10 @@ namespace Open_lab.Tests.ViewModels
         public void GenerateBarcodeCommand_CanExecute_When_Code_Not_Empty_Should_Return_True()
         {
             // Function: 3.9 — Outsourced - Logic Guard: Verify pricing fields are sent to service
+            // Arrange
+            // Act
             _viewModel.Code = "CBC";
+            // Assert
             _viewModel.GenerateBarcodeCommand.CanExecute(null).Should().BeTrue();
         }
 
@@ -48,9 +54,12 @@ namespace Open_lab.Tests.ViewModels
         public void Code_Setter_Should_Generate_Barcode_Automatically()
         {
             // Function: 3.9 — Outsourced - Logic Guard: Verify pricing fields are sent to service
+            // Arrange
+            // Act
             _barcodeServiceMock.Setup(x => x.GenerateCode128("CBC", It.IsAny<int>(), It.IsAny<int>())).Returns(It.IsAny<System.Windows.Media.ImageSource>());
             _viewModel.Code = "CBC";
             _barcodeServiceMock.Verify(x => x.GenerateCode128("CBC", It.IsAny<int>(), It.IsAny<int>()), Times.Once);
+            // Assert
             _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
@@ -58,6 +67,8 @@ namespace Open_lab.Tests.ViewModels
         public async Task LoadAsync_Should_Load_Catalog_Data()
         {
             // Function: 3.9 — Outsourced - Logic Guard: Verify pricing fields are sent to service
+            // Arrange
+            // Act
             var tests = new List<Test> { new Test { TestId = 1, Code = "CBC" } };
             var groups = new List<TestGroup> { new TestGroup { GroupId = 1 } };
             var sampleTypes = new List<SampleType> { new SampleType { SampleTypeId = 1 } };
@@ -70,6 +81,7 @@ namespace Open_lab.Tests.ViewModels
 
             await _viewModel.InvokePrivateAsync("LoadAsync");
 
+            // Assert
             _viewModel.Tests.Should().HaveCount(1);
             _viewModel.Groups.Should().HaveCount(1);
             _viewModel.SampleTypes.Should().HaveCount(1);
@@ -80,6 +92,8 @@ namespace Open_lab.Tests.ViewModels
         public async Task SaveAsync_With_SelectedTest_Should_Update()
         {
             // Function: 3.9 — Outsourced - Logic Guard: Verify pricing fields are sent to service
+            // Arrange
+            // Act
             _viewModel.SelectedTest = new Test { TestId = 1, Code = "CBC", NameReport = "Complete Blood Count" };
             _viewModel.Code = "CBC";
             _viewModel.NameReport = "Complete Blood Count";
@@ -91,6 +105,7 @@ namespace Open_lab.Tests.ViewModels
             await _viewModel.InvokePrivateAsync("SaveAsync");
 
             _testCatalogServiceMock.Verify(x => x.UpdateTestAsync(It.IsAny<Test>()), Times.Once);
+            // Assert
             _viewModel.StatusMessage.Should().Contain("تم تحديث");
         }
 
@@ -98,6 +113,8 @@ namespace Open_lab.Tests.ViewModels
         public async Task SaveAsync_Without_SelectedTest_Should_Create()
         {
             // Function: 3.9 — Outsourced - Logic Guard: Verify pricing fields are sent to service
+            // Arrange
+            // Act
             _viewModel.SelectedTest = null;
             _viewModel.Code = "NEW";
             _viewModel.NameReport = "New Test";
@@ -109,6 +126,7 @@ namespace Open_lab.Tests.ViewModels
             await _viewModel.InvokePrivateAsync("SaveAsync");
 
             _testCatalogServiceMock.Verify(x => x.CreateTestAsync(It.IsAny<Test>()), Times.Once);
+            // Assert
             _viewModel.StatusMessage.Should().Contain("تم إنشاء");
         }
 
@@ -178,9 +196,12 @@ namespace Open_lab.Tests.ViewModels
         public async Task DeleteAsync_With_Null_SelectedTest_Should_Do_Nothing()
         {
             // Function: 3.9 — Outsourced (Edge Case)
+            // Arrange
+            // Act
             _viewModel.SelectedTest = null;
             await _viewModel.InvokePrivateAsync("DeleteAsync");
             _testCatalogServiceMock.Verify(x => x.DeleteTestAsync(It.IsAny<int>()), Times.Never);
+            // Assert
             _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
@@ -188,6 +209,8 @@ namespace Open_lab.Tests.ViewModels
         public async Task DeleteAsync_With_Valid_Test_Should_Delete()
         {
             // Function: 3.9 — Outsourced (Edge Case)
+            // Arrange
+            // Act
             _viewModel.SelectedTest = new Test { TestId = 5 };
             _testCatalogServiceMock.Setup(x => x.DeleteTestAsync(5)).Returns(Task.CompletedTask);
             _testCatalogServiceMock.Setup(x => x.GetAllTestsAsync()).ReturnsAsync(new List<Test>());
@@ -195,6 +218,7 @@ namespace Open_lab.Tests.ViewModels
             await _viewModel.InvokePrivateAsync("DeleteAsync");
 
             _testCatalogServiceMock.Verify(x => x.DeleteTestAsync(5), Times.Once);
+            // Assert
             _viewModel.StatusMessage.Should().Contain("تم حذف");
         }
 
@@ -202,6 +226,8 @@ namespace Open_lab.Tests.ViewModels
         public void ClearForm_Should_Reset_All_Properties()
         {
             // Function: 3.9 — Outsourced (Edge Case)
+            // Arrange
+            // Act
             _viewModel.SelectedTest = new Test { TestId = 1 };
             _viewModel.Code = "TEST";
             _viewModel.NameReport = "Test Name";
@@ -209,6 +235,7 @@ namespace Open_lab.Tests.ViewModels
 
             _viewModel.InvokePrivateAsync("ClearForm");
 
+            // Assert
             _viewModel.SelectedTest.Should().BeNull();
             _viewModel.Code.Should().BeEmpty();
             _viewModel.NameReport.Should().BeEmpty();

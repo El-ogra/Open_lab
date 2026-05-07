@@ -111,7 +111,9 @@ namespace Open_lab.Tests
         public async Task SaveResultAsync_With_NonExistentVisitTest_Should_Throw_FailureGuard()
         {
             // Function: 4.1 — Enter Test Results (Not Found Failure)
+            // Arrange
             // Act & Assert
+            // Assert
             await Assert.ThrowsAsync<InvalidOperationException>(() =>
                 _service.SaveResultAsync(9999, 1, "100", null, null));
         }
@@ -375,6 +377,7 @@ namespace Open_lab.Tests
             await _db.SaveChangesAsync();
 
             // Act & Assert
+            // Assert
             await Assert.ThrowsAsync<InvalidOperationException>(() =>
                 _service.SaveResultAsync(6, 40, "110", null, null));
         }
@@ -587,6 +590,8 @@ namespace Open_lab.Tests
         public async Task SaveResultsAsync_With_Multiple_ResultItems_Should_Call_Service_For_Each_SuccessGuard()
         {
             // Function: 4.1 — Enter Test Results (Multiple Values)
+            // Arrange
+            // Act
             var viewModel = new ResultsEntryViewModel(_resultsServiceMock.Object);
             viewModel.SelectedVisitTest = new VisitTestRow { VisitTestId = 10, TestId = 1, Status = "InProgress" };
             viewModel.ResultItems.Clear();
@@ -602,6 +607,7 @@ namespace Open_lab.Tests
             _resultsServiceMock.Verify(x => x.SaveResultAsync(10, 1, "100", It.IsAny<string?>(), It.IsAny<string?>()), Times.Once);
             _resultsServiceMock.Verify(x => x.SaveResultAsync(10, 2, "200", It.IsAny<string?>(), It.IsAny<string?>()), Times.Once);
             _resultsServiceMock.Verify(x => x.SaveResultAsync(10, 3, "300", It.IsAny<string?>(), It.IsAny<string?>()), Times.Once);
+            // Assert
             viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
@@ -609,12 +615,15 @@ namespace Open_lab.Tests
         public async Task SaveResultsAsync_With_Empty_ResultItems_Should_Not_Call_Service_EdgeGuard()
         {
             // Function: 4.2 — Save Results (Empty Items Edge Case)
+            // Arrange
+            // Act
             var viewModel = new ResultsEntryViewModel(_resultsServiceMock.Object);
             viewModel.SelectedVisitTest = new VisitTestRow { VisitTestId = 10 };
 
             await viewModel.InvokePrivateAsync("SaveResultsAsync");
 
             _resultsServiceMock.Verify(x => x.SaveResultAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<string?>()), Times.Never);
+            // Assert
             viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
@@ -622,6 +631,8 @@ namespace Open_lab.Tests
         public async Task VerifyResultsAsync_With_Incomplete_Results_Should_Set_Warning_FailureGuard()
         {
             // Function: 4.2 — Save Results (Incomplete Verification Check)
+            // Arrange
+            // Act
             var viewModel = new ResultsEntryViewModel(_resultsServiceMock.Object);
             viewModel.SelectedVisitTest = new VisitTestRow { VisitTestId = 10, TestId = 2, Status = "InProgress" };
 
@@ -630,6 +641,7 @@ namespace Open_lab.Tests
 
             await viewModel.InvokePrivateAsync("VerifyResultsAsync");
 
+            // Assert
             viewModel.StatusMessage.Should().Contain("خطأ:");
             viewModel.StatusMessage.Should().Contain("All parameters must have values");
         }
@@ -638,6 +650,8 @@ namespace Open_lab.Tests
         public async Task ReopenResultsAsync_With_Verified_Status_Should_Call_Service_SuccessGuard()
         {
             // Function: 4.3 — Edit Results (Reopen Logic)
+            // Arrange
+            // Act
             var viewModel = new ResultsEntryViewModel(_resultsServiceMock.Object);
             viewModel.SelectedVisitTest = new VisitTestRow { VisitTestId = 20, Status = "Verified" };
 
@@ -654,6 +668,7 @@ namespace Open_lab.Tests
             // Production code sets the message "تم إعادة فتح النتائج للتعديل." — assert the
             // distinctive business token "إعادة فتح" that is invariant across minor wording tweaks
             // and still represents the reopen success contract.
+            // Assert
             viewModel.StatusMessage.Should().Contain("إعادة فتح");
             viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
@@ -666,6 +681,8 @@ namespace Open_lab.Tests
         public async Task PreviewCommand_Should_Load_Report_And_Set_Preview_Flag_SuccessGuard()
         {
             // Function: 4.6 — Preview Report (BR-SEC-002)
+            // Arrange
+            // Act
             var viewModel = new ReportViewerViewModel(_reportServiceMock.Object, _printServiceMock.Object, _resultsServiceMock.Object);
             var report = CreateSampleReport(1);
             _reportServiceMock.Setup(x => x.GetVisitReportAsync(1)).ReturnsAsync(report);
@@ -675,6 +692,7 @@ namespace Open_lab.Tests
             await viewModel.InvokePrivateAsync("PrintAsync", true);
 
             _printServiceMock.Verify(x => x.PrintVisitReportAsync(It.IsAny<VisitReportData>(), true), Times.Once);
+            // Assert
             viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
@@ -682,6 +700,8 @@ namespace Open_lab.Tests
         public async Task PrintAsync_With_Null_Report_Should_Not_Call_PrintService_EdgeGuard()
         {
             // Function: 4.7 — Print Report (No Report Edge Case)
+            // Arrange
+            // Act
             var viewModel = new ReportViewerViewModel(_reportServiceMock.Object, _printServiceMock.Object, _resultsServiceMock.Object);
             viewModel.VisitId = 999;
             _reportServiceMock.Setup(x => x.GetVisitReportAsync(999)).ReturnsAsync((VisitReportData?)null);
@@ -690,6 +710,7 @@ namespace Open_lab.Tests
             await viewModel.InvokePrivateAsync("PrintAsync", false);
 
             _printServiceMock.Verify(x => x.PrintVisitReportAsync(It.IsAny<VisitReportData>(), It.IsAny<bool>()), Times.Never);
+            // Assert
             viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
@@ -697,6 +718,8 @@ namespace Open_lab.Tests
         public async Task LoadReportAsync_Should_Set_Report_Data_Correctly_SuccessGuard()
         {
             // Function: 4.4 — Create Composite Report (Data Mapping)
+            // Arrange
+            // Act
             var viewModel = new ReportViewerViewModel(_reportServiceMock.Object, _printServiceMock.Object, _resultsServiceMock.Object);
             var report = CreateSampleReport(50);
             _reportServiceMock.Setup(x => x.GetVisitReportAsync(50)).ReturnsAsync(report);
@@ -704,6 +727,7 @@ namespace Open_lab.Tests
 
             await viewModel.InvokePrivateAsync("LoadReportAsync");
 
+            // Assert
             viewModel.Report.Should().NotBeNull();
             viewModel.Report!.Patient.FullName.Should().Be("Test Patient");
             viewModel.Tests.Should().HaveCount(1);
@@ -717,6 +741,8 @@ namespace Open_lab.Tests
         public async Task PrintBlankAsync_Should_Call_PrintService_SuccessGuard()
         {
             // Function: 4.8 — Print Blank Report (Print Logic)
+            // Arrange
+            // Act
             var viewModel = new BlankReportViewModel(_reportServiceMock.Object, _printServiceMock.Object);
             var report = CreateSampleReport(100);
             _reportServiceMock.Setup(x => x.GetVisitReportAsync(100)).ReturnsAsync(report);
@@ -730,6 +756,7 @@ namespace Open_lab.Tests
             _printServiceMock.Verify(x => x.PrintTextReportAsync(It.IsAny<string>(), It.IsAny<IReadOnlyCollection<string>>(), It.IsAny<string>()), Times.Once);
             // The actual production wording is "تم إرسال التقرير الفارغ للطباعة."; we assert the
             // meaningful business signal that the blank report was successfully dispatched to print.
+            // Assert
             viewModel.StatusMessage.Should().Contain("تم إرسال التقرير الفارغ للطباعة");
         }
 
@@ -737,6 +764,8 @@ namespace Open_lab.Tests
         public async Task LoadAsync_With_Null_Referral_Should_Handle_EdgeGuard()
         {
             // Function: 4.8 — Print Blank Report (Null Referral Edge Case)
+            // Arrange
+            // Act
             var viewModel = new BlankReportViewModel(_reportServiceMock.Object, _printServiceMock.Object);
             var report = CreateSampleReportWithNullReferral(200);
             _reportServiceMock.Setup(x => x.GetVisitReportAsync(200)).ReturnsAsync(report);
@@ -748,6 +777,7 @@ namespace Open_lab.Tests
             // (see BlankReportViewModel.LoadAsync) so the printed form does not contain a blank field.
             // The edge-case contract is therefore: ReferralName must be the explicit "missing" placeholder,
             // never null and never an empty string.
+            // Assert
             viewModel.ReferralName.Should().Be("—");
             viewModel.StatusMessage.Should().NotBeNull();
         }
@@ -760,6 +790,8 @@ namespace Open_lab.Tests
         public async Task LoadHistoryCommand_With_Multiple_Results_Should_Group_By_Visit_EdgeGuard()
         {
             // Function: 4.9 — Compare with History (Grouping Logic)
+            // Arrange
+            // Act
             var viewModel = new CompareWithHistoryViewModel(
                 _compareServiceMock.Object,
                 _patientServiceMock.Object,
@@ -788,6 +820,7 @@ namespace Open_lab.Tests
             viewModel.LoadHistoryCommand.Execute(null);
             await Task.Delay(50);
 
+            // Assert
             viewModel.HistoryResults.Should().HaveCount(3);
         }
 
@@ -795,6 +828,8 @@ namespace Open_lab.Tests
         public async Task LoadHistoryCommand_With_No_History_Should_Show_Empty_State_EdgeGuard()
         {
             // Function: 4.9 — Compare with History (No History Edge Case)
+            // Arrange
+            // Act
             var viewModel = new CompareWithHistoryViewModel(
                 _compareServiceMock.Object,
                 _patientServiceMock.Object,
@@ -816,6 +851,7 @@ namespace Open_lab.Tests
             viewModel.LoadHistoryCommand.Execute(null);
             await Task.Delay(50);
 
+            // Assert
             viewModel.HistoryResults.Should().BeEmpty();
             // Production code reports an empty-history state via the message
             // "تم تحميل 0 نتيجة من 0 زيارات سابقة." — assert on the distinctive
@@ -831,6 +867,8 @@ namespace Open_lab.Tests
         public async Task LoadCommand_With_Empty_TestList_Should_Set_Status_EdgeGuard()
         {
             // Function: 4.5 — Arrange Report Order (Empty Selection Edge)
+            // Arrange
+            // Act
             var viewModel = new CombinedReportViewModel(_reportServiceMock.Object);
             viewModel.VisitId = 1;
 
@@ -845,6 +883,7 @@ namespace Open_lab.Tests
             viewModel.LoadCommand.Execute(null);
             await Task.Delay(50);
 
+            // Assert
             viewModel.Tests.Should().BeEmpty();
         }
 
@@ -852,6 +891,8 @@ namespace Open_lab.Tests
         public async Task MoveUpCommand_Should_Swap_Items_SuccessGuard()
         {
             // Function: 4.5 — Arrange Report Order (Reordering Logic)
+            // Arrange
+            // Act
             var viewModel = new CombinedReportViewModel(_reportServiceMock.Object);
 
             var report = new VisitReportData
@@ -871,6 +912,7 @@ namespace Open_lab.Tests
             viewModel.LoadCommand.Execute(null);
             await Task.Delay(50);
 
+            // Assert
             viewModel.Tests[0].Test.Code.Should().Be("A");
             viewModel.Tests[1].Test.Code.Should().Be("B");
 

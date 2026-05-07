@@ -43,6 +43,8 @@ namespace Open_lab.Tests.ViewModels
         public async Task AddCultureAsync_Should_Send_Full_Metadata_To_Service()
         {
             // Function: X.X — To Be Determined
+            // Arrange
+            // Act
             Culture? captured = null;
             _serviceMock.Setup(s => s.CreateCultureAsync(It.IsAny<Culture>()))
                 .Callback<Culture>(c => captured = c)
@@ -64,6 +66,7 @@ namespace Open_lab.Tests.ViewModels
 
             await _viewModel.InvokePrivateAsync("AddCultureAsync");
 
+            // Assert
             captured.Should().NotBeNull();
             captured!.SampleType.Should().Be("Urine");
             captured.IsolatedOrganism.Should().Be("E. coli");
@@ -75,6 +78,8 @@ namespace Open_lab.Tests.ViewModels
         public async Task AddAntibioticAsync_Should_Send_Safety_Classification_To_Service()
         {
             // Function: X.X — To Be Determined
+            // Arrange
+            // Act
             Antibiotic? captured = null;
             _serviceMock.Setup(s => s.CreateAntibioticAsync(It.IsAny<Antibiotic>()))
                 .Callback<Antibiotic>(a => captured = a)
@@ -92,6 +97,7 @@ namespace Open_lab.Tests.ViewModels
 
             await _viewModel.InvokePrivateAsync("AddAntibioticAsync");
 
+            // Assert
             captured.Should().NotBeNull();
             captured!.IsSafeForPregnancy.Should().BeFalse();
             captured.IsSafeForChildren.Should().BeTrue();
@@ -101,6 +107,8 @@ namespace Open_lab.Tests.ViewModels
         public async Task BuildResultRowsAsync_When_Visit_Selected_Should_Apply_Filtering()
         {
             // Function: X.X — To Be Determined
+            // Arrange
+            // Act
             _viewModel.SelectedCulture = new Culture
             {
                 CultureId = 10,
@@ -130,6 +138,7 @@ namespace Open_lab.Tests.ViewModels
 
             await _viewModel.InvokePrivateAsync("BuildResultRowsAsync");
 
+            // Assert
             _viewModel.ResultRows.Should().ContainSingle();
             _viewModel.ResultRows[0].AntibioticId.Should().Be(1);
         }
@@ -138,6 +147,8 @@ namespace Open_lab.Tests.ViewModels
         public async Task SaveResultAsync_Should_Save_Classified_Values_Through_Service()
         {
             // Function: X.X — To Be Determined
+            // Arrange
+            // Act
             _viewModel.SelectedCulture = new Culture
             {
                 CultureId = 3,
@@ -171,6 +182,7 @@ namespace Open_lab.Tests.ViewModels
 
             await _viewModel.InvokePrivateAsync("SaveResultAsync");
 
+            // Assert
             savedValues.Should().NotBeNull();
             savedValues!.Should().ContainSingle();
             savedValues!.First().Sensitivity.Should().Be("S");
@@ -180,6 +192,8 @@ namespace Open_lab.Tests.ViewModels
         public async Task PrintCultureReportAsync_Should_Call_Print_Service_With_Results()
         {
             // Function: X.X — To Be Determined
+            // Arrange
+            // Act
             _viewModel.SelectedCulture = new Culture
             {
                 CultureId = 4,
@@ -214,6 +228,7 @@ namespace Open_lab.Tests.ViewModels
 
             await _viewModel.InvokePrivateAsync("PrintCultureReportAsync");
 
+            // Assert
             printed.Should().NotBeNull();
             printed!.CultureName.Should().Be("Urine Culture");
             printed.Results.Should().ContainSingle();

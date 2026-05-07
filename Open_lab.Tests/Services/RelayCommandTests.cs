@@ -13,6 +13,7 @@ namespace Open_lab.Tests.Services
             Action act = () => new RelayCommand(null!);
 
             // Act & Assert
+            // Assert
             act.Should().Throw<ArgumentNullException>();
         }
 

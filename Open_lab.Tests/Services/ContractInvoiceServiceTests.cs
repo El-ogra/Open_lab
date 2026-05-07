@@ -33,6 +33,7 @@ namespace Open_lab.Tests.Services
         public async Task GetPendingInvoicesAsync_Should_Return_Pending_With_Correct_Fields()
         {
             // Function: X.X — To Be Determined
+            // Arrange
             // Refactored to Logic Guard - verifies all returned field values
             var patient = new Patient { LabId = "L1", FullName = "P1", Gender = "Male" };
             _db.Patients.Add(patient);
@@ -69,10 +70,13 @@ namespace Open_lab.Tests.Services
         public async Task CreateContractInvoiceAsync_NoPending_Should_Throw()
         {
             // Function: X.X — To Be Determined
+            // Arrange
+            // Act
             _db.Referrals.Add(new Referral { ReferralId = 2, Name = "R2" });
             await _db.SaveChangesAsync();
 
             Func<Task> act = async () => await _service.CreateContractInvoiceAsync(2, "INV-1", DateTime.Today.AddDays(-1), DateTime.Today);
+            // Assert
             await act.Should().ThrowAsync<Exception>();
         }
 
@@ -80,6 +84,7 @@ namespace Open_lab.Tests.Services
         public async Task CreateContractInvoiceAsync_Should_Create_And_Assign_With_Correct_Aggregates()
         {
             // Function: X.X — To Be Determined
+            // Arrange
             // Refactored to Logic Guard - verifies all calculated fields and side effects
             var referral = new Referral { ReferralId = 3, Name = "R3" };
             _db.Referrals.Add(referral);
@@ -193,6 +198,7 @@ namespace Open_lab.Tests.Services
         public async Task SettleContractInvoiceAsync_NotFound_Should_Throw()
         {
             // Function: X.X — To Be Determined
+            // Arrange
             // Act
             Func<Task> act = async () => await _service.SettleContractInvoiceAsync(99999);
 
@@ -240,6 +246,7 @@ namespace Open_lab.Tests.Services
         public async Task CreateContractInvoiceAsync_ReferralNotFound_Should_Throw()
         {
             // Function: X.X — To Be Determined
+            // Arrange
             // Act
             Func<Task> act = async () => await _service.CreateContractInvoiceAsync(99999, "CN-X", DateTime.Today, DateTime.Today);
 

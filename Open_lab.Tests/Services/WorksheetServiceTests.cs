@@ -32,6 +32,8 @@ namespace Open_lab.Tests.Services
         public async Task GetWorksheetByPatientAsync_Should_Return_PatientRows()
         {
             // Function: X.X — To Be Determined
+            // Arrange
+            // Act
             var patient = new Patient { LabId = "L1", FullName = "P", Gender = "Male" };
             _db.Patients.Add(patient);
             await _db.SaveChangesAsync();
@@ -44,6 +46,7 @@ namespace Open_lab.Tests.Services
             await _db.SaveChangesAsync();
 
             var rows = await _service.GetWorksheetByPatientAsync(DateTime.Today.AddDays(-1), DateTime.Today.AddDays(1));
+            // Assert
             rows.Should().ContainSingle();
             rows.First().TestsCount.Should().Be(1);
         }
@@ -52,6 +55,8 @@ namespace Open_lab.Tests.Services
         public async Task GetWorksheetByTestAsync_Should_Return_GroupedCounts()
         {
             // Function: X.X — To Be Determined
+            // Arrange
+            // Act
             var patient = new Patient { LabId = "L2", FullName = "P2", Gender = "Female" };
             _db.Patients.Add(patient);
             await _db.SaveChangesAsync();
@@ -68,6 +73,7 @@ namespace Open_lab.Tests.Services
             await _db.SaveChangesAsync();
 
             var grouped = await _service.GetWorksheetByTestAsync(DateTime.Today.AddDays(-1), DateTime.Today.AddDays(1));
+            // Assert
             grouped.Should().ContainSingle().Which.TestName.Should().Be("CBC");
             grouped.First().Count.Should().Be(1);
         }

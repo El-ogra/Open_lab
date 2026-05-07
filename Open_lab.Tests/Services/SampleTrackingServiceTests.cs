@@ -31,6 +31,8 @@ namespace Open_lab.Tests.Services
         public async Task UpdateSeparationStatusAsync_Should_Keep_Status_Aligned_With_Tracking_State()
         {
             // Function: X.X — To Be Determined
+            // Arrange
+            // Act
             _db.SampleCollections.Add(new SampleCollection
             {
                 VisitTestId = 11,
@@ -44,6 +46,7 @@ namespace Open_lab.Tests.Services
             await _service.UpdateSeparationStatusAsync(11, true);
 
             var separated = await _db.SampleCollections.SingleAsync(s => s.VisitTestId == 11);
+            // Assert
             separated.IsSeparated.Should().BeTrue();
             separated.Status.Should().Be("مفصولة");
 
@@ -97,6 +100,7 @@ namespace Open_lab.Tests.Services
         public async Task GetSampleStatusAsync_When_Sample_Does_Not_Exist_Should_Return_Null_FailureGuard()
         {
             // Function: X.X — To Be Determined
+            // Arrange
             // Act
             var result = await _service.GetSampleStatusAsync(99999);
 
@@ -158,6 +162,7 @@ namespace Open_lab.Tests.Services
         public async Task GetPendingTrackingSamplesAsync_When_No_Samples_Should_Return_Empty_Edge()
         {
             // Function: X.X — To Be Determined
+            // Arrange
             // Act
             var pendingSamples = await _service.GetPendingTrackingSamplesAsync();
 

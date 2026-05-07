@@ -800,6 +800,7 @@ namespace Open_lab.Tests.Services
         public async Task GenerateContractInvoice_WithNonExistentReferral_ShouldThrow_FailureGuard()
         {
             // Function: 12.8 — Generate Contract Invoice
+            // Arrange
             // Act
             Func<Task> act = async () => await _contractService.CreateContractInvoiceAsync(
                 999999, "CONT-NF", DateTime.Today.AddDays(-1), DateTime.Today);
@@ -935,6 +936,7 @@ namespace Open_lab.Tests.Services
         public async Task SettleContractAccount_WithNonExistentContractId_ShouldThrowInvalidOperation_FailureGuard()
         {
             // Function: 12.9 — Settle Contract Account
+            // Arrange
             // Act
             Func<Task> act = async () => await _contractService.SettleContractInvoiceAsync(999999);
 

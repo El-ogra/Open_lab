@@ -183,6 +183,7 @@ namespace Open_lab.Tests.Services
         {
             // Function: 10.6 — View User Activity Log (failure: log ID not found)
             // Arrange & Act
+            // Act
             var text = await _service.SimplifyAuditLogAsync(9999);
 
             // Assert

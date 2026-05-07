@@ -153,6 +153,8 @@ namespace Open_lab.Tests.Services
         public async Task PatientCountByGender_WithInvalidDateRange_ShouldReturnZeroSnapshot_FailureGuard()
         {
             // Function: 9.1 — Patient Count by Gender
+            // Arrange
+            // Act
             var male = new Patient { LabId = "INV01", FullName = "مريض", Gender = "ذكر" };
             _db.Patients.Add(male);
             await _db.SaveChangesAsync();
@@ -165,6 +167,7 @@ namespace Open_lab.Tests.Services
                 "الكل",
                 null);
 
+            // Assert
             snapshot.Summary.VisitCount.Should().Be(0);
             snapshot.Summary.PatientCount.Should().Be(0);
             snapshot.ByGender.Should().BeEmpty();
@@ -279,7 +282,10 @@ namespace Open_lab.Tests.Services
         public async Task PatientCountByMonth_WithInvalidYear_ShouldThrowArgumentOutOfRangeException_FailureGuard()
         {
             // Function: 9.2 — Patient Count by Month
+            // Arrange
+            // Act
             Func<Task> act = async () => await _statsService.GetMonthlyAnalysisAsync(0);
+            // Assert
             await act.Should().ThrowAsync<ArgumentOutOfRangeException>();
         }
 
@@ -420,7 +426,10 @@ namespace Open_lab.Tests.Services
         public async Task TestDemandAnalysis_WithInvalidDateRange_ShouldReturnEmptyList_FailureGuard()
         {
             // Function: 9.3 — Test Demand Analysis
+            // Arrange
+            // Act
             var list = await _statsService.GetTop10TestsAsync(DateTime.Today.AddDays(1), DateTime.Today.AddDays(-1));
+            // Assert
             list.Should().BeEmpty();
         }
 
@@ -554,6 +563,8 @@ namespace Open_lab.Tests.Services
         public async Task ReferralSourceAnalysis_WithInvalidDateRange_ShouldReturnZeroSnapshot_FailureGuard()
         {
             // Function: 9.5 — Referral Source Analysis
+            // Arrange
+            // Act
             var referral = new Referral { Name = "R-INV" };
             _db.Referrals.Add(referral);
             await _db.SaveChangesAsync();
@@ -571,6 +582,7 @@ namespace Open_lab.Tests.Services
                 "الكل",
                 referral.ReferralId);
 
+            // Assert
             snapshot.Summary.VisitCount.Should().Be(0);
             snapshot.ByReferral.Should().BeEmpty();
         }

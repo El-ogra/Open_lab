@@ -10,11 +10,14 @@ namespace Open_lab.Tests.Services
         public async Task PrintCultureReportAsync_When_Data_Is_Null_Should_Throw()
         {
             // Function: 5.7 — Print Culture Report (guard path)
+            // Arrange
+            // Act
             var settingsMock = new Mock<ISettingsService>();
             var service = new PrintService(settingsMock.Object);
 
             Func<Task> act = async () => await service.PrintCultureReportAsync(null!);
 
+            // Assert
             await act.Should().ThrowAsync<ArgumentNullException>();
         }
 
@@ -22,11 +25,14 @@ namespace Open_lab.Tests.Services
         public async Task PrintVisitReportAsync_When_Report_Is_Null_Should_Throw()
         {
             // Function: 8.6 — Print External Lab Report uses same visit-report printing pipeline
+            // Arrange
+            // Act
             var settingsMock = new Mock<ISettingsService>();
             var service = new PrintService(settingsMock.Object);
 
             Func<Task> act = async () => await service.PrintVisitReportAsync(null!);
 
+            // Assert
             await act.Should().ThrowAsync<ArgumentNullException>();
         }
 
@@ -36,6 +42,8 @@ namespace Open_lab.Tests.Services
         public void PrintCultureReportData_Should_Validate_Report_Structure_LogicGuard()
         {
             // Function: 5.7 — Culture Report Printing - unit-level data contract validation.
+            // Arrange
+            // Act
             // Do not invoke real print pipeline in unit tests because it depends on OS printer drivers.
             var cultureData = new CultureReportData
             {
@@ -50,6 +58,7 @@ namespace Open_lab.Tests.Services
                 }
             };
 
+            // Assert
             cultureData.PatientName.Should().NotBeNullOrEmpty();
             cultureData.LabId.Should().NotBeNullOrEmpty();
             cultureData.CultureName.Should().NotBeNullOrEmpty();
@@ -64,6 +73,7 @@ namespace Open_lab.Tests.Services
         public void Constructor_When_SettingsServiceNull_Should_Throw_FailureGuard()
         {
             // Function: 5.7 — Culture Report Printing - unit-level data contract validation.
+            // Arrange
             // Act
             Action act = () => new PrintService(null!);
 
@@ -75,11 +85,14 @@ namespace Open_lab.Tests.Services
         public async Task PrintTextReportAsync_When_TitleEmpty_Should_Throw_FailureGuard()
         {
             // Function: 5.7 — Culture Report Printing - unit-level data contract validation.
+            // Arrange
+            // Act
             var settingsMock = new Mock<ISettingsService>();
             var service = new PrintService(settingsMock.Object);
 
             Func<Task> act = async () => await service.PrintTextReportAsync(" ", new List<string>());
 
+            // Assert
             await act.Should().ThrowAsync<ArgumentException>();
         }
     }

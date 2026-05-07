@@ -26,6 +26,8 @@ namespace Open_lab.Tests.ViewModels
         public async Task LoadReportAsync_With_Valid_Visit_Should_Build_Preview_LogicGuard()
         {
             // Function: 4.4 — Composite Report - 4.5 Report Order Validation
+            // Arrange
+            // Act
             var report = BuildReport(visitId: 10, isSendOut: false);
             _reportServiceMock.Setup(x => x.GetVisitReportAsync(10)).ReturnsAsync(report);
             _viewModel.VisitId = 10;
@@ -58,6 +60,8 @@ namespace Open_lab.Tests.ViewModels
         public async Task PrintAsync_Should_Call_PrintService_For_Report_LogicGuard()
         {
             // Function: 4.7 — Print Report - Logic Guard: Verify correct data is passed to print service
+            // Arrange
+            // Act
             VisitReportData? capturedReport = null;
             bool? capturedPreview = null;
             _printServiceMock.Setup(x => x.PrintVisitReportAsync(It.IsAny<VisitReportData>(), It.IsAny<bool>()))
@@ -95,10 +99,13 @@ namespace Open_lab.Tests.ViewModels
         public async Task LoadReportAsync_With_InvalidVisitId_Should_Set_Validation_Message_FailureGuard()
         {
             // Function: 4.7 — Print Report - Logic Guard: Verify correct data is passed to print service
+            // Arrange
+            // Act
             _viewModel.VisitId = 0;
 
             await _viewModel.InvokePrivateAsync("LoadReportAsync");
 
+            // Assert
             _viewModel.StatusMessage.Should().Be("يرجى إدخال رقم الزيارة.");
             _reportServiceMock.Verify(x => x.GetVisitReportAsync(It.IsAny<int>()), Times.Never);
         }
@@ -107,11 +114,14 @@ namespace Open_lab.Tests.ViewModels
         public async Task LoadReportAsync_When_ServiceReturnsNull_Should_Set_NotFound_Message_FailureGuard()
         {
             // Function: 4.7 — Print Report - Logic Guard: Verify correct data is passed to print service
+            // Arrange
+            // Act
             _viewModel.VisitId = 99;
             _reportServiceMock.Setup(x => x.GetVisitReportAsync(99)).ReturnsAsync((VisitReportData?)null);
 
             await _viewModel.InvokePrivateAsync("LoadReportAsync");
 
+            // Assert
             _viewModel.StatusMessage.Should().Be("لم يتم العثور على تقرير.");
             _viewModel.Report.Should().BeNull();
             _viewModel.Tests.Should().BeEmpty();
@@ -121,6 +131,8 @@ namespace Open_lab.Tests.ViewModels
         public async Task PrintAsync_When_PrintServiceThrows_Should_Set_PrintErrorMessage_EdgeGuard()
         {
             // Function: 4.7 — Print Report - Logic Guard: Verify correct data is passed to print service
+            // Arrange
+            // Act
             var report = BuildReport(visitId: 55, isSendOut: false);
             _reportServiceMock.Setup(x => x.GetVisitReportAsync(55)).ReturnsAsync(report);
             _printServiceMock.Setup(x => x.PrintVisitReportAsync(It.IsAny<VisitReportData>(), It.IsAny<bool>()))
@@ -130,6 +142,7 @@ namespace Open_lab.Tests.ViewModels
 
             await _viewModel.InvokePrivateAsync("PrintAsync", false);
 
+            // Assert
             _viewModel.StatusMessage.Should().Contain("خطأ طباعة:");
             _viewModel.StatusMessage.Should().Contain("printer offline");
             _resultsServiceMock.Verify(x => x.LogVisitReportPrintedAsync(It.IsAny<int>(), It.IsAny<int>()), Times.Never);

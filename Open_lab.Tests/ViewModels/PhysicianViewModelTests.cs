@@ -34,6 +34,8 @@ namespace Open_lab.Tests.ViewModels
         public async Task SaveAsync_Should_Create_Physician_For_Module12_6_12_7()
         {
             // Function: 12.6 — `Add Referring Physician`
+            // Arrange
+            // Act
             _viewModel.FullName = "Dr. New";
             _viewModel.Specialty = "Lab";
             _viewModel.PriceListId = 4;
@@ -48,6 +50,7 @@ namespace Open_lab.Tests.ViewModels
                 p.FullName == "Dr. New" &&
                 p.PriceListId == 4 &&
                 p.CommissionPercentage == 12)), Times.Once);
+            // Assert
             _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
@@ -55,6 +58,8 @@ namespace Open_lab.Tests.ViewModels
         public async Task SearchAsync_Should_Replace_List_With_Search_Results()
         {
             // Function: 12.6 — `Add Referring Physician`
+            // Arrange
+            // Act
             _viewModel.SearchTerm = "john";
             _physicianServiceMock
                 .Setup(x => x.SearchAsync("john"))
@@ -62,6 +67,7 @@ namespace Open_lab.Tests.ViewModels
 
             await _viewModel.InvokePrivateAsync("SearchAsync");
 
+            // Assert
             _viewModel.Physicians.Should().ContainSingle();
             _viewModel.Physicians[0].FullName.Should().Be("Dr. John");
         }

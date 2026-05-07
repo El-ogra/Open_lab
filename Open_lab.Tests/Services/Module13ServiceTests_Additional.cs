@@ -68,6 +68,7 @@ namespace Open_lab.Tests.Services
         {
             // Function: 13.1 — Set Report Margins
             // Arrange & Act
+            // Act
             await _settingsService.SetLeftMarginAsync(2.5m);
             await _settingsService.SetRightMarginAsync(3.0m);
 
@@ -170,6 +171,7 @@ namespace Open_lab.Tests.Services
         public async Task SetPaperSize_WhenNotSet_ShouldDefaultToA4_EdgeGuard()
         {
             // Function: 13.2 — Set Paper Size
+            // Arrange
             // Act
             var loaded = await _systemSettingsService.GetProfileAsync();
 
@@ -298,6 +300,7 @@ namespace Open_lab.Tests.Services
         public async Task SetDefaultAccountType_WhenNotSet_ShouldDefaultToCash_EdgeGuard()
         {
             // Function: 13.4 — Set Default Account Type
+            // Arrange
             // Act
             var loaded = await _systemSettingsService.GetProfileAsync();
 
@@ -338,6 +341,7 @@ namespace Open_lab.Tests.Services
         {
             // Function: 13.5 — Configure Printers
             // Arrange & Act
+            // Act
             await _settingsService.SetDefaultPrinterAsync("HP-Default");
             await _settingsService.SetReceiptPrinterAsync("Receipt-Thermal");
             await _settingsService.SetReportPrinterAsync("Report-Laser");
@@ -352,6 +356,7 @@ namespace Open_lab.Tests.Services
         public async Task ConfigurePrinters_WhenNoPrinterConfigured_ShouldFallbackToMicrosoftPrintToPdf_EdgeGuard()
         {
             // Function: 13.5 — Configure Printers
+            // Arrange
             // Act
             var loaded = await _systemSettingsService.GetProfileAsync();
 
@@ -408,6 +413,7 @@ namespace Open_lab.Tests.Services
         {
             // Function: 13.6 — Set Invoice Settings
             // Arrange & Act
+            // Act
             await _settingsService.SetSettingAsync("Invoice.Currency", "EGP");
             await _settingsService.SetSettingAsync("Invoice.ShowLogo", true);
 
@@ -440,6 +446,7 @@ namespace Open_lab.Tests.Services
         public async Task SetInvoiceSettings_WhenLoadingDefaults_ShouldReturnOneCopy_EdgeGuard()
         {
             // Function: 13.6 — Set Invoice Settings
+            // Arrange
             // Act
             var loaded = await _systemSettingsService.GetProfileAsync();
 
@@ -510,6 +517,7 @@ namespace Open_lab.Tests.Services
         public async Task ConfigureBackup_BackupAsync_WithEmptyPath_ShouldThrowArgumentException_FailureGuard()
         {
             // Function: 13.7 — Configure Backup
+            // Arrange
             // Act
             Func<Task> act = async () => await _backupRestoreService.BackupAsync("");
 
@@ -521,6 +529,7 @@ namespace Open_lab.Tests.Services
         public async Task ConfigureBackup_RestoreAsync_WithEmptyPath_ShouldThrowArgumentException_FailureGuard()
         {
             // Function: 13.7 — Configure Backup
+            // Arrange
             // Act
             Func<Task> act = async () => await _backupRestoreService.RestoreAsync("   ");
 
@@ -546,6 +555,7 @@ namespace Open_lab.Tests.Services
         public async Task ConfigureBackup_ListBackupsAsync_WithEmptyPath_ShouldReturnEmptyList_EdgeGuard()
         {
             // Function: 13.7 — Configure Backup
+            // Arrange
             // Act
             var result = await _backupRestoreService.ListBackupsAsync(string.Empty);
 
@@ -652,6 +662,7 @@ namespace Open_lab.Tests.Services
         public async Task SetSystemPassword_WithEmptyPassword_ShouldReturnFalseAndNotPersist_FailureGuard()
         {
             // Function: 13.8 — Set System Password
+            // Arrange
             // Act
             var result = await _systemSettingsService.SetMasterPasswordAsync(string.Empty);
 
@@ -664,6 +675,7 @@ namespace Open_lab.Tests.Services
         public async Task SetSystemPassword_WithNullPassword_ShouldReturnFalse_FailureGuard()
         {
             // Function: 13.8 — Set System Password
+            // Arrange
             // Act
             var result = await _systemSettingsService.SetMasterPasswordAsync(null!);
 
@@ -704,6 +716,7 @@ namespace Open_lab.Tests.Services
         public async Task SetSystemPassword_VerifyMasterPassword_WhenNoPasswordEverSet_ShouldAllowDefaultAdmin123_EdgeGuard()
         {
             // Function: 13.8 — Set System Password
+            // Arrange
             // Act
             var defaultOk = await _systemSettingsService.VerifyMasterPasswordAsync("admin123");
             var anythingElse = await _systemSettingsService.VerifyMasterPasswordAsync("not-admin123");
@@ -718,6 +731,7 @@ namespace Open_lab.Tests.Services
         {
             // Function: 13.8 — Set System Password (BR-SEC-003)
             // Arrange & Act
+            // Act
             await _systemSettingsService.SetMasterPasswordAsync("FirstPass#1");
             var salt1 = (await _db.Settings.FirstAsync(s => s.Key == "Security.MasterPasswordSalt")).Value;
 

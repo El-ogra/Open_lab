@@ -60,6 +60,7 @@ namespace Open_lab.Tests.Services
         {
             // Function: 10.8 — Logout (failure: invalid credentials)
             // Arrange & Act
+            // Act
             var user = await _service.ValidateCredentialsAsync("missing_user", "x");
 
             // Assert

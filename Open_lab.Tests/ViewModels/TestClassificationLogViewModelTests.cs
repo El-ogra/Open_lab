@@ -32,8 +32,11 @@ namespace Open_lab.Tests.ViewModels
         public async Task LoadAsync_Should_Populate_Classification_Log_Items()
         {
             // Function: X.X — To Be Determined
+            // Arrange
+            // Act
             await _viewModel.InvokePrivateAsync("LoadAsync");
 
+            // Assert
             _viewModel.Items.Should().ContainSingle();
             _viewModel.Items[0].ReagentName.Should().Be("R1");
             _viewModel.StatusMessage.Should().Contain("تم تحميل 1 سجل");
@@ -43,11 +46,14 @@ namespace Open_lab.Tests.ViewModels
         public async Task PrintAsync_Should_Send_Text_Report()
         {
             // Function: X.X — To Be Determined
+            // Arrange
+            // Act
             _viewModel.Items.Add(new ReagentConsumptionReport { ReagentName = "R1", TotalConsumed = 5m, Unit = "ml", TestCount = 1 });
 
             await _viewModel.InvokePrivateAsync("PrintAsync");
 
             _printServiceMock.Verify(x => x.PrintTextReportAsync("سجل تصنيف التحاليل", It.IsAny<IReadOnlyCollection<string>>(), "TestClassificationLog"), Times.Once);
+            // Assert
             _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 

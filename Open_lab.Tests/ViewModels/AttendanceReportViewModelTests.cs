@@ -46,6 +46,8 @@ namespace Open_lab.Tests.ViewModels
         public async Task GenerateReportAsync_Should_Load_Report_Rows_For_Module11_5()
         {
             // Function: 11.5 — `Generate Attendance Report`
+            // Arrange
+            // Act
             _tardinessServiceMock
                 .Setup(x => x.GetPunctualityReportAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<int?>()))
                 .ReturnsAsync(new List<AttendanceReportRow>
@@ -55,6 +57,7 @@ namespace Open_lab.Tests.ViewModels
 
             await _viewModel.InvokePrivateAsync("GenerateReportAsync");
 
+            // Assert
             _viewModel.ReportRows.Should().ContainSingle();
             _viewModel.ReportRows[0].Username.Should().Be("u1");
             _viewModel.StatusMessage.Should().Contain("تم إنشاء التقرير");
@@ -99,6 +102,8 @@ namespace Open_lab.Tests.ViewModels
         public async Task GeneratePayrollSummaryAsync_Should_Load_Summary_Rows_For_Module11_5()
         {
             // Function: 11.5 — `Generate Attendance Report`
+            // Arrange
+            // Act
             _payrollServiceMock
                 .Setup(x => x.GeneratePayrollSummaryAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<int?>()))
                 .ReturnsAsync(new List<AttendancePayrollSummaryRow>
@@ -108,6 +113,7 @@ namespace Open_lab.Tests.ViewModels
 
             await _viewModel.InvokePrivateAsync("GeneratePayrollSummaryAsync");
 
+            // Assert
             _viewModel.PayrollRows.Should().ContainSingle();
             _viewModel.PayrollRows[0].NetMinutes.Should().Be(450);
             _viewModel.StatusMessage.Should().Contain("ملخص الرواتب");

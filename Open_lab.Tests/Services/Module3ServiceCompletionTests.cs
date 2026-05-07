@@ -231,6 +231,7 @@ namespace Open_lab.Tests.Services
         public async Task DeleteTestComment_WhenNotExists_ShouldNotThrow_EdgeGuard()
         {
             // Function: 3.6 — Add Test Comments (Edge: non-existent)
+            // Arrange
             // Act
             Func<Task> act = async () => await _service.DeleteTestCommentAsync(99999);
 
@@ -279,6 +280,7 @@ namespace Open_lab.Tests.Services
         public async Task DeleteCustomGroupItem_WithInvalidId_ShouldNotThrow_EdgeGuard()
         {
             // Function: 3.5 — Create Custom Group (Edge: invalid ID)
+            // Arrange
             // Act
             Func<Task> act = async () => await _service.DeleteCustomGroupItemAsync(99999);
 

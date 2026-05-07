@@ -61,6 +61,8 @@ namespace Open_lab.Tests.Services
         public async Task AddTestToVisitAsync_SendOutTest_Should_Register_ExternalQueue()
         {
             // Function: 1.3 — Add Tests to Patient
+            // Arrange
+            // Act
             var patient = new Patient { LabId = "L-EXT", FullName = "Patient", Gender = "Male" };
             var referral = new Referral { Name = "Ref Lab", ReferralType = "ExternalLab" };
             _db.Patients.Add(patient);
@@ -89,6 +91,7 @@ namespace Open_lab.Tests.Services
             var visitTest = await _service.AddTestToVisitAsync(visit.VisitId, test.TestId);
 
             var queue = await _db.ExternalLabQueues.SingleAsync(q => q.VisitTestId == visitTest.VisitTestId);
+            // Assert
             queue.ReferralId.Should().Be(referral.ReferralId);
             queue.Status.Should().Be("Pending");
         }
@@ -455,6 +458,8 @@ namespace Open_lab.Tests.Services
         public async Task CreateAsync_With_Referral_Account_And_No_Referral_Should_Throw()
         {
             // Function: 1.3 — Add Tests to Patient
+            // Arrange
+            // Act
             var patient = new Patient { LabId = "L-AR1", FullName = "Referral Patient", Gender = "Male" };
             _db.Patients.Add(patient);
             await _db.SaveChangesAsync();
@@ -467,6 +472,7 @@ namespace Open_lab.Tests.Services
                 ReferralId = null
             });
 
+            // Assert
             await act.Should().ThrowAsync<InvalidOperationException>()
                 .WithMessage("*requires a referral*");
         }
@@ -475,6 +481,8 @@ namespace Open_lab.Tests.Services
         public async Task CreateAsync_With_Referral_Account_Should_Persist_Referral_Binding()
         {
             // Function: 1.3 — Add Tests to Patient
+            // Arrange
+            // Act
             var patient = new Patient { LabId = "L-AR2", FullName = "Referral Patient 2", Gender = "Female" };
             var referral = new Referral { Name = "Insurance-X", ReferralType = "Insurance" };
             _db.Patients.Add(patient);
@@ -489,6 +497,7 @@ namespace Open_lab.Tests.Services
                 ReferralId = referral.ReferralId
             });
 
+            // Assert
             created.AccountType.Should().Be("Referral");
             created.ReferralId.Should().Be(referral.ReferralId);
             created.Status.Should().Be("Open");

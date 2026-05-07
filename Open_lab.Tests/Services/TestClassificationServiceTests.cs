@@ -31,6 +31,8 @@ namespace Open_lab.Tests.Services
         public async Task GetConsumptionReportAsync_Should_Aggregate_Consumption_Per_Reagent()
         {
             // Function: X.X — To Be Determined
+            // Arrange
+            // Act
             var reagent = new Reagent { Name = "R1", Unit = "ml", CurrentStock = 1000m };
             var test1 = new Test { Code = "T1", NameReport = "CBC", Price = 10m };
             var test2 = new Test { Code = "T2", NameReport = "GLU", Price = 15m };
@@ -54,6 +56,7 @@ namespace Open_lab.Tests.Services
 
             var report = await _service.GetConsumptionReportAsync(DateTime.Today.AddDays(-1), DateTime.Today.AddDays(1));
 
+            // Assert
             report.Should().ContainSingle();
             var row = report.Single();
             row.ReagentName.Should().Be("R1");

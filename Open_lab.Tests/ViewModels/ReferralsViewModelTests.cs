@@ -29,6 +29,8 @@ namespace Open_lab.Tests.ViewModels
         public async Task SaveAsync_Should_Create_Referral_For_Module12_1()
         {
             // Function: 12.1 — `Create Contract Entity`
+            // Arrange
+            // Act
             _viewModel.Name = "Company X";
             _viewModel.Type = "Company";
             _viewModel.DiscountPercentage = 10;
@@ -51,6 +53,7 @@ namespace Open_lab.Tests.ViewModels
                 r.ReferralType == "Company" &&
                 r.DiscountPercentage == 10 &&
                 r.CommissionPercentage == 5)), Times.Once);
+            // Assert
             _viewModel.Referrals.Should().ContainSingle();
         }
 
@@ -58,6 +61,8 @@ namespace Open_lab.Tests.ViewModels
         public async Task SaveAsync_Invalid_Discount_Should_Stop_For_Module12_3()
         {
             // Function: 12.3 — `Set Entity Discount`
+            // Arrange
+            // Act
             _viewModel.Name = "Company Y";
             _viewModel.Type = "Company";
             _viewModel.DiscountPercentage = 120;
@@ -65,6 +70,7 @@ namespace Open_lab.Tests.ViewModels
             await _viewModel.InvokePrivateAsync("SaveAsync");
 
             _catalogMock.Verify(x => x.CreateReferralAsync(It.IsAny<Referral>()), Times.Never);
+            // Assert
             _viewModel.StatusMessage.Should().Contain("نسبة الخصم");
         }
 

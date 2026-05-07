@@ -32,8 +32,11 @@ namespace Open_lab.Tests.Services
         public async Task SetAndGetString_Should_Return_Value()
         {
             // Function: 13.3 — Configure Header/Footer
+            // Arrange
+            // Act
             await _service.SetSettingAsync("Key1", "Value1", "desc");
             var value = await _service.GetStringAsync("Key1");
+            // Assert
             value.Should().Be("Value1");
 
             var row = await _db.SystemSettings.SingleAsync(s => s.SettingKey == "Key1");
@@ -46,7 +49,10 @@ namespace Open_lab.Tests.Services
         public async Task GetString_Default_When_Not_Exists()
         {
             // Function: 13.3 — Configure Header/Footer
+            // Arrange
+            // Act
             var value = await _service.GetStringAsync("NoKey", "Def");
+            // Assert
             value.Should().Be("Def");
         }
 
@@ -54,8 +60,11 @@ namespace Open_lab.Tests.Services
         public async Task SetAndGetInt_Should_Parse()
         {
             // Function: 13.3 — Configure Header/Footer
+            // Arrange
+            // Act
             await _service.SetSettingAsync("IntKey", 42);
             var v = await _service.GetIntAsync("IntKey", 0);
+            // Assert
             v.Should().Be(42);
         }
 
@@ -63,8 +72,11 @@ namespace Open_lab.Tests.Services
         public async Task GetInt_Default_On_ParseFail()
         {
             // Function: 13.3 — Configure Header/Footer
+            // Arrange
+            // Act
             await _service.SetSettingAsync("BadInt", "notint");
             var v = await _service.GetIntAsync("BadInt", 7);
+            // Assert
             v.Should().Be(7);
 
             var raw = await _service.GetStringAsync("BadInt");
@@ -75,8 +87,11 @@ namespace Open_lab.Tests.Services
         public async Task SetAndGetDecimal_Should_Parse()
         {
             // Function: 13.3 — Configure Header/Footer
+            // Arrange
+            // Act
             await _service.SetSettingAsync("DKey", 1.23m);
             var v = await _service.GetDecimalAsync("DKey", 0);
+            // Assert
             v.Should().Be(1.23m);
 
             var row = await _db.SystemSettings.SingleAsync(s => s.SettingKey == "DKey");
@@ -87,8 +102,11 @@ namespace Open_lab.Tests.Services
         public async Task SetAndGetBool_Should_Parse()
         {
             // Function: 13.3 — Configure Header/Footer
+            // Arrange
+            // Act
             await _service.SetSettingAsync("BKey", true);
             var v = await _service.GetBoolAsync("BKey", false);
+            // Assert
             v.Should().BeTrue();
 
             var row = await _db.SystemSettings.SingleAsync(s => s.SettingKey == "BKey");
@@ -102,9 +120,12 @@ namespace Open_lab.Tests.Services
         public async Task SetAndGetJson_Should_Serialize_And_Deserialize()
         {
             // Function: 13.3 — Configure Header/Footer
+            // Arrange
+            // Act
             var dto = new SampleDto { Name = "X", Age = 5 };
             await _service.SetJsonAsync("JsonKey", dto);
             var res = await _service.GetJsonAsync<SampleDto>("JsonKey");
+            // Assert
             res.Should().NotBeNull();
             res!.Name.Should().Be("X");
             res.Age.Should().Be(5);
@@ -114,8 +135,11 @@ namespace Open_lab.Tests.Services
         public async Task GetJson_Returns_Null_On_Invalid_Json()
         {
             // Function: 13.3 — Configure Header/Footer
+            // Arrange
+            // Act
             await _service.SetSettingAsync("JsonKey2", "not-json");
             var res = await _service.GetJsonAsync<SampleDto>("JsonKey2");
+            // Assert
             res.Should().BeNull();
         }
 
@@ -123,8 +147,11 @@ namespace Open_lab.Tests.Services
         public async Task DeleteSetting_Should_Remove()
         {
             // Function: 13.3 — Configure Header/Footer
+            // Arrange
+            // Act
             await _service.SetSettingAsync("KDel", "V");
             var before = await _service.GetStringAsync("KDel");
+            // Assert
             before.Should().Be("V");
             await _service.DeleteSettingAsync("KDel");
             var after = await _service.GetStringAsync("KDel", null);
@@ -138,7 +165,10 @@ namespace Open_lab.Tests.Services
         public async Task PrinterDefaults_Should_Work()
         {
             // Function: 13.3 — Configure Header/Footer
+            // Arrange
+            // Act
             var def = await _service.GetDefaultPrinterAsync();
+            // Assert
             def.Should().NotBeNull();
             await _service.SetDefaultPrinterAsync("MyPrinter");
             var now = await _service.GetDefaultPrinterAsync();
@@ -162,7 +192,10 @@ namespace Open_lab.Tests.Services
         public async Task MarginSettings_Should_Get_And_Set()
         {
             // Function: 13.3 — Configure Header/Footer
+            // Arrange
+            // Act
             var leftDefault = await _service.GetLeftMarginAsync();
+            // Assert
             leftDefault.Should().Be(0);
             await _service.SetLeftMarginAsync(2.5m);
             var left = await _service.GetLeftMarginAsync();
@@ -184,12 +217,15 @@ namespace Open_lab.Tests.Services
         public async Task HeaderFooter_Settings_Should_Work()
         {
             // Function: 13.3 — Configure Header/Footer
+            // Arrange
+            // Act
             await _service.SetSettingAsync("Print.Header", "Lab Name");
             await _service.SetSettingAsync("Print.Footer", "Page {0}");
             
             var header = await _service.GetStringAsync("Print.Header");
             var footer = await _service.GetStringAsync("Print.Footer");
             
+            // Assert
             header.Should().Be("Lab Name");
             footer.Should().Be("Page {0}");
 
@@ -203,8 +239,11 @@ namespace Open_lab.Tests.Services
         public async Task DefaultAccountType_Setting_Should_Work()
         {
             // Function: 13.4 — Set Default Account Type
+            // Arrange
+            // Act
             await _service.SetSettingAsync("Visit.DefaultAccountType", "Referral");
             var type = await _service.GetStringAsync("Visit.DefaultAccountType");
+            // Assert
             type.Should().Be("Referral");
 
             var row = await _db.SystemSettings.SingleAsync(s => s.SettingKey == "Visit.DefaultAccountType");
@@ -215,12 +254,15 @@ namespace Open_lab.Tests.Services
         public async Task InvoiceSettings_Should_Work()
         {
             // Function: 13.6 — Set Invoice Settings
+            // Arrange
+            // Act
             await _service.SetSettingAsync("Invoice.ShowLogo", true);
             await _service.SetSettingAsync("Invoice.Currency", "EGP");
             
             var showLogo = await _service.GetBoolAsync("Invoice.ShowLogo");
             var currency = await _service.GetStringAsync("Invoice.Currency");
             
+            // Assert
             showLogo.Should().BeTrue();
             currency.Should().Be("EGP");
 

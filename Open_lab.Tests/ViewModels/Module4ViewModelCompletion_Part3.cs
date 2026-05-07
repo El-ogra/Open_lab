@@ -296,6 +296,7 @@ namespace Open_lab.Tests.ViewModels
 
             // Act & Assert
             // Note: The current ReportViewerViewModel does not check permissions in CanExecute
+            // Assert
             viewModel.PrintCommand.CanExecute(null).Should().BeTrue();
             viewModel.ReprintCommand.CanExecute(null).Should().BeTrue();
         }

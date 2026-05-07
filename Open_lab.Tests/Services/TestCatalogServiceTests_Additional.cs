@@ -53,6 +53,7 @@ namespace Open_lab.Tests.Services
         public async Task CreateTestAsync_WithNullTest_ShouldThrowArgumentNullException()
         {
             // Function: 3.1 — Add New Test
+            // Arrange
             // Act
             Func<Task> act = async () => await _service.CreateTestAsync(null!);
 
@@ -154,6 +155,7 @@ namespace Open_lab.Tests.Services
         public async Task UpdateTestAsync_WithNullTest_ShouldThrowArgumentNullException()
         {
             // Function: 3.2 — Edit Test Data
+            // Arrange
             // Act
             Func<Task> act = async () => await _service.UpdateTestAsync(null!);
 
@@ -378,6 +380,7 @@ namespace Open_lab.Tests.Services
         public async Task DeleteReferenceRangeAsync_WhenNotFound_ShouldNotThrow_EdgeGuard()
         {
             // Function: 3.3 — Set Reference Values
+            // Arrange
             // Act
             Func<Task> act = async () => await _service.DeleteReferenceRangeAsync(99999);
 
@@ -465,6 +468,7 @@ namespace Open_lab.Tests.Services
         public async Task DeleteTestCommentAsync_WhenNotFound_ShouldNotThrow_EdgeGuard()
         {
             // Function: 3.4 — Add Low/High Comments
+            // Arrange
             // Act
             Func<Task> act = async () => await _service.DeleteTestCommentAsync(99999);
 
@@ -742,6 +746,7 @@ namespace Open_lab.Tests.Services
         public async Task DeletePriceListItemAsync_WhenNotFound_ShouldNotThrow_EdgeGuard()
         {
             // Function: 3.8 — Update Prices
+            // Arrange
             // Act
             Func<Task> act = async () => await _service.DeletePriceListItemAsync(99999);
 
@@ -913,6 +918,7 @@ namespace Open_lab.Tests.Services
         public async Task GetTestByIdAsync_WithInvalidId_ShouldReturnNull()
         {
             // Function: 3.1 - Support Method
+            // Arrange
             // Act
             var result = await _service.GetTestByIdAsync(99999);
 
@@ -944,6 +950,7 @@ namespace Open_lab.Tests.Services
         public async Task DeleteTestAsync_WhenNotFound_ShouldNotThrow_EdgeGuard()
         {
             // Function: 3.1 - Delete Test
+            // Arrange
             // Act
             Func<Task> act = async () => await _service.DeleteTestAsync(99999);
 

@@ -32,6 +32,8 @@ namespace Open_lab.Tests.Services
         public async Task Patient_And_Visit_Functions_Should_Work_EndToEnd()
         {
             // Function: 1.1 — , 1.3, 1.4
+            // Arrange
+            // Act
             var patientService = new PatientService(_db);
             var visitService = new VisitService(_db);
 
@@ -42,6 +44,7 @@ namespace Open_lab.Tests.Services
             await _db.SaveChangesAsync();
 
             var visitTest = await visitService.AddTestToVisitAsync(visit.VisitId, test.TestId);
+            // Assert
             visitTest.Price.Should().Be(50m);
 
             await visitService.RemoveVisitTestAsync(visitTest.VisitTestId);
@@ -52,6 +55,8 @@ namespace Open_lab.Tests.Services
         public async Task Finance_Gap_Functions_Should_Work()
         {
             // Function: 2.1 — , 2.2, 2.5, 2.9
+            // Arrange
+            // Act
             var invoiceService = new InvoiceService(_db);
 
             var patient = new Patient { LabId = "L-FIN", FullName = "P", Gender = "Male" };
@@ -66,6 +71,7 @@ namespace Open_lab.Tests.Services
             await _db.SaveChangesAsync();
 
             var invoice = await invoiceService.CreateOrUpdateInvoiceAsync(visit.VisitId, discount: 20m, paid: 0m);
+            // Assert
             invoice.Total.Should().Be(200m);
             invoice.Discount.Should().Be(20m);
             invoice.NetTotal.Should().Be(180m);
@@ -84,6 +90,8 @@ namespace Open_lab.Tests.Services
         public async Task Catalog_Gap_Functions_Should_Work()
         {
             // Function: 3.1 — , 3.2, 3.4, 3.5, 3.6, 3.8, 3.9
+            // Arrange
+            // Act
             var catalog = new TestCatalogService(_db);
 
             var test = await catalog.CreateTestAsync(new Test
@@ -113,6 +121,7 @@ namespace Open_lab.Tests.Services
             await catalog.UpdateTestAsync(test);
 
             var saved = await catalog.GetTestByIdAsync(test.TestId);
+            // Assert
             saved!.IsSendOut.Should().BeTrue();
         }
 
@@ -120,6 +129,8 @@ namespace Open_lab.Tests.Services
         public async Task Results_And_Preview_Gap_Functions_Should_Work()
         {
             // Function: 4.1 — , 4.2, 4.6
+            // Arrange
+            // Act
             var resultsService = new ResultsService(_db);
             var reportService = new ReportService(_db);
 
@@ -140,6 +151,7 @@ namespace Open_lab.Tests.Services
 
             await resultsService.SaveResultAsync(visitTest.VisitTestId, param.ParameterId, "5.5", "N", "ok");
             var saved = await _db.VisitTests.FindAsync(visitTest.VisitTestId);
+            // Assert
             saved!.Status.Should().Be("Completed");
 
             var report = await reportService.GetVisitReportAsync(visit.VisitId);
@@ -151,6 +163,8 @@ namespace Open_lab.Tests.Services
         public async Task Culture_Gap_Functions_Should_Work()
         {
             // Function: 5.1 — , 5.2, 5.3, 5.6
+            // Arrange
+            // Act
             var service = new CultureSensitivityService(_db);
 
             var culture = await service.CreateCultureAsync(new Culture
@@ -165,6 +179,7 @@ namespace Open_lab.Tests.Services
             await service.LinkAntibioticAsync(culture.CultureId, antibiotic.AntibioticId);
 
             var linked = await service.GetCultureAntibioticsAsync(culture.CultureId);
+            // Assert
             linked.Should().ContainSingle();
 
             var patient = new Patient { LabId = "L-CUL", FullName = "Child", Gender = "Male", Age = 8 };
@@ -193,6 +208,8 @@ namespace Open_lab.Tests.Services
         public async Task Sample_Collection_Gap_Functions_Should_Work()
         {
             // Function: 6.1 — , 6.2
+            // Arrange
+            // Act
             var service = new SampleCollectionService(_db);
             var patient = new Patient { LabId = "L-SMP", FullName = "P", Gender = "Male" };
             _db.Patients.Add(patient);
@@ -211,6 +228,7 @@ namespace Open_lab.Tests.Services
             await service.MarkSeparatedAsync(visitTest.VisitTestId, "Serum");
 
             var row = await _db.SampleCollections.FirstOrDefaultAsync(s => s.VisitTestId == visitTest.VisitTestId);
+            // Assert
             row.Should().NotBeNull();
             row!.IsSeparated.Should().BeTrue();
         }
@@ -219,6 +237,8 @@ namespace Open_lab.Tests.Services
         public async Task Worksheet_Gap_Functions_Should_Work()
         {
             // Function: 7.1 — , 7.2
+            // Arrange
+            // Act
             var service = new WorksheetService(_db);
             var patient = new Patient { LabId = "L-WS", FullName = "P", Gender = "Male" };
             _db.Patients.Add(patient);
@@ -235,6 +255,7 @@ namespace Open_lab.Tests.Services
             var byPatient = await service.GetWorksheetByPatientAsync(DateTime.Today.AddDays(-1), DateTime.Today.AddDays(1));
             var byTest = await service.GetWorksheetByTestAsync(DateTime.Today.AddDays(-1), DateTime.Today.AddDays(1));
 
+            // Assert
             byPatient.Should().ContainSingle();
             byTest.Should().ContainSingle();
         }
@@ -243,6 +264,8 @@ namespace Open_lab.Tests.Services
         public async Task External_Lab_Gap_Functions_Should_Work()
         {
             // Function: 8.1 — , 8.2, 8.3, 8.4
+            // Arrange
+            // Act
             var visitService = new VisitService(_db);
             var externalService = new ExternalLabService(_db);
 
@@ -261,6 +284,7 @@ namespace Open_lab.Tests.Services
 
             var visitTest = await visitService.AddTestToVisitAsync(visit.VisitId, test.TestId);
             var queueItem = await _db.ExternalLabQueues.FirstOrDefaultAsync(q => q.VisitTestId == visitTest.VisitTestId);
+            // Assert
             queueItem.Should().NotBeNull();
 
             var manifest = await externalService.CreateManifestAsync(referral.ReferralId, new List<int> { queueItem!.QueueId }, "courier");
@@ -276,6 +300,8 @@ namespace Open_lab.Tests.Services
         public async Task Statistics_Gap_Functions_Should_Work()
         {
             // Function: 9.1 — , 9.2, 9.3, 9.4, 9.5
+            // Arrange
+            // Act
             var service = new StatisticsService(_db);
 
             var referral = new Referral { Name = "Referral", ReferralType = "Company" };
@@ -308,6 +334,7 @@ namespace Open_lab.Tests.Services
             var top = await service.GetTop10TestsAsync(DateTime.Today.AddYears(-1), DateTime.Today.AddYears(1));
             var yearly = await service.GetSampleCountPerYearAsync(3);
 
+            // Assert
             snapshot.ByGender.Should().HaveCountGreaterThan(1);
             snapshot.ByReferral.Should().Contain(r => r.ReferralName == "Referral");
             monthly.Should().HaveCount(12);
@@ -319,6 +346,8 @@ namespace Open_lab.Tests.Services
         public async Task User_Attendance_Gap_Functions_Should_Work()
         {
             // Function: 10.1 — , 10.2, 10.3, 10.4, 10.5, 11.1, 11.2, 11.4
+            // Arrange
+            // Act
             var userAdmin = new UserAdminService(_db);
             var attendance = new AttendanceService(_db);
             var tardiness = new TardinessService(_db);
@@ -335,6 +364,7 @@ namespace Open_lab.Tests.Services
             var log = await attendance.CreateLoginAsync(user.UserId, "start");
             await attendance.CloseAsync(log.AttendanceLogId);
             var closed = await _db.AttendanceLogs.FindAsync(log.AttendanceLogId);
+            // Assert
             closed!.LogoutAt.Should().NotBeNull();
 
             var shift = new ShiftSchedule
@@ -366,6 +396,8 @@ namespace Open_lab.Tests.Services
         public async Task Contract_Invoice_Gap_Functions_Should_Work()
         {
             // Function: 12.8 — , 12.9
+            // Arrange
+            // Act
             var service = new ContractInvoiceService(_db);
             var referral = new Referral { Name = "Insurance A", ReferralType = "Company" };
             _db.Referrals.Add(referral);
@@ -385,6 +417,7 @@ namespace Open_lab.Tests.Services
             var contractInvoiceId = await service.CreateContractInvoiceAsync(referral.ReferralId, "CI-001", DateTime.Today.AddDays(-1), DateTime.Today.AddDays(1));
             var settled = await service.SettleContractInvoiceAsync(contractInvoiceId);
 
+            // Assert
             settled.IsPaid.Should().BeTrue();
         }
 
@@ -392,6 +425,8 @@ namespace Open_lab.Tests.Services
         public async Task System_Settings_Gap_Function_Should_Work()
         {
             // Function: 13.1 — Set Report Margins
+            // Arrange
+            // Act
             var service = new SystemSettingsService(_db);
             var profile = await service.GetProfileAsync();
             var updatedProfile = new SystemSettingsProfile
@@ -417,6 +452,7 @@ namespace Open_lab.Tests.Services
             await service.SaveProfileAsync(updatedProfile);
 
             var updated = await service.GetProfileAsync();
+            // Assert
             updated.ReportMarginTop.Should().Be(2.2);
             updated.ReportMarginBottom.Should().Be(1.3);
         }
@@ -425,6 +461,8 @@ namespace Open_lab.Tests.Services
         public async Task PatientSearchService_SearchPatientsAsync_Should_Filter_By_Name_Phone_And_LabId_SuccessGuard()
         {
             // Function: 13.1 — Set Report Margins
+            // Arrange
+            // Act
             var service = new PatientSearchService(_db);
             _db.Patients.AddRange(
                 new Patient { LabId = "LAB-A", FullName = "Ali Hassan", Gender = "Male", Phone = "01000111" },
@@ -434,6 +472,7 @@ namespace Open_lab.Tests.Services
 
             var result = await service.SearchPatientsAsync("Ali", "0100", "LAB-A");
 
+            // Assert
             result.Should().ContainSingle();
             result[0].LabId.Should().Be("LAB-A");
             result[0].FullName.Should().Contain("Ali");
@@ -443,6 +482,8 @@ namespace Open_lab.Tests.Services
         public async Task PatientSearchService_SearchPatientsAsync_With_AllFiltersEmpty_Should_Return_AllOrdered_EdgeGuard()
         {
             // Function: 13.1 — Set Report Margins
+            // Arrange
+            // Act
             var service = new PatientSearchService(_db);
             _db.Patients.AddRange(
                 new Patient { LabId = "L2", FullName = "Zed", Gender = "Male" },
@@ -451,6 +492,7 @@ namespace Open_lab.Tests.Services
 
             var result = await service.SearchPatientsAsync(null, string.Empty, " ");
 
+            // Assert
             result.Should().HaveCount(2);
             result[0].FullName.Should().Be("Adam");
             result[1].FullName.Should().Be("Zed");
@@ -460,6 +502,8 @@ namespace Open_lab.Tests.Services
         public async Task PatientSearchService_SearchPatientsAsync_With_DateFilter_Should_Exclude_Patients_Without_Visits_FailureGuard()
         {
             // Function: 13.1 — Set Report Margins
+            // Arrange
+            // Act
             var service = new PatientSearchService(_db);
             var withVisit = new Patient { LabId = "LAB-D1", FullName = "With Visit", Gender = "Male" };
             var withoutVisit = new Patient { LabId = "LAB-D2", FullName = "Without Visit", Gender = "Female" };
@@ -470,6 +514,7 @@ namespace Open_lab.Tests.Services
 
             var result = await service.SearchPatientsAsync(null, null, null, DateTime.Today);
 
+            // Assert
             result.Should().ContainSingle();
             result[0].LabId.Should().Be("LAB-D1");
         }
@@ -478,6 +523,8 @@ namespace Open_lab.Tests.Services
         public async Task CompareWithHistoryService_GetLastResultsAsync_Should_Return_MostRecent_VisitResults_SuccessGuard()
         {
             // Function: 13.1 — Set Report Margins
+            // Arrange
+            // Act
             var service = new CompareWithHistoryService(_db);
             var patient = new Patient { LabId = "LAB-H1", FullName = "History P", Gender = "Male" };
             var test = new Test { Code = "HIS1", NameReport = "History Test", NameReceipt = "History Test", Price = 20m };
@@ -506,6 +553,7 @@ namespace Open_lab.Tests.Services
 
             var result = await service.GetLastResultsAsync(patient.PatientId, test.TestId, count: 1);
 
+            // Assert
             result.Should().ContainSingle();
             result[0].Value.Should().Be("5.2");
             result[0].VisitId.Should().Be(newVisit.VisitId);
@@ -515,10 +563,13 @@ namespace Open_lab.Tests.Services
         public async Task CompareWithHistoryService_GetLastResultsAsync_When_NoHistory_Should_Return_EmptyList_FailureGuard()
         {
             // Function: 13.1 — Set Report Margins
+            // Arrange
+            // Act
             var service = new CompareWithHistoryService(_db);
 
             var result = await service.GetLastResultsAsync(patientId: 999, testId: 999, count: 3);
 
+            // Assert
             result.Should().BeEmpty();
         }
 
@@ -526,6 +577,8 @@ namespace Open_lab.Tests.Services
         public async Task CompareWithHistoryService_GetLastResultsAsync_With_ZeroCount_Should_Return_Empty_EdgeGuard()
         {
             // Function: 13.1 — Set Report Margins
+            // Arrange
+            // Act
             var service = new CompareWithHistoryService(_db);
             var patient = new Patient { LabId = "LAB-H2", FullName = "Edge", Gender = "Male" };
             var test = new Test { Code = "HIS2", NameReport = "H2", NameReceipt = "H2", Price = 10m };
@@ -535,6 +588,7 @@ namespace Open_lab.Tests.Services
 
             var result = await service.GetLastResultsAsync(patient.PatientId, test.TestId, count: 0);
 
+            // Assert
             result.Should().BeEmpty();
         }
 
@@ -542,6 +596,8 @@ namespace Open_lab.Tests.Services
         public async Task AuthService_ValidateCredentialsAsync_With_HashedPassword_Should_Return_User_SuccessGuard()
         {
             // Function: 13.1 — Set Report Margins
+            // Arrange
+            // Act
             var service = new AuthService(_db);
             var salt = PasswordSecurity.GenerateSalt();
             var user = new User
@@ -556,6 +612,7 @@ namespace Open_lab.Tests.Services
 
             var result = await service.ValidateCredentialsAsync("hashed-user", "p@ss");
 
+            // Assert
             result.Should().NotBeNull();
             result!.Username.Should().Be("hashed-user");
         }
@@ -564,6 +621,8 @@ namespace Open_lab.Tests.Services
         public async Task AuthService_ValidateCredentialsAsync_With_InvalidPassword_Should_Return_Null_FailureGuard()
         {
             // Function: 13.1 — Set Report Margins
+            // Arrange
+            // Act
             var service = new AuthService(_db);
             var salt = PasswordSecurity.GenerateSalt();
             _db.Users.Add(new User
@@ -577,6 +636,7 @@ namespace Open_lab.Tests.Services
 
             var result = await service.ValidateCredentialsAsync("wrong-pass-user", "incorrect");
 
+            // Assert
             result.Should().BeNull();
         }
 
@@ -584,6 +644,8 @@ namespace Open_lab.Tests.Services
         public async Task AuthService_ValidateCredentialsAsync_With_LegacyPassword_Should_MigrateSaltAndHash_EdgeGuard()
         {
             // Function: 13.1 — Set Report Margins
+            // Arrange
+            // Act
             var service = new AuthService(_db);
             var user = new User
             {
@@ -598,6 +660,7 @@ namespace Open_lab.Tests.Services
             var result = await service.ValidateCredentialsAsync("legacy-user", "legacy-pass");
             var persisted = await _db.Users.FirstAsync(u => u.UserId == user.UserId);
 
+            // Assert
             result.Should().NotBeNull();
             persisted.Salt.Should().NotBeNullOrWhiteSpace();
             persisted.PasswordHash.Should().NotBe("legacy-pass");

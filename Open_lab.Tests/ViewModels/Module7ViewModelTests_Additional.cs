@@ -25,6 +25,7 @@ namespace Open_lab.Tests
         public async Task LoadCommand_With_Specific_Date_Range_Should_Pass_Range_To_Service_SuccessGuard()
         {
             // Function: 7.1 — Generate Patient Worksheet (Date Range from ViewModel)
+            // Arrange
             // Production normalises the range to From.Date → To.Date end-of-day (To.Date.AddDays(1).AddSeconds(-1)).
             AppSessionTestHelper.ResetToAdmin();
             var worksheetServiceMock = new Mock<IWorksheetService>();
@@ -56,6 +57,7 @@ namespace Open_lab.Tests
         public async Task PrintCommand_With_Multiple_Rows_Should_Call_Print_With_All_Rows_SuccessGuard()
         {
             // Function: 7.1 — Generate Patient Worksheet (Print Multiple Rows)
+            // Arrange
             AppSessionTestHelper.ResetToAdmin();
             var worksheetServiceMock = new Mock<IWorksheetService>();
             var printServiceMock = new Mock<IPrintService>();
@@ -86,6 +88,7 @@ namespace Open_lab.Tests
         public async Task LoadCommand_With_Multiple_Test_Results_Should_Display_All_SuccessGuard()
         {
             // Function: 7.2 — Generate Test Worksheet (Multiple Results)
+            // Arrange
             AppSessionTestHelper.ResetToAdmin();
             var worksheetServiceMock = new Mock<IWorksheetService>();
             var printServiceMock = new Mock<IPrintService>();
@@ -117,6 +120,7 @@ namespace Open_lab.Tests
         public async Task LoadWorksheetCommand_With_Custom_Group_Should_Call_Custom_Group_Service_SuccessGuard()
         {
             // Function: 7.3 — Generate Group Worksheet (Custom Group Selection)
+            // Arrange
             AppSessionTestHelper.ResetToAdmin();
             var groupServiceMock = new Mock<IGroupWorksheetService>();
             var testCatalogServiceMock = new Mock<ITestCatalogService>();
@@ -149,6 +153,7 @@ namespace Open_lab.Tests
         public async Task LoadWorksheetCommand_With_Normal_Group_Should_Call_Group_Service_SuccessGuard()
         {
             // Function: 7.3 — Generate Group Worksheet (Normal Group Selection)
+            // Arrange
             AppSessionTestHelper.ResetToAdmin();
             var groupServiceMock = new Mock<IGroupWorksheetService>();
             var testCatalogServiceMock = new Mock<ITestCatalogService>();
@@ -181,6 +186,7 @@ namespace Open_lab.Tests
         public async Task PrintCommand_With_Group_Worksheet_Should_Call_Print_Service_SuccessGuard()
         {
             // Function: 7.3 — Generate Group Worksheet (Print Group Worksheet)
+            // Arrange
             AppSessionTestHelper.ResetToAdmin();
             var groupServiceMock = new Mock<IGroupWorksheetService>();
             var testCatalogServiceMock = new Mock<ITestCatalogService>();
@@ -213,6 +219,7 @@ namespace Open_lab.Tests
         public async Task LoadAsync_With_Multiple_Reagent_Consumptions_Should_Display_All_SuccessGuard()
         {
             // Function: 7.4 — Test Classification LOG (Multiple Reagents Display)
+            // Arrange
             AppSessionTestHelper.ResetToAdmin();
             var classificationServiceMock = new Mock<ITestClassificationService>();
             var printServiceMock = new Mock<IPrintService>();
@@ -240,6 +247,7 @@ namespace Open_lab.Tests
         public async Task ServiceLayer_LoadCommand_When_Service_Throws_Should_Set_Error_Message_FailureGuard()
         {
             // Function: 7.4 — Test Classification LOG (Service Error Handling)
+            // Arrange
             AppSessionTestHelper.ResetToAdmin();
             var classificationServiceMock = new Mock<ITestClassificationService>();
             var printServiceMock = new Mock<IPrintService>();
@@ -263,6 +271,7 @@ namespace Open_lab.Tests
         public async Task PrintCommand_With_Empty_Items_Should_Not_Call_Print_Service_EdgeGuard()
         {
             // Function: 7.4 — Test Classification LOG (Print Empty)
+            // Arrange
             AppSessionTestHelper.ResetToAdmin();
             var classificationServiceMock = new Mock<ITestClassificationService>();
             var printServiceMock = new Mock<IPrintService>();
@@ -292,6 +301,7 @@ namespace Open_lab.Tests
         public async Task LoadCommand_Without_Login_Should_Set_Auth_Error_EdgeGuard()
         {
             // Function: 7.1 — Generate Patient Worksheet (Authentication Required)
+            // Arrange
             AppSessionTestHelper.Reset();
             var worksheetServiceMock = new Mock<IWorksheetService>();
             var printServiceMock = new Mock<IPrintService>();
@@ -310,6 +320,7 @@ namespace Open_lab.Tests
         public async Task GroupWorksheet_LoadCommand_Without_Login_Should_Set_Auth_Error_EdgeGuard()
         {
             // Function: 7.3 — Generate Group Worksheet (Authentication Required)
+            // Arrange
             AppSessionTestHelper.Reset();
             var groupServiceMock = new Mock<IGroupWorksheetService>();
             var testCatalogServiceMock = new Mock<ITestCatalogService>();
@@ -337,6 +348,7 @@ namespace Open_lab.Tests
         public async Task Full_Worksheet_Workflow_Patient_Load_Print_Should_Work_SuccessGuard()
         {
             // Function: 7.1 — Complete Patient Worksheet Workflow
+            // Arrange
             AppSessionTestHelper.ResetToAdmin();
             var worksheetServiceMock = new Mock<IWorksheetService>();
             var printServiceMock = new Mock<IPrintService>();
@@ -370,6 +382,7 @@ namespace Open_lab.Tests
         public async Task Full_Group_Worksheet_Workflow_Load_Print_Should_Work_SuccessGuard()
         {
             // Function: 7.3 — Complete Group Worksheet Workflow
+            // Arrange
             AppSessionTestHelper.ResetToAdmin();
             var groupServiceMock = new Mock<IGroupWorksheetService>();
             var testCatalogServiceMock = new Mock<ITestCatalogService>();

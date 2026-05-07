@@ -30,6 +30,8 @@ namespace Open_lab.Tests.Services
         public async Task GetPunctualityReportAsync_Should_Calculate_Delay_And_Overtime_LogicGuard()
         {
             // Function: X.X — To Be Determined
+            // Arrange
+            // Act
             // Refactored to Logic Guard - verifies precise delay and overtime calculations
             var shift = new ShiftSchedule { Name = "Day", StartTime = new TimeSpan(8, 0, 0), EndTime = new TimeSpan(16, 0, 0), GracePeriodMinutes = 5 };
             _db.ShiftSchedules.Add(shift);

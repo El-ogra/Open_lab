@@ -239,6 +239,7 @@ namespace Open_lab.Tests
         public async Task GetSampleStatusAsync_With_NonExistent_Id_Should_Return_Null_EdgeGuard()
         {
             // Function: 6.3 — Track Sample Status (Non-Existent Sample)
+            // Arrange
             // Act
             var result = await _trackingService.GetSampleStatusAsync(99999);
 
@@ -299,6 +300,7 @@ namespace Open_lab.Tests
 
             // Verify Collected state
             var collectedSample = await _db.SampleCollections.FirstOrDefaultAsync(s => s.VisitTestId == vtId);
+            // Assert
             collectedSample!.Status.Should().Be("مسحوبة");
 
             await _collectionService.MarkSeparatedAsync(vtId, "Centrifuge");
@@ -355,6 +357,7 @@ namespace Open_lab.Tests
         public async Task MarkCollectedAsync_External_With_NonExistent_VisitTest_Should_Throw_FailureGuard()
         {
             // Function: 6.4 — Mark Taken Outside Lab (Non-Existent VisitTest)
+            // Arrange
             // Act
             Func<Task> act = async () => await _collectionService.MarkCollectedAsync(88888, userId: 1, isExternal: true, receivedBy: 2);
 
@@ -382,6 +385,7 @@ namespace Open_lab.Tests
         public async Task MarkNotCollectedAsync_With_NonExistent_Sample_Should_NotThrow_EdgeGuard()
         {
             // Function: 6.1 — Register Sample Collection (Cancel Non-Existent)
+            // Arrange
             // Act
             Func<Task> act = async () => await _collectionService.MarkNotCollectedAsync(77777);
 

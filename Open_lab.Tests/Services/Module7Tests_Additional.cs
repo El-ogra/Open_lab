@@ -267,6 +267,7 @@ namespace Open_lab.Tests
         public async Task GetGroupWorksheetByGroupAsync_With_NonExistent_Group_Should_Return_Empty_EdgeGuard()
         {
             // Function: 7.3 — Generate Group Worksheet (Non-Existent Group)
+            // Arrange
             // Act
             var rows = await _groupWorksheetService.GetGroupWorksheetByGroupAsync(99999, DateTime.Today.AddDays(-1), DateTime.Today.AddDays(1));
 

@@ -25,11 +25,14 @@ namespace Open_lab.Tests.ViewModels
         public async Task LoadCommand_With_Invalid_VisitId_Should_Show_Validation_Message_FailureGuard()
         {
             // Function: X.X — To Be Determined
+            // Arrange
+            // Act
             _viewModel.VisitId = 0;
 
             _viewModel.LoadCommand.Execute(null);
             await Task.Delay(50);
 
+            // Assert
             _viewModel.StatusMessage.Should().Be("يرجى إدخال رقم الزيارة.");
             _reportServiceMock.Verify(s => s.GetCompositeReportAsync(It.IsAny<int>(), It.IsAny<IReadOnlyCollection<int>>()), Times.Never);
         }
@@ -38,6 +41,8 @@ namespace Open_lab.Tests.ViewModels
         public async Task LoadCommand_With_Existing_Visit_Should_Populate_Report_Data_SuccessGuard()
         {
             // Function: X.X — To Be Determined
+            // Arrange
+            // Act
             var report = BuildReport(visitId: 22);
             _reportServiceMock
                 .Setup(s => s.GetCompositeReportAsync(22, It.IsAny<IReadOnlyCollection<int>>()))
@@ -47,6 +52,7 @@ namespace Open_lab.Tests.ViewModels
             _viewModel.LoadCommand.Execute(null);
             await Task.Delay(50);
 
+            // Assert
             _viewModel.PatientName.Should().Be("Patient 22");
             _viewModel.LabId.Should().Be("LAB-22");
             _viewModel.Tests.Should().HaveCount(2);
@@ -57,6 +63,8 @@ namespace Open_lab.Tests.ViewModels
         public async Task CombinedReport_LoadCommand_When_Service_Throws_Should_Set_Error_Message_FailureGuard()
         {
             // Function: X.X — To Be Determined
+            // Arrange
+            // Act
             _reportServiceMock
                 .Setup(s => s.GetCompositeReportAsync(It.IsAny<int>(), It.IsAny<IReadOnlyCollection<int>>()))
                 .ThrowsAsync(new InvalidOperationException("Load failed"));
@@ -65,6 +73,7 @@ namespace Open_lab.Tests.ViewModels
             _viewModel.LoadCommand.Execute(null);
             await Task.Delay(50);
 
+            // Assert
             _viewModel.StatusMessage.Should().Contain("Load failed");
         }
 
@@ -72,6 +81,8 @@ namespace Open_lab.Tests.ViewModels
         public async Task MoveCommands_Should_Reorder_Items_When_Selection_Changes_EdgeGuard()
         {
             // Function: X.X — To Be Determined
+            // Arrange
+            // Act
             var report = BuildReport(visitId: 30);
             _reportServiceMock
                 .Setup(s => s.GetCompositeReportAsync(30, It.IsAny<IReadOnlyCollection<int>>()))
@@ -83,6 +94,7 @@ namespace Open_lab.Tests.ViewModels
 
             _viewModel.SelectedTest = _viewModel.Tests[1];
             _viewModel.MoveUpCommand.Execute(null);
+            // Assert
             _viewModel.Tests[0].Test.Code.Should().Be("CBC");
 
             _viewModel.MoveDownCommand.Execute(null);

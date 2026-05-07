@@ -244,6 +244,8 @@ namespace Open_lab.Tests.ViewModels
         public async Task PatientCountByMonth_WhenMonthlyServiceThrows_ShouldSetErrorStatusMessage_Failure()
         {
             // Function: 9.2 — Patient Count by Month
+            // Arrange
+            // Act
             _statsMock
                 .Setup(x => x.GetMonthlyAnalysisAsync(It.IsAny<int>()))
                 .ThrowsAsync(new Exception("فشل التحليل الشهري"));
@@ -251,6 +253,7 @@ namespace Open_lab.Tests.ViewModels
             _viewModel.LoadCommand.Execute(null);
             await Task.Delay(200);
 
+            // Assert
             _viewModel.StatusMessage.Should().Contain("خطأ:");
             _viewModel.StatusMessage.Should().Contain("فشل التحليل الشهري");
         }
@@ -427,6 +430,7 @@ namespace Open_lab.Tests.ViewModels
         {
             // Function: 9.5 — Referral Source Analysis
             // Arrange — انتظار اكتمال الـ Initialize
+            // Act
             await Task.Delay(300);
 
             // Assert
@@ -485,6 +489,8 @@ namespace Open_lab.Tests.ViewModels
         public async Task ReferralSourceAnalysis_WhenSnapshotServiceThrows_ShouldSetErrorStatusMessage_Failure()
         {
             // Function: 9.5 — Referral Source Analysis
+            // Arrange
+            // Act
             _statsMock
                 .Setup(x => x.GetSnapshotAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>(),
                     It.IsAny<string?>(), It.IsAny<int?>()))
@@ -493,6 +499,7 @@ namespace Open_lab.Tests.ViewModels
             _viewModel.LoadCommand.Execute(null);
             await Task.Delay(200);
 
+            // Assert
             _viewModel.StatusMessage.Should().Contain("خطأ:");
             _viewModel.StatusMessage.Should().Contain("فشل تحميل مصادر الإحالة");
         }

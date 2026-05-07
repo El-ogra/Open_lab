@@ -320,6 +320,7 @@ namespace Open_lab.Tests.Services
         public async Task GetMedicalHistoryAsync_InvalidPatientId_Should_Throw()
         {
             // Function: 1.6 — View Patient History
+            // Arrange
             // Act
             Func<Task> act = async () => await _service.GetMedicalHistoryAsync(-1);
 
@@ -489,6 +490,7 @@ namespace Open_lab.Tests.Services
         public async Task GetByLabIdAsync_When_LabIdIsWhitespace_Should_Throw_FailureGuard()
         {
             // Function: 1.5 — Search Patient
+            // Arrange
             // Act
             Func<Task> act = async () => await _service.GetByLabIdAsync(" ");
 

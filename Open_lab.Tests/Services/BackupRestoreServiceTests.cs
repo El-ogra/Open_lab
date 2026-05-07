@@ -34,6 +34,7 @@ namespace Open_lab.Tests.Services
         public async Task ListBackupsAsync_Should_Return_Files_If_Exists_LogicGuard()
         {
             // Function: 13.7 — Configure Backup - Refactored to Logic Guard
+            // Arrange
             var tempPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
             Directory.CreateDirectory(tempPath);
             try
@@ -67,6 +68,8 @@ namespace Open_lab.Tests.Services
         public async Task BackupAsync_With_EmptyPath_Should_Throw_LogicGuard()
         {
             // Function: 13.7 — Configure Backup - Refactored to Logic Guard
+            // Arrange
+            // Act
             // Refactored to Logic Guard - verifies exception message and side effect
             Func<Task> act = async () => await _service.BackupAsync("");
             
@@ -123,8 +126,11 @@ namespace Open_lab.Tests.Services
         public async Task RestoreAsync_WithEmptyPath_ShouldThrowException_FailureGuard()
         {
             // Function: 13.7 — Configure Backup - Logic Guard: Verify data is prepared for backup (InMemoryDatabase limitation workaround)
+            // Arrange
+            // Act
             Func<Task> act = async () => await _service.RestoreAsync("");
             
+            // Assert
             await act.Should().ThrowAsync<ArgumentException>().WithMessage("*path*");
         }
 
@@ -169,6 +175,7 @@ namespace Open_lab.Tests.Services
         {
             // Function: 13.7 — Configure Backup (Restore with Valid Path)
             // Arrange/Act
+            // Act
             Func<Task> act = async () => await _service.ConfigureDailyBackupScheduleAsync(string.Empty, TimeSpan.FromHours(1));
 
             // Assert
