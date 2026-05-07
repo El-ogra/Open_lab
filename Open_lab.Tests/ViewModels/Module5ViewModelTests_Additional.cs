@@ -51,14 +51,18 @@ namespace Open_lab.Tests
         public async Task AddCultureAsync_With_Empty_Name_Should_Set_Error_FailureGuard()
         {
             // Function: 5.1 — Enter Culture Data (Empty Name Validation)
+
+            // Arrange
             _viewModel.NewCultureName = "";
             _viewModel.NewCultureSampleType = "Urine";
             _viewModel.NewCultureOrganism = "E. coli";
             _viewModel.NewCultureConditions = "Aerobic";
             _viewModel.NewCultureColonyCount = 100;
 
+            // Act
             await _viewModel.InvokePrivateAsync("AddCultureAsync");
 
+            // Assert
             // Production validation message for empty culture name (no "خطأ:" prefix on validation guards).
             _viewModel.StatusMessage.Should().Contain("أدخل اسم المزرعة");
             _serviceMock.Verify(s => s.CreateCultureAsync(It.IsAny<Culture>()), Times.Never);
@@ -68,6 +72,8 @@ namespace Open_lab.Tests
         public async Task AddCultureAsync_With_Minimum_ColonyCount_Should_Succeed_EdgeGuard()
         {
             // Function: 5.1 — Enter Culture Data (Minimum Colony Count Boundary)
+
+            // Arrange
             // Production rule: ColonyCount must be > 0. The smallest accepted value is 1.
             _viewModel.NewCultureName = "Minimum Growth";
             _viewModel.NewCultureSampleType = "Urine";
@@ -78,8 +84,10 @@ namespace Open_lab.Tests
             _serviceMock.Setup(s => s.CreateCultureAsync(It.IsAny<Culture>()))
                 .ReturnsAsync((Culture c) => { c.CultureId = 1; return c; });
 
+            // Act
             await _viewModel.InvokePrivateAsync("AddCultureAsync");
 
+            // Assert
             _serviceMock.Verify(s => s.CreateCultureAsync(It.Is<Culture>(c => c.ColonyCount == 1)), Times.Once);
             _viewModel.StatusMessage.Should().Contain("تم إضافة المزرعة");
         }
@@ -153,12 +161,16 @@ namespace Open_lab.Tests
         public async Task AddAntibioticAsync_With_Empty_Name_Should_Set_Error_FailureGuard()
         {
             // Function: 5.2 — Add Antibiotics (Empty Name Validation)
+
+            // Arrange
             _viewModel.NewAntibioticName = "";
             _viewModel.NewAntibioticSafeForPregnancy = true;
             _viewModel.NewAntibioticSafeForChildren = true;
 
+            // Act
             await _viewModel.InvokePrivateAsync("AddAntibioticAsync");
 
+            // Assert
             // Production validation message for empty antibiotic name (no "خطأ:" prefix on validation guards).
             _viewModel.StatusMessage.Should().Contain("أدخل اسم المضاد الحيوي");
             _serviceMock.Verify(s => s.CreateAntibioticAsync(It.IsAny<Antibiotic>()), Times.Never);
@@ -168,6 +180,8 @@ namespace Open_lab.Tests
         public async Task AddAntibioticAsync_When_Service_Throws_Should_Set_Error_FailureGuard()
         {
             // Function: 5.2 — Add Antibiotics (Service Exception Handling)
+
+            // Arrange
             _viewModel.NewAntibioticName = "NewAbx";
             _viewModel.NewAntibioticSafeForPregnancy = true;
             _viewModel.NewAntibioticSafeForChildren = true;
@@ -175,8 +189,10 @@ namespace Open_lab.Tests
             _serviceMock.Setup(s => s.CreateAntibioticAsync(It.IsAny<Antibiotic>()))
                 .ThrowsAsync(new Exception("database-error"));
 
+            // Act
             await _viewModel.InvokePrivateAsync("AddAntibioticAsync");
 
+            // Assert
             _viewModel.StatusMessage.Should().Contain("خطأ:");
             _viewModel.StatusMessage.Should().Contain("database-error");
         }
@@ -221,6 +237,8 @@ namespace Open_lab.Tests
         public async Task SaveResultAsync_With_Empty_ResultRows_Should_Set_Warning_EdgeGuard()
         {
             // Function: 5.3 — Set Sensitivity (Empty Results Edge Case)
+
+            // Arrange
             _viewModel.SelectedCulture = new Culture
             {
                 CultureId = 10,
@@ -239,8 +257,10 @@ namespace Open_lab.Tests
             };
             _viewModel.ResultRows.Clear(); // No results to save
 
+            // Act
             await _viewModel.InvokePrivateAsync("SaveResultAsync");
 
+            // Assert
             _viewModel.StatusMessage.Should().Contain("لا توجد نتائج");
             _serviceMock.Verify(s => s.SaveCultureResultAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<IReadOnlyCollection<CultureSensitivityValue>>()), Times.Never);
         }
@@ -374,6 +394,8 @@ namespace Open_lab.Tests
         public async Task BuildResultRowsAsync_With_Pregnant_Patient_Should_Filter_Antibiotics_SuccessGuard()
         {
             // Function: 5.5 — Filter Pregnancy Antibiotics (BR-MED-006)
+
+            // Arrange
             _viewModel.SelectedCulture = new Culture
             {
                 CultureId = 30,
@@ -404,8 +426,10 @@ namespace Open_lab.Tests
                 antibiotics.Where(a => a.IsSafeForPregnancy).ToList()
             );
 
+            // Act
             await _viewModel.InvokePrivateAsync("BuildResultRowsAsync");
 
+            // Assert
             _viewModel.ResultRows.Should().HaveCount(1);
             _viewModel.ResultRows[0].AntibioticName.Should().Be("SafePreg");
         }
@@ -447,6 +471,8 @@ namespace Open_lab.Tests
         public async Task BuildResultRowsAsync_With_Child_Patient_Should_Filter_Antibiotics_SuccessGuard()
         {
             // Function: 5.6 — Filter Children Antibiotics (BR-MED-007)
+
+            // Arrange
             _viewModel.SelectedCulture = new Culture
             {
                 CultureId = 31,
@@ -477,8 +503,10 @@ namespace Open_lab.Tests
                 antibiotics.Where(a => a.IsSafeForChildren).ToList()
             );
 
+            // Act
             await _viewModel.InvokePrivateAsync("BuildResultRowsAsync");
 
+            // Assert
             _viewModel.ResultRows.Should().HaveCount(1);
             _viewModel.ResultRows[0].AntibioticName.Should().Be("SafeChild");
         }
@@ -530,6 +558,8 @@ namespace Open_lab.Tests
         public async Task PrintCultureReportAsync_With_Null_Culture_Should_Set_Error_FailureGuard()
         {
             // Function: 5.7 — Print Culture Report (Missing Culture Edge Case)
+
+            // Arrange
             _viewModel.SelectedCulture = null;
             _viewModel.SelectedVisitTest = new CultureVisitTestRow
             {
@@ -539,8 +569,10 @@ namespace Open_lab.Tests
                 PatientName = "Patient"
             };
 
+            // Act
             await _viewModel.InvokePrivateAsync("PrintCultureReportAsync");
 
+            // Assert
             _viewModel.StatusMessage.Should().Contain("بيانات الطباعة غير مكتملة");
             _printServiceMock.Verify(p => p.PrintCultureReportAsync(It.IsAny<CultureReportData>()), Times.Never);
         }
@@ -549,6 +581,8 @@ namespace Open_lab.Tests
         public async Task PrintCultureReportAsync_With_Null_VisitTest_Should_Set_Error_FailureGuard()
         {
             // Function: 5.7 — Print Culture Report (Missing Visit Edge Case)
+
+            // Arrange
             _viewModel.SelectedCulture = new Culture
             {
                 CultureId = 60,
@@ -560,8 +594,10 @@ namespace Open_lab.Tests
             };
             _viewModel.SelectedVisitTest = null;
 
+            // Act
             await _viewModel.InvokePrivateAsync("PrintCultureReportAsync");
 
+            // Assert
             _viewModel.StatusMessage.Should().Contain("بيانات الطباعة غير مكتملة");
         }
 
@@ -569,6 +605,8 @@ namespace Open_lab.Tests
         public async Task PrintCultureReportAsync_With_Empty_ResultRows_Should_Print_Anyway_SuccessGuard()
         {
             // Function: 5.7 — Print Culture Report (Empty Results - Valid Scenario)
+
+            // Arrange
             _viewModel.SelectedCulture = new Culture
             {
                 CultureId = 70,
@@ -592,8 +630,10 @@ namespace Open_lab.Tests
                 .Callback<CultureReportData>(data => printedData = data)
                 .Returns(Task.CompletedTask);
 
+            // Act
             await _viewModel.InvokePrivateAsync("PrintCultureReportAsync");
 
+            // Assert
             _printServiceMock.Verify(p => p.PrintCultureReportAsync(It.IsAny<CultureReportData>()), Times.Once);
             printedData.Should().NotBeNull();
             printedData!.CultureName.Should().Be("No Growth Culture");
@@ -603,6 +643,8 @@ namespace Open_lab.Tests
         public async Task PrintCultureReportAsync_When_PrintService_Throws_Should_Set_Error_FailureGuard()
         {
             // Function: 5.7 — Print Culture Report (Print Service Exception)
+
+            // Arrange
             _viewModel.SelectedCulture = new Culture
             {
                 CultureId = 90,
@@ -630,8 +672,10 @@ namespace Open_lab.Tests
             _printServiceMock.Setup(p => p.PrintCultureReportAsync(It.IsAny<CultureReportData>()))
                 .ThrowsAsync(new InvalidOperationException("Printer offline"));
 
+            // Act
             await _viewModel.InvokePrivateAsync("PrintCultureReportAsync");
 
+            // Assert
             _viewModel.StatusMessage.Should().Contain("خطأ:");
             _viewModel.StatusMessage.Should().Contain("Printer offline");
         }
@@ -703,6 +747,8 @@ namespace Open_lab.Tests
         public async Task SearchCommand_With_Valid_LabId_Should_Load_Results_SuccessGuard()
         {
             // Function: 5.1 — Enter Culture Data (Search by LabId)
+
+            // Arrange
             _viewModel.LabIdFilter = "LAB123";
 
             var searchResults = new List<CultureVisitTestRow>
@@ -713,8 +759,10 @@ namespace Open_lab.Tests
                 .ReturnsAsync(searchResults);
 
             // The CultureSensitivityViewModel exposes the LabId-based search through LoadVisitTestsAsync (bound to LoadVisitTestsCommand).
+            // Act
             await _viewModel.InvokePrivateAsync("LoadVisitTestsAsync");
 
+            // Assert
             _serviceMock.Verify(s => s.SearchCultureVisitTestsAsync("LAB123", It.IsAny<DateTime>(), It.IsAny<DateTime>()), Times.Once);
             _viewModel.VisitTests.Should().ContainSingle(r => r.LabId == "LAB123");
         }
@@ -723,14 +771,18 @@ namespace Open_lab.Tests
         public async Task SearchCommand_With_NonExistent_LabId_Should_Show_NotFound_EdgeGuard()
         {
             // Function: 5.1 — Enter Culture Data (Search No Results)
+
+            // Arrange
             _viewModel.LabIdFilter = "NONEXISTENT";
 
             _serviceMock.Setup(s => s.SearchCultureVisitTestsAsync("NONEXISTENT", It.IsAny<DateTime>(), It.IsAny<DateTime>()))
                 .ReturnsAsync(new List<CultureVisitTestRow>());
 
             // The CultureSensitivityViewModel exposes the LabId-based search through LoadVisitTestsAsync (bound to LoadVisitTestsCommand).
+            // Act
             await _viewModel.InvokePrivateAsync("LoadVisitTestsAsync");
 
+            // Assert
             // Production reports the empty result-set with the load-count message (zero requests found).
             _viewModel.StatusMessage.Should().Contain("تم تحميل 0");
             _viewModel.VisitTests.Should().BeEmpty();
