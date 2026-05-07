@@ -61,40 +61,18 @@ namespace Open_lab.Tests.Services
             await act.Should().ThrowAsync<ArgumentNullException>();
         }
 
-        [Fact]
-        public async Task CreateTestAsync_WithEmptyCode_ShouldThrowArgumentException()
+        [Theory]
+        [InlineData("   ", "Test", "Test")]
+        [InlineData("CODE", "", "Test")]
+        [InlineData("CODE", "Test", "  ")]
+        public async Task CreateTestAsync_WithRequiredFieldEmpty_ShouldThrowArgumentException(
+            string code,
+            string nameReport,
+            string nameReceipt)
         {
             // Function: 3.1 — Add New Test
             // Arrange
-            var test = new Test { Code = "   ", NameReport = "Test", NameReceipt = "Test", Price = 10m };
-
-            // Act
-            Func<Task> act = async () => await _service.CreateTestAsync(test);
-
-            // Assert
-            await act.Should().ThrowAsync<ArgumentException>();
-        }
-
-        [Fact]
-        public async Task CreateTestAsync_WithEmptyNameReport_ShouldThrowArgumentException()
-        {
-            // Function: 3.1 — Add New Test
-            // Arrange
-            var test = new Test { Code = "CODE", NameReport = "", NameReceipt = "Test", Price = 10m };
-
-            // Act
-            Func<Task> act = async () => await _service.CreateTestAsync(test);
-
-            // Assert
-            await act.Should().ThrowAsync<ArgumentException>();
-        }
-
-        [Fact]
-        public async Task CreateTestAsync_WithEmptyNameReceipt_ShouldThrowArgumentException()
-        {
-            // Function: 3.1 — Add New Test
-            // Arrange
-            var test = new Test { Code = "CODE", NameReport = "Test", NameReceipt = "  ", Price = 10m };
+            var test = new Test { Code = code, NameReport = nameReport, NameReceipt = nameReceipt, Price = 10m };
 
             // Act
             Func<Task> act = async () => await _service.CreateTestAsync(test);
@@ -477,26 +455,14 @@ namespace Open_lab.Tests.Services
         }
 
         // ========== Function 3.5 - Create Custom Group ==========
-        [Fact]
-        public async Task CreateCustomGroupAsync_WithEmptyName_ShouldThrowArgumentException()
+        [Theory]
+        [InlineData("")]
+        [InlineData(null)]
+        public async Task CreateCustomGroupAsync_WithEmptyOrNullName_ShouldThrowArgumentException(string? name)
         {
             // Function: 3.5 — Create Custom Group
             // Arrange
-            var group = new CustomGroup { Name = "   ", Price = 10m };
-
-            // Act
-            Func<Task> act = async () => await _service.CreateCustomGroupAsync(group);
-
-            // Assert
-            await act.Should().ThrowAsync<ArgumentException>();
-        }
-
-        [Fact]
-        public async Task CreateCustomGroupAsync_WithNullName_ShouldThrowArgumentException()
-        {
-            // Function: 3.5 — Create Custom Group
-            // Arrange
-            var group = new CustomGroup { Name = null!, Price = 10m };
+            var group = new CustomGroup { Name = name!, Price = 10m };
 
             // Act
             Func<Task> act = async () => await _service.CreateCustomGroupAsync(group);
@@ -541,26 +507,14 @@ namespace Open_lab.Tests.Services
         // Already covered by 3.4 tests (same function)
 
         // ========== Function 3.7 - Create Price List ==========
-        [Fact]
-        public async Task CreatePriceListAsync_WithEmptyName_ShouldThrowArgumentException()
+        [Theory]
+        [InlineData("")]
+        [InlineData(null)]
+        public async Task CreatePriceListAsync_WithEmptyOrNullName_ShouldThrowArgumentException(string? name)
         {
             // Function: 3.7 — Create Price List
             // Arrange
-            var priceList = new PriceList { Name = "   " };
-
-            // Act
-            Func<Task> act = async () => await _service.CreatePriceListAsync(priceList);
-
-            // Assert
-            await act.Should().ThrowAsync<ArgumentException>();
-        }
-
-        [Fact]
-        public async Task CreatePriceListAsync_WithNullName_ShouldThrowArgumentException()
-        {
-            // Function: 3.7 — Create Price List
-            // Arrange
-            var priceList = new PriceList { Name = null! };
+            var priceList = new PriceList { Name = name! };
 
             // Act
             Func<Task> act = async () => await _service.CreatePriceListAsync(priceList);

@@ -274,22 +274,10 @@ namespace Open_lab.Tests
         [InlineData("resistant", "R")]
         [InlineData("RESISTANT", "R")]
         [InlineData("r", "R")]
-        public void ClassifySensitivity_Should_Handle_Case_Insensitive_SuccessGuard(string raw, string expected)
-        {
-            // Function: 5.4 — Classify Sensitivity (BR-MED-005: Case Insensitive)
-            // Arrange
-            // Act
-            var result = _service.ClassifySensitivity(raw);
-
-            // Assert
-            result.Should().Be(expected);
-        }
-
-        [Theory]
         [InlineData("حساس", "S")]
         [InlineData("متوسط", "I")]
         [InlineData("مقاوم", "R")]
-        public void ClassifySensitivity_Should_Handle_Arabic_Input_SuccessGuard(string raw, string expected)
+        public void ClassifySensitivity_WithVariousFormats_ShouldReturnCorrectCode(string raw, string expected)
         {
             // Function: 5.4 — Classify Sensitivity (BR-MED-005: Arabic Support)
             // Arrange

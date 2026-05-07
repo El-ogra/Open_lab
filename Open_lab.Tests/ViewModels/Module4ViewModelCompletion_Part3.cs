@@ -111,29 +111,15 @@ namespace Open_lab.Tests.ViewModels
             viewModel.StatusMessage.Should().Contain("Service error");
         }
 
-        [Fact]
-        public async Task PreviewReport_LoadCommand_With_Zero_VisitId_Should_Show_Validation_Edge()
+        [Theory]
+        [InlineData(0)]
+        [InlineData(-1)]
+        public async Task PreviewReport_LoadCommand_With_Invalid_VisitId_Should_Show_Validation_Edge(int visitId)
         {
             // Function: 4.6 — Preview Report (Edge: invalid input)
             // Arrange
             var viewModel = new ReportViewerViewModel(_reportServiceMock.Object, _printServiceMock.Object, _resultsServiceMock.Object);
-            viewModel.VisitId = 0;
-
-            // Act
-            await viewModel.InvokePrivateAsync("LoadReportAsync");
-            await Task.Delay(100);
-
-            // Assert
-            viewModel.StatusMessage.Should().Be("يرجى إدخال رقم الزيارة.");
-        }
-
-        [Fact]
-        public async Task PreviewReport_LoadCommand_With_Negative_VisitId_Should_Show_Validation_Edge()
-        {
-            // Function: 4.6 — Preview Report (Edge: negative input)
-            // Arrange
-            var viewModel = new ReportViewerViewModel(_reportServiceMock.Object, _printServiceMock.Object, _resultsServiceMock.Object);
-            viewModel.VisitId = -1;
+            viewModel.VisitId = visitId;
 
             // Act
             await viewModel.InvokePrivateAsync("LoadReportAsync");

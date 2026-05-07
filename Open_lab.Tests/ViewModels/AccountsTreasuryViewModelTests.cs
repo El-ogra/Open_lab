@@ -106,7 +106,7 @@ namespace Open_lab.Tests.ViewModels
         }
 
         [Fact]
-        public async Task WeeklyCommand_Should_CalculateStartOfWeek_SuccessGuard()
+        public async Task WeeklyCommand_Should_SetDateRangeToStartOfWeek_SuccessGuard()
         {
             // Function: 2.10 — Generate Inventory
             // Arrange
@@ -130,7 +130,7 @@ namespace Open_lab.Tests.ViewModels
         }
 
         [Fact]
-        public async Task MonthlyCommand_Should_CalculateStartOfMonth_SuccessGuard()
+        public async Task MonthlyCommand_Should_SetDateRangeToStartOfMonth_SuccessGuard()
         {
             // Function: 2.10 — Generate Inventory
             // Arrange
