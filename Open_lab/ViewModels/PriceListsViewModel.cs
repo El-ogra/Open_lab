@@ -222,6 +222,7 @@ namespace Open_lab.ViewModels
         {
             if (SelectedPriceList == null)
             {
+                StatusMessage = "يرجى تحديد قائمة لتحديثها.";
                 return;
             }
 

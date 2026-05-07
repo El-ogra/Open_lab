@@ -260,23 +260,30 @@ namespace Open_lab.ViewModels
                 return;
             }
 
-            var links = await _service.GetCultureAntibioticsAsync(SelectedCulture.CultureId);
-            if (SelectedVisitTest != null)
+            try
             {
-                var allowed = await _service.GetFilteredAntibioticsAsync(SelectedVisitTest.VisitTestId);
-                var allowedIds = allowed.Select(a => a.AntibioticId).ToHashSet();
-                links = links.Where(link => allowedIds.Contains(link.AntibioticId)).ToList();
-            }
-
-            foreach (var link in links)
-            {
-                ResultRows.Add(new CultureSensitivityRow
+                var links = await _service.GetCultureAntibioticsAsync(SelectedCulture.CultureId);
+                if (SelectedVisitTest != null)
                 {
-                    AntibioticId = link.AntibioticId,
-                    AntibioticName = link.Antibiotic.Name,
-                    Sensitivity = string.Empty,
-                    Comment = null
-                });
+                    var allowed = await _service.GetFilteredAntibioticsAsync(SelectedVisitTest.VisitTestId);
+                    var allowedIds = allowed.Select(a => a.AntibioticId).ToHashSet();
+                    links = links.Where(link => allowedIds.Contains(link.AntibioticId)).ToList();
+                }
+
+                foreach (var link in links)
+                {
+                    ResultRows.Add(new CultureSensitivityRow
+                    {
+                        AntibioticId = link.AntibioticId,
+                        AntibioticName = link.Antibiotic.Name,
+                        Sensitivity = string.Empty,
+                        Comment = null
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = $"خطأ: {ex.Message}";
             }
         }
 
@@ -492,8 +499,8 @@ namespace Open_lab.ViewModels
                 }
 
                 await _service.SaveCultureResultAsync(SelectedVisitTest.VisitTestId, SelectedCulture.CultureId, values);
-                StatusMessage = "تم حفظ نتيجة المزرعة وربطها بالزيارة بنجاح.";
                 await LoadVisitTestsAsync();
+                StatusMessage = "تم حفظ نتيجة المزرعة وربطها بالزيارة بنجاح.";
             }
             catch (Exception ex)
             {

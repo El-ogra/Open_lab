@@ -103,6 +103,7 @@ namespace Open_lab.ViewModels
         {
             if (Report == null)
             {
+                StatusMessage = "لا يوجد تقرير للطباعة.";
                 return;
             }
 

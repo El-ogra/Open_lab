@@ -199,6 +199,7 @@ namespace Open_lab.ViewModels
         {
             if (SelectedRange == null)
             {
+                StatusMessage = "يرجى تحديد نطاق مرجعي للحذف.";
                 return;
             }
 

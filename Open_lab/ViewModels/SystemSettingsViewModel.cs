@@ -226,6 +226,7 @@ namespace Open_lab.ViewModels
                 {
                     Settings.Add(item);
                 }
+                StatusMessage = "تم تحميل الإعدادات بنجاح.";
             }
             catch (Exception ex)
             {

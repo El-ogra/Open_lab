@@ -308,6 +308,7 @@ namespace Open_lab.ViewModels
         {
             if (SelectedRole == null)
             {
+                StatusMessage = "يرجى تحديد الدور أولاً.";
                 return;
             }
 

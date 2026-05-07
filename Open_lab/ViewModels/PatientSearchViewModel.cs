@@ -106,6 +106,7 @@ namespace Open_lab.ViewModels
                 {
                     Visits.Add(visit);
                 }
+                StatusMessage = $"تم تحميل {Visits.Count} زيارة.";
             }
             catch (Exception ex)
             {

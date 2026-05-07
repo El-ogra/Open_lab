@@ -262,6 +262,7 @@ namespace Open_lab.ViewModels
         {
             if (SelectedPayment == null)
             {
+                StatusMessage = "يرجى تحديد دفعة مالية.";
                 return;
             }
 
@@ -313,6 +314,7 @@ namespace Open_lab.ViewModels
         {
             if (VisitId <= 0)
             {
+                StatusMessage = "رقم الزيارة غير صالح.";
                 return;
             }
 
@@ -335,6 +337,7 @@ namespace Open_lab.ViewModels
         {
             if (VisitId <= 0)
             {
+                StatusMessage = "رقم الزيارة غير صالح.";
                 return;
             }
 
@@ -395,6 +398,10 @@ namespace Open_lab.ViewModels
                 {
                     await _invoiceService.LogInvoicePrintedAsync(invoice.InvoiceId, AppSession.UserId > 0 ? AppSession.UserId : 1);
                     StatusMessage = "تم تسجيل عملية الطباعة برمجياً.";
+                }
+                else
+                {
+                    StatusMessage = "الفاتورة غير موجودة.";
                 }
             }
             catch (Exception ex)

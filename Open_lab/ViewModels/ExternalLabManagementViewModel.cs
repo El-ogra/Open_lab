@@ -284,7 +284,10 @@ namespace Open_lab.ViewModels
             }
 
             if (SelectedQueueItem == null)
+            {
+                StatusMessage = "يرجى تحديد عنصر لتحديث حالته.";
                 return;
+            }
 
             try
             {

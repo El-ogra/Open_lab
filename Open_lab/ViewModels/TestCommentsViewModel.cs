@@ -185,6 +185,7 @@ namespace Open_lab.ViewModels
         {
             if (SelectedComment == null)
             {
+                StatusMessage = "يرجى تحديد تعليق للحذف.";
                 return;
             }
 

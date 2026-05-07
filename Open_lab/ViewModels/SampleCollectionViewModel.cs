@@ -159,6 +159,7 @@ namespace Open_lab.ViewModels
         {
             if (SelectedRow == null)
             {
+                StatusMessage = "يرجى تحديد عينة أولاً.";
                 return;
             }
 
@@ -189,6 +190,7 @@ namespace Open_lab.ViewModels
         {
             if (SelectedRow == null)
             {
+                StatusMessage = "يرجى تحديد عينة أولاً.";
                 return;
             }
 
@@ -219,6 +221,7 @@ namespace Open_lab.ViewModels
         {
             if (SelectedRow == null)
             {
+                StatusMessage = "يرجى تحديد عينة أولاً.";
                 return;
             }
 
@@ -243,6 +246,7 @@ namespace Open_lab.ViewModels
         {
             if (SelectedRow == null)
             {
+                StatusMessage = "يرجى تحديد عينة أولاً.";
                 return;
             }
 
@@ -251,7 +255,7 @@ namespace Open_lab.ViewModels
             {
                 await _sampleCollectionService.MarkNotCollectedAsync(SelectedRow.VisitTestId);
                 await LoadAsync();
-                StatusMessage = "تم تحديث الحالة.";
+                StatusMessage = "تم تعليم العينة كغير مجمعة.";
             }
             catch (Exception ex)
             {

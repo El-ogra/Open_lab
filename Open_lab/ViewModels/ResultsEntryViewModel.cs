@@ -84,11 +84,11 @@ namespace Open_lab.ViewModels
                     {
                         VisitTestId = vt.VisitTestId,
                         TestId = vt.TestId,
-                        PatientName = vt.Visit.Patient.FullName,
-                        PatientGender = vt.Visit.Patient.Gender,
-                        PatientAge = vt.Visit.Patient.Age ?? 0,
-                        TestName = vt.Test.NameReport,
-                        VisitDate = vt.Visit.VisitDate,
+                        PatientName = vt.Visit?.Patient?.FullName ?? string.Empty,
+                        PatientGender = vt.Visit?.Patient?.Gender ?? string.Empty,
+                        PatientAge = vt.Visit?.Patient?.Age ?? 0,
+                        TestName = vt.Test?.NameReport ?? string.Empty,
+                        VisitDate = vt.Visit?.VisitDate ?? DateTime.MinValue,
                         Status = vt.Status
                     });
                 }
@@ -166,6 +166,7 @@ namespace Open_lab.ViewModels
         {
             if (SelectedVisitTest == null)
             {
+                StatusMessage = "لم يتم تحديد اختبار لحفظ نتائجه.";
                 return;
             }
 
@@ -190,6 +191,7 @@ namespace Open_lab.ViewModels
         {
             if (SelectedVisitTest == null)
             {
+                StatusMessage = "لم يتم تحديد اختبار لاعتماده.";
                 return;
             }
 
@@ -211,6 +213,7 @@ namespace Open_lab.ViewModels
         {
             if (SelectedVisitTest == null)
             {
+                StatusMessage = "لم يتم تحديد اختبار لإعادة فتحه.";
                 return;
             }
 

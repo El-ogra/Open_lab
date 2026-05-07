@@ -106,6 +106,7 @@ namespace Open_lab.ViewModels
         {
             if (History == null)
             {
+                StatusMessage = "لا يوجد تاريخ مرضي للطباعة.";
                 return;
             }
 

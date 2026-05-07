@@ -135,7 +135,7 @@ namespace Open_lab.ViewModels
                 var attendance = await _attendanceService.CreateLoginAsync(user.UserId, "تسجيل دخول");
                 AppSession.AttendanceLogId = attendance.AttendanceLogId;
 
-                StatusMessage = string.Empty;
+                StatusMessage = "تم تسجيل الدخول بنجاح.";
                 _onLoginSuccess();
             }
             catch (Exception ex)
