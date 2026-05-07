@@ -91,7 +91,7 @@ namespace Open_lab.Tests.Services
 
         // 12.7 - Doctor Pricing Assignment - Pricing Assignment Logic Tests
         [Fact]
-        public async Task UpdateAsync_Should_Update_All_Fields()
+        public async Task UpdatePhysicianAsync_Should_Update_All_Fields()
         {
             var physician = new Physician
             {
@@ -259,3 +259,4 @@ namespace Open_lab.Tests.Services
         }
     }
 }
+

@@ -25,7 +25,7 @@ namespace Open_lab.Tests.ViewModels
         }
 
         [Fact]
-        public void Commands_When_Admin_Should_Be_Enabled()
+        public void PatientBilling_Commands_When_Admin_Should_Be_Enabled()
         {
             // Function: 2.9 — View Patient Account
             _viewModel.LoadVisitCommand.CanExecute(null).Should().BeTrue();

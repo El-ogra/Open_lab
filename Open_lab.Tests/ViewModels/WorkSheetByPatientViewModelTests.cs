@@ -18,7 +18,7 @@ namespace Open_lab.Tests.ViewModels
         }
 
         [Fact]
-        public async Task LoadCommand_Should_Load_Rows_Success()
+        public async Task LoadCommand_Should_Load_Patient_Rows_Success()
         {
             // Arrange
             AppSessionTestHelper.ResetToAdmin();
@@ -38,7 +38,7 @@ namespace Open_lab.Tests.ViewModels
         }
 
         [Fact]
-        public async Task LoadCommand_When_Service_Throws_Should_Set_Error_Failure()
+        public async Task LoadCommand_When_PatientService_Throws_Should_Set_Error_Failure()
         {
             // Arrange
             AppSessionTestHelper.ResetToAdmin();
@@ -58,7 +58,7 @@ namespace Open_lab.Tests.ViewModels
         }
 
         [Fact]
-        public void PrintCommand_When_No_Rows_Should_Be_Disabled_Edge()
+        public void PrintCommand_When_No_PatientRows_Should_Be_Disabled_Edge()
         {
             // Arrange
             var vm = new WorkSheetByPatientViewModel(Mock.Of<IWorksheetService>(), Mock.Of<IPrintService>());
@@ -69,3 +69,4 @@ namespace Open_lab.Tests.ViewModels
         }
     }
 }
+

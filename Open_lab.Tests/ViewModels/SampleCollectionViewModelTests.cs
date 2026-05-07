@@ -31,7 +31,7 @@ namespace Open_lab.Tests.ViewModels
         }
 
         [Fact]
-        public void Commands_When_Admin_Should_Be_Enabled()
+        public void SampleCollection_Commands_When_Admin_Should_Be_Enabled()
         {
             _viewModel.LoadCommand.CanExecute(null).Should().BeTrue();
             _viewModel.MarkCollectedCommand.CanExecute(null).Should().BeFalse(); // SelectedRow == null
@@ -298,3 +298,4 @@ namespace Open_lab.Tests.ViewModels
         }
     }
 }
+

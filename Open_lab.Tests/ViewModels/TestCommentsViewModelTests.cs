@@ -129,7 +129,7 @@ namespace Open_lab.Tests.ViewModels
         }
 
         [Fact]
-        public async Task DeleteAsync_When_ServiceThrows_Should_Set_ErrorStatus_FailureGuard()
+        public async Task TestComments_DeleteAsync_When_ServiceThrows_Should_Set_ErrorStatus_FailureGuard()
         {
             // Arrange
             _viewModel.SelectedComment = new TestComment { CommentId = 7, TestId = 1, CommentText = "C" };
@@ -146,3 +146,4 @@ namespace Open_lab.Tests.ViewModels
         }
     }
 }
+

@@ -151,7 +151,7 @@ namespace Open_lab.Tests.ViewModels
         }
 
         [Fact]
-        public async Task PrintCommand_When_PrintService_Fails_Should_Set_Error_Message_Failure()
+        public async Task PrintCommand_When_GroupPrintService_Fails_Should_Set_Error_Message_Failure()
         {
             // Arrange
             _viewModel.Rows.Add(new WorkSheetPatientRow { VisitId = 2, PatientName = "P2", TestsCount = 1 });
@@ -170,3 +170,4 @@ namespace Open_lab.Tests.ViewModels
         public void Dispose() => AppSessionTestHelper.Reset();
     }
 }
+

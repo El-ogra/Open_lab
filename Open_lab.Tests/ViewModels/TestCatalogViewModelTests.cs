@@ -27,7 +27,7 @@ namespace Open_lab.Tests.ViewModels
         }
 
         [Fact]
-        public void Commands_When_Admin_Should_Be_Enabled()
+        public void TestCatalog_Commands_When_Admin_Should_Be_Enabled()
         {
             _viewModel.SaveCommand.CanExecute(null).Should().BeTrue();
             _viewModel.NewCommand.CanExecute(null).Should().BeTrue();
@@ -244,3 +244,4 @@ namespace Open_lab.Tests.ViewModels
         }
     }
 }
+

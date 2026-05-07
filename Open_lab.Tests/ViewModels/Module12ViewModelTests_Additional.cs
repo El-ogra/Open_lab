@@ -264,7 +264,7 @@ namespace Open_lab.Tests.ViewModels
         }
 
         [Fact]
-        public async Task SetEntityCommission_WithExactly100Percent_ShouldAllow_EdgeGuard_BR_ACC_008()
+        public async Task ViewModel_SetEntityCommission_WithExactly100Percent_ShouldAllow_EdgeGuard_BR_ACC_008()
         {
             // Function: 12.4 — Set Entity Commission (BR-ACC-008 boundary)
             // Arrange
@@ -967,3 +967,4 @@ namespace Open_lab.Tests.ViewModels
         }
     }
 }
+

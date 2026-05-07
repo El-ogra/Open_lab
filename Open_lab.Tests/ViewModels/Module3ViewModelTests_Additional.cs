@@ -134,7 +134,7 @@ namespace Open_lab.Tests.ViewModels
             }
 
             [Fact]
-            public async Task SaveAsync_When_ServiceThrows_Should_Show_Error_FailureGuard()
+            public async Task ReferenceRanges_SaveAsync_When_ServiceThrows_Should_Show_Error_FailureGuard()
             {
                 // Function: 3.1 — Add New Test (Failure: service error)
                 // Arrange
@@ -239,7 +239,7 @@ namespace Open_lab.Tests.ViewModels
             }
 
             [Fact]
-            public async Task DeleteAsync_When_ServiceThrows_Should_Set_ErrorStatus_FailureGuard()
+            public async Task TestCatalog_DeleteAsync_When_ServiceThrows_Should_Set_ErrorStatus_FailureGuard()
             {
                 // Arrange
                 _viewModel.SelectedTest = new Test { TestId = 50, Code = "DEL" };
@@ -472,7 +472,7 @@ namespace Open_lab.Tests.ViewModels
             }
 
             [Fact]
-            public async Task SaveAsync_When_ServiceThrows_Should_Show_Error_FailureGuard()
+            public async Task TestCatalog_SaveAsync_When_ServiceThrows_Should_Show_Error_FailureGuard()
             {
                 // Arrange
                 _viewModel.SelectedTest = new Test { TestId = 4 };
@@ -582,7 +582,7 @@ namespace Open_lab.Tests.ViewModels
             }
 
             [Fact]
-            public async Task DeleteItemAsync_Should_Remove_Item_SuccessGuard()
+            public async Task CustomGroups_DeleteItemAsync_Should_Remove_Item_SuccessGuard()
             {
                 // Function: 3.5 — Create Custom Group (Delete Item)
                 // Arrange
@@ -604,7 +604,7 @@ namespace Open_lab.Tests.ViewModels
             }
 
             [Fact]
-            public async Task DeleteItemAsync_When_ServiceThrows_Should_Show_Error_FailureGuard()
+            public async Task CustomGroups_DeleteItemAsync_When_ServiceThrows_Should_Show_Error_FailureGuard()
             {
                 // Arrange
                 _viewModel.SelectedItem = new CustomGroupItem { CustomGroupItemId = 15 };
@@ -759,7 +759,7 @@ namespace Open_lab.Tests.ViewModels
             }
 
             [Fact]
-            public async Task DeleteItemAsync_Should_Remove_Item_SuccessGuard()
+            public async Task PriceLists_DeleteItemAsync_Should_Remove_Item_SuccessGuard()
             {
                 // Arrange
                 var item = new PriceListItem { PriceListItemId = 10 };
@@ -777,7 +777,7 @@ namespace Open_lab.Tests.ViewModels
             }
 
             [Fact]
-            public async Task DeleteItemAsync_When_ServiceThrows_Should_Show_Error_FailureGuard()
+            public async Task PriceLists_DeleteItemAsync_When_ServiceThrows_Should_Show_Error_FailureGuard()
             {
                 // Arrange
                 _viewModel.SelectedItem = new PriceListItem { PriceListItemId = 20 };
@@ -1044,7 +1044,7 @@ namespace Open_lab.Tests.ViewModels
             }
 
             [Fact]
-            public async Task SaveAsync_When_ServiceThrows_Should_Show_Error_FailureGuard()
+            public async Task TestComments_SaveAsync_When_ServiceThrows_Should_Show_Error_FailureGuard()
             {
                 // Arrange
                 _viewModel.SelectedTest = new Test { TestId = 1 };

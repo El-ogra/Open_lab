@@ -707,7 +707,7 @@ namespace Open_lab.Tests
         }
 
         [Fact]
-        public async Task LoadCommand_When_Service_Throws_Should_Set_Error_Message_FailureGuard()
+        public async Task ServiceLayer_LoadCommand_When_Service_Throws_Should_Set_Error_Message_FailureGuard()
         {
             // Function: 7.4 — Test Classification LOG (Service Error Handling)
             AppSessionTestHelper.ResetToAdmin();

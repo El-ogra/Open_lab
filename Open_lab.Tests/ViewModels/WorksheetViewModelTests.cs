@@ -67,7 +67,7 @@ namespace Open_lab.Tests.ViewModels
         }
 
         [Fact]
-        public async Task LoadCommand_When_Service_Fails_Should_Set_Error_Message_Failure()
+        public async Task LoadCommand_When_PatientService_Fails_Should_Set_Error_Message_Failure()
         {
             // Arrange
             _worksheetServiceMock
@@ -83,7 +83,7 @@ namespace Open_lab.Tests.ViewModels
         }
 
         [Fact]
-        public async Task LoadCommand_When_Service_Returns_Empty_Should_Set_Zero_Status_Edge()
+        public async Task LoadCommand_When_PatientService_Returns_Empty_Should_Set_Zero_Status_Edge()
         {
             // Arrange
             _worksheetServiceMock
@@ -100,7 +100,7 @@ namespace Open_lab.Tests.ViewModels
         }
 
         [Fact]
-        public async Task PrintCommand_When_PrintService_Fails_Should_Set_Error_Message_Failure()
+        public async Task PrintCommand_When_PatientPrintService_Fails_Should_Set_Error_Message_Failure()
         {
             // Arrange
             _viewModel.Rows.Add(new WorkSheetPatientRow { VisitId = 3, PatientName = "P3", TestsCount = 1 });
@@ -117,7 +117,7 @@ namespace Open_lab.Tests.ViewModels
         }
 
         [Fact]
-        public void PrintCommand_When_No_Rows_Should_Be_Disabled_Edge()
+        public void PrintCommand_When_PatientRows_Empty_Should_Be_Disabled_Edge()
         {
             // Arrange
             _viewModel.Rows.Clear();
@@ -189,7 +189,7 @@ namespace Open_lab.Tests.ViewModels
         }
 
         [Fact]
-        public async Task LoadCommand_When_Service_Fails_Should_Set_Error_Message_Failure()
+        public async Task LoadCommand_When_TestService_Fails_Should_Set_Error_Message_Failure()
         {
             // Arrange
             _worksheetServiceMock
@@ -205,7 +205,7 @@ namespace Open_lab.Tests.ViewModels
         }
 
         [Fact]
-        public async Task LoadCommand_When_Service_Returns_Empty_Should_Set_Zero_Status_Edge()
+        public async Task LoadCommand_When_TestService_Returns_Empty_Should_Set_Zero_Status_Edge()
         {
             // Arrange
             _worksheetServiceMock
@@ -222,7 +222,7 @@ namespace Open_lab.Tests.ViewModels
         }
 
         [Fact]
-        public async Task PrintCommand_When_PrintService_Fails_Should_Set_Error_Message_Failure()
+        public async Task PrintCommand_When_TestPrintService_Fails_Should_Set_Error_Message_Failure()
         {
             // Arrange
             _viewModel.Rows.Add(new WorkSheetTestRow { TestName = "AST", Count = 1 });
@@ -239,7 +239,7 @@ namespace Open_lab.Tests.ViewModels
         }
 
         [Fact]
-        public void PrintCommand_When_No_Rows_Should_Be_Disabled_Edge()
+        public void PrintCommand_When_TestRows_Empty_Should_Be_Disabled_Edge()
         {
             // Arrange
             _viewModel.Rows.Clear();

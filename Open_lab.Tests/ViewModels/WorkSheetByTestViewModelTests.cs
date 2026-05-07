@@ -12,7 +12,7 @@ namespace Open_lab.Tests.ViewModels
     public class WorkSheetByTestViewModelCommandMatrixTests
     {
         [Fact]
-        public async Task LoadCommand_Should_Load_Rows_Success()
+        public async Task LoadCommand_Should_Load_Test_Rows_Success()
         {
             // Arrange
             var worksheet = new Mock<IWorksheetService>();
@@ -30,7 +30,7 @@ namespace Open_lab.Tests.ViewModels
         }
 
         [Fact]
-        public async Task LoadCommand_When_Service_Throws_Should_Set_Error_Failure()
+        public async Task LoadCommand_When_TestService_Throws_Should_Set_Error_Failure()
         {
             // Arrange
             var worksheet = new Mock<IWorksheetService>();
@@ -48,7 +48,7 @@ namespace Open_lab.Tests.ViewModels
         }
 
         [Fact]
-        public void PrintCommand_When_No_Rows_Should_Be_Disabled_Edge()
+        public void PrintCommand_When_No_TestRows_Should_Be_Disabled_Edge()
         {
             // Arrange
             var vm = new WorkSheetByTestViewModel(Mock.Of<IWorksheetService>(), Mock.Of<IPrintService>());
@@ -59,3 +59,4 @@ namespace Open_lab.Tests.ViewModels
         }
     }
 }
+

@@ -52,7 +52,7 @@ namespace Open_lab.Tests.ViewModels
         }
 
         [Fact]
-        public async Task LoadCommand_When_Service_Throws_Should_Set_Error_Message_FailureGuard()
+        public async Task CombinedReport_LoadCommand_When_Service_Throws_Should_Set_Error_Message_FailureGuard()
         {
             _reportServiceMock
                 .Setup(s => s.GetCompositeReportAsync(It.IsAny<int>(), It.IsAny<IReadOnlyCollection<int>>()))
@@ -121,3 +121,4 @@ namespace Open_lab.Tests.ViewModels
         }
     }
 }
+

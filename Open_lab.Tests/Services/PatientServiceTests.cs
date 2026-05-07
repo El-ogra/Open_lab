@@ -145,7 +145,7 @@ namespace Open_lab.Tests.Services
 
         // 1.2 - Patient Update - CRUD Logic Validation Tests
         [Fact]
-        public async Task UpdateAsync_Should_Update_All_Fields()
+        public async Task UpdatePatientAsync_Should_Update_All_Fields()
         {
             // Function: 1.2 — Edit Patient Data
             // Arrange
@@ -550,3 +550,4 @@ namespace Open_lab.Tests.Services
         }
     }
 }
+

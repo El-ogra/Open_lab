@@ -25,7 +25,7 @@ namespace Open_lab.Tests.ViewModels
         }
 
         [Fact]
-        public void Commands_When_Admin_Should_Be_Enabled()
+        public void ResultsEntry_Commands_When_Admin_Should_Be_Enabled()
         {
             _viewModel.LoadVisitTestsCommand.CanExecute(null).Should().BeTrue();
             _viewModel.SaveResultsCommand.CanExecute(null).Should().BeFalse();
@@ -146,3 +146,4 @@ namespace Open_lab.Tests.ViewModels
         }
     }
 }
+
