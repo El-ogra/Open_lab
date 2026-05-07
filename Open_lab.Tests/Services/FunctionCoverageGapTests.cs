@@ -424,6 +424,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task PatientSearchService_SearchPatientsAsync_Should_Filter_By_Name_Phone_And_LabId_SuccessGuard()
         {
+            // Function: 13.1 — Set Report Margins
             var service = new PatientSearchService(_db);
             _db.Patients.AddRange(
                 new Patient { LabId = "LAB-A", FullName = "Ali Hassan", Gender = "Male", Phone = "01000111" },
@@ -441,6 +442,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task PatientSearchService_SearchPatientsAsync_With_AllFiltersEmpty_Should_Return_AllOrdered_EdgeGuard()
         {
+            // Function: 13.1 — Set Report Margins
             var service = new PatientSearchService(_db);
             _db.Patients.AddRange(
                 new Patient { LabId = "L2", FullName = "Zed", Gender = "Male" },
@@ -457,6 +459,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task PatientSearchService_SearchPatientsAsync_With_DateFilter_Should_Exclude_Patients_Without_Visits_FailureGuard()
         {
+            // Function: 13.1 — Set Report Margins
             var service = new PatientSearchService(_db);
             var withVisit = new Patient { LabId = "LAB-D1", FullName = "With Visit", Gender = "Male" };
             var withoutVisit = new Patient { LabId = "LAB-D2", FullName = "Without Visit", Gender = "Female" };
@@ -474,6 +477,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task CompareWithHistoryService_GetLastResultsAsync_Should_Return_MostRecent_VisitResults_SuccessGuard()
         {
+            // Function: 13.1 — Set Report Margins
             var service = new CompareWithHistoryService(_db);
             var patient = new Patient { LabId = "LAB-H1", FullName = "History P", Gender = "Male" };
             var test = new Test { Code = "HIS1", NameReport = "History Test", NameReceipt = "History Test", Price = 20m };
@@ -510,6 +514,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task CompareWithHistoryService_GetLastResultsAsync_When_NoHistory_Should_Return_EmptyList_FailureGuard()
         {
+            // Function: 13.1 — Set Report Margins
             var service = new CompareWithHistoryService(_db);
 
             var result = await service.GetLastResultsAsync(patientId: 999, testId: 999, count: 3);
@@ -520,6 +525,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task CompareWithHistoryService_GetLastResultsAsync_With_ZeroCount_Should_Return_Empty_EdgeGuard()
         {
+            // Function: 13.1 — Set Report Margins
             var service = new CompareWithHistoryService(_db);
             var patient = new Patient { LabId = "LAB-H2", FullName = "Edge", Gender = "Male" };
             var test = new Test { Code = "HIS2", NameReport = "H2", NameReceipt = "H2", Price = 10m };
@@ -535,6 +541,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task AuthService_ValidateCredentialsAsync_With_HashedPassword_Should_Return_User_SuccessGuard()
         {
+            // Function: 13.1 — Set Report Margins
             var service = new AuthService(_db);
             var salt = PasswordSecurity.GenerateSalt();
             var user = new User
@@ -556,6 +563,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task AuthService_ValidateCredentialsAsync_With_InvalidPassword_Should_Return_Null_FailureGuard()
         {
+            // Function: 13.1 — Set Report Margins
             var service = new AuthService(_db);
             var salt = PasswordSecurity.GenerateSalt();
             _db.Users.Add(new User
@@ -575,6 +583,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task AuthService_ValidateCredentialsAsync_With_LegacyPassword_Should_MigrateSaltAndHash_EdgeGuard()
         {
+            // Function: 13.1 — Set Report Margins
             var service = new AuthService(_db);
             var user = new User
             {

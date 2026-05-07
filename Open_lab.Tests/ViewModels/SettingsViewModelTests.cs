@@ -32,6 +32,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task LoadSettingsAsync_Should_Load_Printer_And_Margins_For_Module13()
         {
+            // Function: 13.1 — `Set Report Margins`
             await _viewModel.LoadSettingsAsync();
 
             _viewModel.DefaultPrinter.Should().Be("DefaultPrinter");
@@ -57,6 +58,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task LoadSettingsCommand_When_Executed_Should_Call_Service_And_Update_ViewModel_Success()
         {
+            // Function: 13.1 — `Set Report Margins`
             // Act
             _viewModel.LoadSettingsCommand.Execute(null);
             await Task.Delay(50);
@@ -69,6 +71,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task SavePrinterSettingsCommand_When_Executed_Should_Save_All_Printer_Values_Success()
         {
+            // Function: 13.1 — `Set Report Margins`
             // Arrange
             _viewModel.DefaultPrinter = "P-Default";
             _viewModel.ReceiptPrinter = "P-Receipt";
@@ -87,6 +90,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task SaveMarginSettingsCommand_When_Service_Throws_Should_Not_Propagate_Exception_Failure()
         {
+            // Function: 13.1 — `Set Report Margins`
             // Arrange
             _viewModel.LeftMargin = 1m;
             _viewModel.RightMargin = 2m;

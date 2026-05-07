@@ -101,6 +101,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task ReloadCommand_When_Executed_Should_Refresh_Profile_And_Settings_Success()
         {
+            // Function: 13.8 — Set System Password
             // Act
             _viewModel.ReloadCommand.Execute(null);
             await Task.Delay(50);
@@ -114,6 +115,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task SaveRawSettingCommand_When_Key_Empty_Should_Set_Validation_Message_Failure()
         {
+            // Function: 13.8 — Set System Password
             // Arrange
             _viewModel.Key = "";
             _viewModel.Value = "v";
@@ -130,6 +132,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task SaveRawSettingCommand_When_Key_Valid_Should_Call_Service_Success()
         {
+            // Function: 13.8 — Set System Password
             // Arrange
             _viewModel.Key = "K1";
             _viewModel.Value = "V1";
@@ -146,6 +149,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task DeleteRawSettingCommand_When_SelectedSetting_Exists_Should_Call_Service_Success()
         {
+            // Function: 13.8 — Set System Password
             // Arrange
             _viewModel.SelectedSetting = new Setting { Key = "X", Value = "1" };
 
@@ -161,6 +165,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task ChangeMasterPasswordCommand_When_CurrentPassword_Invalid_Should_Set_User_Message_Failure()
         {
+            // Function: 13.8 — Set System Password
             // Arrange
             _settingsServiceMock.Setup(x => x.VerifyMasterPasswordAsync("old")).ReturnsAsync(false);
             _viewModel.CurrentMasterPassword = "old";

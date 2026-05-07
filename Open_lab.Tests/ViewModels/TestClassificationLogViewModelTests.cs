@@ -31,6 +31,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task LoadAsync_Should_Populate_Classification_Log_Items()
         {
+            // Function: X.X — To Be Determined
             await _viewModel.InvokePrivateAsync("LoadAsync");
 
             _viewModel.Items.Should().ContainSingle();
@@ -41,6 +42,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task PrintAsync_Should_Send_Text_Report()
         {
+            // Function: X.X — To Be Determined
             _viewModel.Items.Add(new ReagentConsumptionReport { ReagentName = "R1", TotalConsumed = 5m, Unit = "ml", TestCount = 1 });
 
             await _viewModel.InvokePrivateAsync("PrintAsync");

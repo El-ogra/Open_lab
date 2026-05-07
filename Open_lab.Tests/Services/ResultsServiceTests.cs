@@ -31,6 +31,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task SaveResultAsync_Should_Create_Result_And_Set_Status()
         {
+            // Function: 4.4 — Create Composite Report - Logic Guard: Verify composite report structure
             // Arrange
             var patient = new Patient { LabId = "L1", FullName = "P", Gender = "Male" };
             _db.Patients.Add(patient);
@@ -62,6 +63,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task SaveResultAsync_When_VisitTestNotFound_Should_Throw()
         {
+            // Function: 4.4 — Create Composite Report - Logic Guard: Verify composite report structure
             // Act
             Func<Task> act = async () => await _service.SaveResultAsync(999, 1, "5", null, null);
 
@@ -72,6 +74,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task VerifyVisitTestAsync_NoResults_Should_Throw()
         {
+            // Function: 4.4 — Create Composite Report - Logic Guard: Verify composite report structure
             // Arrange
             var patient = new Patient { LabId = "L2", FullName = "P2", Gender = "Male" };
             _db.Patients.Add(patient);
@@ -99,6 +102,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task VerifyVisitTestAsync_With_AllResults_Should_Verify()
         {
+            // Function: 4.4 — Create Composite Report - Logic Guard: Verify composite report structure
             // Arrange
             var patient = new Patient { LabId = "L3", FullName = "P3", Gender = "Male" };
             _db.Patients.Add(patient);
@@ -137,6 +141,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task ReopenVisitTestAsync_When_NotVerified_Should_Return()
         {
+            // Function: 4.4 — Create Composite Report - Logic Guard: Verify composite report structure
             // Arrange
             var patient = new Patient { LabId = "L4", FullName = "P4", Gender = "Male" };
             _db.Patients.Add(patient);
@@ -225,6 +230,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task SaveResultAsync_When_Verified_Should_Throw()
         {
+            // Function: 4.4 — Create Composite Report - Logic Guard: Verify composite report structure
             // Arrange
             var patient = new Patient { LabId = "L5", FullName = "P5", Gender = "Male" };
             _db.Patients.Add(patient);
@@ -256,6 +262,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task SaveResultAsync_Should_Clear_Verification_On_Update()
         {
+            // Function: 4.4 — Create Composite Report - Logic Guard: Verify composite report structure
             // Arrange
             var patient = new Patient { LabId = "L6", FullName = "P6", Gender = "Male" };
             _db.Patients.Add(patient);
@@ -305,6 +312,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task SaveResultAsync_Should_Set_Status_To_Completed_When_Result_Is_Present()
         {
+            // Function: 4.4 — Create Composite Report - Logic Guard: Verify composite report structure
             // Arrange
             var patient = new Patient { LabId = "L7", FullName = "P7", Gender = "Male" };
             _db.Patients.Add(patient);
@@ -334,6 +342,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task ReopenVisitTestAsync_Should_Clear_Verification_Data()
         {
+            // Function: 4.4 — Create Composite Report - Logic Guard: Verify composite report structure
             // Arrange
             var patient = new Patient { LabId = "L8", FullName = "P8", Gender = "Male" };
             _db.Patients.Add(patient);

@@ -28,6 +28,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task LoadPendingCommand_Should_Load_Pending_Invoices_And_Total_SuccessGuard()
         {
+            // Function: X.X — To Be Determined
             _catalogServiceMock.Setup(s => s.GetReferralsAsync()).ReturnsAsync(new List<Referral>
             {
                 new() { ReferralId = 1, Name = "Corp A", ReferralType = "Company" }
@@ -52,6 +53,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task CreateInvoiceCommand_Should_Create_And_Refresh_Data_SuccessGuard()
         {
+            // Function: X.X — To Be Determined
             _viewModel.SelectedReferralId = 3;
             _viewModel.InvoiceNumber = "INV-2026-01";
             _contractServiceMock.Setup(s => s.GetPendingInvoicesAsync(3, It.IsAny<DateTime>(), It.IsAny<DateTime>()))
@@ -73,6 +75,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task SettleSelectedCommand_When_Service_Fails_Should_Set_Error_Message_FailureGuard()
         {
+            // Function: X.X — To Be Determined
             var contractInvoice = new ContractInvoice { ContractInvoiceId = 20, ReferralId = 5, InvoiceNumber = "X1", IsPaid = false };
             _viewModel.SelectedContractInvoice = contractInvoice;
             _contractServiceMock.Setup(s => s.SettleContractInvoiceAsync(20))
@@ -87,6 +90,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task LoadReferralsCommand_Should_Load_Contract_Referrals_Success()
         {
+            // Function: X.X — To Be Determined
             // Arrange
             _catalogServiceMock.Setup(s => s.GetReferralsAsync()).ReturnsAsync(new List<Referral>
             {
@@ -106,6 +110,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task LoadHistoryCommand_When_Referral_Selected_Should_Load_History_Success()
         {
+            // Function: X.X — To Be Determined
             // Arrange
             _viewModel.SelectedReferralId = 3;
             _contractServiceMock.Setup(s => s.GetContractInvoicesAsync(3)).ReturnsAsync(new List<ContractInvoice>
@@ -124,6 +129,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task LoadPendingCommand_When_Service_Throws_Should_Set_Error_Message_Failure()
         {
+            // Function: X.X — To Be Determined
             // Arrange
             _viewModel.SelectedReferralId = 1;
             _contractServiceMock
@@ -141,6 +147,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task SettleSelectedCommand_When_Valid_Selection_Should_Call_Service_Success()
         {
+            // Function: X.X — To Be Determined
             // Arrange
             _viewModel.SelectedReferralId = 5;
             _viewModel.SelectedContractInvoice = new ContractInvoice { ContractInvoiceId = 20, IsPaid = false };

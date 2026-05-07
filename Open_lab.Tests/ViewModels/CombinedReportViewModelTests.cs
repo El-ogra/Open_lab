@@ -24,6 +24,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task LoadCommand_With_Invalid_VisitId_Should_Show_Validation_Message_FailureGuard()
         {
+            // Function: X.X — To Be Determined
             _viewModel.VisitId = 0;
 
             _viewModel.LoadCommand.Execute(null);
@@ -36,6 +37,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task LoadCommand_With_Existing_Visit_Should_Populate_Report_Data_SuccessGuard()
         {
+            // Function: X.X — To Be Determined
             var report = BuildReport(visitId: 22);
             _reportServiceMock
                 .Setup(s => s.GetCompositeReportAsync(22, It.IsAny<IReadOnlyCollection<int>>()))
@@ -54,6 +56,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task CombinedReport_LoadCommand_When_Service_Throws_Should_Set_Error_Message_FailureGuard()
         {
+            // Function: X.X — To Be Determined
             _reportServiceMock
                 .Setup(s => s.GetCompositeReportAsync(It.IsAny<int>(), It.IsAny<IReadOnlyCollection<int>>()))
                 .ThrowsAsync(new InvalidOperationException("Load failed"));
@@ -68,6 +71,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task MoveCommands_Should_Reorder_Items_When_Selection_Changes_EdgeGuard()
         {
+            // Function: X.X — To Be Determined
             var report = BuildReport(visitId: 30);
             _reportServiceMock
                 .Setup(s => s.GetCompositeReportAsync(30, It.IsAny<IReadOnlyCollection<int>>()))

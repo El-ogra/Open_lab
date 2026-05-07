@@ -454,6 +454,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task CreateAsync_With_Referral_Account_And_No_Referral_Should_Throw()
         {
+            // Function: 1.3 — Add Tests to Patient
             var patient = new Patient { LabId = "L-AR1", FullName = "Referral Patient", Gender = "Male" };
             _db.Patients.Add(patient);
             await _db.SaveChangesAsync();
@@ -473,6 +474,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task CreateAsync_With_Referral_Account_Should_Persist_Referral_Binding()
         {
+            // Function: 1.3 — Add Tests to Patient
             var patient = new Patient { LabId = "L-AR2", FullName = "Referral Patient 2", Gender = "Female" };
             var referral = new Referral { Name = "Insurance-X", ReferralType = "Insurance" };
             _db.Patients.Add(patient);
@@ -657,6 +659,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task CreateAsync_When_PatientNotFound_Should_Throw_FailureGuard()
         {
+            // Function: 1.8 — Add Group of Tests
             // Arrange
             var visit = new Visit
             {
@@ -675,6 +678,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task CreateAsync_When_VisitDateDefault_Should_Set_Date_And_OpenStatus_EdgeGuard()
         {
+            // Function: 1.8 — Add Group of Tests
             // Arrange
             var patient = new Patient { LabId = "L-E1", FullName = "Edge Patient", Gender = "Male" };
             _db.Patients.Add(patient);
@@ -697,6 +701,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task GetByPatientIdAsync_When_MultipleVisits_Should_Return_DescendingByDate_EdgeGuard()
         {
+            // Function: 1.8 — Add Group of Tests
             // Arrange
             var patient = new Patient { LabId = "L-E2", FullName = "Order Patient", Gender = "Female" };
             _db.Patients.Add(patient);

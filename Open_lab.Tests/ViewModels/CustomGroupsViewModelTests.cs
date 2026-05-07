@@ -50,6 +50,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task AddItemAsync_Should_Link_Test_To_Group()
         {
+            // Function: 3.5 — Custom Group - Logic Guard
             // Arrange
             var group = new CustomGroup { CustomGroupId = 10 };
             _viewModel.SelectedGroup = group;
@@ -73,6 +74,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task SaveGroupAsync_With_EmptyName_Should_NotCall_Service_FailureGuard()
         {
+            // Function: 3.5 — Custom Group - Logic Guard
             // Arrange
             _viewModel.GroupName = " ";
             _viewModel.GroupPrice = 99m;
@@ -88,6 +90,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task AddItemAsync_When_SelectionMissing_Should_NotCall_Service_EdgeGuard()
         {
+            // Function: 3.5 — Custom Group - Logic Guard
             // Arrange
             _viewModel.SelectedGroup = null;
             _viewModel.SelectedTest = new Test { TestId = 1, Code = "T1" };

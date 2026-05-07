@@ -88,6 +88,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task GeneratePayrollSummaryAsync_When_UserId_NotFound_Should_Return_EmptyList_FailureGuard()
         {
+            // Function: 11.5 — `Generate Attendance Report`
             // Arrange
             var user = new User { Username = "u-any", FullName = "Any User" };
             _db.Users.Add(user);
@@ -103,6 +104,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task GeneratePayrollSummaryAsync_When_ToBeforeFrom_Should_SwapRange_And_Count_UnknownStatus_AsOther_EdgeGuard()
         {
+            // Function: 11.5 — `Generate Attendance Report`
             // Arrange
             var user = new User { Username = "u-edge", FullName = "Edge User" };
             _db.Users.Add(user);

@@ -14,6 +14,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task LogoutAsync_Should_Close_Attendance_And_Clear_Session()
         {
+            // Function: X.X — To Be Determined
             AppSessionTestHelper.ResetToAdmin();
 
             var navigationServiceMock = new Mock<INavigationService>();
@@ -45,6 +46,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task LogoutAsync_When_NoAttendanceLog_Should_NotCall_Close_EdgeGuard()
         {
+            // Function: X.X — To Be Determined
             // Arrange
             AppSessionTestHelper.ResetToAdmin();
 
@@ -76,6 +78,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task LogoutAsync_When_CloseAttendanceThrows_Should_Still_Clear_AttendanceId_FailureGuard()
         {
+            // Function: X.X — To Be Determined
             // Arrange
             AppSessionTestHelper.ResetToAdmin();
 

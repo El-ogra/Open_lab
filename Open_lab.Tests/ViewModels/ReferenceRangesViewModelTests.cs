@@ -60,6 +60,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public void SelectedRange_Setter_Should_Load_Data()
         {
+            // Function: 3.3 — Reference Values - Logic Guard
             // Arrange
             var range = new TestReferenceRange
             {
@@ -87,6 +88,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task SaveAsync_Without_SelectedTest_Should_NotCall_Service_FailureGuard()
         {
+            // Function: 3.3 — Reference Values - Logic Guard
             // Arrange
             _viewModel.SelectedTest = null;
 
@@ -102,6 +104,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task DeleteAsync_When_NoSelection_Should_NotCall_Service_EdgeGuard()
         {
+            // Function: 3.3 — Reference Values - Logic Guard
             // Arrange
             _viewModel.SelectedRange = null;
 

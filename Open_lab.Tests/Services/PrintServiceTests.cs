@@ -63,6 +63,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public void Constructor_When_SettingsServiceNull_Should_Throw_FailureGuard()
         {
+            // Function: 5.7 — Culture Report Printing - unit-level data contract validation.
             // Act
             Action act = () => new PrintService(null!);
 
@@ -73,6 +74,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task PrintTextReportAsync_When_TitleEmpty_Should_Throw_FailureGuard()
         {
+            // Function: 5.7 — Culture Report Printing - unit-level data contract validation.
             var settingsMock = new Mock<ISettingsService>();
             var service = new PrintService(settingsMock.Object);
 

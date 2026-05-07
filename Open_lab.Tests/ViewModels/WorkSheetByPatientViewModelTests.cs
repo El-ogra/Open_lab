@@ -20,6 +20,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task LoadCommand_Should_Load_Patient_Rows_Success()
         {
+            // Function: X.X — To Be Determined
             // Arrange
             AppSessionTestHelper.ResetToAdmin();
 
@@ -40,6 +41,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task LoadCommand_When_PatientService_Throws_Should_Set_Error_Failure()
         {
+            // Function: X.X — To Be Determined
             // Arrange
             AppSessionTestHelper.ResetToAdmin();
 
@@ -60,6 +62,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public void PrintCommand_When_No_PatientRows_Should_Be_Disabled_Edge()
         {
+            // Function: X.X — To Be Determined
             // Arrange
             var vm = new WorkSheetByPatientViewModel(Mock.Of<IWorksheetService>(), Mock.Of<IPrintService>());
             vm.Rows.Clear();

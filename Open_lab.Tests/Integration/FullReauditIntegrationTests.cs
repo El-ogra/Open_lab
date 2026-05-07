@@ -20,6 +20,7 @@ namespace Open_lab.Tests.Integration
         [Fact]
         public void OpenLabModulesDocumentation_Should_Define_13_Modules_And_97_Functions()
         {
+            // Function: X.X — To Be Determined
             var markdown = File.ReadAllText(GetModulesDocPath());
             var moduleCount = ModuleRegex.Matches(markdown).Count;
             var functionIds = ExtractFunctionIds(markdown);
@@ -32,6 +33,7 @@ namespace Open_lab.Tests.Integration
         [Fact]
         public void Every_Documented_Function_Should_Have_Model_Service_ViewModel_Mapping()
         {
+            // Function: X.X — To Be Determined
             var documentedIds = ExtractFunctionIds(File.ReadAllText(GetModulesDocPath()));
             var mapped = BuildCases();
 
@@ -44,6 +46,7 @@ namespace Open_lab.Tests.Integration
         [Fact]
         public void Every_Function_Mapping_Should_Have_Service_Interface_And_ViewModel_Commands()
         {
+            // Function: X.X — To Be Determined
             foreach (var item in BuildCases())
             {
                 var interfaceType = item.ServiceType.GetInterface($"I{item.ServiceType.Name}");
@@ -66,6 +69,7 @@ namespace Open_lab.Tests.Integration
         [Fact]
         public void Every_Function_Mapping_Should_Have_Service_And_ViewModel_Test_Evidence()
         {
+            // Function: X.X — To Be Determined
             var serviceTestTexts = Directory.GetFiles(Path.Combine(GetRepositoryRoot(), "Open_lab.Tests", "Services"), "*.cs", SearchOption.AllDirectories)
                 .Select(File.ReadAllText)
                 .ToList();

@@ -153,6 +153,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task SaveListAsync_With_EmptyName_Should_NotCall_Service_FailureGuard()
         {
+            // Function: 3.8 — Update Prices (Edge Case)
             // Arrange
             _viewModel.ListName = " ";
 
@@ -167,6 +168,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task AddItemAsync_When_PriceZero_Should_Fallback_To_TestPrice_EdgeGuard()
         {
+            // Function: 3.8 — Update Prices (Edge Case)
             // Arrange
             _viewModel.SelectedPriceList = new PriceList { PriceListId = 2 };
             _viewModel.SelectedTest = new Test { TestId = 20, Code = "T20", Price = 135m };

@@ -31,6 +31,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task SetAndGetString_Should_Return_Value()
         {
+            // Function: 13.3 — Configure Header/Footer
             await _service.SetSettingAsync("Key1", "Value1", "desc");
             var value = await _service.GetStringAsync("Key1");
             value.Should().Be("Value1");
@@ -44,6 +45,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task GetString_Default_When_Not_Exists()
         {
+            // Function: 13.3 — Configure Header/Footer
             var value = await _service.GetStringAsync("NoKey", "Def");
             value.Should().Be("Def");
         }
@@ -51,6 +53,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task SetAndGetInt_Should_Parse()
         {
+            // Function: 13.3 — Configure Header/Footer
             await _service.SetSettingAsync("IntKey", 42);
             var v = await _service.GetIntAsync("IntKey", 0);
             v.Should().Be(42);
@@ -59,6 +62,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task GetInt_Default_On_ParseFail()
         {
+            // Function: 13.3 — Configure Header/Footer
             await _service.SetSettingAsync("BadInt", "notint");
             var v = await _service.GetIntAsync("BadInt", 7);
             v.Should().Be(7);
@@ -70,6 +74,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task SetAndGetDecimal_Should_Parse()
         {
+            // Function: 13.3 — Configure Header/Footer
             await _service.SetSettingAsync("DKey", 1.23m);
             var v = await _service.GetDecimalAsync("DKey", 0);
             v.Should().Be(1.23m);
@@ -81,6 +86,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task SetAndGetBool_Should_Parse()
         {
+            // Function: 13.3 — Configure Header/Footer
             await _service.SetSettingAsync("BKey", true);
             var v = await _service.GetBoolAsync("BKey", false);
             v.Should().BeTrue();
@@ -95,6 +101,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task SetAndGetJson_Should_Serialize_And_Deserialize()
         {
+            // Function: 13.3 — Configure Header/Footer
             var dto = new SampleDto { Name = "X", Age = 5 };
             await _service.SetJsonAsync("JsonKey", dto);
             var res = await _service.GetJsonAsync<SampleDto>("JsonKey");
@@ -106,6 +113,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task GetJson_Returns_Null_On_Invalid_Json()
         {
+            // Function: 13.3 — Configure Header/Footer
             await _service.SetSettingAsync("JsonKey2", "not-json");
             var res = await _service.GetJsonAsync<SampleDto>("JsonKey2");
             res.Should().BeNull();
@@ -114,6 +122,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task DeleteSetting_Should_Remove()
         {
+            // Function: 13.3 — Configure Header/Footer
             await _service.SetSettingAsync("KDel", "V");
             var before = await _service.GetStringAsync("KDel");
             before.Should().Be("V");
@@ -128,6 +137,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task PrinterDefaults_Should_Work()
         {
+            // Function: 13.3 — Configure Header/Footer
             var def = await _service.GetDefaultPrinterAsync();
             def.Should().NotBeNull();
             await _service.SetDefaultPrinterAsync("MyPrinter");
@@ -151,6 +161,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task MarginSettings_Should_Get_And_Set()
         {
+            // Function: 13.3 — Configure Header/Footer
             var leftDefault = await _service.GetLeftMarginAsync();
             leftDefault.Should().Be(0);
             await _service.SetLeftMarginAsync(2.5m);

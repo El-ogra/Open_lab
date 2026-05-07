@@ -54,6 +54,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task SearchAsync_Should_Replace_List_With_Search_Results()
         {
+            // Function: 12.6 — `Add Referring Physician`
             _viewModel.SearchTerm = "john";
             _physicianServiceMock
                 .Setup(x => x.SearchAsync("john"))
@@ -68,6 +69,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public void SaveCommand_When_FullNameEmpty_Should_Be_Disabled_FailureGuard()
         {
+            // Function: 12.6 — `Add Referring Physician`
             // Arrange
             _viewModel.FullName = " ";
 
@@ -81,6 +83,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public void SearchCommand_When_SearchTermWhitespace_Should_Be_Disabled_EdgeGuard()
         {
+            // Function: 12.6 — `Add Referring Physician`
             // Arrange
             _viewModel.SearchTerm = " ";
 
@@ -94,6 +97,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task LoadPhysiciansCommand_When_Executed_Should_Load_Active_Physicians_Success()
         {
+            // Function: 12.6 — `Add Referring Physician`
             // Arrange
             _physicianServiceMock.Setup(x => x.GetActiveAsync()).ReturnsAsync(new List<Physician>
             {
@@ -112,6 +116,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public void NewCommand_When_Executed_Should_Clear_Editor_Edge()
         {
+            // Function: 12.6 — `Add Referring Physician`
             // Arrange
             _viewModel.FullName = "Dr. X";
             _viewModel.Specialty = "Lab";
@@ -129,6 +134,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task SearchCommand_When_Service_Throws_Should_Set_Error_Message_Failure()
         {
+            // Function: 12.6 — `Add Referring Physician`
             // Arrange
             _viewModel.SearchTerm = "john";
             _physicianServiceMock.Setup(x => x.SearchAsync("john"))

@@ -29,6 +29,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task GetGroupWorksheetByCustomGroupAsync_Should_Return_Visits_For_Custom_Group()
         {
+            // Function: X.X — To Be Determined
             var customGroup = new CustomGroup { Name = "Package A" };
             var test = new Test { Code = "T1", NameReport = "CBC", Price = 10m };
             var patient = new Patient { LabId = "L1", FullName = "Patient 1", Gender = "Male" };
@@ -56,6 +57,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task GetGroupWorksheetByGroupAsync_When_GroupHasNoTests_Should_Return_Empty_FailureGuard()
         {
+            // Function: X.X — To Be Determined
             // Arrange
             var patient = new Patient { LabId = "L2", FullName = "Patient 2", Gender = "Female" };
             var otherGroupTest = new Test { Code = "T2", NameReport = "GLU", Price = 5m, GroupId = 99 };
@@ -80,6 +82,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task GetGroupWorksheetByGroupAsync_Should_Return_Visits_For_Target_Group_Success()
         {
+            // Function: X.X — To Be Determined
             // Arrange
             var patient = new Patient { LabId = "L4", FullName = "Group Patient", Gender = "Female" };
             var targetTest = new Test { Code = "TG1", NameReport = "Target", Price = 11m, GroupId = 7 };
@@ -109,6 +112,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task GetGroupWorksheetByCustomGroupAsync_When_VisitOutsideRange_Should_Return_Empty_EdgeGuard()
         {
+            // Function: X.X — To Be Determined
             // Arrange
             var customGroup = new CustomGroup { Name = "Package B" };
             var test = new Test { Code = "T3", NameReport = "CRP", Price = 15m };
@@ -136,6 +140,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task GetGroupWorksheetByCustomGroupAsync_When_CustomGroup_Not_Found_Should_Return_Empty_FailureGuard()
         {
+            // Function: X.X — To Be Determined
             // Act
             var rows = await _service.GetGroupWorksheetByCustomGroupAsync(9999, DateTime.Today.AddDays(-1), DateTime.Today.AddDays(1));
 
@@ -146,6 +151,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task GetGroupWorksheetByGroupAsync_When_Visit_Has_Multiple_Target_Tests_Should_Count_Only_Target_Tests_EdgeGuard()
         {
+            // Function: X.X — To Be Determined
             // Arrange
             var patient = new Patient { LabId = "L5", FullName = "Edge Group", Gender = "Male" };
             var g1TestA = new Test { Code = "G1A", NameReport = "GroupA", Price = 10m, GroupId = 10 };

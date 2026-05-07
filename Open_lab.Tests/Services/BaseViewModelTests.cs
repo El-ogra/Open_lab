@@ -26,6 +26,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public void SetProperty_When_Value_Changes_Should_Raise_PropertyChanged()
         {
+            // Function: X.X — To Be Determined
             // Arrange
             var vm = new TestViewModel();
             var propertyName = string.Empty;
@@ -41,6 +42,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public void SetProperty_When_Value_Does_Not_Change_Should_Not_Raise_PropertyChanged()
         {
+            // Function: X.X — To Be Determined
             // Arrange
             var vm = new TestViewModel();
             vm.Name = "John";
@@ -57,6 +59,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public void SetProperty_Should_Return_True_When_Value_Changes()
         {
+            // Function: X.X — To Be Determined
             // Arrange
             var vm = new TestViewModel();
 
@@ -71,6 +74,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public void SetProperty_With_Different_Types_Should_Raise_Correct_PropertyName()
         {
+            // Function: X.X — To Be Determined
             // Arrange
             var vm = new TestViewModel();
             var raisedProperties = new List<string>();

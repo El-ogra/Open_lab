@@ -42,6 +42,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task AddCultureAsync_Should_Send_Full_Metadata_To_Service()
         {
+            // Function: X.X — To Be Determined
             Culture? captured = null;
             _serviceMock.Setup(s => s.CreateCultureAsync(It.IsAny<Culture>()))
                 .Callback<Culture>(c => captured = c)
@@ -73,6 +74,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task AddAntibioticAsync_Should_Send_Safety_Classification_To_Service()
         {
+            // Function: X.X — To Be Determined
             Antibiotic? captured = null;
             _serviceMock.Setup(s => s.CreateAntibioticAsync(It.IsAny<Antibiotic>()))
                 .Callback<Antibiotic>(a => captured = a)
@@ -98,6 +100,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task BuildResultRowsAsync_When_Visit_Selected_Should_Apply_Filtering()
         {
+            // Function: X.X — To Be Determined
             _viewModel.SelectedCulture = new Culture
             {
                 CultureId = 10,
@@ -134,6 +137,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task SaveResultAsync_Should_Save_Classified_Values_Through_Service()
         {
+            // Function: X.X — To Be Determined
             _viewModel.SelectedCulture = new Culture
             {
                 CultureId = 3,
@@ -175,6 +179,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task PrintCultureReportAsync_Should_Call_Print_Service_With_Results()
         {
+            // Function: X.X — To Be Determined
             _viewModel.SelectedCulture = new Culture
             {
                 CultureId = 4,
@@ -218,6 +223,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task SaveResultAsync_When_SelectionMissing_Should_Set_ValidationMessage_FailureGuard()
         {
+            // Function: X.X — To Be Determined
             // Arrange
             _viewModel.SelectedVisitTest = null;
             _viewModel.SelectedCulture = null;
@@ -233,6 +239,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task PrintCultureReportAsync_When_DataIncomplete_Should_Set_Message_EdgeGuard()
         {
+            // Function: X.X — To Be Determined
             // Arrange
             _viewModel.SelectedVisitTest = null;
             _viewModel.SelectedCulture = null;

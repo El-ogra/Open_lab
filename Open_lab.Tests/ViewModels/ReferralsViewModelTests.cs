@@ -71,6 +71,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task SaveAsync_Without_NameOrType_Should_Stop_Validation_FailureGuard()
         {
+            // Function: 12.3 — `Set Entity Discount`
             // Arrange
             _viewModel.Name = "";
             _viewModel.Type = "";
@@ -86,6 +87,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task SaveAsync_Invalid_CommissionPercentage_Should_Stop_Creation_EdgeGuard()
         {
+            // Function: 12.3 — `Set Entity Discount`
             // Arrange
             _viewModel.Name = "Company Z";
             _viewModel.Type = "Company";
@@ -103,6 +105,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task SaveCommand_When_Service_Throws_Should_Set_Error_Message_Failure()
         {
+            // Function: 12.3 — `Set Entity Discount`
             // Arrange
             _viewModel.Name = "Company Err";
             _viewModel.Type = "Company";
@@ -122,6 +125,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task DeleteCommand_When_SelectedReferral_Exists_Should_Delete_Success()
         {
+            // Function: 12.3 — `Set Entity Discount`
             // Arrange
             var referral = new Referral { ReferralId = 9, Name = "ToDelete", ReferralType = "Company" };
             _viewModel.Referrals.Add(referral);
@@ -141,6 +145,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task DeleteCommand_When_Service_Throws_Should_Set_Error_Message_Failure()
         {
+            // Function: 12.3 — `Set Entity Discount`
             // Arrange
             var referral = new Referral { ReferralId = 10, Name = "Fail", ReferralType = "Company" };
             _viewModel.Referrals.Add(referral);

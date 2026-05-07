@@ -63,6 +63,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task LoadUsersCommand_When_Executed_Should_Load_Users_Success()
         {
+            // Function: 11.5 — `Generate Attendance Report`
             // Arrange
             _userAdminServiceMock.Setup(x => x.GetUsersAsync()).ReturnsAsync(new List<User>
             {
@@ -82,6 +83,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task LoadUsersCommand_When_Service_Throws_Should_Set_Error_Message_Failure()
         {
+            // Function: 11.5 — `Generate Attendance Report`
             // Arrange
             _userAdminServiceMock.Setup(x => x.GetUsersAsync()).ThrowsAsync(new InvalidOperationException("users-failed"));
 
@@ -114,6 +116,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task GenerateReportCommand_When_Executed_Should_Fill_ReportRows_Success()
         {
+            // Function: 11.5 — `Generate Attendance Report`
             // Arrange
             _tardinessServiceMock
                 .Setup(x => x.GetPunctualityReportAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<int?>()))
@@ -130,6 +133,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task GeneratePayrollSummaryCommand_When_Service_Throws_Should_Set_Error_Message_Failure()
         {
+            // Function: 11.5 — `Generate Attendance Report`
             // Arrange
             _payrollServiceMock
                 .Setup(x => x.GeneratePayrollSummaryAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<int?>()))
@@ -146,6 +150,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task GenerateReportAsync_When_ServiceThrows_Should_Set_ErrorStatus_FailureGuard()
         {
+            // Function: 11.5 — `Generate Attendance Report`
             // Arrange
             _tardinessServiceMock
                 .Setup(x => x.GetPunctualityReportAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<int?>()))
@@ -162,6 +167,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public void ClearFilter_Should_Reset_User_And_DefaultDateRange_EdgeGuard()
         {
+            // Function: 11.5 — `Generate Attendance Report`
             // Arrange
             _viewModel.SelectedUserId = 10;
             _viewModel.From = DateTime.Today.AddDays(-30);

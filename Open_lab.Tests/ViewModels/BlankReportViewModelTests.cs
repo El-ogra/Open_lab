@@ -58,6 +58,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task LoadAsync_With_InvalidVisitId_Should_Set_Validation_Message_FailureGuard()
         {
+            // Function: 4.8 — Print Blank Report - Logic Guard: Verify all blank report fields are populated
             _viewModel.VisitId = 0;
 
             await _viewModel.InvokePrivateAsync("LoadAsync");
@@ -69,6 +70,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task LoadAsync_When_ReportData_NotFound_Should_Set_NotFound_Message_FailureGuard()
         {
+            // Function: 4.8 — Print Blank Report - Logic Guard: Verify all blank report fields are populated
             _viewModel.VisitId = 42;
             _reportServiceMock.Setup(x => x.GetVisitReportAsync(42)).ReturnsAsync((VisitReportData?)null);
 
@@ -81,6 +83,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task PrintBlankAsync_Without_PrintService_Should_Set_ServiceUnavailable_EdgeGuard()
         {
+            // Function: 4.8 — Print Blank Report - Logic Guard: Verify all blank report fields are populated
             _viewModel.VisitId = 7;
 
             await _viewModel.InvokePrivateAsync("PrintBlankAsync");

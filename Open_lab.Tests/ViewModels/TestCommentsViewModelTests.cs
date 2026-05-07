@@ -93,6 +93,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public void SelectedComment_Setter_Should_Load_Low_High_Comments()
         {
+            // Function: 3.4 — Low/High Comments (Edge Case)
             // Arrange
             var comment = new TestComment
             {
@@ -116,6 +117,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task SaveAsync_When_SelectedTestIsNull_Should_Set_ValidationMessage_FailureGuard()
         {
+            // Function: 3.4 — Low/High Comments (Edge Case)
             // Arrange
             _viewModel.SelectedTest = null;
             _viewModel.CommentText = "Any";
@@ -131,6 +133,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task TestComments_DeleteAsync_When_ServiceThrows_Should_Set_ErrorStatus_FailureGuard()
         {
+            // Function: 3.4 — Low/High Comments (Edge Case)
             // Arrange
             _viewModel.SelectedComment = new TestComment { CommentId = 7, TestId = 1, CommentText = "C" };
             _testCatalogServiceMock

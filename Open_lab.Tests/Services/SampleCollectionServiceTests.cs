@@ -31,6 +31,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task GetRowsAsync_Should_Return_Rows_LogicGuard()
         {
+            // Function: X.X — To Be Determined
             // Refactored to Logic Guard - verifies complete row data and filtering
             var patient = new Patient { LabId = "L1", FullName = "P", Gender = "Male", Phone = "555-1111" };
             _db.Patients.Add(patient);
@@ -63,6 +64,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task MarkCollectedAsync_Should_Create_SampleCollection_LogicGuard()
         {
+            // Function: X.X — To Be Determined
             // Refactored to Logic Guard - verifies all fields and side effects
             var patient = new Patient { LabId = "L2", FullName = "P2", Gender = "Female" };
             _db.Patients.Add(patient);
@@ -94,6 +96,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task MarkSeparatedAsync_Without_Sample_Should_Throw_LogicGuard()
         {
+            // Function: X.X — To Be Determined
             // Refactored to Logic Guard - verifies exception message and side effect
             Func<Task> act = async () => await _service.MarkSeparatedAsync(999, "Centrifuge");
             
@@ -108,6 +111,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task MarkNotCollectedAsync_Should_Remove_Sample()
         {
+            // Function: X.X — To Be Determined
             var patient = new Patient { LabId = "L3", FullName = "P3", Gender = "Male" };
             _db.Patients.Add(patient);
             await _db.SaveChangesAsync();
@@ -134,6 +138,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task GetRowsAsync_With_Inverted_Date_Range_Should_Return_Empty_FailureGuard()
         {
+            // Function: X.X — To Be Determined
             // Arrange
             var patient = new Patient { LabId = "L-INV", FullName = "Inverted", Gender = "Male" };
             _db.Patients.Add(patient);
@@ -160,6 +165,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task MarkSeparatedAsync_With_Whitespace_SeparationType_Should_Set_Default_Separated_Status_Edge()
         {
+            // Function: X.X — To Be Determined
             // Arrange
             _db.SampleCollections.Add(new SampleCollection
             {
@@ -182,6 +188,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task MarkNotCollectedAsync_When_Sample_Missing_Should_Keep_State_Unchanged_Edge()
         {
+            // Function: X.X — To Be Determined
             // Arrange
             (await _db.SampleCollections.CountAsync()).Should().Be(0);
 
@@ -195,6 +202,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task MarkSeparatedAsync_Should_Update_Status_And_IsSeparated()
         {
+            // Function: X.X — To Be Determined
             // Arrange
             var vtId = 1;
             _db.SampleCollections.Add(new SampleCollection { VisitTestId = vtId, Status = "مسحوبة", CollectedAt = DateTime.Now });
@@ -213,6 +221,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task MarkCollectedAsync_WithExternalFlag_Should_Set_IsExternalSample_True()
         {
+            // Function: X.X — To Be Determined
             // Arrange
             var patient = new Patient { LabId = "LEXT1", FullName = "P", Gender = "Male" };
             _db.Patients.Add(patient);
@@ -245,6 +254,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task MarkCollectedAsync_WithoutExternalFlag_Should_Set_IsExternalSample_False()
         {
+            // Function: X.X — To Be Determined
             // Arrange
             var patient = new Patient { LabId = "LEXT2", FullName = "P", Gender = "Male" };
             _db.Patients.Add(patient);
@@ -276,6 +286,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task MarkCollectedAsync_UpdatingExisting_Should_Update_ExternalFlag()
         {
+            // Function: X.X — To Be Determined
             // Arrange
             var patient = new Patient { LabId = "LEXT3", FullName = "P", Gender = "Male" };
             _db.Patients.Add(patient);
@@ -310,6 +321,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task MarkCollectedAsync_NonExistentVisitTest_Should_Throw()
         {
+            // Function: X.X — To Be Determined
             // Act
             Func<Task> act = async () => await _service.MarkCollectedAsync(99999, userId: 1, isExternal: false, receivedBy: null);
 

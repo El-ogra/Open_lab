@@ -27,6 +27,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public void ResultsEntry_Commands_When_Admin_Should_Be_Enabled()
         {
+            // Function: X.X — To Be Determined
             _viewModel.LoadVisitTestsCommand.CanExecute(null).Should().BeTrue();
             _viewModel.SaveResultsCommand.CanExecute(null).Should().BeFalse();
             _viewModel.VerifyResultsCommand.CanExecute(null).Should().BeFalse();
@@ -35,6 +36,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task LoadVisitTestsAsync_Should_Call_Service()
         {
+            // Function: X.X — To Be Determined
             var visitTests = new List<VisitTest> { new VisitTest { VisitTestId = 1 } };
             _resultsServiceMock.Setup(x => x.GetVisitTestsByDateAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>()))
                 .ReturnsAsync(visitTests);
@@ -46,6 +48,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task LoadVisitTestsAsync_When_Service_Throws_Should_Set_Error()
         {
+            // Function: X.X — To Be Determined
             _resultsServiceMock.Setup(x => x.GetVisitTestsByDateAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>()))
                 .ThrowsAsync(new Exception("DB Error"));
             await _viewModel.InvokePrivateAsync("LoadVisitTestsAsync");
@@ -55,6 +58,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task SaveResultsAsync_With_Null_SelectedVisitTest_Should_Do_Nothing()
         {
+            // Function: X.X — To Be Determined
             _viewModel.SelectedVisitTest = null;
             await _viewModel.InvokePrivateAsync("SaveResultsAsync");
             _resultsServiceMock.Verify(x => x.SaveResultAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
@@ -65,6 +69,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task SaveResultsAsync_With_Results_Should_Call_Service()
         {
+            // Function: X.X — To Be Determined
             _viewModel.SelectedVisitTest = new VisitTestRow { VisitTestId = 10 };
             _viewModel.ResultItems.Clear();
             _viewModel.ResultItems.Add(new ResultEntryItem { ParameterId = 1, Value = "5.0" });
@@ -78,6 +83,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task VerifyResultsAsync_With_Null_SelectedVisitTest_Should_Do_Nothing()
         {
+            // Function: X.X — To Be Determined
             _viewModel.SelectedVisitTest = null;
             await _viewModel.InvokePrivateAsync("VerifyResultsAsync");
             _resultsServiceMock.Verify(x => x.VerifyVisitTestAsync(It.IsAny<int>(), It.IsAny<int>()), Times.Never);
@@ -88,6 +94,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task VerifyResultsAsync_With_Valid_VisitTest_Should_Call_Service()
         {
+            // Function: X.X — To Be Determined
             _viewModel.SelectedVisitTest = new VisitTestRow { VisitTestId = 10 };
             _resultsServiceMock.Setup(x => x.VerifyVisitTestAsync(10, It.IsAny<int>())).Returns(Task.CompletedTask);
             await _viewModel.InvokePrivateAsync("VerifyResultsAsync");
@@ -98,6 +105,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task SaveResultsAsync_When_ServiceThrows_Should_Set_ErrorStatus_FailureGuard()
         {
+            // Function: X.X — To Be Determined
             _viewModel.SelectedVisitTest = new VisitTestRow { VisitTestId = 10, TestId = 2, Status = "InProgress" };
             _viewModel.ResultItems.Clear();
             _viewModel.ResultItems.Add(new ResultEntryItem { ParameterId = 1, Value = "5.0" });
@@ -114,6 +122,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task VerifyResultsAsync_When_ServiceThrows_Should_Set_ErrorStatus_FailureGuard()
         {
+            // Function: X.X — To Be Determined
             _viewModel.SelectedVisitTest = new VisitTestRow { VisitTestId = 10, TestId = 2, Status = "InProgress" };
             _resultsServiceMock
                 .Setup(x => x.VerifyVisitTestAsync(10, It.IsAny<int>()))
@@ -128,6 +137,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task ReopenResultsAsync_With_Null_SelectedVisitTest_Should_Do_Nothing()
         {
+            // Function: X.X — To Be Determined
             _viewModel.SelectedVisitTest = null;
             await _viewModel.InvokePrivateAsync("ReopenResultsAsync");
             _resultsServiceMock.Verify(x => x.ReopenVisitTestAsync(It.IsAny<int>()), Times.Never);
@@ -138,6 +148,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task ReopenResultsAsync_With_Valid_VisitTest_Should_Call_Service()
         {
+            // Function: X.X — To Be Determined
             _viewModel.SelectedVisitTest = new VisitTestRow { VisitTestId = 10 };
             _resultsServiceMock.Setup(x => x.ReopenVisitTestAsync(10)).Returns(Task.CompletedTask);
             await _viewModel.InvokePrivateAsync("ReopenResultsAsync");

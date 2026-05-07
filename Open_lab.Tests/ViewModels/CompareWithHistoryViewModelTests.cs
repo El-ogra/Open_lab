@@ -32,6 +32,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task LoadPatientCommand_When_LabId_NotFound_Should_Set_Status_FailureGuard()
         {
+            // Function: X.X — To Be Determined
             _viewModel.LabId = "UNKNOWN";
             _patientServiceMock.Setup(s => s.GetByLabIdAsync("UNKNOWN")).ReturnsAsync((Patient?)null);
 
@@ -45,6 +46,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task LoadPatientCommand_When_Patient_Exists_Should_Load_Test_List_SuccessGuard()
         {
+            // Function: X.X — To Be Determined
             _viewModel.LabId = "L-100";
             _patientServiceMock.Setup(s => s.GetByLabIdAsync("L-100"))
                 .ReturnsAsync(new Patient { PatientId = 10, FullName = "Ali", LabId = "L-100", Gender = "Male" });
@@ -66,6 +68,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task LoadHistoryCommand_Should_Group_And_Load_HistoryRows_EdgeGuard()
         {
+            // Function: X.X — To Be Determined
             _viewModel.LabId = "L-200";
             _patientServiceMock.Setup(s => s.GetByLabIdAsync("L-200"))
                 .ReturnsAsync(new Patient { PatientId = 11, FullName = "Mona", LabId = "L-200", Gender = "Female" });
@@ -93,6 +96,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task LoadHistoryCommand_When_ServiceThrows_Should_Set_ErrorMessage_FailureGuard()
         {
+            // Function: X.X — To Be Determined
             _viewModel.LabId = "L-300";
             _patientServiceMock.Setup(s => s.GetByLabIdAsync("L-300"))
                 .ReturnsAsync(new Patient { PatientId = 50, FullName = "Patient 50", LabId = "L-300", Gender = "Male" });
@@ -116,6 +120,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task ClearCommand_Should_Reset_State_And_Collections_EdgeGuard()
         {
+            // Function: X.X — To Be Determined
             _viewModel.LabId = "L-RESET";
             _patientServiceMock.Setup(s => s.GetByLabIdAsync("L-RESET"))
                 .ReturnsAsync(new Patient { PatientId = 60, FullName = "Reset P", LabId = "L-RESET", Gender = "Female" });
@@ -140,6 +145,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public void LoadHistoryCommand_CanExecute_Should_Be_False_Without_Patient_Or_Test_FailureGuard()
         {
+            // Function: X.X — To Be Determined
             _viewModel.PatientId.Should().BeNull();
             _viewModel.SelectedTestId.Should().BeNull();
 

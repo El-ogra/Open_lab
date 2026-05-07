@@ -32,6 +32,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task CreateCultureAsync_Should_Create_With_Full_Culture_Metadata()
         {
+            // Function: X.X — To Be Determined
             var culture = new Culture
             {
                 Name = "Urine Culture",
@@ -53,6 +54,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task CreateCultureAsync_When_Missing_Clinical_Metadata_Should_Throw()
         {
+            // Function: X.X — To Be Determined
             Func<Task> act = async () => await _service.CreateCultureAsync(new Culture
             {
                 Name = "Blood Culture",
@@ -68,6 +70,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task CreateCultureAsync_Duplicate_Should_Throw()
         {
+            // Function: X.X — To Be Determined
             await _service.CreateCultureAsync(new Culture
             {
                 Name = "Blood",
@@ -92,6 +95,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task CreateAntibioticAsync_Should_Persist_Safety_Classification_Flags()
         {
+            // Function: X.X — To Be Determined
             var created = await _service.CreateAntibioticAsync(new Antibiotic
             {
                 Name = "Amoxicillin",
@@ -107,6 +111,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task LinkAndUnlinkAntibiotic_Should_Work()
         {
+            // Function: X.X — To Be Determined
             var culture = await _service.CreateCultureAsync(new Culture
             {
                 Name = "Urine",
@@ -138,12 +143,14 @@ namespace Open_lab.Tests.Services
         [InlineData("مقاوم", "R")]
         public void ClassifySensitivity_Should_Normalize_To_SIR(string raw, string expected)
         {
+            // Function: X.X — To Be Determined
             _service.ClassifySensitivity(raw).Should().Be(expected);
         }
 
         [Fact]
         public void ClassifySensitivity_When_Unsupported_Should_Throw()
         {
+            // Function: X.X — To Be Determined
             Action act = () => _service.ClassifySensitivity("UNKNOWN");
             act.Should().Throw<InvalidOperationException>();
         }
@@ -151,6 +158,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task SearchCultureVisitTestsAsync_Should_Filter_By_Date_And_LabId()
         {
+            // Function: X.X — To Be Determined
             var patient = new Patient { LabId = "LAB123", FullName = "John", Gender = "Male" };
             _db.Patients.Add(patient);
             var test = new Test { Code = "CULT-1", NameReport = "Culture & Sensitivity", NameReceipt = "Culture", Price = 10 };
@@ -173,6 +181,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task GetFilteredAntibioticsAsync_PregnantPatient_Should_OnlyReturn_PregnancySafe()
         {
+            // Function: X.X — To Be Determined
             await _service.CreateAntibioticAsync(new Antibiotic { Name = "SafePreg", IsSafeForPregnancy = true, IsSafeForChildren = false });
             await _service.CreateAntibioticAsync(new Antibiotic { Name = "UnsafePreg", IsSafeForPregnancy = false, IsSafeForChildren = true });
             await _service.CreateAntibioticAsync(new Antibiotic { Name = "BothSafe", IsSafeForPregnancy = true, IsSafeForChildren = true });
@@ -196,6 +205,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task GetFilteredAntibioticsAsync_ChildPatient_Should_OnlyReturn_ChildrenSafe()
         {
+            // Function: X.X — To Be Determined
             await _service.CreateAntibioticAsync(new Antibiotic { Name = "SafeChild", IsSafeForPregnancy = false, IsSafeForChildren = true });
             await _service.CreateAntibioticAsync(new Antibiotic { Name = "UnsafeChild", IsSafeForPregnancy = true, IsSafeForChildren = false });
             await _service.CreateAntibioticAsync(new Antibiotic { Name = "BothSafe", IsSafeForPregnancy = true, IsSafeForChildren = true });
@@ -219,6 +229,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task SaveCultureResultAsync_Should_Save_Culture_Metadata_And_SIR_Classifications()
         {
+            // Function: X.X — To Be Determined
             var test = new Test { Code = "CULT-2", NameReport = "Culture Test", NameReceipt = "Culture Test", Price = 10 };
             _db.Tests.Add(test);
             var antibiotic1 = new Antibiotic { Name = "Amoxicillin" };
@@ -262,6 +273,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task SaveCultureResultAsync_When_VisitTestIsVerified_Should_Throw_FailureGuard()
         {
+            // Function: X.X — To Be Determined
             // Arrange
             var culture = await _service.CreateCultureAsync(new Culture
             {

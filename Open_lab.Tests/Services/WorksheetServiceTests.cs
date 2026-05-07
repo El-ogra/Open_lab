@@ -31,6 +31,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task GetWorksheetByPatientAsync_Should_Return_PatientRows()
         {
+            // Function: X.X — To Be Determined
             var patient = new Patient { LabId = "L1", FullName = "P", Gender = "Male" };
             _db.Patients.Add(patient);
             await _db.SaveChangesAsync();
@@ -50,6 +51,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task GetWorksheetByTestAsync_Should_Return_GroupedCounts()
         {
+            // Function: X.X — To Be Determined
             var patient = new Patient { LabId = "L2", FullName = "P2", Gender = "Female" };
             _db.Patients.Add(patient);
             await _db.SaveChangesAsync();
@@ -73,6 +75,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task GetWorksheetByPatientAsync_When_NoVisitsInRange_Should_Return_Empty_FailureGuard()
         {
+            // Function: X.X — To Be Determined
             // Arrange
             var patient = new Patient { LabId = "L9", FullName = "Old Visit", Gender = "Male" };
             _db.Patients.Add(patient);
@@ -92,6 +95,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task GetWorksheetByTestAsync_When_MultipleVisitsSameTest_Should_Aggregate_Count_EdgeGuard()
         {
+            // Function: X.X — To Be Determined
             // Arrange
             var patient = new Patient { LabId = "L10", FullName = "P10", Gender = "Female" };
             _db.Patients.Add(patient);
@@ -122,6 +126,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task GetWorksheetByPatientAsync_Should_Include_Visit_On_Range_Boundary_EdgeGuard()
         {
+            // Function: X.X — To Be Determined
             // Arrange
             var patient = new Patient { LabId = "L11", FullName = "Boundary", Gender = "Male" };
             _db.Patients.Add(patient);
@@ -150,6 +155,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task GetWorksheetByTestAsync_When_No_Tests_In_Range_Should_Return_Empty_FailureGuard()
         {
+            // Function: X.X — To Be Determined
             // Arrange
             var patient = new Patient { LabId = "L12", FullName = "Out of range", Gender = "Female" };
             _db.Patients.Add(patient);

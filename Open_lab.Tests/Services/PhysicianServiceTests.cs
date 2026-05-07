@@ -32,6 +32,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task CreateAsync_Should_Create_Physician_With_All_Fields()
         {
+            // Function: X.X — To Be Determined
             var physician = new Physician
             {
                 FullName = "Dr. John Smith",
@@ -58,6 +59,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task CreateAsync_Should_Create_Physician()
         {
+            // Function: X.X — To Be Determined
             var physician = new Physician { FullName = "Dr. Smith", CommissionPercentage = 10m };
             var created = await _service.CreateAsync(physician);
             created.PhysicianId.Should().BeGreaterThan(0);
@@ -69,6 +71,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task CreateAsync_WithPriceList_Should_Link_PriceList()
         {
+            // Function: X.X — To Be Determined
             var priceList = new PriceList { Name = "Doctor PL" };
             _db.PriceLists.Add(priceList);
             await _db.SaveChangesAsync();
@@ -93,6 +96,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task UpdatePhysicianAsync_Should_Update_All_Fields()
         {
+            // Function: X.X — To Be Determined
             var physician = new Physician
             {
                 FullName = "Dr. Old Name",
@@ -127,6 +131,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task UpdateAsync_Should_Assign_PriceList()
         {
+            // Function: X.X — To Be Determined
             var priceList = new PriceList { Name = "PL" };
             _db.PriceLists.Add(priceList);
             await _db.SaveChangesAsync();
@@ -145,6 +150,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task UpdateAsync_Should_Remove_PriceList_When_Set_To_Null()
         {
+            // Function: X.X — To Be Determined
             var priceList = new PriceList { Name = "Old PL" };
             _db.PriceLists.Add(priceList);
             await _db.SaveChangesAsync();
@@ -169,6 +175,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task UpdateAsync_Should_Update_CommissionPercentage()
         {
+            // Function: X.X — To Be Determined
             var physician = new Physician
             {
                 FullName = "Dr. Williams",
@@ -188,6 +195,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task GetAllAsync_Should_Return_All_Physicians_Ordered_By_Name_Success()
         {
+            // Function: X.X — To Be Determined
             // Arrange
             _db.Physicians.AddRange(
                 new Physician { FullName = "Dr. Zed", IsActive = true },
@@ -206,6 +214,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task GetActiveAsync_Should_Return_Only_Active_Physicians_FailureGuard()
         {
+            // Function: X.X — To Be Determined
             // Arrange
             _db.Physicians.AddRange(
                 new Physician { FullName = "Dr. Active", IsActive = true },
@@ -222,6 +231,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task GetByIdAsync_When_Not_Found_Should_Return_Null_Edge()
         {
+            // Function: X.X — To Be Determined
             // Act
             var physician = await _service.GetByIdAsync(9999);
 
@@ -232,6 +242,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task DeleteAsync_When_Physician_Exists_Should_Remove_It_Success()
         {
+            // Function: X.X — To Be Determined
             // Arrange
             var physician = new Physician { FullName = "Dr. Delete", IsActive = true };
             _db.Physicians.Add(physician);
@@ -247,6 +258,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task SearchAsync_When_No_Match_Should_Return_Empty_Failure()
         {
+            // Function: X.X — To Be Determined
             // Arrange
             _db.Physicians.Add(new Physician { FullName = "Dr. Search", Specialty = "Cardio", IsActive = true });
             await _db.SaveChangesAsync();

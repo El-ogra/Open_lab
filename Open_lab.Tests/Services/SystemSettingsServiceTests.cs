@@ -76,6 +76,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task SaveSettingAsync_And_GetSettingsAsync_Should_Persist_KeyValue_Success()
         {
+            // Function: 13.3 — `Configure Header/Footer`
             // Act
             await _service.SaveSettingAsync("Printer.Report", "HP-1");
             var all = await _service.GetSettingsAsync();
@@ -87,6 +88,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task DeleteSettingAsync_When_Key_Not_Exists_Should_Not_Throw_Edge()
         {
+            // Function: 13.3 — `Configure Header/Footer`
             // Act
             await _service.DeleteSettingAsync("Missing.Key");
 
@@ -97,6 +99,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task VerifyMasterPasswordAsync_When_No_Hash_Should_Allow_Default_Admin123_Edge()
         {
+            // Function: 13.3 — `Configure Header/Footer`
             // Act
             var ok = await _service.VerifyMasterPasswordAsync("admin123");
             var bad = await _service.VerifyMasterPasswordAsync("wrong");
@@ -109,6 +112,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task SetMasterPasswordAsync_When_Password_Empty_Should_Return_False_Failure()
         {
+            // Function: 13.3 — `Configure Header/Footer`
             // Act
             var result = await _service.SetMasterPasswordAsync(string.Empty);
 
@@ -119,6 +123,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task SaveProfileAsync_When_MasterPasswordHash_Provided_Should_Save_Hash_And_Salt_Success()
         {
+            // Function: 13.3 — `Configure Header/Footer`
             // Arrange
             var profile = new SystemSettingsProfile
             {

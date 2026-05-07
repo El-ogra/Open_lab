@@ -94,6 +94,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task LoadReportAsync_With_InvalidVisitId_Should_Set_Validation_Message_FailureGuard()
         {
+            // Function: 4.7 — Print Report - Logic Guard: Verify correct data is passed to print service
             _viewModel.VisitId = 0;
 
             await _viewModel.InvokePrivateAsync("LoadReportAsync");
@@ -105,6 +106,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task LoadReportAsync_When_ServiceReturnsNull_Should_Set_NotFound_Message_FailureGuard()
         {
+            // Function: 4.7 — Print Report - Logic Guard: Verify correct data is passed to print service
             _viewModel.VisitId = 99;
             _reportServiceMock.Setup(x => x.GetVisitReportAsync(99)).ReturnsAsync((VisitReportData?)null);
 
@@ -118,6 +120,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task PrintAsync_When_PrintServiceThrows_Should_Set_PrintErrorMessage_EdgeGuard()
         {
+            // Function: 4.7 — Print Report - Logic Guard: Verify correct data is passed to print service
             var report = BuildReport(visitId: 55, isSendOut: false);
             _reportServiceMock.Setup(x => x.GetVisitReportAsync(55)).ReturnsAsync(report);
             _printServiceMock.Setup(x => x.PrintVisitReportAsync(It.IsAny<VisitReportData>(), It.IsAny<bool>()))

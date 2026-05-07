@@ -180,6 +180,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task GetVisitReportAsync_When_VisitNotFound_Should_Return_Null_FailureGuard()
         {
+            // Function: 1.6 — View Patient History
             // Act
             var report = await _service.GetVisitReportAsync(99999);
 

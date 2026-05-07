@@ -66,6 +66,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task BackupAsync_With_EmptyPath_Should_Throw_LogicGuard()
         {
+            // Function: 13.7 — Configure Backup - Refactored to Logic Guard
             // Refactored to Logic Guard - verifies exception message and side effect
             Func<Task> act = async () => await _service.BackupAsync("");
             
@@ -121,6 +122,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task RestoreAsync_WithEmptyPath_ShouldThrowException_FailureGuard()
         {
+            // Function: 13.7 — Configure Backup - Logic Guard: Verify data is prepared for backup (InMemoryDatabase limitation workaround)
             Func<Task> act = async () => await _service.RestoreAsync("");
             
             await act.Should().ThrowAsync<ArgumentException>().WithMessage("*path*");
@@ -143,6 +145,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task ConfigureDailyBackupScheduleAsync_Should_Enable_Schedule_And_Persist_LogicGuard()
         {
+            // Function: 13.7 — Configure Backup (Restore with Valid Path)
             // Arrange - 13.7 scheduled backup configuration
             var tempDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
             var scheduledTime = DateTime.Now.AddHours(2).TimeOfDay;
@@ -164,6 +167,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task ConfigureDailyBackupScheduleAsync_With_Empty_Directory_Should_Throw_FailureGuard()
         {
+            // Function: 13.7 — Configure Backup (Restore with Valid Path)
             // Arrange/Act
             Func<Task> act = async () => await _service.ConfigureDailyBackupScheduleAsync(string.Empty, TimeSpan.FromHours(1));
 
@@ -175,6 +179,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task CancelBackupScheduleAsync_Should_Disable_Schedule_LogicGuard()
         {
+            // Function: 13.7 — Configure Backup (Restore with Valid Path)
             // Arrange
             var tempDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
             await _service.ConfigureDailyBackupScheduleAsync(tempDirectory, TimeSpan.FromHours(4));

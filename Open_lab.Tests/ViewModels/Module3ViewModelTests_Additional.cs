@@ -51,6 +51,7 @@ namespace Open_lab.Tests.ViewModels
             [Fact]
             public void LoadFromSelected_Should_Map_All_Fields_SuccessGuard()
             {
+                // Function: 3.1 — Add New Test (Complete Fields)
                 // Arrange
                 var test = new Test
                 {
@@ -89,6 +90,7 @@ namespace Open_lab.Tests.ViewModels
             [Fact]
             public void LoadFromSelected_When_Null_Should_Do_Nothing_EdgeGuard()
             {
+                // Function: 3.1 — Add New Test (Complete Fields)
                 // Arrange
                 _viewModel.Code = "ORIG";
                 _viewModel.NameReport = "Original";
@@ -199,6 +201,7 @@ namespace Open_lab.Tests.ViewModels
             [Fact]
             public async Task SaveAsync_With_Null_Optional_Fields_Should_Succeed_EdgeGuard()
             {
+                // Function: 3.9 — Mark as Outsourced (BR-ACC-007 Logic Guard)
                 // Arrange
                 _viewModel.Code = "MIN";
                 _viewModel.NameReport = "Minimal Test";
@@ -226,6 +229,7 @@ namespace Open_lab.Tests.ViewModels
             [Fact]
             public async Task LoadAsync_When_ServiceThrows_Should_Set_ErrorStatus_FailureGuard()
             {
+                // Function: 3.9 — Mark as Outsourced (BR-ACC-007 Logic Guard)
                 // Arrange
                 _testCatalogServiceMock.Setup(x => x.GetAllTestsAsync())
                     .ThrowsAsync(new Exception("db-connection-failed"));
@@ -241,6 +245,7 @@ namespace Open_lab.Tests.ViewModels
             [Fact]
             public async Task TestCatalog_DeleteAsync_When_ServiceThrows_Should_Set_ErrorStatus_FailureGuard()
             {
+                // Function: 3.9 — Mark as Outsourced (BR-ACC-007 Logic Guard)
                 // Arrange
                 _viewModel.SelectedTest = new Test { TestId = 50, Code = "DEL" };
                 _testCatalogServiceMock.Setup(x => x.DeleteTestAsync(50))
@@ -257,6 +262,7 @@ namespace Open_lab.Tests.ViewModels
             [Fact]
             public void GenerateBarcode_When_Code_Whitespace_Should_Clear_Barcode_EdgeGuard()
             {
+                // Function: 3.9 — Mark as Outsourced (BR-ACC-007 Logic Guard)
                 // Arrange
                 _barcodeServiceMock.Setup(x => x.GenerateCode128(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>()))
                     .Returns(It.IsAny<System.Windows.Media.ImageSource>());
@@ -383,6 +389,7 @@ namespace Open_lab.Tests.ViewModels
             [Fact]
             public async Task LoadRangesAsync_When_NoTest_Should_Clear_Ranges_EdgeGuard()
             {
+                // Function: 3.3 — Set Reference Values (Load Guard)
                 // Arrange
                 _viewModel.SelectedTest = null;
                 _viewModel.Ranges.Add(new TestReferenceRange { RangeId = 99 }); // Pre-existing
@@ -439,6 +446,7 @@ namespace Open_lab.Tests.ViewModels
             [Fact]
             public async Task DeleteAsync_Should_Remove_Range_And_Clear_Selection_SuccessGuard()
             {
+                // Function: 3.3 — Set Reference Values (Update Logic)
                 // Arrange
                 var range = new TestReferenceRange { RangeId = 20, TestId = 3 };
                 _viewModel.SelectedRange = range;
@@ -458,6 +466,7 @@ namespace Open_lab.Tests.ViewModels
             [Fact]
             public async Task DeleteAsync_When_ServiceThrows_Should_Show_Error_FailureGuard()
             {
+                // Function: 3.3 — Set Reference Values (Update Logic)
                 // Arrange
                 _viewModel.SelectedRange = new TestReferenceRange { RangeId = 30 };
                 _testCatalogServiceMock.Setup(x => x.DeleteReferenceRangeAsync(30))
@@ -474,6 +483,7 @@ namespace Open_lab.Tests.ViewModels
             [Fact]
             public async Task TestCatalog_SaveAsync_When_ServiceThrows_Should_Show_Error_FailureGuard()
             {
+                // Function: 3.3 — Set Reference Values (Update Logic)
                 // Arrange
                 _viewModel.SelectedTest = new Test { TestId = 4 };
                 _viewModel.Gender = "Male";
@@ -493,6 +503,7 @@ namespace Open_lab.Tests.ViewModels
             [Fact]
             public void LoadFromRange_Should_Set_All_Properties_SuccessGuard()
             {
+                // Function: 3.3 — Set Reference Values (Update Logic)
                 // Arrange
                 var range = new TestReferenceRange
                 {
@@ -606,6 +617,7 @@ namespace Open_lab.Tests.ViewModels
             [Fact]
             public async Task CustomGroups_DeleteItemAsync_When_ServiceThrows_Should_Show_Error_FailureGuard()
             {
+                // Function: 3.5 — Create Custom Group (Delete Item)
                 // Arrange
                 _viewModel.SelectedItem = new CustomGroupItem { CustomGroupItemId = 15 };
                 _testCatalogServiceMock.Setup(x => x.DeleteCustomGroupItemAsync(15))
@@ -622,6 +634,7 @@ namespace Open_lab.Tests.ViewModels
             [Fact]
             public async Task LoadItemsAsync_Should_Populate_GroupItems_SuccessGuard()
             {
+                // Function: 3.5 — Create Custom Group (Delete Item)
                 // Arrange
                 var group = new CustomGroup { CustomGroupId = 7 };
                 _viewModel.SelectedGroup = group;
@@ -644,6 +657,7 @@ namespace Open_lab.Tests.ViewModels
             [Fact]
             public async Task LoadItemsAsync_When_No_Group_Should_Clear_EdgeGuard()
             {
+                // Function: 3.5 — Create Custom Group (Delete Item)
                 // Arrange
                 _viewModel.SelectedGroup = null;
                 _viewModel.GroupItems.Add(new CustomGroupItem { CustomGroupItemId = 99 });
@@ -658,6 +672,7 @@ namespace Open_lab.Tests.ViewModels
             [Fact]
             public async Task AddItemAsync_With_Existing_Item_Should_Set_Test_Reference_SuccessGuard()
             {
+                // Function: 3.5 — Create Custom Group (Delete Item)
                 // Arrange
                 var group = new CustomGroup { CustomGroupId = 10 };
                 _viewModel.SelectedGroup = group;
@@ -761,6 +776,7 @@ namespace Open_lab.Tests.ViewModels
             [Fact]
             public async Task PriceLists_DeleteItemAsync_Should_Remove_Item_SuccessGuard()
             {
+                // Function: 3.8 — Update Prices (Update Item Logic)
                 // Arrange
                 var item = new PriceListItem { PriceListItemId = 10 };
                 _viewModel.SelectedItem = item;
@@ -779,6 +795,7 @@ namespace Open_lab.Tests.ViewModels
             [Fact]
             public async Task PriceLists_DeleteItemAsync_When_ServiceThrows_Should_Show_Error_FailureGuard()
             {
+                // Function: 3.8 — Update Prices (Update Item Logic)
                 // Arrange
                 _viewModel.SelectedItem = new PriceListItem { PriceListItemId = 20 };
                 _testCatalogServiceMock.Setup(x => x.DeletePriceListItemAsync(20))
@@ -822,6 +839,7 @@ namespace Open_lab.Tests.ViewModels
             [Fact]
             public async Task PrintListAsync_When_NoItems_Should_Not_Print_EdgeGuard()
             {
+                // Function: 3.7 — Create Price List (Print Logic)
                 // Arrange
                 // The print-prevention guard for an empty price list is enforced through the
                 // PrintListCommand's CanExecute predicate (Items.Count > 0). Invoking the private
@@ -851,6 +869,7 @@ namespace Open_lab.Tests.ViewModels
             [Fact]
             public async Task LoadItemsAsync_Should_Clear_And_Populate_SuccessGuard()
             {
+                // Function: 3.7 — Create Price List (Print Logic)
                 // Arrange
                 var priceList = new PriceList { PriceListId = 3 };
                 _viewModel.SelectedPriceList = priceList;
@@ -873,6 +892,7 @@ namespace Open_lab.Tests.ViewModels
             [Fact]
             public async Task UpdateListAsync_When_Null_Selected_Should_Do_Nothing_EdgeGuard()
             {
+                // Function: 3.7 — Create Price List (Print Logic)
                 // Arrange
                 _viewModel.SelectedPriceList = null;
                 _viewModel.ListName = "Test";
@@ -888,6 +908,7 @@ namespace Open_lab.Tests.ViewModels
             [Fact]
             public void FindReferral_Should_Return_Matching_Referral_SuccessGuard()
             {
+                // Function: 3.7 — Create Price List (Print Logic)
                 // Arrange
                 var referral = new Referral { ReferralId = 5, Name = "Insurance Co" };
                 _viewModel.Referrals.Add(referral);
@@ -958,6 +979,7 @@ namespace Open_lab.Tests.ViewModels
             [Fact]
             public async Task SaveAsync_With_Empty_Comment_Text_Should_NotCall_Service_EdgeGuard()
             {
+                // Function: 3.4/3.6 — Add/Low/High Comments (Update Logic)
                 // Arrange
                 var test = new Test { TestId = 1 };
                 _viewModel.SelectedTest = test;
@@ -978,6 +1000,7 @@ namespace Open_lab.Tests.ViewModels
             [Fact]
             public async Task DeleteAsync_With_Valid_Selection_Should_Remove_Comment_SuccessGuard()
             {
+                // Function: 3.4/3.6 — Add/Low/High Comments (Update Logic)
                 // Arrange
                 var comment = new TestComment { CommentId = 20, TestId = 1, CommentText = "Delete Me" };
                 _viewModel.SelectedComment = comment;
@@ -996,6 +1019,7 @@ namespace Open_lab.Tests.ViewModels
             [Fact]
             public async Task DeleteAsync_When_Null_Selection_Should_Do_Nothing_EdgeGuard()
             {
+                // Function: 3.4/3.6 — Add/Low/High Comments (Update Logic)
                 // Arrange
                 _viewModel.SelectedComment = null;
 
@@ -1010,6 +1034,7 @@ namespace Open_lab.Tests.ViewModels
             [Fact]
             public async Task LoadCommentsAsync_Should_Populate_Comments_SuccessGuard()
             {
+                // Function: 3.4/3.6 — Add/Low/High Comments (Update Logic)
                 // Arrange
                 var test = new Test { TestId = 5 };
                 _viewModel.SelectedTest = test;
@@ -1032,6 +1057,7 @@ namespace Open_lab.Tests.ViewModels
             [Fact]
             public async Task LoadCommentsAsync_When_No_Test_Should_Clear_EdgeGuard()
             {
+                // Function: 3.4/3.6 — Add/Low/High Comments (Update Logic)
                 // Arrange
                 _viewModel.SelectedTest = null;
                 _viewModel.Comments.Add(new TestComment { CommentId = 99 });
@@ -1046,6 +1072,7 @@ namespace Open_lab.Tests.ViewModels
             [Fact]
             public async Task TestComments_SaveAsync_When_ServiceThrows_Should_Show_Error_FailureGuard()
             {
+                // Function: 3.4/3.6 — Add/Low/High Comments (Update Logic)
                 // Arrange
                 _viewModel.SelectedTest = new Test { TestId = 1 };
                 _viewModel.CommentText = "Test Comment";

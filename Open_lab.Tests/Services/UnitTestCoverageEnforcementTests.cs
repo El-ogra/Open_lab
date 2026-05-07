@@ -12,6 +12,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public void CoverageTracker_When_FunctionMarkedComplete_Should_List_TestNames()
         {
+            // Function: X.X — To Be Determined
             var path = GetCoverageTrackerPath();
             var lines = File.ReadAllLines(path);
 
