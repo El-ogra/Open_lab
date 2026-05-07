@@ -115,6 +115,8 @@ namespace Open_lab.Tests
 
             // Assert - May or may not include depending on service logic
             rows.Should().NotBeNull();
+            rows.Should().HaveCount(1);
+            rows.First().PatientName.Should().Be("Null Date");
         }
 
         #endregion

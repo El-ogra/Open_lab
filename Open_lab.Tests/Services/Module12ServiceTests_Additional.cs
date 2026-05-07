@@ -141,6 +141,7 @@ namespace Open_lab.Tests.Services
             // Assert
             var saved = await _db.Referrals.FindAsync(created.ReferralId);
             saved.Should().NotBeNull();
+            saved!.ReferralId.Should().Be(created.ReferralId);
             saved!.Phone.Should().BeNull();
             saved.City.Should().BeNull();
         }

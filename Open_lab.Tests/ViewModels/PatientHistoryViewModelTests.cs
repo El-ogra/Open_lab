@@ -116,6 +116,7 @@ namespace Open_lab.Tests.ViewModels
 
             // Assert
             _printServiceMock.Verify(x => x.PrintPatientHistoryAsync(It.IsAny<PatientHistoryReportData>()), Times.Never);
+            _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
         [Fact]

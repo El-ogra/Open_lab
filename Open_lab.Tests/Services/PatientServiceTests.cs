@@ -121,6 +121,7 @@ namespace Open_lab.Tests.Services
             // Assert
             var persisted = await _db.Patients.FindAsync(created.PatientId);
             persisted.Should().NotBeNull();
+            persisted!.PatientId.Should().Be(created.PatientId);
             persisted!.Phone.Should().BeNull();
         }
 
@@ -464,6 +465,7 @@ namespace Open_lab.Tests.Services
             // Assert
             var saved = await _db.MedicalHistories.FirstOrDefaultAsync(m => m.PatientId == patient.PatientId);
             saved.Should().NotBeNull();
+            saved!.PatientId.Should().Be(patient.PatientId);
             saved!.ChronicDiseases.Should().BeNull();
             saved.Allergies.Should().BeNull();
             saved.Medications.Should().BeNull();

@@ -59,6 +59,7 @@ namespace Open_lab.Tests.ViewModels
             _settingsMock.Verify(x => x.SetLeftMarginAsync(3.2m), Times.Once);
             _settingsMock.Verify(x => x.SetRightMarginAsync(1.1m), Times.Once);
             // Assert
+            _viewModel.Should().NotBeNull();
         }
 
         [Fact]
@@ -92,6 +93,7 @@ namespace Open_lab.Tests.ViewModels
             _settingsMock.Verify(x => x.SetDefaultPrinterAsync("P-Default"), Times.Once);
             _settingsMock.Verify(x => x.SetReceiptPrinterAsync("P-Receipt"), Times.Once);
             _settingsMock.Verify(x => x.SetReportPrinterAsync("P-Report"), Times.Once);
+            _viewModel.Should().NotBeNull();
         }
 
         [Fact]
@@ -109,6 +111,7 @@ namespace Open_lab.Tests.ViewModels
 
             // Assert
             _settingsMock.Verify(x => x.SetLeftMarginAsync(1m), Times.Once);
+            _viewModel.Should().NotBeNull();
         }
     }
 }

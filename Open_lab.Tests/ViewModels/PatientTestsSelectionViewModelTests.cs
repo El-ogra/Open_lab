@@ -120,6 +120,7 @@ namespace Open_lab.Tests.ViewModels
 
             // Assert
             _visitServiceMock.Verify(service => service.AddTestToVisitAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<decimal?>()), Times.Never);
+            _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
         [Fact]
@@ -182,6 +183,7 @@ namespace Open_lab.Tests.ViewModels
 
             // Assert
             _visitServiceMock.Verify(service => service.RemoveVisitTestAsync(It.IsAny<int>()), Times.Never);
+            _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
         [Fact]

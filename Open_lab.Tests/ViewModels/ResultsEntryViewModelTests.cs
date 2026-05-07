@@ -48,6 +48,7 @@ namespace Open_lab.Tests.ViewModels
             await _viewModel.InvokePrivateAsync("LoadVisitTestsAsync");
             _resultsServiceMock.Verify(x => x.GetVisitTestsByDateAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>()), Times.Once);
             // Assert
+            _viewModel.VisitTests.Should().HaveCount(1);
             _viewModel.StatusMessage.Should().NotBeNull();
         }
 

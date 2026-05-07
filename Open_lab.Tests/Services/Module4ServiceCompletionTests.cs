@@ -193,6 +193,7 @@ namespace Open_lab.Tests.Services
             // Assert - Should be ordered by NameReport when ReportOrder is equal
             report.Should().NotBeNull();
             report!.Tests.Should().HaveCount(2);
+            report.Tests[0].Test.NameReport.Should().Be("Alpha");
         }
 
         [Fact]
@@ -213,6 +214,7 @@ namespace Open_lab.Tests.Services
 
             // Assert
             report.Should().NotBeNull();
+            report!.Visit.VisitId.Should().Be(500);
             report!.Tests.Should().BeEmpty();
         }
 
@@ -299,6 +301,7 @@ namespace Open_lab.Tests.Services
             // Assert
             report.Should().NotBeNull();
             report!.Tests.Should().HaveCount(1);
+            report.Tests[0].Test.TestId.Should().Be(700);
         }
 
         // ===================================================================
@@ -420,6 +423,7 @@ namespace Open_lab.Tests.Services
 
             // Assert
             report.Should().NotBeNull();
+            report!.Visit.VisitId.Should().Be(901);
             report!.Visit.Referral.Should().BeNull();
         }
 
@@ -452,6 +456,7 @@ namespace Open_lab.Tests.Services
             // Assert
             report.Should().NotBeNull();
             report!.Tests.Should().HaveCount(2);
+            report.Tests[0].Test.TestId.Should().BeGreaterThan(0);
         }
 
         // ===================================================================
@@ -525,6 +530,7 @@ namespace Open_lab.Tests.Services
             // Assert
             history.Should().NotBeNull();
             history.Patient.Should().NotBeNull();
+            history.Patient.PatientId.Should().Be(1200);
             history.Visits.Should().BeEmpty();
         }
 

@@ -154,6 +154,7 @@ namespace Open_lab.Tests.ViewModels
                 t.CostPrice == 25.5m &&
                 t.PatientPrice == 60.0m
             )), Times.Once);
+            _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
         [Fact]

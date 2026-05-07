@@ -532,6 +532,7 @@ namespace Open_lab.Tests.ViewModels
             // Assert
             physicianMock.Verify(s => s.UpdateAsync(It.Is<Physician>(p =>
                 p.PhysicianId == 9 && p.PriceListId == null)), Times.Once);
+            viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
         // ==================================================================================

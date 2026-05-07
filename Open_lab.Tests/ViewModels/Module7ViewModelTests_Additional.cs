@@ -330,6 +330,7 @@ namespace Open_lab.Tests
                 It.IsAny<DateTime>(),
                 It.IsAny<DateTime>(),
                 It.Is<IReadOnlyCollection<WorkSheetPatientRow>>(rows => rows.Count == 1)), Times.Once);
+            viewModel.StatusMessage.Should().NotBeNullOrEmpty();
             AppSessionTestHelper.Reset();
         }
 

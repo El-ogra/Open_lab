@@ -102,6 +102,7 @@ namespace Open_lab.Tests.Services
             // Assert
             var persisted = await _db.Patients.FindAsync(patient.PatientId);
             persisted.Should().NotBeNull();
+            persisted!.PatientId.Should().BeGreaterThan(0);
             persisted!.BirthDate.Should().BeNull();
         }
 

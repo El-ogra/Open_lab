@@ -51,6 +51,7 @@ namespace Open_lab.Tests.ViewModels
             _testCatalogServiceMock.Verify(x => x.CreatePriceListAsync(It.Is<PriceList>(pl =>
                 pl.Name == "Corporate List" && pl.ReferralId == 5 && pl.IsDefault == true
             )), Times.Once);
+            _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
         [Fact]

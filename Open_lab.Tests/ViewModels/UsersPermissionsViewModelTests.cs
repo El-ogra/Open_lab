@@ -271,6 +271,7 @@ namespace Open_lab.Tests.ViewModels
                     It.IsAny<int>(),
                     It.IsAny<IEnumerable<string>>()),
                 Times.Never);
+            _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
         [Fact]

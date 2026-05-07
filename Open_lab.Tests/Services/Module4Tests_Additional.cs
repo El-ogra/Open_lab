@@ -104,6 +104,7 @@ namespace Open_lab.Tests
             // Assert
             var result = await _db.ResultValues.FirstOrDefaultAsync(r => r.VisitTestId == 2 && r.ParameterId == 2);
             result.Should().NotBeNull();
+            result!.ParameterId.Should().Be(2);
             result!.Value.Should().BeNull();
         }
 

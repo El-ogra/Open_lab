@@ -98,6 +98,7 @@ namespace Open_lab.Tests
 
             // Assert
             queue.Should().NotBeNull();
+            queue.QueueId.Should().BeGreaterThan(0);
             queue.ReferralId.Should().BeNull();
         }
 
@@ -689,6 +690,7 @@ namespace Open_lab.Tests
 
             // Assert - Old manifests should still be accessible
             manifests.Should().NotBeNull();
+            manifests.Count().Should().Be(0);
         }
 
         #endregion

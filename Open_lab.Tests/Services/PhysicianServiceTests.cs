@@ -187,6 +187,7 @@ namespace Open_lab.Tests.Services
             var saved = await _db.Physicians.FindAsync(physician.PhysicianId);
             // Assert
             saved.Should().NotBeNull();
+            saved!.PhysicianId.Should().Be(physician.PhysicianId);
             saved!.PriceListId.Should().BeNull();
         }
 

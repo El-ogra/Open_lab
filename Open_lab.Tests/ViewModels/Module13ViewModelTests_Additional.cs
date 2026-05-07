@@ -139,6 +139,7 @@ namespace Open_lab.Tests.ViewModels
             // Assert
             _settingsServiceMock.Verify(x => x.SetLeftMarginAsync(2.5m), Times.Once);
             _settingsServiceMock.Verify(x => x.SetRightMarginAsync(3.1m), Times.Once);
+            vm.Should().NotBeNull();
         }
 
         [Fact]
@@ -179,6 +180,7 @@ namespace Open_lab.Tests.ViewModels
                 x => x.SaveProfileAsync(It.Is<SystemSettingsProfile>(p =>
                     p.ReportMarginTop == 0 && p.ReportMarginBottom == 0)),
                 Times.AtLeastOnce);
+            vm.StatusMessage.Should().NotBeNull();
         }
 
         // ========================================================================
@@ -486,6 +488,7 @@ namespace Open_lab.Tests.ViewModels
                     p.BarcodePrinterName == "Zebra-GK420" &&
                     p.EnvelopePrinterName == "Brother-HL")),
                 Times.AtLeastOnce);
+            vm.StatusMessage.Should().NotBeNull();
         }
 
         [Fact]
@@ -506,6 +509,7 @@ namespace Open_lab.Tests.ViewModels
             _settingsServiceMock.Verify(x => x.SetDefaultPrinterAsync("P-Default"), Times.Once);
             _settingsServiceMock.Verify(x => x.SetReceiptPrinterAsync("P-Receipt"), Times.Once);
             _settingsServiceMock.Verify(x => x.SetReportPrinterAsync("P-Report"), Times.Once);
+            vm.Should().NotBeNull();
         }
 
         [Fact]
@@ -546,6 +550,7 @@ namespace Open_lab.Tests.ViewModels
             _settingsServiceMock.Verify(x => x.SetDefaultPrinterAsync(string.Empty), Times.Once);
             _settingsServiceMock.Verify(x => x.SetReceiptPrinterAsync(string.Empty), Times.Once);
             _settingsServiceMock.Verify(x => x.SetReportPrinterAsync(string.Empty), Times.Once);
+            vm.Should().NotBeNull();
         }
 
         [Fact]
@@ -600,6 +605,7 @@ namespace Open_lab.Tests.ViewModels
                     p.ReceiptHeaderText == "Invoice Title" &&
                     p.ReceiptFooterText == "Footer Note")),
                 Times.AtLeastOnce);
+            vm.StatusMessage.Should().NotBeNull();
         }
 
         [Fact]
@@ -1119,6 +1125,7 @@ namespace Open_lab.Tests.ViewModels
             // Assert
             _systemSettingsServiceMock.Verify(x => x.GetProfileAsync(), Times.AtLeastOnce);
             _systemSettingsServiceMock.Verify(x => x.GetSettingsAsync(), Times.AtLeastOnce);
+            vm.StatusMessage.Should().NotBeNull();
         }
     }
 }

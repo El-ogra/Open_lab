@@ -215,6 +215,7 @@ namespace Open_lab.Tests.Services
 
             // Assert
             closed.Should().NotBeNull();
+            closed!.UserId.Should().Be(user.UserId);
             closed!.LogoutAt.Should().NotBeNull();
             closed.LogoutAt!.Value.Should().BeOnOrAfter(beforeCall.AddSeconds(-1));
             closed.LogoutAt.Value.Should().BeOnOrBefore(DateTime.Now.AddSeconds(1));

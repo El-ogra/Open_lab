@@ -150,6 +150,7 @@ namespace Open_lab.Tests.Services
             // Assert
             var updated = await _db.AttendanceLogs.FindAsync(created.AttendanceLogId);
             updated.Should().NotBeNull();
+            updated!.UserId.Should().Be(6);
             updated!.LogoutAt.Should().NotBeNull();
             updated.LastActivityAt.Should().BeCloseTo(
                 updated.LogoutAt!.Value, TimeSpan.FromSeconds(1));

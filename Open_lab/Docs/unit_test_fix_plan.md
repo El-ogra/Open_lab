@@ -22,7 +22,7 @@
 | 2 | إصلاح الاختبار الوهمي الواحد | ✅ مكتملة |
 | 3 | استبدال الـ 255 Placeholder بأرقام وظائف حقيقية | ✅ مكتملة |
 | 4 | دمج الـ 7 أزواج المكررة | ✅ مكتملة |
-| 5 | تقوية الـ 56 اختباراً الضعيفة | ⏳ لم تبدأ |
+| 5 | تقوية الـ 56 اختباراً الضعيفة | ✅ مكتملة |
 | 6 | سد فجوات التغطية في الـ 22 وظيفة جزئية | ⏳ لم تبدأ |
 | 7 | إصلاح الاختبارات الفاشلة وإصلاح ViewModels في الإنتاج | ⏳ لم تبدأ |
 | 8 | التحقق النهائي والتقرير | ⏳ لم تبدأ |
@@ -422,7 +422,9 @@ public static class StatusMessages
 > **الصيغة:**
 > `[اسم الملف] :: [اسم الاختبار] — [سبب الفشل المتوقع] — [ظهر في المرحلة #]`
 
-*(لا إدخالات حتى الآن)*
+[UsersPermissionsViewModelTests.cs] :: [SaveRolePermissionsCommand_WhenNoRoleSelected_ShouldNotCallService] — [StatusMessage is empty] — [ظهر في المرحلة 5]
+[ResultsEntryViewModelTests.cs] :: [LoadVisitTestsAsync_Should_Call_Service] — [StatusMessage is empty] — [ظهر في المرحلة 5]
+[PatientHistoryViewModelTests.cs] :: [PrintHistoryAsync_When_HistoryIsNull_Should_NotCall_PrintService_EdgeGuard] — [StatusMessage is empty] — [ظهر في المرحلة 5]
 ```
 
 ---
