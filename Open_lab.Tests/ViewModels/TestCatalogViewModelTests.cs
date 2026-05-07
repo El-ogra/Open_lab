@@ -48,6 +48,7 @@ namespace Open_lab.Tests.ViewModels
             _barcodeServiceMock.Setup(x => x.GenerateCode128("CBC", It.IsAny<int>(), It.IsAny<int>())).Returns(It.IsAny<System.Windows.Media.ImageSource>());
             _viewModel.Code = "CBC";
             _barcodeServiceMock.Verify(x => x.GenerateCode128("CBC", It.IsAny<int>(), It.IsAny<int>()), Times.Once);
+            _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
         [Fact]
@@ -173,6 +174,7 @@ namespace Open_lab.Tests.ViewModels
             _viewModel.SelectedTest = null;
             await _viewModel.InvokePrivateAsync("DeleteAsync");
             _testCatalogServiceMock.Verify(x => x.DeleteTestAsync(It.IsAny<int>()), Times.Never);
+            _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
         [Fact]

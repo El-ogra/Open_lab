@@ -1,105 +1,209 @@
-# سجل تغطية اختبارات الوحدة — مشروع Open_lab
-## Unit Test Coverage Tracker
-
-> **إجمالي الوظائف:** 97 وظيفة | **إجمالي الموديولات:** 13 موديول
-> **آخر تحديث:** 2026-05-01 — تم استكمال الموديولات 1، 2، 3 بالكامل
-> **قاعدة:** لا يُعدَّل هذا الملف يدوياً — يُحدَّث فقط بعد كتابة الاختبارات الفعلية والتحقق من نجاحها
-
----
-
-## دليل الحالات
-
-| الرمز | المعنى |
-|-------|--------|
-| ❌ | لم يبدأ — لا توجد اختبارات لهذه الوظيفة |
-| 🔄 | جزئي — توجد اختبارات لكنها غير مكتملة (مثلاً: Success بدون Failure/Edge) |
-| ✅ | مكتمل — تغطية كاملة لـ Service و ViewModel (Success + Failure + Edge لكل طبقة) |
-| ⚠️ | يحتاج مراجعة — اختبارات موجودة لكنها ضعيفة أو وهمية |
-
----
-
-## الموديول 1 — إدارة المرضى | Patient Management
-
-| رقم الوظيفة | اسم الوظيفة | Service ✅/❌ | ViewModel ✅/❌ | الحالة | أسماء الاختبارات المكتوبة |
-|-------------|-------------|--------------|----------------|--------|--------------------------|
-| 1.1 | إضافة مريض جديد — Add New Patient | ✅ | ✅ | ✅ مكتمل | AddNewPatient_WhenLabIdSequenceExists_ShouldGenerateNextLabId, AddNewPatient_WithInvalidGender_ShouldThrowArgumentException, AddNewPatient_WithMissingFullName_ShouldThrowArgumentException, AddNewPatient_WithValidData_ShouldCreatePatientAndGenerateLabId, AddNewPatient_WithWhitespacePhone_ShouldStoreNullPhone_EdgeCase, CreateAsync_WithValidPatient_Should_CreatePatient_SuccessTemplate, Patient_And_Visit_Functions_Should_Work_EndToEnd, ClearFormAsync_When_PatientExists_Should_Reset_Fields_And_Generate_NewLabId_EdgeGuard, Commands_When_Admin_Should_All_Be_Enabled_LogicGuard, Constructor_Should_Generate_LabId_Automatically_LogicGuard, GenerateLabIdAsync_When_ServiceThrows_Should_Set_ErrorMessage_FailureGuard, SaveAsync_When_No_FullName_Should_Show_Error_LogicGuard, SaveAsync_When_Service_Throws_Should_Set_Error_StatusMessage, SaveAsync_With_New_Patient_Should_Create_New_Patient_LogicGuard |
-| 1.2 | تعديل بيانات مريض — Edit Patient Data | ✅ | ✅ | ✅ مكتمل | EditPatientData_WithValidBirthDate_ShouldUpdateSuccessfully_SuccessGuard, EditPatientData_WithNullBirthDate_ShouldClearBirthDate_EdgeGuard, EditPatient_SaveAsync_WhenUpdateThrows_ShouldSetErrorMessage_FailureGuard, EditPatient_LoadByLabId_WhenPatientFoundWithMedicalHistory_ShouldPopulateAllFields_SuccessGuard, DeleteAsync_When_PatientNotFound_Should_NotThrow_And_KeepData_EdgeGuard, DeleteAsync_With_Visits_Should_Throw, UpdateAsync_DuplicateLabId_Should_Throw, UpdateAsync_FutureBirthDate_Should_Throw, UpdateAsync_InvalidGender_Should_Throw, UpdateAsync_Should_Update_All_Fields, UpdateAsync_When_PatientUpdated_Should_NotWrite_AuditLog_ProductionGap, DeleteAsync_When_DeleteServiceThrows_Should_Set_ErrorMessage_FailureGuard, DeleteAsync_With_PatientId_Zero_Should_Not_Call_Service_LogicGuard, LoadByLabIdAsync_With_Empty_LabId_Should_Set_StatusMessage, LoadByLabIdAsync_With_Existing_LabId_Should_Load_Patient_Data, LoadByLabIdAsync_With_NonExistent_LabId_Should_Set_StatusMessage, SaveAsync_With_Existing_Patient_Should_Update_Patient_LogicGuard, SelectedPatient_Setter_Should_Load_Patient_Data_LogicGuard |
-| 1.3 | إضافة تحاليل للمريض — Add Tests to Patient | ✅ | ✅ | ✅ مكتمل | AddTestToVisit_WithCashAccount_ShouldUseBasePriceWhenNoPriceList_SuccessGuard, AddTestToVisit_WithDefaultPriceList_ShouldUseListPrice_SuccessGuard, AddTestCommand_When_VisitIdIsZero_Should_Be_Disabled_EdgeGuard, LoadPatient_WhenLabIdEmpty_ShouldNotCallService_FailureGuard, LoadPatient_WhenPatientNotFound_ShouldSetStatusMessage_FailureGuard, AddTestToVisitAsync_Duplicate_Should_Throw, AddTestToVisitAsync_SendOutTest_Should_Register_ExternalQueue, AddTestToVisitAsync_Should_Add_VisitTest_With_Price, AddTestToVisitAsync_Test_Not_Found_Should_Throw, AddTestToVisitAsync_Visit_Closed_Should_Throw, AddTestToVisitAsync_Visit_Not_Found_Should_Throw, AddTestsToPatient_When_NoPriceListsExist_Should_Use_BaseTestPrice_EdgeGuard, AddTestsToPatient_When_ReferralAndDefaultPriceListExist_Should_PrioritizeReferralPriceList, ResolveTestPriceAsync_With_DefaultPriceList_Should_Use_DefaultPrice, ResolveTestPriceAsync_With_PhysicianAssigned_Should_Fallback_To_DefaultPrice_ProductionGap, ResolveTestPriceAsync_With_Referral_PriceList_Should_Use_Contract_Price, AddTestCommand_Should_Add_Test_To_Visit_LogicGuard, AddTestCommand_When_SelectedAvailableTest_Null_Should_Not_Call_Service_LogicGuard, AddTestCommand_When_Service_Throws_Should_Set_Error_StatusMessage, CreateVisitAsync_When_ReferralAccountWithoutReferral_Should_Set_ValidationMessage_FailureGuard, CreateVisitAsync_When_ServiceThrows_Should_Set_ErrorMessage_FailureGuard, LoadPatientCommand_Should_Load_Patient_Data_LogicGuard, RefreshTestsCommand_When_TestCatalogThrows_Should_Set_ErrorMessage_EdgeGuard |
-| 1.4 | حذف تحاليل — Delete Tests | ✅ | ✅ | ✅ مكتمل | RemoveVisitTest_WhenLastTestInVisit_ShouldLeaveVisitEmpty_EdgeGuard, RemoveVisitTest_WithInProgressStatus_ShouldDelete_SuccessGuard, RemoveTestCommand_WhenSelectedVisitTestIsNull_ShouldBeDisabled_EdgeGuard, RemoveVisitTestAsync_Pending_Should_Delete_Successfully, RemoveVisitTestAsync_Verified_Should_Throw, RemoveVisitTestAsync_VisitTest_Not_Found_Should_Not_Throw, RemoveVisitTestAsync_Visit_Closed_Should_Throw, RemoveTestCommand_Should_Remove_Test_LogicGuard, RemoveTestCommand_When_SelectedVisitTest_Null_Should_Not_Call_Service_LogicGuard, RemoveTestCommand_When_Service_Throws_Should_Set_Error_StatusMessage |
-| 1.5 | البحث عن مريض — Search Patient | ✅ | ✅ | ✅ مكتمل | SearchPatient_ByNameOnly_ShouldReturnMatchingPatients_SuccessGuard, SearchPatient_ByPhoneOnly_ShouldReturnExactMatch_SuccessGuard, SearchPatient_WithNoMatchingPhone_ShouldReturnEmpty_FailureGuard, SearchPatient_WhenNoResults_ShouldShowZeroCountInStatus_EdgeGuard, SearchPatient_ByLabIdOnly_ShouldReturnMatch_SuccessGuard, GetByLabIdAsync_When_LabIdHasWhitespace_Should_Trim_And_Return_Patient_EdgeGuard, GetByLabIdAsync_When_LabIdIsWhitespace_Should_Throw_FailureGuard, SearchAsync_When_DateFilterHasNoVisits_Should_Return_Empty_FailureGuard, SearchAsync_With_NameAndPhone_Should_Return_Matching_Patients_SuccessGuard, SearchPatient_WhenAllFiltersEmpty_ShouldReturnAllOrderedByName, SearchPatient_WhenNoMatch_ShouldReturnEmptyList, SearchPatient_WithMatchingLabId_ShouldReturnPatient, SearchAsync_By_Name_Should_Return_Matching_Patients_LogicGuard, SearchAsync_By_Phone_Should_Return_Exact_Match_LogicGuard, SearchAsync_Partial_Match_Should_Return_Relevant_Results_LogicGuard, SearchAsync_Should_Handle_Exceptions_Gracefully, SearchAsync_Should_Populate_Results_LogicGuard, SearchAsync_With_No_Results_Should_Return_Empty_LogicGuard, SearchCommand_By_Date_Should_Filter_Results, SearchCommand_Should_Search_By_All_Criteria_And_Populate_Results |
-| 1.6 | عرض التاريخ المرضي — View Patient History | ✅ | ✅ | ✅ مكتمل | ViewPatientHistory_MultipleVisits_ShouldPopulateVisitsList_SuccessGuard, GetMedicalHistoryAsync_InvalidPatientId_Should_Throw, GetMedicalHistoryAsync_Should_Return_History_For_Patient, GetMedicalHistoryAsync_When_NoHistoryExists_Should_Return_Null_EdgeGuard, ViewPatientHistory_WhenFromGreaterThanTo_ShouldReturnEmptyVisits, ViewPatientHistory_WhenNoVisits_ShouldReturnEmptyList, ViewPatientHistory_WhenPatientNotFound_ShouldThrowInvalidOperationException, ViewPatientHistory_WhenVisitsExist_ShouldReturnDescendingByVisitDate, ViewPatientHistory_WithExistingVisits_ShouldReturnVisitsWithinRange, LoadHistoryAsync_When_LabId_Empty_Should_Set_Error, LoadHistoryAsync_When_Patient_Not_Found_Should_Set_Error, LoadHistoryAsync_When_ReportService_Throws_Should_Set_Error, LoadHistoryCommand_Should_Populate_Visits_LogicGuard, PatientHistoryViewModel_Should_Expose_ReadOnly_Design_Without_EditCommand_DesignEnforcement, PrintHistoryAsync_When_HistoryIsNull_Should_NotCall_PrintService_EdgeGuard, PrintHistoryAsync_When_PrintServiceThrows_Should_Set_PrintErrorMessage_FailureGuard, SelectedPatient_Setter_Should_Load_Visits, SelectedPatient_When_SetToNull_Should_Clear_Visits_EdgeGuard, SelectedPatient_When_VisitServiceThrows_Should_Set_ErrorMessage_FailureGuard |
-| 1.7 | إضافة تاريخ طبي — Add Medical History | ✅ | ✅ | ✅ مكتمل | SaveMedicalHistory_WithZeroPatientId_ShouldThrow_FailureGuard, SaveMedicalHistory_UpdateExisting_ShouldReplaceAllFields_SuccessGuard, SaveMedicalHistory_WhenExistingPatient_ShouldCallSaveMedicalHistoryAsync_SuccessGuard, AddMedicalHistory_WithNullHistory_ShouldThrowArgumentNullException, AddMedicalHistory_WithWhitespaceFields_ShouldStoreNulls_EdgeCase, SaveMedicalHistoryAsync_NonExistentPatient_Should_Throw, SaveMedicalHistoryAsync_Should_Create_New_History, SaveMedicalHistoryAsync_Should_Update_Existing_History, PatientRegistrationViewModel_Should_Have_Only_PatientService_Dependency_Outside_ResultEntryScope_ProductionGap, SaveAsync_When_MedicalHistorySaveFails_Should_Set_Error_Message_FailureGuard, SaveAsync_With_Empty_MedicalHistoryFields_Should_Save_Without_Throw_EdgeGuard, SaveAsync_With_MedicalHistory_Should_Save_Complete_History_LogicGuard |
-| 1.8 | إضافة مجموعة تحاليل — Add Group of Tests | ✅ | ✅ | ✅ مكتمل | AddGroupOfTests_WhenGroupHasThreeTests_ShouldAddAllThree_SuccessGuard, AddGroupOfTests_WhenAllTestsAlreadyInVisit_ShouldAddNone_EdgeGuard, AddGroupOfTests_WhenNoVisitCreated_ShouldNotCallService_EdgeGuard, AddGroupOfTests_WhenServiceSucceeds_ShouldUpdateSelectedTests_SuccessGuard, AddCustomGroupToVisitAsync_CustomGroup_Has_No_Tests_Should_Throw, AddCustomGroupToVisitAsync_CustomGroup_Not_Found_Should_Throw, AddCustomGroupToVisitAsync_Visit_Closed_Should_Throw, AddCustomGroupToVisitAsync_Visit_Not_Found_Should_Throw, AddGroupOfTests_WhenSomeTestsAlreadyInVisit_Should_AddOnlyMissingOnes_EdgeGuard, AddGroupOfTests_WithValidCustomGroup_Should_AddAllTestsToVisit, VisitService_AddCustomGroup_Should_Add_All_Tests, AddCustomGroupCommand_Should_Add_All_Tests_In_Group_LogicGuard, AddCustomGroupCommand_When_SelectedCustomGroup_Null_Should_Not_Call_Service_LogicGuard, AddCustomGroupCommand_When_Service_Throws_Should_Set_Error_StatusMessage |
-
----
-
-## الموديول 2 — المحاسبة والمالية | Financial Accounting
-
-| رقم الوظيفة | اسم الوظيفة | Service ✅/❌ | ViewModel ✅/❌ | الحالة | أسماء الاختبارات المكتوبة |
-|-------------|-------------|--------------|----------------|--------|--------------------------|
-| 2.1 | حساب الإجمالي — Calculate Total | ✅ | ✅ | ✅ مكتمل | CalculateTotal_WhenVisitHasTests_ShouldSetTotal_SuccessGuard, Finance_Gap_Functions_Should_Work, GetVisitTotalAsync_When_VisitNotFound_Should_Return_Zero_FailureGuard, GetVisitTotalAsync_WithCharges_Returns_Sum_LogicGuard, GetVisitTotalAsync_With_NoTestsOrCharges_Should_Return_Zero_EdgeGuard, CalculateTotalAsync_Should_Call_GetVisitTotalAsync_Directly, LoadVisitCommand_When_VisitHasNoTests_Should_Return_Zero_EdgeGuard, LoadVisitCommand_When_VisitNotFound_Should_Show_Error_FailureGuard |
-| 2.2 | تطبيق خصم — Apply Discount | ✅ | ✅ | ✅ مكتمل | ApplyDiscount_WhenValidVisitAndDiscount_ShouldUpdateNetTotal_SuccessGuard, CalculateReferralDiscountAsync_When_ReferralMissing_Should_Return_Zero_EdgeGuard, CalculateReferralDiscountAsync_With_Valid_Referral_Should_Apply_Discount_LogicGuard, CreateOrUpdateInvoiceAsync_DiscountExceedsTotal_Should_Throw_LogicGuard, CreateOrUpdateInvoiceAsync_NegativeDiscount_Should_Throw, CreateOrUpdateInvoiceAsync_WithLargeValues_Should_Handle_Correctly, CreateOrUpdateInvoiceAsync_WithZeroDiscount_Should_Calculate_Correctly, ApplyDiscountAsync_Should_Update_NetTotal_Directly, ApplyDiscountAsync_When_DiscountExceedsTotal_Should_Throw_FailureGuard, ApplyDiscountAsync_With_ZeroDiscount_Should_Calculate_Correctly_EdgeGuard |
-| 2.3 | تسجيل دفعة — Record Payment | ✅ | ✅ | ✅ مكتمل | RecordPayment_WhenNegativeAmount_ShouldShowValidationError_EdgeGuard, AddPaymentAsync_InvalidAmount_Should_Throw_LogicGuard, AddPaymentAsync_PartialPayment_Should_Update_Balance_Correctly, AddPaymentAsync_When_PaymentExceedsBalance_Should_Allow_Overpayment_EdgeGuard, AddPaymentAsync_With_Valid_Data_Should_RecordPayment_SuccessGuard, CreateOrUpdateInvoiceAsync_NegativePaid_Should_Throw, CreateOrUpdateInvoiceAsync_PartialPayment_Should_Set_Status_To_Partial, AddPaymentAsync_When_ServiceThrows_Should_Show_Error_FailureGuard, AddPaymentAsync_With_MaximumAmount_Should_Handle_LargeValue_EdgeGuard, AddPaymentAsync_With_Paid_Zero_Should_Set_StatusMessage |
-| 2.4 | تصفية الحساب — Settle Account | ✅ | ✅ | ✅ مكتمل | SettleAccount_WhenVisitIdIsZero_ShouldNotCallService_EdgeGuard, CreateOrUpdateInvoiceAsync_FullPayment_Should_Set_Status_To_Paid, SettleAccountAsync_When_BalanceRemaining_Should_Throw_FailureGuard, SettleAccountAsync_When_FullyPaid_Should_CloseVisit_EdgeGuard, SettleAccountAsync_When_AlreadySettled_Should_Handle_Gracefully_EdgeGuard, SettleAccountAsync_When_ServiceThrows_Should_Set_ErrorStatus_FailureGuard, SettleAccountAsync_With_FullyPaidInvoice_Should_Settle_SuccessGuard |
-| 2.5 | تعديل دفعة — Edit Payment | ✅ | ✅ | ✅ مكتمل | EditPayment_ToHigherAmount_ShouldRecalculateBalance_SuccessGuard, EditPayment_ToLowerAmount_ShouldIncreaseBalance_EdgeGuard, EditPayment_WithNegativeAmount_ShouldThrow_FailureGuard, EditPayment_ShouldCreateAuditLog_WithReasonAndUserId_SuccessGuard, EditPaymentAsync_Should_Update_Amount_And_Recalculate_Invoice_LogicGuard, EditPaymentAsync_When_PaymentNotFound_Should_Throw_FailureGuard, EditPaymentAsync_When_ReasonWhitespace_Should_Throw_EdgeGuard, EditPaymentAsync_When_EditingToSameAmount_Should_Handle_NoChange_EdgeGuard, EditPaymentAsync_When_ServiceThrows_Should_Show_Error_FailureGuard, EditPaymentAsync_With_InvalidAmount_Should_Set_ValidationMessage_FailureGuard, EditPaymentAsync_With_ValidAmount_Should_EditPayment_SuccessGuard |
-| 2.6 | حذف دفعة — Delete Payment | ✅ | ✅ | ✅ مكتمل | DeletePayment_WhenMultiplePaymentsExist_ShouldDeleteOnlyTargetPayment_SuccessGuard, DeletePayment_WithWhitespaceReason_ShouldThrow_EdgeGuard, DeletePayment_ShouldCreateAuditLog_SuccessGuard, DeletePaymentAsync_NonExistent_Should_Return_Without_Throwing, DeletePaymentAsync_Should_Recalculate_Balance, DeletePaymentAsync_Without_Reason_Should_Throw, DeletePaymentAsync_When_DeletingLastPayment_Should_UpdateBalanceCorrectly_EdgeGuard, DeletePaymentAsync_When_ServiceThrows_Should_Show_Error_FailureGuard, DeletePaymentAsync_With_Null_SelectedPayment_Should_Return, DeletePaymentAsync_With_Valid_SelectedPayment_Should_Delete |
-| 2.7 | إضافة رسوم إضافية — Add Additional Charge | ✅ | ✅ | ✅ مكتمل | AddAdditionalChargeAsync_InvalidDescription_Should_Throw_LogicGuard, AddAdditionalChargeAsync_NegativeAmount_Should_Throw, AddAdditionalChargeAsync_Should_Create_Charge_Record, AddAdditionalChargeAsync_With_DescriptionWhitespaceAround_Should_Trim_EdgeGuard, AddChargeAsync_When_ServiceThrows_Should_Show_Error_FailureGuard, AddChargeAsync_With_Valid_Data_Should_Add_Charge, AddChargeAsync_With_VisitId_Zero_Should_Return, AddChargeAsync_With_ZeroAmount_Should_Handle_Gracefully_EdgeGuard |
-| 2.8 | إصدار فاتورة — Generate Invoice | ✅ | ✅ | ✅ مكتمل | PrintInvoice_WhenInvoiceFound_ShouldCallLogPrinted_SuccessGuard, CreateOrUpdateInvoiceAsync_Should_Create_Invoice_With_Correct_Totals_LogicGuard, LogInvoicePrintedAsync_Should_Create_AuditLog_Entry, LogInvoicePrintedAsync_With_InvalidInvoiceId_Should_Still_Create_Log_FailureGuard, LogInvoicePrintedAsync_With_ZeroUserId_Should_Create_Log_EdgeGuard, PrintInvoiceAsync_When_LogThrows_Should_Set_ErrorStatus_FailureGuard, PrintInvoiceAsync_When_NoInvoiceFound_Should_NotLogPrint_EdgeGuard, SaveInvoiceAsync_With_Valid_Visit_Should_Save, SaveInvoiceAsync_With_VisitId_Zero_Should_Set_StatusMessage |
-| 2.9 | كشف حساب المريض — View Patient Account | ✅ | ✅ | ✅ مكتمل | LoadVisit_WhenInvoiceHasPayments_ShouldPopulatePaymentsList_SuccessGuard, GetPatientAccount_ByDate_Should_Return_Invoices_And_Payments_For_Same_Patient_LogicGuard, GetPatientAccount_When_PatientNotFound_Should_Return_Empty_FailureGuard, GetPatientAccount_With_DateRangeOutside_VisitDate_Should_Return_Empty_EdgeGuard, Commands_When_Admin_Should_Be_Enabled, LoadVisitAsync_When_ServiceThrows_Should_Set_StatusMessage_FailureGuard, LoadVisitAsync_When_VisitHasNoInvoice_Should_Create_New_EdgeGuard, LoadVisitAsync_With_Existing_Invoice_Should_Load_Data, LoadVisitAsync_With_VisitId_Zero_Should_Set_StatusMessage |
-| 2.10 | تقرير الجرد المالي — Generate Inventory | ✅ | ✅ | ✅ مكتمل | GetSnapshotAsync_Overall_Should_Aggregate_Invoices_And_Payments_LogicGuard, GetSnapshotAsync_When_NoDataInRange_Should_Return_ZeroedSnapshot_EdgeGuard, GetSnapshotAsync_WithInvalidDates_ShouldThrowException_FailureGuard, DailyCommand_Should_LoadDataForToday_SuccessGuard, DailyCommand_When_ServiceThrows_Should_Set_ErrorMessage_FailureGuard, LoadCommand_Failure_Should_HandleException_FailureGuard, LoadCommand_Should_SetIsLoading_And_LoadData_SuccessGuard, LoadCommand_With_EmptySnapshot_Should_Keep_ZeroTotals_EdgeGuard, MonthlyCommand_Should_CalculateStartOfMonth_SuccessGuard, PrintCommand_Failure_Should_HandleException_FailureGuard, PrintCommand_Should_CallPrintService_SuccessGuard, WeeklyCommand_Should_CalculateStartOfWeek_SuccessGuard |
-| 2.11 | جرد مالي للفرع — Branch-wise Inventory | ✅ | ✅ | ✅ مكتمل | GetSnapshotAsync_With_BranchFilter_And_NoData_Should_Return_ZeroedSnapshot_EdgeGuard, GetSnapshotAsync_With_BranchFilter_Should_Isolate_Branch_Data_LogicGuard, GetSnapshotAsync_With_NonExistentBranch_Should_Return_ZeroedSnapshot_FailureGuard, StatisticsService_BranchWiseInventory_Should_Filter_By_Branch, LoadCommand_With_BranchFilter_Should_Call_GetSnapshotAsync_With_BranchId, LoadCommand_With_BranchFilter_When_ServiceThrows_Should_Show_Error_FailureGuard, LoadCommand_With_NoBranchSelected_Should_Load_AllBranches_EdgeGuard |
-| 2.12 | حساب الأطباء — Doctor-wise Inventory | ✅ | ✅ | ✅ مكتمل | GetSnapshotAsync_DoctorWise_When_DateRangeInvalid_Should_Throw_FailureGuard, GetSnapshotAsync_Should_Calculate_Doctor_Commissions_LogicGuard, GetSnapshotAsync_With_ZeroCommissionPercentage_Should_Calculate_ZeroCommission_EdgeGuard, LoadCommand_Should_Calculate_Doctor_Commissions_Directly, LoadCommand_When_ServiceThrows_DoctorCommissions_Should_Show_Error_FailureGuard, LoadCommand_With_NoDoctorCommissions_Should_Return_EmptyList_EdgeGuard |
-| 2.13 | تصفية حسابات المعامل الخارجية — Lab-to-Lab Settlement | ✅ | ✅ | ✅ مكتمل | CreateSettlementAsync_Should_Update_Balance_LogicGuard, CreateSettlementAsync_When_AmountPaid_Exceeds_Balance_Should_Store_NegativeBalance_EdgeGuard, ExternalSettlementService_Should_Calculate_Correct_Balance, GetPendingBalanceAsync_When_NoQueueOrPayments_Should_Return_Zero_FailureGuard, GetTotalProfitAsync_Should_Calculate_PatientPrice_Minus_CostPrice_LogicGuard, CreateManifestCommand_When_Queue_Selection_Empty_Should_Not_Call_Service_Edge, CreateManifestCommand_When_Referral_Missing_Should_Not_Call_Service_Failure, CreateManifestCommand_With_Valid_Data_Should_Create_Manifest_Success, CreateSettlementAsync_When_AmountIsZero_Should_NotCall_Service_EdgeGuard, CreateSettlementCommand_When_Service_Throws_Should_Set_Error_Message_Failure, CreateSettlementCommand_When_Valid_Data_Should_Create_And_Reset_Amount_Success, EnterExternalResultAsync_Should_Call_Service_And_Reset_Input, EnterExternalResultAsync_When_ServiceThrows_Should_Set_ErrorMessage_FailureGuard, EnterExternalResultCommand_When_Result_Value_Empty_Should_Not_Call_Service_Edge, LoadManifestsCommand_When_Executed_Should_Load_Manifest_List_Success, LoadManifestsCommand_When_Service_Throws_Should_Set_Error_Message_Failure, LoadQueueAsync_Should_Map_Row_With_VisitTest_For_Printing, LoadQueueCommand_When_No_Pending_Items_Should_Clear_Queue_Edge, LoadQueueCommand_When_Service_Throws_Should_Set_Error_Message_Failure, LoadReferralsCommand_When_Executed_Should_Load_ExternalLab_Referrals_Success, LoadReferralsCommand_When_Service_Throws_Should_Set_Error_Message_Failure, LoadSettlementAsync_Should_Load_History_And_TotalProfit, LoadSettlementCommand_When_Referral_Not_Selected_Should_Not_Call_Service_Edge, LoadSettlementCommand_When_Referral_Selected_Should_Load_Settlement_Success, LoadSettlementCommand_When_Service_Throws_Should_Set_Error_Message_Failure, PrintExternalReportAsync_Should_Print_When_Visit_Is_Available, PrintExternalReportCommand_When_Report_Not_Found_Should_Set_NotFound_Message_Edge, PrintExternalReportCommand_When_VisitId_Invalid_Should_Set_User_Message_Failure, UpdateStatusCommand_When_No_Selected_Item_Should_Not_Call_Service_Edge, UpdateStatusCommand_When_SelectedItem_Exists_Should_Call_Service_Success, UpdateStatusCommand_When_Service_Throws_Should_Set_Error_Message_Failure |
-
----
-
-## الموديول 3 — إدارة التحاليل والأسعار | Test & Price Management
-
-| رقم الوظيفة | اسم الوظيفة | Service ✅/❌ | ViewModel ✅/❌ | الحالة | أسماء الاختبارات المكتوبة |
-|-------------|-------------|--------------|----------------|--------|--------------------------|
-| 3.1 | إضافة تحليل جديد — Add New Test | ✅ | ✅ | ✅ مكتمل | CreateParameter_Should_Persist_Correctly_SuccessGuard, TestCatalog_NewCommand_ShouldResetForm_SuccessGuard, Catalog_Gap_Functions_Should_Work, CreateSampleTypeAsync_ShouldCreateSampleType, CreateSampleTypeAsync_WithEmptyName_ShouldThrowArgumentException, CreateTestAsync_WithAllFields_ShouldPersistCorrectly, CreateTestAsync_WithEmptyCode_ShouldThrowArgumentException, CreateTestAsync_WithEmptyNameReceipt_ShouldThrowArgumentException, CreateTestAsync_WithEmptyNameReport_ShouldThrowArgumentException, CreateTestAsync_WithNullTest_ShouldThrowArgumentNullException, CreateTestAsync_WithZeroPrice_ShouldBeAllowed_EdgeGuard, CreateUnitAsync_ShouldCreateUnit, CreateUnitAsync_WithEmptyName_ShouldThrowArgumentException, DeleteTestAsync_WhenNotFound_ShouldNotThrow_EdgeGuard, DeleteTestAsync_WhenTestInUse_ShouldThrowInvalidOperationException, GetAllTestsAsync_ShouldReturnOrderedByNameReport, GetSampleTypesAsync_ShouldReturnOrderedSampleTypes, GetTestByIdAsync_WithInvalidId_ShouldReturnNull, GetTestByIdAsync_WithValidId_ShouldReturnTest, GetUnitsAsync_ShouldReturnOrderedUnits, SaveAsync_With_AllFields_Should_Persist_Correctly_SuccessGuard |
-| 3.2 | تعديل بيانات تحليل — Edit Test Data | ✅ | ✅ | ✅ مكتمل | UpdateTest_WithValidData_ShouldPersistAllFields_SuccessGuard, UpdateTestAsync_WithDuplicateCode_ShouldThrowInvalidOperationException, UpdateTestAsync_WithNonExistentTest_ShouldThrowInvalidOperationException, UpdateTestAsync_WithNullTest_ShouldThrowArgumentNullException, UpdateTestAsync_WithValidData_ShouldUpdateAllFields, UpdateTestAsync_Should_Modify_SelectedTest_Fields_SuccessGuard |
-| 3.3 | تحديد القيم المرجعية — Set Reference Values | ✅ | ✅ | ✅ مكتمل | UpdateReferenceRange_ShouldPersistChanges_SuccessGuard, DeleteReferenceRange_ShouldRemove_SuccessGuard, ReferenceRanges_Save_WithInvalidBoundaries_ShouldShowError_FailureGuard, CreateReferenceRangeAsync_Equal_Boundaries_Should_Be_Valid_LogicGuard, CreateReferenceRangeAsync_Should_Validate_Range_Boundaries_LogicGuard, CreateReferenceRangeAsync_WithInvalidAgeRange_ShouldThrowArgumentException, CreateReferenceRangeAsync_WithInvalidValueRange_ShouldThrowArgumentException, CreateReferenceRangeAsync_WithNoValuesOrText_ShouldThrowArgumentException, CreateReferenceRangeAsync_WithNullTestId_ShouldThrowArgumentException, CreateReferenceRangeAsync_WithOnlyNormalText_ShouldSucceed_EdgeGuard, DeleteReferenceRangeAsync_ShouldRemoveRange, DeleteReferenceRangeAsync_WhenNotFound_ShouldNotThrow_EdgeGuard, SaveResultAsync_With_ReferenceRange_Should_Classify_Correctly_LogicGuard, UpdateReferenceRangeAsync_ShouldPersistChanges, LoadRangesAsync_Should_Populate_Ranges_SuccessGuard, SaveAsync_NewRange_Should_Call_CreateRange, UpdateRangeAsync_Should_Call_Update_Service_SuccessGuard |
-| 3.4 | إضافة تعليقات القيم المرتفعة/المنخفضة — Add Low/High Comments | ✅ | ✅ | ✅ مكتمل | GetTestComments_ForSpecificTest_ShouldReturnOnlyRelevant_SuccessGuard, TestComments_Save_WithValidComment_ShouldCallService_SuccessGuard, CreateTestCommentAsync_ShouldTrimWhitespace, CreateTestCommentAsync_WithEmptyText_ShouldThrowArgumentException, CreateTestCommentAsync_WithNullText_ShouldThrowArgumentException, DeleteTestCommentAsync_ShouldRemoveComment, DeleteTestCommentAsync_WhenNotFound_ShouldNotThrow_EdgeGuard, SaveAsync_Should_Persist_Low_High_Comments_LogicGuard, SaveAsync_Update_Existing_Comment_Should_Call_Update_Service_SuccessGuard |
-| 3.5 | إنشاء مجموعة مخصصة — Create Custom Group | ✅ | ✅ | ✅ مكتمل | DeleteCustomGroupItem_ShouldRemoveOnlyItem_SuccessGuard, CustomGroups_DeleteItem_WhenSelected_ShouldCallService_SuccessGuard, CreateCustomGroupAsync_WithDuplicateName_ShouldThrowInvalidOperationException, CreateCustomGroupAsync_WithEmptyName_ShouldThrowArgumentException, CreateCustomGroupAsync_WithNullName_ShouldThrowArgumentException, CreateCustomGroupAsync_WithZeroPrice_ShouldSucceed_EdgeGuard, CreateTestGroupAsync_ShouldCreateGroup, CreateTestGroupAsync_WithDuplicateName_ShouldThrowInvalidOperationException, CreateTestGroupAsync_WithEmptyName_ShouldThrowArgumentException, GetTestGroupsAsync_ShouldReturnOrderedGroups, DeleteItemAsync_Should_Remove_Item_SuccessGuard, SaveGroupAsync_Should_Create_Group, SaveGroupAsync_With_Zero_Price_Should_Allow_EdgeGuard |
-| 3.6 | إضافة تعليقات التحليل — Add Test Comments | ✅ | ✅ | ✅ مكتمل | DeleteTestComment_WhenExists_ShouldRemove_SuccessGuard, TestComments_Delete_WhenSelected_ShouldCallService_SuccessGuard, CreateAndUpdateTestComment_Should_Persist_Low_High_Comments_LogicGuard, CreateTestCommentAsync_Default_Should_Clear_Other_Defaults_LogicGuard |
-| 3.7 | إنشاء قائمة أسعار — Create Price List | ✅ | ✅ | ✅ مكتمل | UpdatePriceList_WithNewName_ShouldUpdate_SuccessGuard, PriceLists_Print_ShouldCallPrintService_SuccessGuard, CreatePriceListAsync_WithEmptyName_ShouldThrowArgumentException, CreatePriceListAsync_WithNullName_ShouldThrowArgumentException, CreatePriceListAsync_WithNullReferral_ShouldCreateSuccessfully, UpdatePriceListAsync_ShouldUpdateAllFields, UpdatePriceListAsync_WithNullName_ShouldThrowArgumentException, PrintListAsync_Should_Call_PrintService_SuccessGuard, SaveListAsync_Should_Create_PriceList, UpdateListAsync_Should_Call_Update_Service_SuccessGuard |
-| 3.8 | تحديث الأسعار — Update Prices | ✅ | ✅ | ✅ مكتمل | UpdatePriceListItem_ShouldUpdatePrice_SuccessGuard, DeletePriceListItem_ShouldRemoveFromList_SuccessGuard, PriceLists_DeleteItem_WhenSelected_ShouldCallService_SuccessGuard, AddPriceListItemAsync_WithDuplicateTestAndPriceList_ShouldThrowInvalidOperationException, AddPriceListItemAsync_WithNegativePrice_ShouldThrowArgumentException, DeletePriceListItemAsync_ShouldRemoveItem, DeletePriceListItemAsync_WhenNotFound_ShouldNotThrow_EdgeGuard, UpdatePriceListItemAsync_ShouldUpdatePrice, UpdatePriceListItemAsync_WithNegativePrice_ShouldThrowArgumentException, AddItemAsync_Should_Add_Test_To_PriceList, UpdateItemAsync_Should_Change_Price_SuccessGuard |
-| 3.9 | تحديد تحليل كخارجي — Mark as Outsourced | ✅ | ✅ | ✅ مكتمل | TestCatalog_Save_WhenIsSendOut_ShouldIncludePricing_LogicGuard, CreateTestAsync_WithNullCostPrice_ShouldBeAllowed_EdgeGuard, CreateTestAsync_WithNullPatientPrice_ShouldBeAllowed_EdgeGuard, CreateTestAsync_WithOutsourceFlags_ShouldPersist, SaveAsync_With_IsSendOut_True_Should_Include_Pricing_Fields_BR_ACC_007, SaveAsync_With_OutsourceData_Should_Persist_Pricing_LogicGuard |
-
----
-
-## الموديول 4 — إدخال النتائج والتقارير | Result Entry & Reporting
-
-| رقم الوظيفة | اسم الوظيفة | Service ✅/❌ | ViewModel ✅/❌ | الحالة | أسماء الاختبارات المكتوبة |
-|-------------|-------------|--------------|----------------|--------|--------------------------|
-| 4.1 | إدخال نتائج التحاليل — Enter Test Results | ✅ | ✅ | ✅ مكتمل | Function_4_1_Automated_Intelligence_Full_Verification, EnterTestResults_LoadCommand_Should_Populate_VisitTests_Success, EnterTestResults_LoadCommand_When_ServiceThrows_Failure, EnterTestResults_LoadCommand_With_EmptyResults_Edge |
-| 4.2 | حفظ النتائج — Save Results | ✅ | ✅ | ✅ مكتمل | SaveResultAsync_Should_Create_Result_And_Set_Status, SaveResults_SaveCommand_With_Valid_Data_Should_Call_Service_Success, SaveResults_SaveCommand_When_Verified_Failure, SaveResults_SaveCommand_With_Empty_ResultItems_Edge |
-| 4.3 | تعديل النتائج — Edit Results | ✅ | ✅ | ✅ مكتمل | Function_4_3_Audit_Trail_Integrity_Verification, SaveResultAsync_When_Verified_Should_Throw, EditResults_ReopenCommand_With_Verified_Status_Should_Reopen_Success, EditResults_ReopenCommand_When_ServiceThrows_Failure |
-| 4.4 | إنشاء تقرير مركّب — Create Composite Report | ✅ | ✅ | ✅ مكتمل | GetCompositeReportAsync_With_Valid_Visit_Should_Return_Report_Success, CreateCompositeReport_LoadCommand_With_Valid_Visit_Should_Load_All_Tests_Success, CreateCompositeReport_LoadCommand_When_Visit_Not_Found_Failure, CreateCompositeReport_LoadCommand_With_Zero_VisitId_Edge |
-| 4.5 | ترتيب التقرير — Arrange Report Order | ✅ | ✅ | ✅ مكتمل | GetVisitReportAsync_Should_Order_By_ReportOrder_Success, ArrangeReportOrder_MoveUp_Should_Reorder_Tests_Success, ArrangeReportOrder_With_Single_Test_Edge, ArrangeReportOrder_SaveCommand_Should_Persist_Order_Success |
-| 4.6 | معاينة التقرير — Preview Report | ✅ | ✅ | ✅ مكتمل | GetVisitReportAsync_For_Preview_Should_Include_All_Data_Success, PreviewReport_LoadCommand_Should_Populate_Preview_Content_Success, PreviewReport_LoadCommand_When_Visit_Not_Found_Failure, PreviewReport_LoadCommand_With_Zero_VisitId_Edge |
-| 4.7 | طباعة التقرير — Print Report | ✅ | ✅ | ✅ مكتمل | LogVisitReportPrintedAsync_Should_Create_AuditLog_With_UserId_Success, PrintReport_PrintCommand_Should_Call_PrintService_And_Log_Audit_Success, PrintReport_PrintCommand_When_PrintServiceThrows_Failure, PrintReport_PrintCommand_When_No_Report_Edge |
-| 4.8 | طباعة تقرير فارغ — Print Blank Report | ✅ | ✅ | ✅ مكتمل | GetVisitReportAsync_For_Blank_Report_Should_Include_Test_Names_Success, PrintBlankReport_LoadCommand_With_Valid_Visit_Should_Populate_Data_Success, PrintBlankReport_LoadCommand_When_ServiceThrows_Failure, PrintBlankReport_LoadCommand_With_Zero_VisitId_Edge |
-| 4.9 | المقارنة مع التاريخ — Compare with History | ✅ | ✅ | ✅ مكتمل | GetVisitReportAsync_Should_Include_Previous_Result_For_Comparison_Success, Function_4_9_LoadPatientCommand_With_Valid_LabId_Success, Function_4_9_LoadPatientCommand_With_Invalid_LabId_Failure, Function_4_9_LoadPatientCommand_With_Empty_LabId_Edge |
-
----
-
-## ملخص التقدم الإجمالي
-
-| الموديول | إجمالي الوظائف | مكتمل ✅ | جزئي 🔄 | لم يبدأ ❌ | يحتاج مراجعة ⚠️ |
-|----------|---------------|---------|---------|-----------|----------------|
-| 1 — إدارة المرضى | 8 | 8 | 0 | 0 | 0 |
-| 2 — المحاسبة والمالية | 13 | 13 | 0 | 0 | 0 |
-| 3 — إدارة التحاليل والأسعار | 9 | 9 | 0 | 0 | 0 |
-| 4 — إدخال النتائج والتقارير | 9 | 9 | 0 | 0 | 0 |
-| 5 — المزارع والحساسية | 7 | 0 | 7 | 0 | 0 |
-| 6 — سحب العينات | 4 | 0 | 4 | 0 | 0 |
-| 7 — أوراق العمل | 4 | 0 | 4 | 0 | 0 |
-| 8 — المعامل الخارجية | 7 | 0 | 7 | 0 | 0 |
-| 9 — الإحصائيات والتحليلات | 6 | 6 | 0 | 0 | 0 |
-| 10 — إدارة المستخدمين | 8 | 0 | 8 | 0 | 0 |
-| 11 — الحضور والانصراف | 5 | 5 | 0 | 0 | 0 |
-| 12 — جهات التعاقد والإحالة | 9 | 5 | 4 | 0 | 0 |
-| 13 — إعدادات النظام | 8 | 2 | 6 | 0 | 0 |
-| **الإجمالي** | **97** | **65** | **32** | **0** | **0** |
+========== Starting test run ==========
+[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v2.5.3.1+6b60a9e56a (64-bit .NET 8.0.26)
+[xUnit.net 00:00:00.74]   Starting:    Open_lab.Tests
+[xUnit.net 00:00:08.81]     Open_lab.Tests.ViewModels.ReferenceRangesViewModelTests.DeleteAsync_When_NoSelection_Should_NotCall_Service_EdgeGuard [FAIL]
+[xUnit.net 00:00:08.82]       Expected _viewModel.StatusMessage not to be <null> or empty, but found "".
+[xUnit.net 00:00:08.82]       Stack Trace:
+[xUnit.net 00:00:08.82]            at FluentAssertions.Execution.XUnit2TestFramework.Throw(String message)
+[xUnit.net 00:00:08.82]            at FluentAssertions.Execution.TestFrameworkProvider.Throw(String message)
+[xUnit.net 00:00:08.82]            at FluentAssertions.Execution.DefaultAssertionStrategy.HandleFailure(String message)
+[xUnit.net 00:00:08.82]            at FluentAssertions.Execution.AssertionScope.FailWith(Func`1 failReasonFunc)
+[xUnit.net 00:00:08.82]            at FluentAssertions.Execution.AssertionScope.FailWith(Func`1 failReasonFunc)
+[xUnit.net 00:00:08.82]            at FluentAssertions.Execution.AssertionScope.FailWith(String message, Object[] args)
+[xUnit.net 00:00:08.82]            at FluentAssertions.Primitives.StringAssertions`1.NotBeNullOrEmpty(String because, Object[] becauseArgs)
+[xUnit.net 00:00:08.82]         C:\Users\LAP LINK\source\repos\Open_lab\Open_lab.Tests\ViewModels\ReferenceRangesViewModelTests.cs(113,0): at Open_lab.Tests.ViewModels.ReferenceRangesViewModelTests.DeleteAsync_When_NoSelection_Should_NotCall_Service_EdgeGuard()
+[xUnit.net 00:00:08.82]         --- End of stack trace from previous location ---
+[xUnit.net 00:00:09.55]     Open_lab.Tests.ViewModels.LoginViewModelTests.LoginAsync_WithValidAdminCredentials_ShouldSetSessionAndCreateAttendanceRecord [FAIL]
+[xUnit.net 00:00:09.55]       Expected _viewModel.StatusMessage not to be <null> or empty, but found "".
+[xUnit.net 00:00:09.55]       Stack Trace:
+[xUnit.net 00:00:09.55]            at FluentAssertions.Execution.XUnit2TestFramework.Throw(String message)
+[xUnit.net 00:00:09.56]            at FluentAssertions.Execution.TestFrameworkProvider.Throw(String message)
+[xUnit.net 00:00:09.56]            at FluentAssertions.Execution.DefaultAssertionStrategy.HandleFailure(String message)
+[xUnit.net 00:00:09.56]            at FluentAssertions.Execution.AssertionScope.FailWith(Func`1 failReasonFunc)
+[xUnit.net 00:00:09.56]            at FluentAssertions.Execution.AssertionScope.FailWith(Func`1 failReasonFunc)
+[xUnit.net 00:00:09.56]            at FluentAssertions.Execution.AssertionScope.FailWith(String message, Object[] args)
+[xUnit.net 00:00:09.56]            at FluentAssertions.Primitives.StringAssertions`1.NotBeNullOrEmpty(String because, Object[] becauseArgs)
+[xUnit.net 00:00:09.56]         C:\Users\LAP LINK\source\repos\Open_lab\Open_lab.Tests\ViewModels\LoginViewModelTests.cs(164,0): at Open_lab.Tests.ViewModels.LoginViewModelTests.LoginAsync_WithValidAdminCredentials_ShouldSetSessionAndCreateAttendanceRecord()
+[xUnit.net 00:00:09.56]         --- End of stack trace from previous location ---
+[xUnit.net 00:00:09.59]     Open_lab.Tests.ViewModels.LoginViewModelTests.LoginAsync_WithRememberMe_ShouldSaveUsername [FAIL]
+[xUnit.net 00:00:09.59]       Expected _viewModel.StatusMessage not to be <null> or empty, but found "".
+[xUnit.net 00:00:09.59]       Stack Trace:
+[xUnit.net 00:00:09.59]            at FluentAssertions.Execution.XUnit2TestFramework.Throw(String message)
+[xUnit.net 00:00:09.59]            at FluentAssertions.Execution.TestFrameworkProvider.Throw(String message)
+[xUnit.net 00:00:09.59]            at FluentAssertions.Execution.DefaultAssertionStrategy.HandleFailure(String message)
+[xUnit.net 00:00:09.59]            at FluentAssertions.Execution.AssertionScope.FailWith(Func`1 failReasonFunc)
+[xUnit.net 00:00:09.59]            at FluentAssertions.Execution.AssertionScope.FailWith(Func`1 failReasonFunc)
+[xUnit.net 00:00:09.59]            at FluentAssertions.Execution.AssertionScope.FailWith(String message, Object[] args)
+[xUnit.net 00:00:09.59]            at FluentAssertions.Primitives.StringAssertions`1.NotBeNullOrEmpty(String because, Object[] becauseArgs)
+[xUnit.net 00:00:09.59]         C:\Users\LAP LINK\source\repos\Open_lab\Open_lab.Tests\ViewModels\LoginViewModelTests.cs(194,0): at Open_lab.Tests.ViewModels.LoginViewModelTests.LoginAsync_WithRememberMe_ShouldSaveUsername()
+[xUnit.net 00:00:09.59]         --- End of stack trace from previous location ---
+[xUnit.net 00:00:09.61]     Open_lab.Tests.ViewModels.LoginViewModelTests.LoginAsync_WithoutRememberMe_ShouldClearSavedUsername [FAIL]
+[xUnit.net 00:00:09.61]       Expected _viewModel.StatusMessage not to be <null> or empty, but found "".
+[xUnit.net 00:00:09.61]       Stack Trace:
+[xUnit.net 00:00:09.61]            at FluentAssertions.Execution.XUnit2TestFramework.Throw(String message)
+[xUnit.net 00:00:09.61]            at FluentAssertions.Execution.TestFrameworkProvider.Throw(String message)
+[xUnit.net 00:00:09.61]            at FluentAssertions.Execution.DefaultAssertionStrategy.HandleFailure(String message)
+[xUnit.net 00:00:09.61]            at FluentAssertions.Execution.AssertionScope.FailWith(Func`1 failReasonFunc)
+[xUnit.net 00:00:09.61]            at FluentAssertions.Execution.AssertionScope.FailWith(Func`1 failReasonFunc)
+[xUnit.net 00:00:09.61]            at FluentAssertions.Execution.AssertionScope.FailWith(String message, Object[] args)
+[xUnit.net 00:00:09.61]            at FluentAssertions.Primitives.StringAssertions`1.NotBeNullOrEmpty(String because, Object[] becauseArgs)
+[xUnit.net 00:00:09.61]         C:\Users\LAP LINK\source\repos\Open_lab\Open_lab.Tests\ViewModels\LoginViewModelTests.cs(224,0): at Open_lab.Tests.ViewModels.LoginViewModelTests.LoginAsync_WithoutRememberMe_ShouldClearSavedUsername()
+[xUnit.net 00:00:09.61]         --- End of stack trace from previous location ---
+[xUnit.net 00:00:11.20]     Open_lab.Tests.ViewModels.ResultsEntryViewModelTests.VerifyResultsAsync_With_Null_SelectedVisitTest_Should_Do_Nothing [FAIL]
+[xUnit.net 00:00:11.20]       Expected (_viewModel.StatusMessage.Contains("لم يتم تحديد") || _viewModel.StatusMessage.Contains("اختبار")) to be true, but found False.
+[xUnit.net 00:00:11.20]       Stack Trace:
+[xUnit.net 00:00:11.20]            at FluentAssertions.Execution.XUnit2TestFramework.Throw(String message)
+[xUnit.net 00:00:11.20]            at FluentAssertions.Execution.TestFrameworkProvider.Throw(String message)
+[xUnit.net 00:00:11.20]            at FluentAssertions.Execution.DefaultAssertionStrategy.HandleFailure(String message)
+[xUnit.net 00:00:11.20]            at FluentAssertions.Execution.AssertionScope.FailWith(Func`1 failReasonFunc)
+[xUnit.net 00:00:11.20]            at FluentAssertions.Execution.AssertionScope.FailWith(Func`1 failReasonFunc)
+[xUnit.net 00:00:11.20]            at FluentAssertions.Execution.AssertionScope.FailWith(String message, Object[] args)
+[xUnit.net 00:00:11.20]            at FluentAssertions.Primitives.BooleanAssertions`1.BeTrue(String because, Object[] becauseArgs)
+[xUnit.net 00:00:11.20]         C:\Users\LAP LINK\source\repos\Open_lab\Open_lab.Tests\ViewModels\ResultsEntryViewModelTests.cs(84,0): at Open_lab.Tests.ViewModels.ResultsEntryViewModelTests.VerifyResultsAsync_With_Null_SelectedVisitTest_Should_Do_Nothing()
+[xUnit.net 00:00:11.20]         --- End of stack trace from previous location ---
+[xUnit.net 00:00:11.21]     Open_lab.Tests.ViewModels.ResultsEntryViewModelTests.ReopenResultsAsync_With_Null_SelectedVisitTest_Should_Do_Nothing [FAIL]
+[xUnit.net 00:00:11.21]       Expected (_viewModel.StatusMessage.Contains("لم يتم تحديد") || _viewModel.StatusMessage.Contains("اختبار")) to be true, but found False.
+[xUnit.net 00:00:11.21]       Stack Trace:
+[xUnit.net 00:00:11.21]            at FluentAssertions.Execution.XUnit2TestFramework.Throw(String message)
+[xUnit.net 00:00:11.21]            at FluentAssertions.Execution.TestFrameworkProvider.Throw(String message)
+[xUnit.net 00:00:11.21]            at FluentAssertions.Execution.DefaultAssertionStrategy.HandleFailure(String message)
+[xUnit.net 00:00:11.21]            at FluentAssertions.Execution.AssertionScope.FailWith(Func`1 failReasonFunc)
+[xUnit.net 00:00:11.21]            at FluentAssertions.Execution.AssertionScope.FailWith(Func`1 failReasonFunc)
+[xUnit.net 00:00:11.21]            at FluentAssertions.Execution.AssertionScope.FailWith(String message, Object[] args)
+[xUnit.net 00:00:11.21]            at FluentAssertions.Primitives.BooleanAssertions`1.BeTrue(String because, Object[] becauseArgs)
+[xUnit.net 00:00:11.21]         C:\Users\LAP LINK\source\repos\Open_lab\Open_lab.Tests\ViewModels\ResultsEntryViewModelTests.cs(134,0): at Open_lab.Tests.ViewModels.ResultsEntryViewModelTests.ReopenResultsAsync_With_Null_SelectedVisitTest_Should_Do_Nothing()
+[xUnit.net 00:00:11.21]         --- End of stack trace from previous location ---
+[xUnit.net 00:00:11.23]     Open_lab.Tests.ViewModels.ResultsEntryViewModelTests.SaveResultsAsync_With_Null_SelectedVisitTest_Should_Do_Nothing [FAIL]
+[xUnit.net 00:00:11.23]       Expected (_viewModel.StatusMessage.Contains("لم يتم تحديد") || _viewModel.StatusMessage.Contains("اختبار")) to be true, but found False.
+[xUnit.net 00:00:11.23]       Stack Trace:
+[xUnit.net 00:00:11.23]            at FluentAssertions.Execution.XUnit2TestFramework.Throw(String message)
+[xUnit.net 00:00:11.23]            at FluentAssertions.Execution.TestFrameworkProvider.Throw(String message)
+[xUnit.net 00:00:11.23]            at FluentAssertions.Execution.DefaultAssertionStrategy.HandleFailure(String message)
+[xUnit.net 00:00:11.23]            at FluentAssertions.Execution.AssertionScope.FailWith(Func`1 failReasonFunc)
+[xUnit.net 00:00:11.23]            at FluentAssertions.Execution.AssertionScope.FailWith(Func`1 failReasonFunc)
+[xUnit.net 00:00:11.23]            at FluentAssertions.Execution.AssertionScope.FailWith(String message, Object[] args)
+[xUnit.net 00:00:11.23]            at FluentAssertions.Primitives.BooleanAssertions`1.BeTrue(String because, Object[] becauseArgs)
+[xUnit.net 00:00:11.23]         C:\Users\LAP LINK\source\repos\Open_lab\Open_lab.Tests\ViewModels\ResultsEntryViewModelTests.cs(61,0): at Open_lab.Tests.ViewModels.ResultsEntryViewModelTests.SaveResultsAsync_With_Null_SelectedVisitTest_Should_Do_Nothing()
+[xUnit.net 00:00:11.23]         --- End of stack trace from previous location ---
+[xUnit.net 00:00:53.51]     Open_lab.Tests.Module6ViewModelTests_Additional.MarkExternalCollectedAsync_With_Null_SelectedRow_Should_Do_Nothing_EdgeGuard [FAIL]
+[xUnit.net 00:00:53.51]       Expected _viewModel.StatusMessage not to be <null> or empty, but found "".
+[xUnit.net 00:00:53.51]       Stack Trace:
+[xUnit.net 00:00:53.51]            at FluentAssertions.Execution.XUnit2TestFramework.Throw(String message)
+[xUnit.net 00:00:53.51]            at FluentAssertions.Execution.TestFrameworkProvider.Throw(String message)
+[xUnit.net 00:00:53.51]            at FluentAssertions.Execution.DefaultAssertionStrategy.HandleFailure(String message)
+[xUnit.net 00:00:53.51]            at FluentAssertions.Execution.AssertionScope.FailWith(Func`1 failReasonFunc)
+[xUnit.net 00:00:53.51]            at FluentAssertions.Primitives.StringAssertions`1.NotBeNullOrEmpty(String because, Object[] becauseArgs)
+[xUnit.net 00:00:53.51]         C:\Users\LAP LINK\source\repos\Open_lab\Open_lab.Tests\Services\Module6Tests_Additional.cs(597,0): at Open_lab.Tests.Module6ViewModelTests_Additional.MarkExternalCollectedAsync_With_Null_SelectedRow_Should_Do_Nothing_EdgeGuard()
+[xUnit.net 00:00:53.51]         --- End of stack trace from previous location ---
+[xUnit.net 00:00:59.23]     Open_lab.Tests.ViewModels.Module3ViewModelTests_Additional+PriceListsViewModel_AdditionalTests.UpdateListAsync_When_Null_Selected_Should_Do_Nothing_EdgeGuard [FAIL]
+[xUnit.net 00:00:59.23]       Expected _viewModel.StatusMessage not to be <null> or empty, but found "".
+[xUnit.net 00:00:59.23]       Stack Trace:
+[xUnit.net 00:00:59.23]            at FluentAssertions.Execution.XUnit2TestFramework.Throw(String message)
+[xUnit.net 00:00:59.23]            at FluentAssertions.Execution.TestFrameworkProvider.Throw(String message)
+[xUnit.net 00:00:59.23]            at FluentAssertions.Execution.DefaultAssertionStrategy.HandleFailure(String message)
+[xUnit.net 00:00:59.23]            at FluentAssertions.Execution.AssertionScope.FailWith(Func`1 failReasonFunc)
+[xUnit.net 00:00:59.23]            at FluentAssertions.Primitives.StringAssertions`1.NotBeNullOrEmpty(String because, Object[] becauseArgs)
+[xUnit.net 00:00:59.23]         C:\Users\LAP LINK\source\repos\Open_lab\Open_lab.Tests\ViewModels\Module3ViewModelTests_Additional.cs(885,0): at Open_lab.Tests.ViewModels.Module3ViewModelTests_Additional.PriceListsViewModel_AdditionalTests.UpdateListAsync_When_Null_Selected_Should_Do_Nothing_EdgeGuard()
+[xUnit.net 00:00:59.23]         --- End of stack trace from previous location ---
+[xUnit.net 00:00:59.71]     Open_lab.Tests.ViewModels.Module3ViewModelTests_Additional+TestCommentsViewModel_AdditionalTests.DeleteAsync_When_Null_Selection_Should_Do_Nothing_EdgeGuard [FAIL]
+[xUnit.net 00:00:59.71]       Expected _viewModel.StatusMessage not to be <null> or empty, but found "".
+[xUnit.net 00:00:59.71]       Stack Trace:
+[xUnit.net 00:00:59.71]            at FluentAssertions.Execution.XUnit2TestFramework.Throw(String message)
+[xUnit.net 00:00:59.71]            at FluentAssertions.Execution.TestFrameworkProvider.Throw(String message)
+[xUnit.net 00:00:59.71]            at FluentAssertions.Execution.DefaultAssertionStrategy.HandleFailure(String message)
+[xUnit.net 00:00:59.71]            at FluentAssertions.Execution.AssertionScope.FailWith(Func`1 failReasonFunc)
+[xUnit.net 00:00:59.71]            at FluentAssertions.Primitives.StringAssertions`1.NotBeNullOrEmpty(String because, Object[] becauseArgs)
+[xUnit.net 00:00:59.71]         C:\Users\LAP LINK\source\repos\Open_lab\Open_lab.Tests\ViewModels\Module3ViewModelTests_Additional.cs(1007,0): at Open_lab.Tests.ViewModels.Module3ViewModelTests_Additional.TestCommentsViewModel_AdditionalTests.DeleteAsync_When_Null_Selection_Should_Do_Nothing_EdgeGuard()
+[xUnit.net 00:00:59.71]         --- End of stack trace from previous location ---
+[xUnit.net 00:01:03.32]     Open_lab.Tests.ViewModels.SystemSettingsViewModelTests.ReloadCommand_When_Executed_Should_Refresh_Profile_And_Settings_Success [FAIL]
+[xUnit.net 00:01:03.32]       Expected _viewModel.StatusMessage not to be <null> or empty, but found "".
+[xUnit.net 00:01:03.32]       Stack Trace:
+[xUnit.net 00:01:03.32]            at FluentAssertions.Execution.XUnit2TestFramework.Throw(String message)
+[xUnit.net 00:01:03.32]            at FluentAssertions.Execution.TestFrameworkProvider.Throw(String message)
+[xUnit.net 00:01:03.32]            at FluentAssertions.Execution.DefaultAssertionStrategy.HandleFailure(String message)
+[xUnit.net 00:01:03.32]            at FluentAssertions.Execution.AssertionScope.FailWith(Func`1 failReasonFunc)
+[xUnit.net 00:01:03.32]            at FluentAssertions.Primitives.StringAssertions`1.NotBeNullOrEmpty(String because, Object[] becauseArgs)
+[xUnit.net 00:01:03.32]         C:\Users\LAP LINK\source\repos\Open_lab\Open_lab.Tests\ViewModels\SystemSettingsViewModelTests.cs(111,0): at Open_lab.Tests.ViewModels.SystemSettingsViewModelTests.ReloadCommand_When_Executed_Should_Refresh_Profile_And_Settings_Success()
+[xUnit.net 00:01:03.32]         --- End of stack trace from previous location ---
+[xUnit.net 00:01:07.08]     Open_lab.Tests.ViewModels.Module1And2ViewModelCompletionTests.ViewPatientHistory_MultipleVisits_ShouldPopulateVisitsList_SuccessGuard [FAIL]
+[xUnit.net 00:01:07.08]       Expected vm.StatusMessage not to be <null> or empty, but found "".
+[xUnit.net 00:01:07.08]       Stack Trace:
+[xUnit.net 00:01:07.08]            at FluentAssertions.Execution.XUnit2TestFramework.Throw(String message)
+[xUnit.net 00:01:07.08]            at FluentAssertions.Execution.TestFrameworkProvider.Throw(String message)
+[xUnit.net 00:01:07.09]            at FluentAssertions.Execution.DefaultAssertionStrategy.HandleFailure(String message)
+[xUnit.net 00:01:07.09]            at FluentAssertions.Execution.AssertionScope.FailWith(Func`1 failReasonFunc)
+[xUnit.net 00:01:07.09]            at FluentAssertions.Primitives.StringAssertions`1.NotBeNullOrEmpty(String because, Object[] becauseArgs)
+[xUnit.net 00:01:07.09]         C:\Users\LAP LINK\source\repos\Open_lab\Open_lab.Tests\ViewModels\Module1And2ViewModelCompletionTests.cs(254,0): at Open_lab.Tests.ViewModels.Module1And2ViewModelCompletionTests.ViewPatientHistory_MultipleVisits_ShouldPopulateVisitsList_SuccessGuard()
+[xUnit.net 00:01:07.09]         --- End of stack trace from previous location ---
+[xUnit.net 00:01:07.70]     Open_lab.Tests.ViewModels.Module1And2ViewModelCompletionTests.SettleAccount_WhenVisitIdIsZero_ShouldNotCallService_EdgeGuard [FAIL]
+[xUnit.net 00:01:07.70]       Expected vm.StatusMessage not to be <null> or empty, but found "".
+[xUnit.net 00:01:07.70]       Stack Trace:
+[xUnit.net 00:01:07.70]            at FluentAssertions.Execution.XUnit2TestFramework.Throw(String message)
+[xUnit.net 00:01:07.70]            at FluentAssertions.Execution.TestFrameworkProvider.Throw(String message)
+[xUnit.net 00:01:07.70]            at FluentAssertions.Execution.DefaultAssertionStrategy.HandleFailure(String message)
+[xUnit.net 00:01:07.70]            at FluentAssertions.Execution.AssertionScope.FailWith(Func`1 failReasonFunc)
+[xUnit.net 00:01:07.70]            at FluentAssertions.Primitives.StringAssertions`1.NotBeNullOrEmpty(String because, Object[] becauseArgs)
+[xUnit.net 00:01:07.70]         C:\Users\LAP LINK\source\repos\Open_lab\Open_lab.Tests\ViewModels\Module1And2ViewModelCompletionTests.cs(451,0): at Open_lab.Tests.ViewModels.Module1And2ViewModelCompletionTests.SettleAccount_WhenVisitIdIsZero_ShouldNotCallService_EdgeGuard()
+[xUnit.net 00:01:07.70]         --- End of stack trace from previous location ---
+[xUnit.net 00:01:08.96]     Open_lab.Tests.ViewModels.SampleCollectionViewModelTests.MarkNotCollectedAsync_With_Valid_Row_Should_Call_Service [FAIL]
+[xUnit.net 00:01:08.96]       Expected _viewModel.StatusMessage "تم تحديث الحالة." to contain "تم تعليم العينة كغير مجمعة".
+[xUnit.net 00:01:08.96]       Stack Trace:
+[xUnit.net 00:01:08.96]            at FluentAssertions.Execution.XUnit2TestFramework.Throw(String message)
+[xUnit.net 00:01:08.96]            at FluentAssertions.Execution.TestFrameworkProvider.Throw(String message)
+[xUnit.net 00:01:08.96]            at FluentAssertions.Execution.DefaultAssertionStrategy.HandleFailure(String message)
+[xUnit.net 00:01:08.96]            at FluentAssertions.Execution.AssertionScope.FailWith(Func`1 failReasonFunc)
+[xUnit.net 00:01:08.96]            at FluentAssertions.Primitives.StringAssertions`1.Contain(String expected, String because, Object[] becauseArgs)
+[xUnit.net 00:01:08.96]         C:\Users\LAP LINK\source\repos\Open_lab\Open_lab.Tests\ViewModels\SampleCollectionViewModelTests.cs(188,0): at Open_lab.Tests.ViewModels.SampleCollectionViewModelTests.MarkNotCollectedAsync_With_Valid_Row_Should_Call_Service()
+[xUnit.net 00:01:08.96]         --- End of stack trace from previous location ---
+[xUnit.net 00:01:08.97]     Open_lab.Tests.ViewModels.SampleCollectionViewModelTests.MarkCollectedAsync_With_Null_SelectedRow_Should_Do_Nothing [FAIL]
+[xUnit.net 00:01:08.97]       Expected _viewModel.StatusMessage not to be <null> or empty, but found "".
+[xUnit.net 00:01:08.97]       Stack Trace:
+[xUnit.net 00:01:08.97]            at FluentAssertions.Execution.XUnit2TestFramework.Throw(String message)
+[xUnit.net 00:01:08.97]            at FluentAssertions.Execution.TestFrameworkProvider.Throw(String message)
+[xUnit.net 00:01:08.97]            at FluentAssertions.Execution.DefaultAssertionStrategy.HandleFailure(String message)
+[xUnit.net 00:01:08.97]            at FluentAssertions.Execution.AssertionScope.FailWith(Func`1 failReasonFunc)
+[xUnit.net 00:01:08.97]            at FluentAssertions.Primitives.StringAssertions`1.NotBeNullOrEmpty(String because, Object[] becauseArgs)
+[xUnit.net 00:01:08.97]         C:\Users\LAP LINK\source\repos\Open_lab\Open_lab.Tests\ViewModels\SampleCollectionViewModelTests.cs(101,0): at Open_lab.Tests.ViewModels.SampleCollectionViewModelTests.MarkCollectedAsync_With_Null_SelectedRow_Should_Do_Nothing()
+[xUnit.net 00:01:08.97]         --- End of stack trace from previous location ---
+[xUnit.net 00:01:11.91]     Open_lab.Tests.ViewModels.Module4ViewModelCompletion_Part3.PrintReport_PrintCommand_When_No_Report_Should_Do_Nothing_Edge [FAIL]
+[xUnit.net 00:01:11.91]       Expected viewModel.StatusMessage not to be <null> or empty, but found "".
+[xUnit.net 00:01:11.91]       Stack Trace:
+[xUnit.net 00:01:11.91]            at FluentAssertions.Execution.XUnit2TestFramework.Throw(String message)
+[xUnit.net 00:01:11.91]            at FluentAssertions.Execution.TestFrameworkProvider.Throw(String message)
+[xUnit.net 00:01:11.91]            at FluentAssertions.Execution.DefaultAssertionStrategy.HandleFailure(String message)
+[xUnit.net 00:01:11.91]            at FluentAssertions.Execution.AssertionScope.FailWith(Func`1 failReasonFunc)
+[xUnit.net 00:01:11.91]            at FluentAssertions.Primitives.StringAssertions`1.NotBeNullOrEmpty(String because, Object[] becauseArgs)
+[xUnit.net 00:01:11.91]         C:\Users\LAP LINK\source\repos\Open_lab\Open_lab.Tests\ViewModels\Module4ViewModelCompletion_Part3.cs(235,0): at Open_lab.Tests.ViewModels.Module4ViewModelCompletion_Part3.PrintReport_PrintCommand_When_No_Report_Should_Do_Nothing_Edge()
+[xUnit.net 00:01:11.91]         --- End of stack trace from previous location ---
+[xUnit.net 00:01:20.36]     Open_lab.Tests.ViewModels.PatientBillingViewModelTests.DeletePaymentAsync_With_Null_SelectedPayment_Should_Return [FAIL]
+[xUnit.net 00:01:20.37]       Expected _viewModel.StatusMessage not to be <null> or empty, but found "".
+[xUnit.net 00:01:20.37]       Stack Trace:
+[xUnit.net 00:01:20.37]            at FluentAssertions.Execution.XUnit2TestFramework.Throw(String message)
+[xUnit.net 00:01:20.37]            at FluentAssertions.Execution.TestFrameworkProvider.Throw(String message)
+[xUnit.net 00:01:20.37]            at FluentAssertions.Execution.DefaultAssertionStrategy.HandleFailure(String message)
+[xUnit.net 00:01:20.37]            at FluentAssertions.Execution.AssertionScope.FailWith(Func`1 failReasonFunc)
+[xUnit.net 00:01:20.37]            at FluentAssertions.Primitives.StringAssertions`1.NotBeNullOrEmpty(String because, Object[] becauseArgs)
+[xUnit.net 00:01:20.37]         C:\Users\LAP LINK\source\repos\Open_lab\Open_lab.Tests\ViewModels\PatientBillingViewModelTests.cs(226,0): at Open_lab.Tests.ViewModels.PatientBillingViewModelTests.DeletePaymentAsync_With_Null_SelectedPayment_Should_Return()
+[xUnit.net 00:01:20.37]         --- End of stack trace from previous location ---
+[xUnit.net 00:01:20.72]     Open_lab.Tests.ViewModels.PatientBillingViewModelTests.AddChargeAsync_With_VisitId_Zero_Should_Return [FAIL]
+[xUnit.net 00:01:20.72]       Expected _viewModel.StatusMessage not to be <null> or empty, but found "".
+[xUnit.net 00:01:20.72]       Stack Trace:
+[xUnit.net 00:01:20.72]            at FluentAssertions.Execution.XUnit2TestFramework.Throw(String message)
+[xUnit.net 00:01:20.72]            at FluentAssertions.Execution.TestFrameworkProvider.Throw(String message)
+[xUnit.net 00:01:20.72]            at FluentAssertions.Execution.DefaultAssertionStrategy.HandleFailure(String message)
+[xUnit.net 00:01:20.72]            at FluentAssertions.Execution.AssertionScope.FailWith(Func`1 failReasonFunc)
+[xUnit.net 00:01:20.72]            at FluentAssertions.Primitives.StringAssertions`1.NotBeNullOrEmpty(String because, Object[] becauseArgs)
+[xUnit.net 00:01:20.72]         C:\Users\LAP LINK\source\repos\Open_lab\Open_lab.Tests\ViewModels\PatientBillingViewModelTests.cs(346,0): at Open_lab.Tests.ViewModels.PatientBillingViewModelTests.AddChargeAsync_With_VisitId_Zero_Should_Return()
+[xUnit.net 00:01:20.72]         --- End of stack trace from previous location ---
+[xUnit.net 00:01:21.38]     Open_lab.Tests.ViewModels.PatientBillingViewModelTests.PrintInvoiceAsync_When_NoInvoiceFound_Should_NotLogPrint_EdgeGuard [FAIL]
+[xUnit.net 00:01:21.38]       Expected _viewModel.StatusMessage not to be <null> or empty, but found "".
+[xUnit.net 00:01:21.38]       Stack Trace:
+[xUnit.net 00:01:21.38]            at FluentAssertions.Execution.XUnit2TestFramework.Throw(String message)
+[xUnit.net 00:01:21.38]            at FluentAssertions.Execution.TestFrameworkProvider.Throw(String message)
+[xUnit.net 00:01:21.38]            at FluentAssertions.Execution.DefaultAssertionStrategy.HandleFailure(String message)
+[xUnit.net 00:01:21.38]            at FluentAssertions.Execution.AssertionScope.FailWith(Func`1 failReasonFunc)
+[xUnit.net 00:01:21.38]            at FluentAssertions.Primitives.StringAssertions`1.NotBeNullOrEmpty(String because, Object[] becauseArgs)
+[xUnit.net 00:01:21.38]         C:\Users\LAP LINK\source\repos\Open_lab\Open_lab.Tests\ViewModels\PatientBillingViewModelTests.cs(500,0): at Open_lab.Tests.ViewModels.PatientBillingViewModelTests.PrintInvoiceAsync_When_NoInvoiceFound_Should_NotLogPrint_EdgeGuard()
+[xUnit.net 00:01:21.38]         --- End of stack trace from previous location ---
+[xUnit.net 00:01:22.49]   Finished:    Open_lab.Tests
+========== Test run finished: 1483 Tests (1464 Passed, 19 Failed, 0 Skipped) run in 1.4 min ==========

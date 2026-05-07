@@ -130,6 +130,7 @@ namespace Open_lab.Tests.ViewModels
                     t.Price == 120m &&
                     t.TurnaroundHours == 48
                 )), Times.Once);
+                _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
             }
 
             [Fact]
@@ -192,6 +193,7 @@ namespace Open_lab.Tests.ViewModels
                     t.CostPrice == 15.50m &&
                     t.PatientPrice == 45.00m
                 )), Times.Once);
+                _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
             }
 
             [Fact]
@@ -218,6 +220,7 @@ namespace Open_lab.Tests.ViewModels
                     t.SampleTypeId == null &&
                     t.UnitId == null
                 )), Times.Once);
+                _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
             }
 
             [Fact]
@@ -291,6 +294,7 @@ namespace Open_lab.Tests.ViewModels
                     t.NameReport == "Updated Name" &&
                     t.Price == 75m
                 )), Times.Once);
+                _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
             }
 
             [Fact]
@@ -326,6 +330,7 @@ namespace Open_lab.Tests.ViewModels
                 // When SelectedTest is null, SaveAsync should call CreateTestAsync, not UpdateTestAsync.
                 // We verify UpdateTestAsync is NOT called.
                 _testCatalogServiceMock.Verify(x => x.UpdateTestAsync(It.IsAny<Test>()), Times.Never);
+                _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
             }
         }
 
@@ -428,6 +433,7 @@ namespace Open_lab.Tests.ViewModels
                     r.TestId == 5 &&
                     r.HighValue == 200
                 )), Times.Once);
+                _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
             }
 
             [Fact]
@@ -446,6 +452,7 @@ namespace Open_lab.Tests.ViewModels
                 _testCatalogServiceMock.Verify(x => x.DeleteReferenceRangeAsync(20), Times.Once);
                 _viewModel.SelectedRange.Should().BeNull();
                 _viewModel.Ranges.Should().BeEmpty();
+                _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
             }
 
             [Fact]
@@ -554,6 +561,7 @@ namespace Open_lab.Tests.ViewModels
                 _testCatalogServiceMock.Verify(x => x.CreateCustomGroupAsync(It.Is<CustomGroup>(g =>
                     g.Name == "Free Screening" && g.Price == 0m
                 )), Times.Once);
+                _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
             }
 
             [Fact]
@@ -592,6 +600,7 @@ namespace Open_lab.Tests.ViewModels
                 // Assert
                 _testCatalogServiceMock.Verify(x => x.DeleteCustomGroupItemAsync(10), Times.Once);
                 _viewModel.GroupItems.Should().BeEmpty();
+                _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
             }
 
             [Fact]
@@ -724,6 +733,7 @@ namespace Open_lab.Tests.ViewModels
                 _testCatalogServiceMock.Verify(x => x.UpdatePriceListAsync(It.Is<PriceList>(pl =>
                     pl.PriceListId == 1 && pl.Name == "New Name"
                 )), Times.Once);
+                _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
             }
 
             [Fact]
@@ -745,6 +755,7 @@ namespace Open_lab.Tests.ViewModels
                 _testCatalogServiceMock.Verify(x => x.UpdatePriceListItemAsync(It.Is<PriceListItem>(i =>
                     i.PriceListItemId == 5 && i.Price == 45m
                 )), Times.Once);
+                _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
             }
 
             [Fact]
@@ -762,6 +773,7 @@ namespace Open_lab.Tests.ViewModels
                 // Assert
                 _testCatalogServiceMock.Verify(x => x.DeletePriceListItemAsync(10), Times.Once);
                 _viewModel.SelectedItem.Should().BeNull();
+                _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
             }
 
             [Fact]
@@ -804,6 +816,7 @@ namespace Open_lab.Tests.ViewModels
                     It.IsAny<ObservableCollection<string>>(),
                     "PriceList_1"
                 ), Times.Once);
+                (_viewModel.StatusMessage.Contains("تم") || _viewModel.StatusMessage.Contains("print") || _viewModel.StatusMessage.Contains("طباع")).Should().BeTrue();
             }
 
             [Fact]
@@ -832,6 +845,7 @@ namespace Open_lab.Tests.ViewModels
                     It.IsAny<ObservableCollection<string>>(),
                     It.IsAny<string>()
                 ), Times.Never);
+                _viewModel.StatusMessage.Should().NotBeNull();
             }
 
             [Fact]
@@ -868,6 +882,7 @@ namespace Open_lab.Tests.ViewModels
 
                 // Assert
                 _testCatalogServiceMock.Verify(x => x.UpdatePriceListAsync(It.IsAny<PriceList>()), Times.Never);
+                _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
             }
 
             [Fact]
@@ -937,6 +952,7 @@ namespace Open_lab.Tests.ViewModels
                     c.LowComment == "Low Update" &&
                     c.HighComment == "High Update"
                 )), Times.Once);
+                _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
             }
 
             [Fact]
@@ -956,6 +972,7 @@ namespace Open_lab.Tests.ViewModels
 
                 // Assert
                 _testCatalogServiceMock.Verify(x => x.CreateTestCommentAsync(It.IsAny<TestComment>()), Times.Never);
+                _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
             }
 
             [Fact]
@@ -973,6 +990,7 @@ namespace Open_lab.Tests.ViewModels
                 // Assert
                 _testCatalogServiceMock.Verify(x => x.DeleteTestCommentAsync(20), Times.Once);
                 _viewModel.Comments.Should().BeEmpty();
+                _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
             }
 
             [Fact]
@@ -986,6 +1004,7 @@ namespace Open_lab.Tests.ViewModels
 
                 // Assert
                 _testCatalogServiceMock.Verify(x => x.DeleteTestCommentAsync(It.IsAny<int>()), Times.Never);
+                _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
             }
 
             [Fact]

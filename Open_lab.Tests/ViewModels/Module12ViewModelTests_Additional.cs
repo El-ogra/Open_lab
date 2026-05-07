@@ -237,6 +237,7 @@ namespace Open_lab.Tests.ViewModels
 
             // Assert
             catalogMock.Verify(s => s.CreateReferralAsync(It.Is<Referral>(r => r.CommissionPercentage == 15m)), Times.Once);
+            viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
         [Fact]
@@ -283,6 +284,7 @@ namespace Open_lab.Tests.ViewModels
 
             // Assert
             catalogMock.Verify(s => s.CreateReferralAsync(It.Is<Referral>(r => r.CommissionPercentage == 100m)), Times.Once);
+            viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
         // ==================================================================================

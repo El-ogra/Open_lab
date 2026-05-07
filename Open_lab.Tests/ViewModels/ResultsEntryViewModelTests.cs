@@ -40,6 +40,7 @@ namespace Open_lab.Tests.ViewModels
                 .ReturnsAsync(visitTests);
             await _viewModel.InvokePrivateAsync("LoadVisitTestsAsync");
             _resultsServiceMock.Verify(x => x.GetVisitTestsByDateAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>()), Times.Once);
+            _viewModel.StatusMessage.Should().NotBeNull();
         }
 
         [Fact]
@@ -57,6 +58,8 @@ namespace Open_lab.Tests.ViewModels
             _viewModel.SelectedVisitTest = null;
             await _viewModel.InvokePrivateAsync("SaveResultsAsync");
             _resultsServiceMock.Verify(x => x.SaveResultAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+            (_viewModel.StatusMessage.Contains("لم يتم تحديد") || _viewModel.StatusMessage.Contains("اختبار")).Should().BeTrue();
+            _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
         [Fact]
@@ -69,6 +72,7 @@ namespace Open_lab.Tests.ViewModels
                 .Returns(Task.CompletedTask);
             await _viewModel.InvokePrivateAsync("SaveResultsAsync");
             _resultsServiceMock.Verify(x => x.SaveResultAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+            _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
         [Fact]
@@ -77,6 +81,8 @@ namespace Open_lab.Tests.ViewModels
             _viewModel.SelectedVisitTest = null;
             await _viewModel.InvokePrivateAsync("VerifyResultsAsync");
             _resultsServiceMock.Verify(x => x.VerifyVisitTestAsync(It.IsAny<int>(), It.IsAny<int>()), Times.Never);
+            (_viewModel.StatusMessage.Contains("لم يتم تحديد") || _viewModel.StatusMessage.Contains("اختبار")).Should().BeTrue();
+            _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
         [Fact]
@@ -86,6 +92,7 @@ namespace Open_lab.Tests.ViewModels
             _resultsServiceMock.Setup(x => x.VerifyVisitTestAsync(10, It.IsAny<int>())).Returns(Task.CompletedTask);
             await _viewModel.InvokePrivateAsync("VerifyResultsAsync");
             _resultsServiceMock.Verify(x => x.VerifyVisitTestAsync(10, It.IsAny<int>()), Times.Once);
+            _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
         [Fact]
@@ -124,6 +131,8 @@ namespace Open_lab.Tests.ViewModels
             _viewModel.SelectedVisitTest = null;
             await _viewModel.InvokePrivateAsync("ReopenResultsAsync");
             _resultsServiceMock.Verify(x => x.ReopenVisitTestAsync(It.IsAny<int>()), Times.Never);
+            (_viewModel.StatusMessage.Contains("لم يتم تحديد") || _viewModel.StatusMessage.Contains("اختبار")).Should().BeTrue();
+            _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
         [Fact]
@@ -133,6 +142,7 @@ namespace Open_lab.Tests.ViewModels
             _resultsServiceMock.Setup(x => x.ReopenVisitTestAsync(10)).Returns(Task.CompletedTask);
             await _viewModel.InvokePrivateAsync("ReopenResultsAsync");
             _resultsServiceMock.Verify(x => x.ReopenVisitTestAsync(10), Times.Once);
+            _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
     }
 }

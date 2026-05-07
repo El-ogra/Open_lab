@@ -237,6 +237,7 @@ namespace Open_lab.Tests.ViewModels
                 x => x.GetMonthlyAnalysisAsync(It.IsAny<int>()),
                 Times.AtLeastOnce,
                 "يجب استدعاء GetMonthlyAnalysisAsync عند تحميل البيانات");
+            _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
         [Fact]
@@ -323,6 +324,7 @@ namespace Open_lab.Tests.ViewModels
                 x => x.GetTop10TestsAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>()),
                 Times.AtLeastOnce,
                 "يجب استدعاء GetTop10TestsAsync بنطاق زمني");
+            _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
         // ===================================================================
@@ -395,6 +397,7 @@ namespace Open_lab.Tests.ViewModels
                 x => x.GetSampleCountPerYearAsync(It.IsAny<int>()),
                 Times.AtLeastOnce,
                 "يجب استدعاء GetSampleCountPerYearAsync عند تحميل البيانات");
+            _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
         // ===================================================================
@@ -475,6 +478,7 @@ namespace Open_lab.Tests.ViewModels
                     It.IsAny<int?>()),
                 Times.AtLeastOnce,
                 "يجب استدعاء GetSnapshotAsync عند تحميل بيانات مصادر الإحالة");
+            _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
         [Fact]
@@ -565,6 +569,7 @@ namespace Open_lab.Tests.ViewModels
                 x => x.GetUserPerformanceAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>()),
                 Times.AtLeastOnce,
                 "يجب استدعاء GetUserPerformanceAsync عند تحميل التقرير");
+            _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
         // ===================================================================

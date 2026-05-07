@@ -155,6 +155,7 @@ namespace Open_lab.Tests.ViewModels
 
             // Assert
             _contractServiceMock.Verify(s => s.SettleContractInvoiceAsync(20), Times.Once);
+            _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
     }
 }

@@ -244,6 +244,7 @@ namespace Open_lab.Tests.ViewModels
 
             // Assert
             _resultsServiceMock.Verify(x => x.SaveResultAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+            viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
         [Fact]
@@ -371,6 +372,7 @@ namespace Open_lab.Tests.ViewModels
 
             // Assert
             _resultsServiceMock.Verify(x => x.SaveResultAsync(53, 1, "120", "N", It.IsAny<string>()), Times.Once);
+            viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
     }
 }

@@ -602,6 +602,7 @@ namespace Open_lab.Tests
             _resultsServiceMock.Verify(x => x.SaveResultAsync(10, 1, "100", It.IsAny<string?>(), It.IsAny<string?>()), Times.Once);
             _resultsServiceMock.Verify(x => x.SaveResultAsync(10, 2, "200", It.IsAny<string?>(), It.IsAny<string?>()), Times.Once);
             _resultsServiceMock.Verify(x => x.SaveResultAsync(10, 3, "300", It.IsAny<string?>(), It.IsAny<string?>()), Times.Once);
+            viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
         [Fact]
@@ -614,6 +615,7 @@ namespace Open_lab.Tests
             await viewModel.InvokePrivateAsync("SaveResultsAsync");
 
             _resultsServiceMock.Verify(x => x.SaveResultAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<string?>()), Times.Never);
+            viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
         [Fact]
@@ -653,6 +655,7 @@ namespace Open_lab.Tests
             // distinctive business token "إعادة فتح" that is invariant across minor wording tweaks
             // and still represents the reopen success contract.
             viewModel.StatusMessage.Should().Contain("إعادة فتح");
+            viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
         #endregion
@@ -672,6 +675,7 @@ namespace Open_lab.Tests
             await viewModel.InvokePrivateAsync("PrintAsync", true);
 
             _printServiceMock.Verify(x => x.PrintVisitReportAsync(It.IsAny<VisitReportData>(), true), Times.Once);
+            viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
         [Fact]
@@ -686,6 +690,7 @@ namespace Open_lab.Tests
             await viewModel.InvokePrivateAsync("PrintAsync", false);
 
             _printServiceMock.Verify(x => x.PrintVisitReportAsync(It.IsAny<VisitReportData>(), It.IsAny<bool>()), Times.Never);
+            viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
         [Fact]

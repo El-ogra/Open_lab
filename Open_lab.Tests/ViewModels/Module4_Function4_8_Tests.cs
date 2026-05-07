@@ -133,6 +133,7 @@ namespace Open_lab.Tests.ViewModels
             await Task.Delay(100);
 
             _printServiceMock.Verify(x => x.PrintTextReportAsync("تقرير فارغ", It.IsAny<IReadOnlyCollection<string>>(), It.IsAny<string>()), Times.Once);
+            viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
         [Fact]

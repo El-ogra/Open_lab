@@ -98,6 +98,7 @@ namespace Open_lab.Tests.ViewModels
             _viewModel.SelectedRow = null;
             await _viewModel.InvokePrivateAsync("MarkCollectedAsync");
             _sampleCollectionServiceMock.Verify(x => x.MarkCollectedAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<bool>(), It.IsAny<int?>()), Times.Never);
+            _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
         [Fact]
@@ -111,6 +112,7 @@ namespace Open_lab.Tests.ViewModels
 
             _sampleCollectionServiceMock.Verify(x => x.MarkCollectedAsync(10, It.IsAny<int>(), false, It.IsAny<int?>()), Times.Once);
             _viewModel.IsLoading.Should().BeFalse();
+            _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
         [Fact]
@@ -155,6 +157,7 @@ namespace Open_lab.Tests.ViewModels
 
             _sampleCollectionServiceMock.Verify(x => x.MarkSeparatedAsync(10, "Centrifuge"), Times.Once);
             _viewModel.IsLoading.Should().BeFalse();
+            _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
         [Fact]
@@ -182,6 +185,8 @@ namespace Open_lab.Tests.ViewModels
             await Task.Delay(50);
 
             _sampleCollectionServiceMock.Verify(x => x.MarkNotCollectedAsync(10), Times.Once);
+            _viewModel.StatusMessage.Should().Contain("تم تعليم العينة كغير مجمعة");
+            _viewModel.IsLoading.Should().BeFalse();
         }
 
         [Fact]

@@ -202,6 +202,7 @@ namespace Open_lab.Tests.ViewModels
             _systemSettingsServiceMock.Verify(
                 x => x.SaveProfileAsync(It.Is<SystemSettingsProfile>(p => p.ReportPaperSize == "A4")),
                 Times.AtLeastOnce);
+            vm.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
         [Fact]
@@ -221,6 +222,7 @@ namespace Open_lab.Tests.ViewModels
             _systemSettingsServiceMock.Verify(
                 x => x.SaveProfileAsync(It.Is<SystemSettingsProfile>(p => p.ReportPaperSize == "A5")),
                 Times.AtLeastOnce);
+            vm.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
         [Fact]
@@ -238,6 +240,7 @@ namespace Open_lab.Tests.ViewModels
 
             // Assert
             vm.ReportPaperSize.Should().Be("A5");
+            vm.StatusMessage.Should().NotBeNull();
         }
 
         [Fact]
@@ -283,6 +286,7 @@ namespace Open_lab.Tests.ViewModels
                     p.ReportFooter == "© 2026" &&
                     p.ReportPrimaryColor == "#0D47A1")),
                 Times.AtLeastOnce);
+            vm.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
         [Fact]
@@ -305,6 +309,7 @@ namespace Open_lab.Tests.ViewModels
             // Assert
             vm.ReceiptHeaderText.Should().Be("مختبر ألف");
             vm.ReceiptFooterText.Should().Be("نراكم قريباً");
+            vm.StatusMessage.Should().NotBeNull();
         }
 
         [Fact]
@@ -326,6 +331,7 @@ namespace Open_lab.Tests.ViewModels
                 x => x.SaveProfileAsync(It.Is<SystemSettingsProfile>(p =>
                     p.ReportHeader == string.Empty && p.ReportFooter == string.Empty)),
                 Times.AtLeastOnce);
+            vm.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
         // ========================================================================
@@ -349,6 +355,7 @@ namespace Open_lab.Tests.ViewModels
             _systemSettingsServiceMock.Verify(
                 x => x.SaveProfileAsync(It.Is<SystemSettingsProfile>(p => p.DefaultAccountType == "Cash")),
                 Times.AtLeastOnce);
+            vm.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
         [Fact]
@@ -368,6 +375,7 @@ namespace Open_lab.Tests.ViewModels
             _systemSettingsServiceMock.Verify(
                 x => x.SaveProfileAsync(It.Is<SystemSettingsProfile>(p => p.DefaultAccountType == "Contract")),
                 Times.AtLeastOnce);
+            vm.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
         [Fact]
@@ -385,6 +393,7 @@ namespace Open_lab.Tests.ViewModels
 
             // Assert
             vm.DefaultAccountType.Should().Be("Contract");
+            vm.StatusMessage.Should().NotBeNull();
         }
 
         // ========================================================================
@@ -792,6 +801,7 @@ namespace Open_lab.Tests.ViewModels
             vm.CurrentMasterPassword.Should().BeEmpty();
             vm.NewMasterPassword.Should().BeEmpty();
             vm.ConfirmMasterPassword.Should().BeEmpty();
+            vm.StatusMessage.Should().NotBeNullOrEmpty();
             vm.StatusMessage.Should().Contain("تم تحديث كلمة مرور النظام");
         }
 

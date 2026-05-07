@@ -46,6 +46,7 @@ namespace Open_lab.Tests.ViewModels
             await _viewModel.InvokePrivateAsync("PrintAsync");
 
             _printServiceMock.Verify(x => x.PrintWorksheetByPatientAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<IReadOnlyCollection<WorkSheetPatientRow>>()), Times.Once);
+            _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
         [Fact]
@@ -167,6 +168,7 @@ namespace Open_lab.Tests.ViewModels
             await _viewModel.InvokePrivateAsync("PrintAsync");
 
             _printServiceMock.Verify(x => x.PrintWorksheetByTestAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<IReadOnlyCollection<WorkSheetTestRow>>()), Times.Once);
+            _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
         [Fact]

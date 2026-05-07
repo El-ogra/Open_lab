@@ -459,6 +459,7 @@ namespace Open_lab.Tests
             await Task.Delay(50);
 
             _collectionServiceMock.Verify(x => x.MarkCollectedAsync(100, It.IsAny<int>(), true, It.IsAny<int?>()), Times.Once);
+            _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
         [Fact]
@@ -503,6 +504,7 @@ namespace Open_lab.Tests
 
             // Separation type can be null - service handles it
             _collectionServiceMock.Verify(x => x.MarkSeparatedAsync(200, It.IsAny<string>()), Times.Once);
+            _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
         [Fact]
@@ -592,6 +594,7 @@ namespace Open_lab.Tests
             await Task.Delay(50);
 
             _collectionServiceMock.Verify(x => x.MarkCollectedAsync(It.IsAny<int>(), It.IsAny<int>(), true, It.IsAny<int?>()), Times.Never);
+            _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
         [Fact]
@@ -651,6 +654,7 @@ namespace Open_lab.Tests
 
             _collectionServiceMock.Verify(x => x.MarkCollectedAsync(500, It.IsAny<int>(), false, It.IsAny<int?>()), Times.Once);
             _collectionServiceMock.Verify(x => x.MarkSeparatedAsync(500, "Centrifuge"), Times.Once);
+            _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
         [Fact]
@@ -667,6 +671,7 @@ namespace Open_lab.Tests
             await Task.Delay(50);
 
             _collectionServiceMock.Verify(x => x.MarkNotCollectedAsync(600), Times.Once);
+            _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
         #endregion

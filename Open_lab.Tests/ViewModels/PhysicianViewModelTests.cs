@@ -48,6 +48,7 @@ namespace Open_lab.Tests.ViewModels
                 p.FullName == "Dr. New" &&
                 p.PriceListId == 4 &&
                 p.CommissionPercentage == 12)), Times.Once);
+            _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
         [Fact]

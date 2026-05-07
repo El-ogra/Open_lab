@@ -861,6 +861,7 @@ namespace Open_lab.Tests
             // Assert
             extLabMock.Verify(x => x.CreateManifestAsync(1, It.IsAny<List<int>>(), It.IsAny<string?>()), Times.Once);
             viewModel.SelectedQueueIds.Should().BeEmpty();
+            viewModel.StatusMessage.Should().NotBeNullOrEmpty();
             AppSessionTestHelper.Reset();
         }
 
@@ -901,6 +902,7 @@ namespace Open_lab.Tests
 
             // Assert
             extLabMock.Verify(x => x.EnterExternalLabResultAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<string?>()), Times.Never);
+            viewModel.StatusMessage.Should().NotBeNullOrEmpty();
             AppSessionTestHelper.Reset();
         }
 
@@ -938,6 +940,7 @@ namespace Open_lab.Tests
 
             // Assert
             extSettleMock.Verify(x => x.CreateSettlementAsync(It.IsAny<int>(), It.IsAny<decimal>(), It.IsAny<string?>()), Times.Never);
+            viewModel.StatusMessage.Should().NotBeNullOrEmpty();
             AppSessionTestHelper.Reset();
         }
 

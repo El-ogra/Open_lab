@@ -244,6 +244,7 @@ namespace Open_lab.Tests.ViewModels
 
             // Assert
             _visitServiceMock.Verify(v => v.AddCustomGroupToVisitAsync(It.IsAny<int>(), It.IsAny<int>()), Times.Never);
+            _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
         [Fact]

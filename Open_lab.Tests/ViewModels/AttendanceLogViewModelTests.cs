@@ -106,6 +106,7 @@ namespace Open_lab.Tests.ViewModels
 
             AppSession.AttendanceLogId.Should().Be(0);
             _attendanceServiceMock.Verify(x => x.ClockOutAsync(AppSession.UserId, It.IsAny<DateTime?>()), Times.Once);
+            _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
         [Fact]
@@ -124,6 +125,7 @@ namespace Open_lab.Tests.ViewModels
             // Assert
             AppSession.AttendanceLogId.Should().Be(11);
             _attendanceServiceMock.Verify(x => x.ClockInAsync(AppSession.UserId, It.IsAny<DateTime?>(), It.IsAny<int?>(), It.IsAny<string?>()), Times.Once);
+            _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
         [Fact]
@@ -156,6 +158,7 @@ namespace Open_lab.Tests.ViewModels
 
             _attendanceServiceMock.Verify(x => x.StartBreakAsync(AppSession.UserId, It.IsAny<string>(), It.IsAny<DateTime?>(), It.IsAny<string?>()), Times.Once);
             _viewModel.BreakNote.Should().BeEmpty();
+            _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
         [Fact]
@@ -173,6 +176,7 @@ namespace Open_lab.Tests.ViewModels
 
             // Assert
             _attendanceServiceMock.Verify(x => x.EndBreakAsync(AppSession.UserId, It.IsAny<DateTime?>()), Times.Once);
+            _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
         [Fact]

@@ -110,6 +110,7 @@ namespace Open_lab.Tests.ViewModels
 
             // Assert
             _testCatalogServiceMock.Verify(x => x.DeleteReferenceRangeAsync(It.IsAny<int>()), Times.Never);
+            _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
     }
 }

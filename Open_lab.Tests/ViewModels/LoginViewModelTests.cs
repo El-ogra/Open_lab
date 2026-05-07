@@ -161,6 +161,7 @@ namespace Open_lab.Tests.ViewModels
                 x => x.CreateLoginAsync(1, It.IsAny<string>()), Times.Once);
             _onLoginSuccessMock.Verify(x => x(), Times.Once);
             _viewModel.IsBusy.Should().BeFalse();
+            _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
         [Fact]
@@ -190,6 +191,7 @@ namespace Open_lab.Tests.ViewModels
 
             // Assert
             _userPreferenceServiceMock.Verify(x => x.SetRememberedUsername("john"), Times.Once);
+            _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
         [Fact]
@@ -219,6 +221,7 @@ namespace Open_lab.Tests.ViewModels
 
             // Assert
             _userPreferenceServiceMock.Verify(x => x.SetRememberedUsername(null), Times.Once);
+            _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
         [Fact]

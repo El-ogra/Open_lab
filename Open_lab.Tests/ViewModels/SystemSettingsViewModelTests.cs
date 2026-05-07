@@ -62,6 +62,7 @@ namespace Open_lab.Tests.ViewModels
 
             _settingsServiceMock.Verify(x => x.SaveProfileAsync(It.Is<SystemSettingsProfile>(p =>
                 p.ReportPaperSize == "A4" && p.DefaultAccountType == "Cash")), Times.AtLeastOnce);
+            _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
         [Fact]
@@ -94,6 +95,7 @@ namespace Open_lab.Tests.ViewModels
             _viewModel.CurrentMasterPassword.Should().BeEmpty();
             _viewModel.NewMasterPassword.Should().BeEmpty();
             _viewModel.ConfirmMasterPassword.Should().BeEmpty();
+            _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
         [Fact]
@@ -106,6 +108,7 @@ namespace Open_lab.Tests.ViewModels
             // Assert
             _settingsServiceMock.Verify(x => x.GetProfileAsync(), Times.AtLeastOnce);
             _settingsServiceMock.Verify(x => x.GetSettingsAsync(), Times.AtLeastOnce);
+            _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
         [Fact]

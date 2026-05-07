@@ -147,6 +147,7 @@ namespace Open_lab.Tests.ViewModels
             // The VM logic (line 261) says: Price > 0 ? Price : SelectedTest.Price
             // So if Price is -10, it should use 100m.
             _testCatalogServiceMock.Verify(x => x.AddPriceListItemAsync(It.Is<PriceListItem>(i => i.Price == 100m)), Times.Once);
+            _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
         [Fact]
@@ -187,6 +188,7 @@ namespace Open_lab.Tests.ViewModels
             // Assert
             _testCatalogServiceMock.Verify(x => x.AddPriceListItemAsync(It.Is<PriceListItem>(i =>
                 i.PriceListId == 2 && i.TestId == 20 && i.Price == 135m)), Times.Once);
+            _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
     }
 }

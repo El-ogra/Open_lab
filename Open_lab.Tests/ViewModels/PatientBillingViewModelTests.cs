@@ -75,6 +75,7 @@ namespace Open_lab.Tests.ViewModels
             // Assert
             _invoiceServiceMock.Verify(x => x.GetVisitTotalAsync(10), Times.Once);
             _viewModel.Total.Should().Be(500m);
+            _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
         [Fact]
@@ -94,6 +95,7 @@ namespace Open_lab.Tests.ViewModels
             _invoiceServiceMock.Verify(x => x.GetVisitTotalAsync(10), Times.Once);
             _invoiceServiceMock.Verify(x => x.GetByVisitIdAsync(10), Times.Once);
             _viewModel.Total.Should().Be(300m);
+            _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
         [Fact]
@@ -206,6 +208,7 @@ namespace Open_lab.Tests.ViewModels
 
             // Assert
             _invoiceServiceMock.Verify(x => x.AddPaymentAsync(100, 999999.99m, It.IsAny<string>(), It.IsAny<int>()), Times.Once);
+            _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
         [Fact]
@@ -220,6 +223,7 @@ namespace Open_lab.Tests.ViewModels
 
             // Assert
             _invoiceServiceMock.Verify(x => x.DeletePaymentAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>()), Times.Never);
+            _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
         [Fact]
@@ -261,6 +265,7 @@ namespace Open_lab.Tests.ViewModels
 
             // Assert
             _invoiceServiceMock.Verify(x => x.EditPaymentAsync(5, 50m, It.IsAny<int>(), It.IsAny<string>()), Times.Once);
+            _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
         [Fact]
@@ -282,6 +287,7 @@ namespace Open_lab.Tests.ViewModels
 
             // Assert
             _invoiceServiceMock.Verify(x => x.DeletePaymentAsync(3, It.IsAny<int>(), It.IsAny<string>()), Times.Once);
+            _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
         [Fact]
@@ -337,6 +343,7 @@ namespace Open_lab.Tests.ViewModels
 
             // Assert
             _invoiceServiceMock.Verify(x => x.AddAdditionalChargeAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<decimal>()), Times.Never);
+            _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
         [Fact]
@@ -408,6 +415,7 @@ namespace Open_lab.Tests.ViewModels
 
             // Assert
             _invoiceServiceMock.Verify(x => x.AddAdditionalChargeAsync(100, "Zero Fee", 0), Times.Once);
+            _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
         [Fact]
@@ -489,6 +497,7 @@ namespace Open_lab.Tests.ViewModels
 
             // Assert
             _invoiceServiceMock.Verify(x => x.LogInvoicePrintedAsync(It.IsAny<int>(), It.IsAny<int>()), Times.Never);
+            _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
         [Fact]
@@ -523,6 +532,7 @@ namespace Open_lab.Tests.ViewModels
             // Assert
             _invoiceServiceMock.Verify(x => x.GetVisitTotalAsync(99999), Times.Once);
             _viewModel.Total.Should().Be(0m);
+            _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
         [Fact]
@@ -540,6 +550,7 @@ namespace Open_lab.Tests.ViewModels
             // Assert
             _invoiceServiceMock.Verify(x => x.GetVisitTotalAsync(10), Times.Once);
             _viewModel.Total.Should().Be(0m);
+            _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
         [Fact]
@@ -559,6 +570,7 @@ namespace Open_lab.Tests.ViewModels
             // Assert
             _invoiceServiceMock.Verify(x => x.CreateOrUpdateInvoiceAsync(10, 50m, 0), Times.Once);
             _viewModel.NetTotal.Should().Be(450m);
+            _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
         [Fact]
@@ -597,6 +609,7 @@ namespace Open_lab.Tests.ViewModels
             // Assert
             _invoiceServiceMock.Verify(x => x.CreateOrUpdateInvoiceAsync(10, 0m, 0), Times.Once);
             _viewModel.NetTotal.Should().Be(500m);
+            _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
         [Fact]
@@ -620,6 +633,7 @@ namespace Open_lab.Tests.ViewModels
 
             // Assert
             _invoiceServiceMock.Verify(x => x.AddPaymentAsync(100, 40m, It.IsAny<string>(), It.IsAny<int>()), Times.Once);
+            _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
         [Fact]
@@ -664,6 +678,7 @@ namespace Open_lab.Tests.ViewModels
 
             // Assert
             _invoiceServiceMock.Verify(x => x.EditPaymentAsync(5, 80m, It.IsAny<int>(), It.IsAny<string>()), Times.Once);
+            _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
         [Fact]

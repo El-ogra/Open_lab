@@ -69,6 +69,7 @@ namespace Open_lab.Tests.ViewModels
 
             _catalogMock.Verify(x => x.CreateTestAsync(It.Is<Test>(t => 
                 t.IsSendOut && t.CostPrice == 100m && t.PatientPrice == 200m)), Times.Once);
+            vm.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
         // ────────────────────────────────────────────────────────────────────────
@@ -163,6 +164,7 @@ namespace Open_lab.Tests.ViewModels
             await vm.InvokePrivateAsync("SaveAsync");
 
             _catalogMock.Verify(x => x.CreateTestCommentAsync(It.Is<TestComment>(c => c.CommentText == "  Whitespace  ")), Times.Once);
+            vm.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
         [Fact]
@@ -177,6 +179,7 @@ namespace Open_lab.Tests.ViewModels
 
             _catalogMock.Verify(x => x.DeleteTestCommentAsync(99), Times.Once);
             vm.Comments.Should().NotContain(comment);
+            vm.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
         // ────────────────────────────────────────────────────────────────────────
@@ -194,6 +197,7 @@ namespace Open_lab.Tests.ViewModels
             await vm.InvokePrivateAsync("DeleteItemAsync");
 
             _catalogMock.Verify(x => x.DeleteCustomGroupItemAsync(12), Times.Once);
+            vm.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
         // ────────────────────────────────────────────────────────────────────────
@@ -211,6 +215,7 @@ namespace Open_lab.Tests.ViewModels
             await vm.InvokePrivateAsync("DeleteItemAsync");
 
             _catalogMock.Verify(x => x.DeletePriceListItemAsync(44), Times.Once);
+            vm.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
         [Fact]
@@ -225,6 +230,7 @@ namespace Open_lab.Tests.ViewModels
             await vm.InvokePrivateAsync("PrintListAsync");
 
             _printMock.Verify(x => x.PrintTextReportAsync(It.IsAny<string>(), It.IsAny<IReadOnlyCollection<string>>(), It.IsAny<string>()), Times.Once);
+            vm.StatusMessage.Should().NotBeNullOrEmpty();
         }
     }
 }

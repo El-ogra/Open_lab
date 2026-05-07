@@ -213,6 +213,7 @@ namespace Open_lab.Tests.ViewModels
             // Assert
             _printServiceMock.Verify(x => x.PrintVisitReportAsync(It.IsAny<VisitReportData>(), true), Times.Once);
             _resultsServiceMock.Verify(x => x.LogVisitReportPrintedAsync(401, It.IsAny<int>()), Times.Once);
+            viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
         [Fact]
@@ -231,6 +232,7 @@ namespace Open_lab.Tests.ViewModels
             // Assert
             _printServiceMock.Verify(x => x.PrintVisitReportAsync(It.IsAny<VisitReportData>(), It.IsAny<bool>()), Times.Never);
             _resultsServiceMock.Verify(x => x.LogVisitReportPrintedAsync(It.IsAny<int>(), It.IsAny<int>()), Times.Never);
+            viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
         [Fact]

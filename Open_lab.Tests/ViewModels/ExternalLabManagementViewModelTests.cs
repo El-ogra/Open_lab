@@ -237,6 +237,7 @@ namespace Open_lab.Tests.ViewModels
 
             // Assert
             _externalLabServiceMock.Verify(x => x.CreateManifestAsync(It.IsAny<int>(), It.IsAny<List<int>>(), It.IsAny<string?>()), Times.Never);
+            _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
         [Fact]
@@ -252,6 +253,7 @@ namespace Open_lab.Tests.ViewModels
 
             // Assert
             _externalLabServiceMock.Verify(x => x.CreateManifestAsync(It.IsAny<int>(), It.IsAny<List<int>>(), It.IsAny<string?>()), Times.Never);
+            _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
         [Fact]
@@ -285,6 +287,7 @@ namespace Open_lab.Tests.ViewModels
 
             // Assert
             _externalLabServiceMock.Verify(x => x.UpdateQueueStatusAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string?>()), Times.Never);
+            _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
         [Fact]
@@ -359,6 +362,7 @@ namespace Open_lab.Tests.ViewModels
             // Assert
             _externalSettlementServiceMock.Verify(x => x.GetPendingBalanceAsync(It.IsAny<int>()), Times.Never);
             _externalSettlementServiceMock.Verify(x => x.GetSettlementHistoryAsync(It.IsAny<int>()), Times.Never);
+            _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
         [Fact]
@@ -393,6 +397,7 @@ namespace Open_lab.Tests.ViewModels
 
             // Assert
             _externalSettlementServiceMock.Verify(x => x.CreateSettlementAsync(It.IsAny<int>(), It.IsAny<decimal>(), It.IsAny<string?>()), Times.Never);
+            _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
         [Fact]
@@ -414,6 +419,7 @@ namespace Open_lab.Tests.ViewModels
             // Assert
             _externalSettlementServiceMock.Verify(x => x.CreateSettlementAsync(3, 15m, "note"), Times.Once);
             _viewModel.SettlementAmount.Should().Be(0m);
+            _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
         [Fact]
@@ -473,6 +479,7 @@ namespace Open_lab.Tests.ViewModels
 
             // Assert
             _externalLabServiceMock.Verify(x => x.EnterExternalLabResultAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<string?>()), Times.Never);
+            _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
         [Fact]

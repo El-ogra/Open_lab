@@ -518,6 +518,7 @@ namespace Open_lab.Tests
 
             // Assert
             worksheetServiceMock.Verify(x => x.GetWorksheetByPatientAsync(expectedFrom, expectedTo), Times.Once);
+            viewModel.StatusMessage.Should().NotBeNullOrEmpty();
             AppSessionTestHelper.Reset();
         }
 
@@ -543,6 +544,7 @@ namespace Open_lab.Tests
                 It.IsAny<DateTime>(),
                 It.IsAny<DateTime>(),
                 It.Is<IReadOnlyCollection<WorkSheetPatientRow>>(rows => rows.Count == 3)), Times.Once);
+            viewModel.StatusMessage.Should().NotBeNullOrEmpty();
             AppSessionTestHelper.Reset();
         }
 
@@ -609,6 +611,7 @@ namespace Open_lab.Tests
 
             // Assert
             groupServiceMock.Verify(x => x.GetGroupWorksheetByCustomGroupAsync(77, It.IsAny<DateTime>(), It.IsAny<DateTime>()), Times.Once);
+            viewModel.StatusMessage.Should().NotBeNullOrEmpty();
             AppSessionTestHelper.Reset();
         }
 
@@ -640,6 +643,7 @@ namespace Open_lab.Tests
 
             // Assert
             groupServiceMock.Verify(x => x.GetGroupWorksheetByGroupAsync(88, It.IsAny<DateTime>(), It.IsAny<DateTime>()), Times.Once);
+            viewModel.StatusMessage.Should().NotBeNullOrEmpty();
             AppSessionTestHelper.Reset();
         }
 
@@ -746,6 +750,7 @@ namespace Open_lab.Tests
 
             // Assert - Should still call print with empty list based on viewmodel logic
             printServiceMock.Verify(x => x.PrintTextReportAsync("سجل تصنيف التحاليل", It.IsAny<IReadOnlyCollection<string>>(), "TestClassificationLog"), Times.Once);
+            viewModel.StatusMessage.Should().NotBeNullOrEmpty();
             AppSessionTestHelper.Reset();
         }
 
@@ -827,6 +832,7 @@ namespace Open_lab.Tests
 
             // Assert - Print succeeded
             printServiceMock.Verify(x => x.PrintWorksheetByPatientAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<IReadOnlyCollection<WorkSheetPatientRow>>()), Times.Once);
+            viewModel.StatusMessage.Should().NotBeNullOrEmpty();
             AppSessionTestHelper.Reset();
         }
 
@@ -867,6 +873,7 @@ namespace Open_lab.Tests
 
             // Assert - Print succeeded
             printServiceMock.Verify(x => x.PrintWorksheetByPatientAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<IReadOnlyCollection<WorkSheetPatientRow>>()), Times.Once);
+            viewModel.StatusMessage.Should().NotBeNullOrEmpty();
             AppSessionTestHelper.Reset();
         }
 

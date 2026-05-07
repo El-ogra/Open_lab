@@ -46,6 +46,7 @@ namespace Open_lab.Tests.ViewModels
             await _viewModel.InvokePrivateAsync("PrintAsync");
 
             _printServiceMock.Verify(x => x.PrintTextReportAsync("سجل تصنيف التحاليل", It.IsAny<IReadOnlyCollection<string>>(), "TestClassificationLog"), Times.Once);
+            _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
         public void Dispose() => AppSessionTestHelper.Reset();
