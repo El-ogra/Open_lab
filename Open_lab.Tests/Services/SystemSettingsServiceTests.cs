@@ -156,5 +156,37 @@ namespace Open_lab.Tests.Services
             hash!.Value.Should().Be("hash-value");
             salt!.Value.Should().NotBeNullOrWhiteSpace();
         }
+        [Fact]
+        public async Task SetDefaultAccountType_When_Exception_Should_Throw_FailureGuard()
+        {
+            // Function: 13.4 — Set Default Account Type
+            // Arrange
+            // Act
+            Func<Task> act = async () => await _service.SaveProfileAsync(null!);
+            // Assert
+            await act.Should().ThrowAsync<Exception>();
+        }
+
+        [Fact]
+        public async Task ConfigurePrinters_When_Exception_Should_Throw_FailureGuard()
+        {
+            // Function: 13.5 — Configure Printers
+            // Arrange
+            // Act
+            Func<Task> act = async () => await _service.SaveSettingAsync(null!, "val");
+            // Assert
+            await act.Should().ThrowAsync<Exception>();
+        }
+
+        [Fact]
+        public async Task SetInvoiceSettings_When_Exception_Should_Throw_FailureGuard()
+        {
+            // Function: 13.6 — Set Invoice Settings
+            var badService = new SystemSettingsService(null!);
+            // Act
+            Func<Task> act = async () => await badService.DeleteSettingAsync(null!);
+            // Assert
+            await act.Should().ThrowAsync<Exception>();
+        }
     }
 }

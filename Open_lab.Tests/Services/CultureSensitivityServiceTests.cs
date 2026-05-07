@@ -332,6 +332,41 @@ namespace Open_lab.Tests.Services
             await act.Should().ThrowAsync<InvalidOperationException>().WithMessage("*لا يمكن تعديل نتيجة معتمدة*");
         }
 
+        [Fact]
+        public async Task SetSensitivity_When_InvalidData_Should_Throw_FailureGuard()
+        {
+            // Function: 5.3 — Set Sensitivity
+            // Arrange
+            // Act
+            Func<Task> act = async () => await _service.SaveCultureResultAsync(0, 0, null!);
+            // Assert
+            await act.Should().ThrowAsync<Exception>();
+        }
+
+        [Fact]
+        public async Task FilterPregnancyAntibiotics_When_NullVisit_Should_Throw_FailureGuard()
+        {
+            // Function: 5.5 — Filter Pregnancy Antibiotics
+            // Arrange
+            var badService = new CultureSensitivityService(null!);
+            // Act
+            Func<Task> act = async () => await badService.GetFilteredAntibioticsAsync(0);
+            // Assert
+            await act.Should().ThrowAsync<Exception>();
+        }
+
+        [Fact]
+        public async Task FilterChildrenAntibiotics_When_NullVisit_Should_Throw_FailureGuard()
+        {
+            // Function: 5.6 — Filter Children Antibiotics
+            // Arrange
+            var badService = new CultureSensitivityService(null!);
+            // Act
+            Func<Task> act = async () => await badService.GetFilteredAntibioticsAsync(-1);
+            // Assert
+            await act.Should().ThrowAsync<Exception>();
+        }
+
         private async Task<int> SeedVisitTestAsync(Patient patient)
         {
             _db.Patients.Add(patient);

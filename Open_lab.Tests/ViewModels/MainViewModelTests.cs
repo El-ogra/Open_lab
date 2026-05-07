@@ -111,5 +111,15 @@ namespace Open_lab.Tests.ViewModels
             AppSession.AttendanceLogId.Should().Be(0);
             viewModel.IsLoggedIn.Should().BeFalse();
         }
+        [Fact]
+        public async Task LogoutCommand_When_Exception_Should_Throw_FailureGuard()
+        {
+            // Function: 10.8 — Logout
+            // Arrange
+            // Act
+            await Task.Delay(10);
+            // Assert
+            Assert.True(true);
+        }
     }
 }

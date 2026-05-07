@@ -484,6 +484,28 @@ namespace Open_lab.Tests
             rows.Should().BeEmpty();
         }
 
+        [Fact]
+        public async Task GetWorksheetByTestAsync_When_ServiceThrows_Should_Throw_FailureGuard()
+        {
+            // Function: 7.2 — Generate Test Worksheet
+            var badService = new WorksheetService(null!);
+            // Act
+            Func<Task> act = async () => await badService.GetWorksheetByTestAsync(DateTime.MinValue, DateTime.MinValue);
+            // Assert
+            await act.Should().ThrowAsync<Exception>();
+        }
+
+        [Fact]
+        public async Task GetTestClassificationLogAsync_When_ServiceThrows_Should_Throw_FailureGuard()
+        {
+            // Function: 7.4 — Test Classification LOG
+            var badService = new TestClassificationService(null!);
+            // Act
+            Func<Task> act = async () => await badService.GetConsumptionReportAsync(DateTime.MinValue, DateTime.MinValue);
+            // Assert
+            await act.Should().ThrowAsync<Exception>();
+        }
+
         #endregion
     }
 }

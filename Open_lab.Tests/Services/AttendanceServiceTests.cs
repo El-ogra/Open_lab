@@ -253,6 +253,27 @@ namespace Open_lab.Tests.Services
             secondBreak.Should().NotBeNull();
             secondBreak!.BreakId.Should().Be(firstBreak!.BreakId);
         }
+        [Fact]
+        public async Task ClockInAsync_When_Exception_Should_Throw_FailureGuard()
+        {
+            // Function: 10.4 — Record Attendance
+            var badService = new AttendanceService(null!);
+            // Act
+            Func<Task> act = async () => await badService.CreateLoginAsync(-1, null);
+            // Assert
+            await act.Should().ThrowAsync<Exception>();
+        }
+
+        [Fact]
+        public async Task ClockOutAsync_When_Exception_Should_Throw_FailureGuard()
+        {
+            // Function: 10.5 — Record Departure
+            var badService = new AttendanceService(null!);
+            // Act
+            Func<Task> act = async () => await badService.CloseAsync(-1);
+            // Assert
+            await act.Should().ThrowAsync<Exception>();
+        }
     }
 }
 

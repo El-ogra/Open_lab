@@ -693,6 +693,53 @@ namespace Open_lab.Tests
             manifests.Count().Should().Be(0);
         }
 
+        [Fact]
+        public async Task MarkTestAsExternal_When_Exception_Should_Throw_FailureGuard()
+        {
+            // Function: 8.2 — Register Patient for External Test
+            // Arrange
+            // Act
+            Func<Task> act = async () => await _externalLabService.AddToQueueAsync(0, 0);
+            // Assert
+            await act.Should().ThrowAsync<Exception>();
+        }
+
+        [Fact]
+        public async Task PrepareExternalSample_When_Exception_Should_Throw_FailureGuard()
+        {
+            // Function: 8.2 — Prepare External Sample
+            // Arrange
+            var badService = new ExternalLabService(null!);
+            // Act
+            Func<Task> act = async () => await badService.CreateManifestAsync(0, new List<int>(), null);
+            // Assert
+            await act.Should().ThrowAsync<Exception>();
+        }
+
+        [Fact]
+        public async Task TrackExternalSampleStatus_When_Exception_Should_Throw_FailureGuard()
+        {
+            // Function: 8.3 — Track External Sample Status
+            // Arrange
+            var badService = new ExternalLabService(null!);
+            // Act
+            Func<Task> act = async () => await badService.UpdateQueueStatusAsync(0, "Shipped", null);
+            // Assert
+            await act.Should().ThrowAsync<Exception>();
+        }
+
+        [Fact]
+        public async Task SettleExternalLabAccount_When_Exception_Should_Throw_FailureGuard()
+        {
+            // Function: 8.7 — Settle External Lab Account
+            // Arrange
+            var badService = new ExternalSettlementService(null!);
+            // Act
+            Func<Task> act = async () => await badService.CreateSettlementAsync(0, -5m, null);
+            // Assert
+            await act.Should().ThrowAsync<Exception>();
+        }
+
         #endregion
     }
 }

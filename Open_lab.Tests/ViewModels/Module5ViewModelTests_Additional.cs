@@ -739,6 +739,59 @@ namespace Open_lab.Tests
             _viewModel.StatusMessage.Should().Contain("تم إرسال تقرير المزرعة للطباعة");
         }
 
+        [Fact]
+        public async Task ClassifySensitivity_When_Exception_Should_Set_Error_FailureGuard()
+        {
+            // Function: 5.4 — Classify Sensitivity
+            // Arrange
+            _viewModel.SelectedCulture = new Culture { CultureId = 112 };
+            _viewModel.SelectedVisitTest = new CultureVisitTestRow { VisitTestId = 212 };
+            _viewModel.ResultRows.Add(new CultureSensitivityRow { AntibioticId = 1, Sensitivity = "S" });
+            _serviceMock.Setup(s => s.SaveCultureResultAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<IReadOnlyCollection<CultureSensitivityValue>>()))
+                .ThrowsAsync(new Exception("classify_error"));
+
+            // Act
+            _viewModel.SaveResultCommand.Execute(null);
+            await Task.Delay(50);
+
+            // Assert
+            _viewModel.StatusMessage.Should().Contain("خطأ:");
+        }
+
+        [Fact]
+        public async Task FilterPregnancyAntibiotics_When_Exception_Should_Set_Error_FailureGuard()
+        {
+            // Function: 5.5 — Filter Pregnancy Antibiotics
+            // Arrange
+            _viewModel.SelectedCulture = new Culture { CultureId = 30 };
+            _viewModel.SelectedVisitTest = new CultureVisitTestRow { VisitTestId = 40, LabId = "L-PREG" };
+            _serviceMock.Setup(s => s.GetFilteredAntibioticsAsync(It.IsAny<int>()))
+                .ThrowsAsync(new Exception("filter_preg_error"));
+
+            // Act
+            await _viewModel.InvokePrivateAsync("BuildResultRowsAsync");
+
+            // Assert
+            _viewModel.StatusMessage.Should().Contain("خطأ:");
+        }
+
+        [Fact]
+        public async Task FilterChildrenAntibiotics_When_Exception_Should_Set_Error_FailureGuard()
+        {
+            // Function: 5.6 — Filter Children Antibiotics
+            // Arrange
+            _viewModel.SelectedCulture = new Culture { CultureId = 31 };
+            _viewModel.SelectedVisitTest = new CultureVisitTestRow { VisitTestId = 41, LabId = "L-CHILD" };
+            _serviceMock.Setup(s => s.GetFilteredAntibioticsAsync(It.IsAny<int>()))
+                .ThrowsAsync(new Exception("filter_child_error"));
+
+            // Act
+            await _viewModel.InvokePrivateAsync("BuildResultRowsAsync");
+
+            // Assert
+            _viewModel.StatusMessage.Should().Contain("خطأ:");
+        }
+
         #endregion
 
         #region Search Functionality Tests
