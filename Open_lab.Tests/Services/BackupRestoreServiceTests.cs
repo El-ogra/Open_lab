@@ -123,29 +123,36 @@ namespace Open_lab.Tests.Services
             }
         }
         [Fact]
-        public async Task RestoreAsync_WithEmptyPath_ShouldThrowException_FailureGuard()
+        public async Task RestoreAsync_WithEmptyPath_ShouldThrowArgumentException_FailureGuard()
         {
-            // Function: 13.7 — Configure Backup - Logic Guard: Verify data is prepared for backup (InMemoryDatabase limitation workaround)
+            // Function: 13.7 — Configure Backup
+
             // Arrange
+            var invalidPath = string.Empty;
+
             // Act
-            Func<Task> act = async () => await _service.RestoreAsync("");
-            
+            var exception = await Record.ExceptionAsync(
+                async () => await _service.RestoreAsync(invalidPath));
+
             // Assert
-            await act.Should().ThrowAsync<ArgumentException>().WithMessage("*path*");
+            exception.Should().BeOfType<ArgumentException>();
         }
 
         [Fact]
         public async Task RestoreAsync_WithValidPath_ShouldNotThrowArgumentException_SuccessGuard()
         {
-            // Function: 13.7 — Configure Backup (Restore with Valid Path)
+            // Function: 13.7 — Configure Backup
+
             // Arrange
             var validPath = Path.Combine(Path.GetTempPath(), "test.bak");
 
             // Act
-            var exception = await Record.ExceptionAsync(async () => await _service.RestoreAsync(validPath));
+            var exception = await Record.ExceptionAsync(
+                async () => await _service.RestoreAsync(validPath));
 
-            // Assert - Should not throw ArgumentException for valid path (other exceptions acceptable due to InMemory limitations)
-            Assert.False(exception is ArgumentException, "Should not throw ArgumentException for valid path");
+            // Assert
+            (exception is ArgumentException).Should().BeFalse();
+            (exception is ArgumentNullException).Should().BeFalse();
         }
 
         [Fact]
