@@ -124,6 +124,27 @@ namespace Open_lab.Tests.ViewModels
         }
 
         [Fact]
+        public async Task RecordDeparture_WhenClockOutServiceThrows_ShouldSetArabicErrorStatusMessage()
+        {
+            // Function: 10.5 — Record Departure
+            // Arrange
+            AppSession.UserId = 12;
+            AppSession.AttendanceLogId = 77;
+            _attendanceServiceMock
+                .Setup(x => x.ClockOutAsync(AppSession.UserId, It.IsAny<DateTime?>()))
+                .ThrowsAsync(new InvalidOperationException("clock-out-failed"));
+
+            // Act
+            _viewModel.ClockOutCommand.Execute(null);
+            await Task.Delay(100);
+
+            // Assert
+            _viewModel.StatusMessage.Should().Contain("خطأ:");
+            _viewModel.StatusMessage.Should().Contain("clock-out-failed");
+            AppSession.AttendanceLogId.Should().Be(77);
+        }
+
+        [Fact]
         public async Task ClockInCommand_When_Service_Returns_Log_Should_Set_AppSession_And_Status_Success()
         {
             // Function: X.X — To Be Determined

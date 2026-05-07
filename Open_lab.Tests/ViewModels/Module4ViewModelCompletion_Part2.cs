@@ -172,5 +172,53 @@ namespace Open_lab.Tests.ViewModels
             viewModel.MoveUpCommand.CanExecute(null).Should().BeFalse();
             viewModel.MoveDownCommand.CanExecute(null).Should().BeFalse();
         }
+
+        [Fact]
+        public async Task ArrangeReportOrder_WithSecondTestSelected_ShouldMoveItemUp()
+        {
+            // Function: 4.5 — Arrange Report Order
+            // Arrange
+            var viewModel = new CombinedReportViewModel(_reportServiceMock.Object);
+            var report = CreateSampleReport(207, 3);
+            _reportServiceMock.Setup(x => x.GetCompositeReportAsync(207, It.IsAny<IReadOnlyCollection<int>>())).ReturnsAsync(report);
+            viewModel.VisitId = 207;
+            viewModel.LoadCommand.Execute(null);
+            await Task.Delay(100);
+            var selected = viewModel.Tests[1];
+            viewModel.SelectedTest = selected;
+
+            // Act
+            viewModel.MoveUpCommand.Execute(null);
+
+            // Assert
+            viewModel.Tests[0].Should().BeSameAs(selected);
+            viewModel.Tests.Select(t => t.Test.Code).Should().Equal("B", "A", "C");
+            viewModel.MoveUpCommand.CanExecute(null).Should().BeFalse();
+            viewModel.MoveDownCommand.CanExecute(null).Should().BeTrue();
+        }
+
+        [Fact]
+        public async Task ArrangeReportOrder_WithFirstTestSelected_ShouldMoveItemDown()
+        {
+            // Function: 4.5 — Arrange Report Order
+            // Arrange
+            var viewModel = new CombinedReportViewModel(_reportServiceMock.Object);
+            var report = CreateSampleReport(208, 3);
+            _reportServiceMock.Setup(x => x.GetCompositeReportAsync(208, It.IsAny<IReadOnlyCollection<int>>())).ReturnsAsync(report);
+            viewModel.VisitId = 208;
+            viewModel.LoadCommand.Execute(null);
+            await Task.Delay(100);
+            var selected = viewModel.Tests[0];
+            viewModel.SelectedTest = selected;
+
+            // Act
+            viewModel.MoveDownCommand.Execute(null);
+
+            // Assert
+            viewModel.Tests[1].Should().BeSameAs(selected);
+            viewModel.Tests.Select(t => t.Test.Code).Should().Equal("B", "A", "C");
+            viewModel.MoveUpCommand.CanExecute(null).Should().BeTrue();
+            viewModel.MoveDownCommand.CanExecute(null).Should().BeTrue();
+        }
     }
 }

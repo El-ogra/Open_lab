@@ -91,6 +91,50 @@ namespace Open_lab.Tests
             _viewModel.StatusMessage.Should().Contain("تم تحميل");
         }
 
+        [Fact]
+        public async Task RegisterSampleCollection_WithSelectedRow_ShouldMarkCollectedAndReloadRows()
+        {
+            // Function: 6.1 — Register Sample Collection
+            // Arrange
+            _viewModel.SelectedRow = new SampleCollectionRow { VisitTestId = 101 };
+            _collectionServiceMock.Setup(x => x.MarkCollectedAsync(101, It.IsAny<int>(), false, It.IsAny<int?>()))
+                .Returns(Task.CompletedTask);
+            _collectionServiceMock.Setup(x => x.GetRowsAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>()))
+                .ReturnsAsync(new List<SampleCollectionRow>
+                {
+                    new() { VisitTestId = 101, PatientName = "Patient 101" }
+                });
+
+            // Act
+            _viewModel.MarkCollectedCommand.Execute(null);
+            await Task.Delay(100);
+
+            // Assert
+            _collectionServiceMock.Verify(x => x.MarkCollectedAsync(101, It.IsAny<int>(), false, It.IsAny<int?>()), Times.Once);
+            _collectionServiceMock.Verify(x => x.GetRowsAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>()), Times.AtLeastOnce);
+            _viewModel.Items.Should().ContainSingle(row => row.VisitTestId == 101);
+            _viewModel.StatusMessage.Should().Contain("تم تحديث حالة العينة");
+        }
+
+        [Fact]
+        public async Task RegisterSampleCollection_WhenMarkCollectedThrows_ShouldSetErrorStatusMessage()
+        {
+            // Function: 6.1 — Register Sample Collection
+            // Arrange
+            _viewModel.SelectedRow = new SampleCollectionRow { VisitTestId = 102 };
+            _collectionServiceMock.Setup(x => x.MarkCollectedAsync(102, It.IsAny<int>(), false, It.IsAny<int?>()))
+                .ThrowsAsync(new InvalidOperationException("mark-collected-failed"));
+
+            // Act
+            _viewModel.MarkCollectedCommand.Execute(null);
+            await Task.Delay(100);
+
+            // Assert
+            _viewModel.StatusMessage.Should().Contain("خطأ:");
+            _viewModel.StatusMessage.Should().Contain("mark-collected-failed");
+            _collectionServiceMock.Verify(x => x.GetRowsAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>()), Times.Never);
+        }
+
         #endregion
 
         #region Function 6.2 ViewModel Tests
@@ -130,6 +174,51 @@ namespace Open_lab.Tests
 
             // Assert
             Assert.False(canExecute);
+        }
+
+        [Fact]
+        public async Task RecordSampleSeparation_WithValidSeparationType_ShouldCallServiceAndReloadRows()
+        {
+            // Function: 6.2 — Record Sample Separation
+            // Arrange
+            _viewModel.SelectedRow = new SampleCollectionRow { VisitTestId = 202 };
+            _viewModel.SeparationType = "Centrifuge";
+            _collectionServiceMock.Setup(x => x.MarkSeparatedAsync(202, "Centrifuge"))
+                .Returns(Task.CompletedTask);
+            _collectionServiceMock.Setup(x => x.GetRowsAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>()))
+                .ReturnsAsync(new List<SampleCollectionRow>
+                {
+                    new() { VisitTestId = 202, PatientName = "Separated Patient" }
+                });
+
+            // Act
+            _viewModel.MarkSeparatedCommand.Execute(null);
+            await Task.Delay(100);
+
+            // Assert
+            _collectionServiceMock.Verify(x => x.MarkSeparatedAsync(202, "Centrifuge"), Times.Once);
+            _viewModel.Items.Should().ContainSingle(row => row.VisitTestId == 202);
+            _viewModel.StatusMessage.Should().Contain("تم تسجيل فصل العينة");
+        }
+
+        [Fact]
+        public async Task RecordSampleSeparation_WhenMarkSeparatedThrows_ShouldSetErrorStatusMessage()
+        {
+            // Function: 6.2 — Record Sample Separation
+            // Arrange
+            _viewModel.SelectedRow = new SampleCollectionRow { VisitTestId = 203 };
+            _viewModel.SeparationType = "Centrifuge";
+            _collectionServiceMock.Setup(x => x.MarkSeparatedAsync(203, "Centrifuge"))
+                .ThrowsAsync(new InvalidOperationException("mark-separated-failed"));
+
+            // Act
+            _viewModel.MarkSeparatedCommand.Execute(null);
+            await Task.Delay(100);
+
+            // Assert
+            _viewModel.StatusMessage.Should().Contain("خطأ:");
+            _viewModel.StatusMessage.Should().Contain("mark-separated-failed");
+            _collectionServiceMock.Verify(x => x.GetRowsAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>()), Times.Never);
         }
 
         #endregion
@@ -198,6 +287,24 @@ namespace Open_lab.Tests
             _viewModel.SelectedSampleStatus.Should().Contain("مفصولة");
         }
 
+        [Fact]
+        public async Task TrackSampleStatus_WhenTrackingServiceThrows_ShouldSetTrackingErrorMessage()
+        {
+            // Function: 6.3 — Track Sample Status
+            // Arrange
+            _viewModel.SelectedRow = new SampleCollectionRow { VisitTestId = 303 };
+            _trackingServiceMock.Setup(x => x.GetSampleStatusAsync(303))
+                .ThrowsAsync(new InvalidOperationException("tracking-failed"));
+
+            // Act
+            _viewModel.RefreshSampleStatusCommand.Execute(null);
+            await Task.Delay(100);
+
+            // Assert
+            _viewModel.SelectedSampleStatus.Should().Contain("خطأ تتبع:");
+            _viewModel.SelectedSampleStatus.Should().Contain("tracking-failed");
+        }
+
         #endregion
 
         #region Function 6.4 ViewModel Tests
@@ -254,6 +361,25 @@ namespace Open_lab.Tests
             _collectionServiceMock.Verify(x => x.MarkCollectedAsync(It.IsAny<int>(), It.IsAny<int>(), true, It.IsAny<int?>()), Times.Never);
             // Assert
             _viewModel.StatusMessage.Should().Contain("يجب تسجيل الدخول");
+        }
+
+        [Fact]
+        public async Task MarkTakenOutsideLab_WhenExternalMarkThrows_ShouldSetErrorStatusMessage()
+        {
+            // Function: 6.4 — Mark Taken Outside Lab
+            // Arrange
+            _viewModel.SelectedRow = new SampleCollectionRow { VisitTestId = 402 };
+            _collectionServiceMock.Setup(x => x.MarkCollectedAsync(402, It.IsAny<int>(), true, It.IsAny<int?>()))
+                .ThrowsAsync(new InvalidOperationException("external-mark-failed"));
+
+            // Act
+            _viewModel.MarkExternalCollectedCommand.Execute(null);
+            await Task.Delay(100);
+
+            // Assert
+            _viewModel.StatusMessage.Should().Contain("خطأ:");
+            _viewModel.StatusMessage.Should().Contain("external-mark-failed");
+            _collectionServiceMock.Verify(x => x.GetRowsAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>()), Times.Never);
         }
 
         #endregion

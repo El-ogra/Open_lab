@@ -80,6 +80,55 @@ namespace Open_lab.Tests
             AppSessionTestHelper.Reset();
         }
 
+        [Fact]
+        public async Task GeneratePatientWorksheet_WhenLoadServiceThrows_ShouldSetErrorStatusMessage()
+        {
+            // Function: 7.1 — Generate Patient Worksheet
+            // Arrange
+            AppSessionTestHelper.ResetToAdmin();
+            var worksheetServiceMock = new Mock<IWorksheetService>();
+            var printServiceMock = new Mock<IPrintService>();
+            var viewModel = new WorkSheetByPatientViewModel(worksheetServiceMock.Object, printServiceMock.Object);
+            worksheetServiceMock.Setup(x => x.GetWorksheetByPatientAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>()))
+                .ThrowsAsync(new InvalidOperationException("patient-worksheet-load-failed"));
+
+            // Act
+            viewModel.LoadCommand.Execute(null);
+            await Task.Delay(100);
+
+            // Assert
+            viewModel.StatusMessage.Should().Contain("خطأ:");
+            viewModel.StatusMessage.Should().Contain("patient-worksheet-load-failed");
+            viewModel.Rows.Should().BeEmpty();
+            AppSessionTestHelper.Reset();
+        }
+
+        [Fact]
+        public async Task GeneratePatientWorksheet_WhenPrintServiceThrows_ShouldSetPrintErrorStatusMessage()
+        {
+            // Function: 7.1 — Generate Patient Worksheet
+            // Arrange
+            AppSessionTestHelper.ResetToAdmin();
+            var worksheetServiceMock = new Mock<IWorksheetService>();
+            var printServiceMock = new Mock<IPrintService>();
+            var viewModel = new WorkSheetByPatientViewModel(worksheetServiceMock.Object, printServiceMock.Object);
+            viewModel.Rows.Add(new WorkSheetPatientRow { VisitId = 10, PatientName = "Patient", TestsCount = 2 });
+            printServiceMock.Setup(x => x.PrintWorksheetByPatientAsync(
+                    It.IsAny<DateTime>(),
+                    It.IsAny<DateTime>(),
+                    It.IsAny<IReadOnlyCollection<WorkSheetPatientRow>>()))
+                .ThrowsAsync(new InvalidOperationException("patient-print-failed"));
+
+            // Act
+            viewModel.PrintCommand.Execute(null);
+            await Task.Delay(100);
+
+            // Assert
+            viewModel.StatusMessage.Should().Contain("خطأ طباعة:");
+            viewModel.StatusMessage.Should().Contain("patient-print-failed");
+            AppSessionTestHelper.Reset();
+        }
+
         #endregion
 
         #region WorkSheetByTestViewModel Additional Tests
@@ -109,6 +158,79 @@ namespace Open_lab.Tests
             // Assert
             viewModel.Rows.Should().HaveCount(3);
             viewModel.StatusMessage.Should().Contain("3 تحليل");
+            AppSessionTestHelper.Reset();
+        }
+
+        [Fact]
+        public async Task GenerateTestWorksheet_WhenLoadServiceThrows_ShouldSetErrorStatusMessage()
+        {
+            // Function: 7.2 — Generate Test Worksheet
+            // Arrange
+            AppSessionTestHelper.ResetToAdmin();
+            var worksheetServiceMock = new Mock<IWorksheetService>();
+            var printServiceMock = new Mock<IPrintService>();
+            var viewModel = new WorkSheetByTestViewModel(worksheetServiceMock.Object, printServiceMock.Object);
+            worksheetServiceMock.Setup(x => x.GetWorksheetByTestAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>()))
+                .ThrowsAsync(new InvalidOperationException("test-worksheet-load-failed"));
+
+            // Act
+            viewModel.LoadCommand.Execute(null);
+            await Task.Delay(100);
+
+            // Assert
+            viewModel.StatusMessage.Should().Contain("خطأ:");
+            viewModel.StatusMessage.Should().Contain("test-worksheet-load-failed");
+            viewModel.Rows.Should().BeEmpty();
+            AppSessionTestHelper.Reset();
+        }
+
+        [Fact]
+        public async Task GenerateTestWorksheet_WithRows_ShouldPrintWorksheet()
+        {
+            // Function: 7.2 — Generate Test Worksheet
+            // Arrange
+            AppSessionTestHelper.ResetToAdmin();
+            var worksheetServiceMock = new Mock<IWorksheetService>();
+            var printServiceMock = new Mock<IPrintService>();
+            var viewModel = new WorkSheetByTestViewModel(worksheetServiceMock.Object, printServiceMock.Object);
+            viewModel.Rows.Add(new WorkSheetTestRow { TestName = "CBC", Count = 4 });
+
+            // Act
+            viewModel.PrintCommand.Execute(null);
+            await Task.Delay(100);
+
+            // Assert
+            printServiceMock.Verify(x => x.PrintWorksheetByTestAsync(
+                It.IsAny<DateTime>(),
+                It.IsAny<DateTime>(),
+                It.Is<IReadOnlyCollection<WorkSheetTestRow>>(rows => rows.Count == 1)), Times.Once);
+            viewModel.StatusMessage.Should().Contain("تم إرسال ورقة العمل");
+            AppSessionTestHelper.Reset();
+        }
+
+        [Fact]
+        public async Task GenerateTestWorksheet_WhenPrintServiceThrows_ShouldSetPrintErrorStatusMessage()
+        {
+            // Function: 7.2 — Generate Test Worksheet
+            // Arrange
+            AppSessionTestHelper.ResetToAdmin();
+            var worksheetServiceMock = new Mock<IWorksheetService>();
+            var printServiceMock = new Mock<IPrintService>();
+            var viewModel = new WorkSheetByTestViewModel(worksheetServiceMock.Object, printServiceMock.Object);
+            viewModel.Rows.Add(new WorkSheetTestRow { TestName = "ALT", Count = 2 });
+            printServiceMock.Setup(x => x.PrintWorksheetByTestAsync(
+                    It.IsAny<DateTime>(),
+                    It.IsAny<DateTime>(),
+                    It.IsAny<IReadOnlyCollection<WorkSheetTestRow>>()))
+                .ThrowsAsync(new InvalidOperationException("test-print-failed"));
+
+            // Act
+            viewModel.PrintCommand.Execute(null);
+            await Task.Delay(100);
+
+            // Assert
+            viewModel.StatusMessage.Should().Contain("خطأ طباعة:");
+            viewModel.StatusMessage.Should().Contain("test-print-failed");
             AppSessionTestHelper.Reset();
         }
 
@@ -211,6 +333,58 @@ namespace Open_lab.Tests
             AppSessionTestHelper.Reset();
         }
 
+        [Fact]
+        public async Task GenerateGroupWorksheet_WhenLoadWorksheetServiceThrows_ShouldSetErrorStatusMessage()
+        {
+            // Function: 7.3 — Generate Group Worksheet
+            // Arrange
+            AppSessionTestHelper.ResetToAdmin();
+            var groupServiceMock = new Mock<IGroupWorksheetService>();
+            var testCatalogServiceMock = new Mock<ITestCatalogService>();
+            var printServiceMock = new Mock<IPrintService>();
+            testCatalogServiceMock.Setup(x => x.GetTestGroupsAsync()).ReturnsAsync(new List<TestGroup>());
+            testCatalogServiceMock.Setup(x => x.GetCustomGroupsAsync()).ReturnsAsync(new List<CustomGroup>());
+            groupServiceMock.Setup(x => x.GetGroupWorksheetByGroupAsync(5, It.IsAny<DateTime>(), It.IsAny<DateTime>()))
+                .ThrowsAsync(new InvalidOperationException("group-worksheet-load-failed"));
+            var viewModel = new GroupWorksheetViewModel(groupServiceMock.Object, testCatalogServiceMock.Object, printServiceMock.Object)
+            {
+                IsCustomGroup = false,
+                SelectedGroupId = 5
+            };
+
+            // Act
+            viewModel.LoadWorksheetCommand.Execute(null);
+            await Task.Delay(100);
+
+            // Assert
+            viewModel.StatusMessage.Should().Contain("خطأ:");
+            viewModel.StatusMessage.Should().Contain("group-worksheet-load-failed");
+            viewModel.Rows.Should().BeEmpty();
+            AppSessionTestHelper.Reset();
+        }
+
+        [Fact]
+        public void GenerateGroupWorksheet_WithNoSelectedGroup_ShouldDisablePrintCommand()
+        {
+            // Function: 7.3 — Generate Group Worksheet
+            // Arrange
+            AppSessionTestHelper.ResetToAdmin();
+            var groupServiceMock = new Mock<IGroupWorksheetService>();
+            var testCatalogServiceMock = new Mock<ITestCatalogService>();
+            var printServiceMock = new Mock<IPrintService>();
+            testCatalogServiceMock.Setup(x => x.GetTestGroupsAsync()).ReturnsAsync(new List<TestGroup>());
+            testCatalogServiceMock.Setup(x => x.GetCustomGroupsAsync()).ReturnsAsync(new List<CustomGroup>());
+            var viewModel = new GroupWorksheetViewModel(groupServiceMock.Object, testCatalogServiceMock.Object, printServiceMock.Object);
+
+            // Act
+            var canPrint = viewModel.PrintCommand.CanExecute(null);
+
+            // Assert
+            canPrint.Should().BeFalse();
+            viewModel.LoadWorksheetCommand.CanExecute(null).Should().BeFalse();
+            AppSessionTestHelper.Reset();
+        }
+
         #endregion
 
         #region TestClassificationLogViewModel Additional Tests
@@ -290,6 +464,66 @@ namespace Open_lab.Tests
             // Assert - Should still call print with empty list based on viewmodel logic
             printServiceMock.Verify(x => x.PrintTextReportAsync("سجل تصنيف التحاليل", It.IsAny<IReadOnlyCollection<string>>(), "TestClassificationLog"), Times.Once);
             viewModel.StatusMessage.Should().NotBeNullOrEmpty();
+            AppSessionTestHelper.Reset();
+        }
+
+        [Fact]
+        public async Task TestClassificationLog_WithReportItems_ShouldPrintTextReport()
+        {
+            // Function: 7.4 — Test Classification LOG
+            // Arrange
+            AppSessionTestHelper.ResetToAdmin();
+            var classificationServiceMock = new Mock<ITestClassificationService>();
+            var printServiceMock = new Mock<IPrintService>();
+            classificationServiceMock.Setup(x => x.GetConsumptionReportAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>()))
+                .ReturnsAsync(new List<ReagentConsumptionReport>
+                {
+                    new() { ReagentName = "Glucose Reagent", TotalConsumed = 12.5m, Unit = "ml", TestCount = 5 }
+                });
+            var viewModel = new TestClassificationLogViewModel(classificationServiceMock.Object, printServiceMock.Object);
+            await viewModel.InvokePrivateAsync("LoadAsync");
+
+            // Act
+            viewModel.PrintCommand.Execute(null);
+            await Task.Delay(100);
+
+            // Assert
+            printServiceMock.Verify(x => x.PrintTextReportAsync(
+                "سجل تصنيف التحاليل",
+                It.Is<IReadOnlyCollection<string>>(lines => lines.Any(line => line.Contains("Glucose Reagent"))),
+                "TestClassificationLog"), Times.Once);
+            viewModel.StatusMessage.Should().Contain("تم إرسال التقرير للطباعة");
+            AppSessionTestHelper.Reset();
+        }
+
+        [Fact]
+        public async Task TestClassificationLog_WhenPrintServiceThrows_ShouldSetErrorStatusMessage()
+        {
+            // Function: 7.4 — Test Classification LOG
+            // Arrange
+            AppSessionTestHelper.ResetToAdmin();
+            var classificationServiceMock = new Mock<ITestClassificationService>();
+            var printServiceMock = new Mock<IPrintService>();
+            classificationServiceMock.Setup(x => x.GetConsumptionReportAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>()))
+                .ReturnsAsync(new List<ReagentConsumptionReport>
+                {
+                    new() { ReagentName = "Urea Reagent", TotalConsumed = 2m, Unit = "ml", TestCount = 1 }
+                });
+            printServiceMock.Setup(x => x.PrintTextReportAsync(
+                    It.IsAny<string>(),
+                    It.IsAny<IReadOnlyCollection<string>>(),
+                    It.IsAny<string>()))
+                .ThrowsAsync(new InvalidOperationException("classification-print-failed"));
+            var viewModel = new TestClassificationLogViewModel(classificationServiceMock.Object, printServiceMock.Object);
+            await viewModel.InvokePrivateAsync("LoadAsync");
+
+            // Act
+            viewModel.PrintCommand.Execute(null);
+            await Task.Delay(100);
+
+            // Assert
+            viewModel.StatusMessage.Should().Contain("خطأ:");
+            viewModel.StatusMessage.Should().Contain("classification-print-failed");
             AppSessionTestHelper.Reset();
         }
 

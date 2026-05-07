@@ -84,6 +84,67 @@ namespace Open_lab.Tests
             _viewModel.StatusMessage.Should().Contain("تم إضافة المزرعة");
         }
 
+        [Fact]
+        public async Task EnterCultureData_WithValidCultureFields_ShouldCreateCultureAndClearInputs()
+        {
+            // Function: 5.1 — Enter Culture Data
+            // Arrange
+            _viewModel.NewCultureName = "Urine Culture";
+            _viewModel.NewCultureSampleType = "Urine";
+            _viewModel.NewCultureOrganism = "E. coli";
+            _viewModel.NewCultureConditions = "Aerobic";
+            _viewModel.NewCultureColonyCount = 120;
+
+            _serviceMock.Setup(s => s.CreateCultureAsync(It.IsAny<Culture>()))
+                .ReturnsAsync((Culture culture) =>
+                {
+                    culture.CultureId = 501;
+                    return culture;
+                });
+
+            // Act
+            _viewModel.AddCultureCommand.Execute(null);
+            await Task.Delay(100);
+
+            // Assert
+            _serviceMock.Verify(s => s.CreateCultureAsync(It.Is<Culture>(culture =>
+                culture.Name == "Urine Culture" &&
+                culture.SampleType == "Urine" &&
+                culture.IsolatedOrganism == "E. coli" &&
+                culture.GrowthConditions == "Aerobic" &&
+                culture.ColonyCount == 120)), Times.Once);
+            _viewModel.Cultures.Should().ContainSingle(c => c.CultureId == 501 && c.Name == "Urine Culture");
+            _viewModel.NewCultureName.Should().BeEmpty();
+            _viewModel.NewCultureSampleType.Should().BeEmpty();
+            _viewModel.NewCultureOrganism.Should().BeEmpty();
+            _viewModel.NewCultureConditions.Should().BeEmpty();
+            _viewModel.NewCultureColonyCount.Should().Be(1);
+            _viewModel.StatusMessage.Should().Contain("تم إضافة المزرعة");
+        }
+
+        [Fact]
+        public async Task EnterCultureData_WhenCreateCultureThrows_ShouldSetErrorStatusMessage()
+        {
+            // Function: 5.1 — Enter Culture Data
+            // Arrange
+            _viewModel.NewCultureName = "Blood Culture";
+            _viewModel.NewCultureSampleType = "Blood";
+            _viewModel.NewCultureOrganism = "Staph";
+            _viewModel.NewCultureConditions = "Aerobic";
+            _viewModel.NewCultureColonyCount = 75;
+            _serviceMock.Setup(s => s.CreateCultureAsync(It.IsAny<Culture>()))
+                .ThrowsAsync(new InvalidOperationException("culture-create-failed"));
+
+            // Act
+            _viewModel.AddCultureCommand.Execute(null);
+            await Task.Delay(100);
+
+            // Assert
+            _viewModel.StatusMessage.Should().Contain("خطأ:");
+            _viewModel.StatusMessage.Should().Contain("culture-create-failed");
+            _viewModel.Cultures.Should().BeEmpty();
+        }
+
         #endregion
 
         #region Function 5.2 ViewModel Tests
@@ -120,6 +181,38 @@ namespace Open_lab.Tests
             _viewModel.StatusMessage.Should().Contain("database-error");
         }
 
+        [Fact]
+        public async Task AddAntibiotics_WithValidAntibiotic_ShouldCreateAntibioticAndClearInput()
+        {
+            // Function: 5.2 — Add Antibiotics
+            // Arrange
+            _viewModel.NewAntibioticName = "Ceftriaxone";
+            _viewModel.NewAntibioticSafeForPregnancy = false;
+            _viewModel.NewAntibioticSafeForChildren = true;
+
+            _serviceMock.Setup(s => s.CreateAntibioticAsync(It.IsAny<Antibiotic>()))
+                .ReturnsAsync((Antibiotic antibiotic) =>
+                {
+                    antibiotic.AntibioticId = 702;
+                    return antibiotic;
+                });
+
+            // Act
+            _viewModel.AddAntibioticCommand.Execute(null);
+            await Task.Delay(100);
+
+            // Assert
+            _serviceMock.Verify(s => s.CreateAntibioticAsync(It.Is<Antibiotic>(antibiotic =>
+                antibiotic.Name == "Ceftriaxone" &&
+                !antibiotic.IsSafeForPregnancy &&
+                antibiotic.IsSafeForChildren)), Times.Once);
+            _viewModel.Antibiotics.Should().ContainSingle(a => a.AntibioticId == 702 && a.Name == "Ceftriaxone");
+            _viewModel.NewAntibioticName.Should().BeEmpty();
+            _viewModel.NewAntibioticSafeForPregnancy.Should().BeTrue();
+            _viewModel.NewAntibioticSafeForChildren.Should().BeTrue();
+            _viewModel.StatusMessage.Should().Contain("تم إضافة المضاد الحيوي");
+        }
+
         #endregion
 
         #region Function 5.3 & 5.4 ViewModel Tests
@@ -150,6 +243,131 @@ namespace Open_lab.Tests
 
             _viewModel.StatusMessage.Should().Contain("لا توجد نتائج");
             _serviceMock.Verify(s => s.SaveCultureResultAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<IReadOnlyCollection<CultureSensitivityValue>>()), Times.Never);
+        }
+
+        [Fact]
+        public async Task SetSensitivity_WithSensitivityRows_ShouldSaveCultureResults()
+        {
+            // Function: 5.3 — Set Sensitivity
+            // Arrange
+            _viewModel.SelectedCulture = new Culture
+            {
+                CultureId = 110,
+                Name = "Urine Culture",
+                SampleType = "Urine",
+                IsolatedOrganism = "E. coli",
+                GrowthConditions = "Aerobic",
+                ColonyCount = 80
+            };
+            _viewModel.SelectedVisitTest = new CultureVisitTestRow
+            {
+                VisitTestId = 210,
+                VisitId = 21,
+                LabId = "LAB-210",
+                PatientName = "Patient"
+            };
+            _viewModel.ResultRows.Clear();
+            _viewModel.ResultRows.Add(new CultureSensitivityRow
+            {
+                AntibioticId = 1,
+                AntibioticName = "Ampicillin",
+                Sensitivity = "S",
+                Comment = "Sensitive"
+            });
+            _serviceMock.Setup(s => s.SaveCultureResultAsync(210, 110, It.IsAny<IReadOnlyCollection<CultureSensitivityValue>>()))
+                .Returns(Task.CompletedTask);
+
+            // Act
+            _viewModel.SaveResultCommand.Execute(null);
+            await Task.Delay(100);
+
+            // Assert
+            _serviceMock.Verify(s => s.SaveCultureResultAsync(210, 110, It.Is<IReadOnlyCollection<CultureSensitivityValue>>(values =>
+                values.Count == 1 &&
+                values.Any(v => v.AntibioticId == 1 && v.Sensitivity == "S" && v.Comment == "Sensitive"))), Times.Once);
+            _viewModel.StatusMessage.Should().Contain("تم حفظ نتيجة المزرعة");
+        }
+
+        [Fact]
+        public async Task SetSensitivity_WhenSaveCultureResultThrows_ShouldSetErrorStatusMessage()
+        {
+            // Function: 5.3 — Set Sensitivity
+            // Arrange
+            _viewModel.SelectedCulture = new Culture
+            {
+                CultureId = 111,
+                Name = "Blood Culture",
+                SampleType = "Blood",
+                IsolatedOrganism = "Staph",
+                GrowthConditions = "Aerobic",
+                ColonyCount = 90
+            };
+            _viewModel.SelectedVisitTest = new CultureVisitTestRow
+            {
+                VisitTestId = 211,
+                VisitId = 22,
+                LabId = "LAB-211",
+                PatientName = "Patient"
+            };
+            _viewModel.ResultRows.Clear();
+            _viewModel.ResultRows.Add(new CultureSensitivityRow
+            {
+                AntibioticId = 2,
+                AntibioticName = "Vancomycin",
+                Sensitivity = "R",
+                Comment = "Resistant"
+            });
+            _serviceMock.Setup(s => s.SaveCultureResultAsync(211, 111, It.IsAny<IReadOnlyCollection<CultureSensitivityValue>>()))
+                .ThrowsAsync(new InvalidOperationException("save-culture-result-failed"));
+
+            // Act
+            _viewModel.SaveResultCommand.Execute(null);
+            await Task.Delay(100);
+
+            // Assert
+            _viewModel.StatusMessage.Should().Contain("خطأ:");
+            _viewModel.StatusMessage.Should().Contain("save-culture-result-failed");
+        }
+
+        [Fact]
+        public async Task ClassifySensitivity_WithValidSIRValues_ShouldClassifyEverySavedValue()
+        {
+            // Function: 5.4 — Classify Sensitivity
+            // Arrange
+            _viewModel.SelectedCulture = new Culture
+            {
+                CultureId = 112,
+                Name = "Culture",
+                SampleType = "Urine",
+                IsolatedOrganism = "E. coli",
+                GrowthConditions = "Aerobic",
+                ColonyCount = 60
+            };
+            _viewModel.SelectedVisitTest = new CultureVisitTestRow
+            {
+                VisitTestId = 212,
+                VisitId = 23,
+                LabId = "LAB-212",
+                PatientName = "Patient"
+            };
+            _viewModel.ResultRows.Clear();
+            _viewModel.ResultRows.Add(new CultureSensitivityRow { AntibioticId = 1, AntibioticName = "A", Sensitivity = "S" });
+            _viewModel.ResultRows.Add(new CultureSensitivityRow { AntibioticId = 2, AntibioticName = "B", Sensitivity = "I" });
+            _viewModel.ResultRows.Add(new CultureSensitivityRow { AntibioticId = 3, AntibioticName = "C", Sensitivity = "R" });
+            _serviceMock.Setup(s => s.SaveCultureResultAsync(212, 112, It.IsAny<IReadOnlyCollection<CultureSensitivityValue>>()))
+                .Returns(Task.CompletedTask);
+
+            // Act
+            _viewModel.SaveResultCommand.Execute(null);
+            await Task.Delay(100);
+
+            // Assert
+            _serviceMock.Verify(s => s.ClassifySensitivity("S"), Times.Once);
+            _serviceMock.Verify(s => s.ClassifySensitivity("I"), Times.Once);
+            _serviceMock.Verify(s => s.ClassifySensitivity("R"), Times.Once);
+            _serviceMock.Verify(s => s.SaveCultureResultAsync(212, 112, It.Is<IReadOnlyCollection<CultureSensitivityValue>>(values =>
+                values.Select(v => v.Sensitivity).OrderBy(v => v).SequenceEqual(new[] { "I", "R", "S" }))), Times.Once);
+            _viewModel.StatusMessage.Should().Contain("تم حفظ نتيجة المزرعة");
         }
 
         [Fact]
@@ -193,6 +411,39 @@ namespace Open_lab.Tests
         }
 
         [Fact]
+        public async Task FilterPregnancyAntibiotics_WithoutVisitTest_ShouldDisplayAllLinkedAntibiotics()
+        {
+            // Function: 5.5 — Filter Pregnancy Antibiotics
+            // Arrange
+            _viewModel.SelectedVisitTest = null;
+            _viewModel.SelectedCulture = new Culture
+            {
+                CultureId = 32,
+                Name = "Urine Culture",
+                SampleType = "Urine",
+                IsolatedOrganism = "E. coli",
+                GrowthConditions = "Aerobic",
+                ColonyCount = 150
+            };
+
+            var antibiotics = new List<Antibiotic>
+            {
+                new() { AntibioticId = 1, Name = "SafePreg", IsSafeForPregnancy = true },
+                new() { AntibioticId = 2, Name = "UnsafePreg", IsSafeForPregnancy = false }
+            };
+            _serviceMock.Setup(s => s.GetCultureAntibioticsAsync(32)).ReturnsAsync(
+                antibiotics.Select(a => new CultureAntibiotic { CultureId = 32, AntibioticId = a.AntibioticId, Antibiotic = a }).ToList());
+
+            // Act
+            await _viewModel.InvokePrivateAsync("BuildResultRowsAsync");
+
+            // Assert
+            _viewModel.ResultRows.Should().HaveCount(2);
+            _viewModel.ResultRows.Select(r => r.AntibioticName).Should().Contain(new[] { "SafePreg", "UnsafePreg" });
+            _serviceMock.Verify(s => s.GetFilteredAntibioticsAsync(It.IsAny<int>()), Times.Never);
+        }
+
+        [Fact]
         public async Task BuildResultRowsAsync_With_Child_Patient_Should_Filter_Antibiotics_SuccessGuard()
         {
             // Function: 5.6 — Filter Children Antibiotics (BR-MED-007)
@@ -230,6 +481,45 @@ namespace Open_lab.Tests
 
             _viewModel.ResultRows.Should().HaveCount(1);
             _viewModel.ResultRows[0].AntibioticName.Should().Be("SafeChild");
+        }
+
+        [Fact]
+        public async Task FilterChildrenAntibiotics_WithAdultPatient_ShouldKeepAllAllowedAntibiotics()
+        {
+            // Function: 5.6 — Filter Children Antibiotics
+            // Arrange
+            _viewModel.SelectedCulture = new Culture
+            {
+                CultureId = 33,
+                Name = "Blood Culture",
+                SampleType = "Blood",
+                IsolatedOrganism = "Staph",
+                GrowthConditions = "Aerobic",
+                ColonyCount = 110
+            };
+            _viewModel.SelectedVisitTest = new CultureVisitTestRow
+            {
+                VisitTestId = 43,
+                VisitId = 12,
+                LabId = "L-ADULT",
+                PatientName = "Adult Patient"
+            };
+
+            var antibiotics = new List<Antibiotic>
+            {
+                new() { AntibioticId = 1, Name = "AdultSafe", IsSafeForChildren = true },
+                new() { AntibioticId = 2, Name = "AdultOnly", IsSafeForChildren = false }
+            };
+            _serviceMock.Setup(s => s.GetCultureAntibioticsAsync(33)).ReturnsAsync(
+                antibiotics.Select(a => new CultureAntibiotic { CultureId = 33, AntibioticId = a.AntibioticId, Antibiotic = a }).ToList());
+            _serviceMock.Setup(s => s.GetFilteredAntibioticsAsync(43)).ReturnsAsync(antibiotics);
+
+            // Act
+            await _viewModel.InvokePrivateAsync("BuildResultRowsAsync");
+
+            // Assert
+            _viewModel.ResultRows.Should().HaveCount(2);
+            _viewModel.ResultRows.Select(r => r.AntibioticName).Should().Contain(new[] { "AdultSafe", "AdultOnly" });
         }
 
         #endregion
@@ -344,6 +634,65 @@ namespace Open_lab.Tests
 
             _viewModel.StatusMessage.Should().Contain("خطأ:");
             _viewModel.StatusMessage.Should().Contain("Printer offline");
+        }
+
+        [Fact]
+        public async Task PrintCultureReport_WithSensitivityRows_ShouldMapCultureReportData()
+        {
+            // Function: 5.7 — Print Culture Report
+            // Arrange
+            _viewModel.SelectedCulture = new Culture
+            {
+                CultureId = 91,
+                Name = "Urine Culture",
+                SampleType = "Urine",
+                IsolatedOrganism = "E. coli",
+                GrowthConditions = "Aerobic",
+                ColonyCount = 150
+            };
+            _viewModel.SelectedVisitTest = new CultureVisitTestRow
+            {
+                VisitTestId = 101,
+                VisitId = 26,
+                LabId = "L-PRINT4",
+                PatientName = "Culture Patient",
+                VisitDate = new DateTime(2026, 5, 7)
+            };
+            _viewModel.ResultRows.Clear();
+            _viewModel.ResultRows.Add(new CultureSensitivityRow
+            {
+                AntibioticId = 1,
+                AntibioticName = "Ciprofloxacin",
+                Sensitivity = "S",
+                Comment = "Use normally"
+            });
+            _viewModel.ResultRows.Add(new CultureSensitivityRow
+            {
+                AntibioticId = 2,
+                AntibioticName = "Amoxicillin",
+                Sensitivity = "R",
+                Comment = "Avoid"
+            });
+
+            CultureReportData? printedData = null;
+            _printServiceMock.Setup(p => p.PrintCultureReportAsync(It.IsAny<CultureReportData>()))
+                .Callback<CultureReportData>(data => printedData = data)
+                .Returns(Task.CompletedTask);
+
+            // Act
+            _viewModel.PrintCultureReportCommand.Execute(null);
+            await Task.Delay(100);
+
+            // Assert
+            printedData.Should().NotBeNull();
+            printedData!.VisitId.Should().Be(26);
+            printedData.PatientName.Should().Be("Culture Patient");
+            printedData.LabId.Should().Be("L-PRINT4");
+            printedData.CultureName.Should().Be("Urine Culture");
+            printedData.Results.Should().HaveCount(2);
+            printedData.Results.Should().Contain(r => r.AntibioticName == "Ciprofloxacin" && r.Sensitivity == "S" && r.Comment == "Use normally");
+            printedData.Results.Should().Contain(r => r.AntibioticName == "Amoxicillin" && r.Sensitivity == "R" && r.Comment == "Avoid");
+            _viewModel.StatusMessage.Should().Contain("تم إرسال تقرير المزرعة للطباعة");
         }
 
         #endregion

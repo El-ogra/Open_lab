@@ -260,6 +260,27 @@ namespace Open_lab.Tests.ViewModels
             vm.StatusMessage.Should().Contain("load-failed");
         }
 
+        [Fact]
+        public async Task SetPaperSize_WhenSaveProfileThrows_ShouldShowErrorMessage()
+        {
+            // Function: 13.2 — Set Paper Size
+            // Arrange
+            _systemSettingsServiceMock
+                .Setup(x => x.SaveProfileAsync(It.IsAny<SystemSettingsProfile>()))
+                .ThrowsAsync(new InvalidOperationException("paper-size-save-failed"));
+            var vm = CreateSystemSettingsVm();
+            await Task.Delay(80);
+            vm.ReportPaperSize = "A5";
+
+            // Act
+            vm.SaveProfileCommand.Execute(null);
+            await Task.Delay(100);
+
+            // Assert
+            vm.StatusMessage.Should().Contain("خطأ:");
+            vm.StatusMessage.Should().Contain("paper-size-save-failed");
+        }
+
         // ========================================================================
         // 13.3 — Configure Header/Footer (تكوين الترويسة والتذييل)
         // ========================================================================
@@ -396,6 +417,47 @@ namespace Open_lab.Tests.ViewModels
             vm.StatusMessage.Should().NotBeNull();
         }
 
+        [Fact]
+        public async Task SetDefaultAccountType_WhenSaveProfileThrows_ShouldShowErrorMessage()
+        {
+            // Function: 13.4 — Set Default Account Type
+            // Arrange
+            _systemSettingsServiceMock
+                .Setup(x => x.SaveProfileAsync(It.IsAny<SystemSettingsProfile>()))
+                .ThrowsAsync(new InvalidOperationException("account-type-save-failed"));
+            var vm = CreateSystemSettingsVm();
+            await Task.Delay(80);
+            vm.DefaultAccountType = "Contract";
+
+            // Act
+            vm.SaveProfileCommand.Execute(null);
+            await Task.Delay(100);
+
+            // Assert
+            vm.StatusMessage.Should().Contain("خطأ:");
+            vm.StatusMessage.Should().Contain("account-type-save-failed");
+        }
+
+        [Fact]
+        public async Task SetDefaultAccountType_WithUnknownValue_ShouldPersistValueAsConfigured()
+        {
+            // Function: 13.4 — Set Default Account Type
+            // Arrange
+            var vm = CreateSystemSettingsVm();
+            await Task.Delay(80);
+            vm.DefaultAccountType = "ResearchOnly";
+
+            // Act
+            vm.SaveProfileCommand.Execute(null);
+            await Task.Delay(100);
+
+            // Assert
+            _systemSettingsServiceMock.Verify(
+                x => x.SaveProfileAsync(It.Is<SystemSettingsProfile>(p => p.DefaultAccountType == "ResearchOnly")),
+                Times.AtLeastOnce);
+            vm.StatusMessage.Should().Contain("تم حفظ");
+        }
+
         // ========================================================================
         // 13.5 — Configure Printers (تكوين الطابعات)
         // ========================================================================
@@ -486,6 +548,30 @@ namespace Open_lab.Tests.ViewModels
             _settingsServiceMock.Verify(x => x.SetReportPrinterAsync(string.Empty), Times.Once);
         }
 
+        [Fact]
+        public async Task ConfigurePrinters_WhenSystemSettingsSaveThrows_ShouldShowErrorMessage()
+        {
+            // Function: 13.5 — Configure Printers
+            // Arrange
+            _systemSettingsServiceMock
+                .Setup(x => x.SaveProfileAsync(It.IsAny<SystemSettingsProfile>()))
+                .ThrowsAsync(new InvalidOperationException("printer-save-failed"));
+            var vm = CreateSystemSettingsVm();
+            await Task.Delay(80);
+            vm.ReportPrinterName = "Laser";
+            vm.ReceiptPrinterName = "Thermal";
+            vm.BarcodePrinterName = "Barcode";
+            vm.EnvelopePrinterName = "Envelope";
+
+            // Act
+            vm.SaveProfileCommand.Execute(null);
+            await Task.Delay(100);
+
+            // Assert
+            vm.StatusMessage.Should().Contain("خطأ:");
+            vm.StatusMessage.Should().Contain("printer-save-failed");
+        }
+
         // ========================================================================
         // 13.6 — Set Invoice Settings (إعدادات الفاتورة)
         // ========================================================================
@@ -573,6 +659,29 @@ namespace Open_lab.Tests.ViewModels
             // Assert
             vm.ReceiptShowLogo.Should().BeTrue();
             vm.ReceiptCopies.Should().Be(5);
+        }
+
+        [Fact]
+        public async Task SetInvoiceSettings_WhenSaveProfileThrows_ShouldShowErrorMessage()
+        {
+            // Function: 13.6 — Set Invoice Settings
+            // Arrange
+            _systemSettingsServiceMock
+                .Setup(x => x.SaveProfileAsync(It.IsAny<SystemSettingsProfile>()))
+                .ThrowsAsync(new InvalidOperationException("invoice-settings-save-failed"));
+            var vm = CreateSystemSettingsVm();
+            await Task.Delay(80);
+            vm.ReceiptShowLogo = true;
+            vm.ReceiptCopies = 2;
+            vm.ReceiptHeaderText = "Receipt Header";
+
+            // Act
+            vm.SaveProfileCommand.Execute(null);
+            await Task.Delay(100);
+
+            // Assert
+            vm.StatusMessage.Should().Contain("خطأ:");
+            vm.StatusMessage.Should().Contain("invoice-settings-save-failed");
         }
 
         // ========================================================================

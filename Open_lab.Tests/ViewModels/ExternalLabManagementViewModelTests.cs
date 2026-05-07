@@ -203,6 +203,29 @@ namespace Open_lab.Tests.ViewModels
         }
 
         [Fact]
+        public async Task EnterExternalLabResult_WithCommentAndReference_ShouldPassBothToService()
+        {
+            // Function: 8.5 — Enter External Lab Result
+            // Arrange
+            _viewModel.SelectedQueueItem = new ExternalLabQueue { QueueId = 41, Status = "Received", ExternalReference = "OLD-REF" };
+            _viewModel.ExternalResultValue = "Negative";
+            _viewModel.ExternalResultComment = "External comment";
+            _viewModel.ExternalReference = "REF-2026";
+            _externalLabServiceMock.Setup(x => x.EnterExternalLabResultAsync(41, "Negative", "External comment", "REF-2026"))
+                .Returns(Task.CompletedTask);
+
+            // Act
+            _viewModel.EnterExternalResultCommand.Execute(null);
+            await Task.Delay(100);
+
+            // Assert
+            _externalLabServiceMock.Verify(x => x.EnterExternalLabResultAsync(41, "Negative", "External comment", "REF-2026"), Times.Once);
+            _viewModel.ExternalResultValue.Should().BeEmpty();
+            _viewModel.ExternalResultComment.Should().BeNull();
+            _viewModel.StatusMessage.Should().Contain("تم إدخال نتيجة المعمل الخارجي");
+        }
+
+        [Fact]
         public async Task CreateManifestCommand_With_Valid_Data_Should_Create_Manifest_Success()
         {
             // Function: 2.13 — Lab-to-Lab Settlement
@@ -221,6 +244,60 @@ namespace Open_lab.Tests.ViewModels
             _externalLabServiceMock.Verify(x => x.CreateManifestAsync(3, It.IsAny<List<int>>(), It.IsAny<string?>()), Times.Once);
             _viewModel.SelectedQueueIds.Should().BeEmpty();
             _viewModel.StatusMessage.Should().Contain("MAN-NEW");
+        }
+
+        [Fact]
+        public async Task PrepareExternalSample_WhenCreateManifestThrows_ShouldSetErrorStatusMessage()
+        {
+            // Function: 8.3 — Prepare External Sample
+            // Arrange
+            _viewModel.SelectedReferralId = 3;
+            _viewModel.SelectedQueueIds.Add(1);
+            _externalLabServiceMock
+                .Setup(x => x.CreateManifestAsync(3, It.IsAny<List<int>>(), It.IsAny<string?>()))
+                .ThrowsAsync(new InvalidOperationException("manifest-create-failed"));
+
+            // Act
+            _viewModel.CreateManifestCommand.Execute(null);
+            await Task.Delay(100);
+
+            // Assert
+            _viewModel.StatusMessage.Should().Contain("خطأ:");
+            _viewModel.StatusMessage.Should().Contain("manifest-create-failed");
+            _viewModel.SelectedQueueIds.Should().ContainSingle(id => id == 1);
+        }
+
+        [Fact]
+        public async Task PrepareExternalSample_WithValidManifest_ShouldReloadQueueAndManifests()
+        {
+            // Function: 8.3 — Prepare External Sample
+            // Arrange
+            _viewModel.SelectedReferralId = 3;
+            _viewModel.SelectedQueueIds.Add(1);
+            _externalLabServiceMock
+                .Setup(x => x.CreateManifestAsync(3, It.IsAny<List<int>>(), It.IsAny<string?>()))
+                .ReturnsAsync(new ShipmentManifest { ManifestId = 20, ManifestNumber = "MAN-RELOAD", ReferralId = 3, DateCreated = DateTime.Today, Status = "Open" });
+            _externalLabServiceMock
+                .Setup(x => x.GetPendingQueueAsync())
+                .ReturnsAsync(new List<ExternalLabQueue> { BuildQueueItem() });
+            _externalLabServiceMock
+                .Setup(x => x.GetAllManifestsAsync())
+                .ReturnsAsync(new List<ShipmentManifest>
+                {
+                    new() { ManifestId = 20, ManifestNumber = "MAN-RELOAD", ReferralId = 3, DateCreated = DateTime.Today, Status = "Open" }
+                });
+
+            // Act
+            _viewModel.CreateManifestCommand.Execute(null);
+            await Task.Delay(150);
+
+            // Assert
+            _externalLabServiceMock.Verify(x => x.GetPendingQueueAsync(), Times.AtLeastOnce);
+            _externalLabServiceMock.Verify(x => x.GetAllManifestsAsync(), Times.AtLeastOnce);
+            _viewModel.Manifests.Should().ContainSingle(m => m.ManifestNumber == "MAN-RELOAD");
+            _viewModel.PendingQueue.Should().ContainSingle(q => q.QueueId == 1);
+            _viewModel.SelectedQueueIds.Should().BeEmpty();
+            _viewModel.StatusMessage.Should().Contain("MAN-RELOAD");
         }
 
         [Fact]
@@ -272,6 +349,60 @@ namespace Open_lab.Tests.ViewModels
             // Assert
             _externalLabServiceMock.Verify(x => x.UpdateQueueStatusAsync(1, "InManifest", It.IsAny<string?>()), Times.Once);
             _viewModel.StatusMessage.Should().Contain("InManifest");
+        }
+
+        [Fact]
+        public async Task TrackExternalSampleStatus_WhenStatusIsInManifest_ShouldUpdateToShipped()
+        {
+            // Function: 8.4 — Track External Sample Status
+            // Arrange
+            _viewModel.SelectedQueueItem = new ExternalLabQueue { QueueId = 31, Status = "InManifest" };
+            _externalLabServiceMock.Setup(x => x.UpdateQueueStatusAsync(31, "Shipped", It.IsAny<string?>()))
+                .Returns(Task.CompletedTask);
+
+            // Act
+            _viewModel.UpdateStatusCommand.Execute(null);
+            await Task.Delay(100);
+
+            // Assert
+            _externalLabServiceMock.Verify(x => x.UpdateQueueStatusAsync(31, "Shipped", It.IsAny<string?>()), Times.Once);
+            _viewModel.StatusMessage.Should().Contain("Shipped");
+        }
+
+        [Fact]
+        public async Task TrackExternalSampleStatus_WhenStatusIsShipped_ShouldUpdateToReceived()
+        {
+            // Function: 8.4 — Track External Sample Status
+            // Arrange
+            _viewModel.SelectedQueueItem = new ExternalLabQueue { QueueId = 32, Status = "Shipped" };
+            _externalLabServiceMock.Setup(x => x.UpdateQueueStatusAsync(32, "Received", It.IsAny<string?>()))
+                .Returns(Task.CompletedTask);
+
+            // Act
+            _viewModel.UpdateStatusCommand.Execute(null);
+            await Task.Delay(100);
+
+            // Assert
+            _externalLabServiceMock.Verify(x => x.UpdateQueueStatusAsync(32, "Received", It.IsAny<string?>()), Times.Once);
+            _viewModel.StatusMessage.Should().Contain("Received");
+        }
+
+        [Fact]
+        public async Task TrackExternalSampleStatus_WhenStatusIsReceived_ShouldRemainReceived()
+        {
+            // Function: 8.4 — Track External Sample Status
+            // Arrange
+            _viewModel.SelectedQueueItem = new ExternalLabQueue { QueueId = 33, Status = "Received" };
+            _externalLabServiceMock.Setup(x => x.UpdateQueueStatusAsync(33, "Received", It.IsAny<string?>()))
+                .Returns(Task.CompletedTask);
+
+            // Act
+            _viewModel.UpdateStatusCommand.Execute(null);
+            await Task.Delay(100);
+
+            // Assert
+            _externalLabServiceMock.Verify(x => x.UpdateQueueStatusAsync(33, "Received", It.IsAny<string?>()), Times.Once);
+            _viewModel.StatusMessage.Should().Contain("Received");
         }
 
         [Fact]
@@ -515,6 +646,49 @@ namespace Open_lab.Tests.ViewModels
 
             // Assert
             _viewModel.StatusMessage.Should().Contain("لم يتم العثور على تقرير للطباعة");
+        }
+
+        [Fact]
+        public async Task PrintExternalLabReport_WhenReportServiceThrows_ShouldSetErrorStatusMessage()
+        {
+            // Function: 8.6 — Print External Lab Report
+            // Arrange
+            _viewModel.SelectedQueueItem = BuildQueueItem();
+            _reportServiceMock.Setup(x => x.GetVisitReportAsync(12))
+                .ThrowsAsync(new InvalidOperationException("external-report-load-failed"));
+
+            // Act
+            _viewModel.PrintExternalReportCommand.Execute(null);
+            await Task.Delay(100);
+
+            // Assert
+            _viewModel.StatusMessage.Should().Contain("خطأ:");
+            _viewModel.StatusMessage.Should().Contain("external-report-load-failed");
+            _printServiceMock.Verify(x => x.PrintVisitReportAsync(It.IsAny<VisitReportData>(), true), Times.Never);
+        }
+
+        [Fact]
+        public async Task PrintExternalLabReport_WhenPrintServiceThrows_ShouldSetErrorStatusMessage()
+        {
+            // Function: 8.6 — Print External Lab Report
+            // Arrange
+            _viewModel.SelectedQueueItem = BuildQueueItem();
+            var report = new VisitReportData
+            {
+                Visit = new Visit { VisitId = 12, VisitDate = DateTime.Today },
+                Patient = new Patient { FullName = "Patient 1", LabId = "L-1", Gender = "Male" }
+            };
+            _reportServiceMock.Setup(x => x.GetVisitReportAsync(12)).ReturnsAsync(report);
+            _printServiceMock.Setup(x => x.PrintVisitReportAsync(report, true))
+                .ThrowsAsync(new InvalidOperationException("external-print-failed"));
+
+            // Act
+            _viewModel.PrintExternalReportCommand.Execute(null);
+            await Task.Delay(100);
+
+            // Assert
+            _viewModel.StatusMessage.Should().Contain("خطأ:");
+            _viewModel.StatusMessage.Should().Contain("external-print-failed");
         }
 
         private static ExternalLabQueue BuildQueueItem()
