@@ -14,7 +14,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task LoadCommand_Should_Load_Test_Rows_Success()
         {
-            // Function: X.X — To Be Determined
+            // Function: 7.2 — Generate Test Worksheet
             // Arrange
             var worksheet = new Mock<IWorksheetService>();
             var print = new Mock<IPrintService>();
@@ -33,7 +33,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task LoadCommand_When_TestService_Throws_Should_Set_Error_Failure()
         {
-            // Function: X.X — To Be Determined
+            // Function: 7.2 — Generate Test Worksheet
             // Arrange
             var worksheet = new Mock<IWorksheetService>();
             var print = new Mock<IPrintService>();
@@ -52,7 +52,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public void PrintCommand_When_No_TestRows_Should_Be_Disabled_Edge()
         {
-            // Function: X.X — To Be Determined
+            // Function: 7.2 — Generate Test Worksheet
             // Arrange
             var vm = new WorkSheetByTestViewModel(Mock.Of<IWorksheetService>(), Mock.Of<IPrintService>());
             vm.Rows.Clear();

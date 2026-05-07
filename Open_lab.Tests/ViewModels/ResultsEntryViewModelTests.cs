@@ -27,7 +27,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public void ResultsEntry_Commands_When_Admin_Should_Be_Enabled()
         {
-            // Function: X.X — To Be Determined
+            // Function: 4.1 — Enter Test Results
             // Arrange
             // Act
             // Assert
@@ -39,7 +39,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task LoadVisitTestsAsync_Should_Call_Service()
         {
-            // Function: X.X — To Be Determined
+            // Function: 4.1 — Enter Test Results
             // Arrange
             // Act
             var visitTests = new List<VisitTest> { new VisitTest { VisitTestId = 1 } };
@@ -54,7 +54,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task LoadVisitTestsAsync_When_Service_Throws_Should_Set_Error()
         {
-            // Function: X.X — To Be Determined
+            // Function: 4.1 — Enter Test Results
             // Arrange
             // Act
             _resultsServiceMock.Setup(x => x.GetVisitTestsByDateAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>()))
@@ -67,7 +67,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task SaveResultsAsync_With_Null_SelectedVisitTest_Should_Do_Nothing()
         {
-            // Function: X.X — To Be Determined
+            // Function: 4.3 — Edit Results
             // Arrange
             // Act
             _viewModel.SelectedVisitTest = null;
@@ -81,7 +81,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task SaveResultsAsync_With_Results_Should_Call_Service()
         {
-            // Function: X.X — To Be Determined
+            // Function: 4.3 — Edit Results
             // Arrange
             // Act
             _viewModel.SelectedVisitTest = new VisitTestRow { VisitTestId = 10 };
@@ -98,7 +98,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task VerifyResultsAsync_With_Null_SelectedVisitTest_Should_Do_Nothing()
         {
-            // Function: X.X — To Be Determined
+            // Function: 4.4 — Create Composite Report
             // Arrange
             // Act
             _viewModel.SelectedVisitTest = null;
@@ -112,7 +112,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task VerifyResultsAsync_With_Valid_VisitTest_Should_Call_Service()
         {
-            // Function: X.X — To Be Determined
+            // Function: 4.4 — Create Composite Report
             // Arrange
             // Act
             _viewModel.SelectedVisitTest = new VisitTestRow { VisitTestId = 10 };
@@ -126,7 +126,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task SaveResultsAsync_When_ServiceThrows_Should_Set_ErrorStatus_FailureGuard()
         {
-            // Function: X.X — To Be Determined
+            // Function: 4.3 — Edit Results
             // Arrange
             // Act
             _viewModel.SelectedVisitTest = new VisitTestRow { VisitTestId = 10, TestId = 2, Status = "InProgress" };
@@ -146,7 +146,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task VerifyResultsAsync_When_ServiceThrows_Should_Set_ErrorStatus_FailureGuard()
         {
-            // Function: X.X — To Be Determined
+            // Function: 4.4 — Create Composite Report
             // Arrange
             // Act
             _viewModel.SelectedVisitTest = new VisitTestRow { VisitTestId = 10, TestId = 2, Status = "InProgress" };
@@ -164,7 +164,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task ReopenResultsAsync_With_Null_SelectedVisitTest_Should_Do_Nothing()
         {
-            // Function: X.X — To Be Determined
+            // Function: 4.3 — Edit Results
             // Arrange
             // Act
             _viewModel.SelectedVisitTest = null;
@@ -178,7 +178,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task ReopenResultsAsync_With_Valid_VisitTest_Should_Call_Service()
         {
-            // Function: X.X — To Be Determined
+            // Function: 4.3 — Edit Results
             // Arrange
             // Act
             _viewModel.SelectedVisitTest = new VisitTestRow { VisitTestId = 10 };

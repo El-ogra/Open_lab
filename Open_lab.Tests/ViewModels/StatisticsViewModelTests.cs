@@ -83,7 +83,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task LoadAsync_Should_Populate_All_Module9_Collections()
         {
-            // Function: X.X — To Be Determined
+            // Function: 9.1 — Patient Count by Gender
             // Arrange
             // Act
             await _viewModel.InvokePrivateAsync("LoadAsync");
@@ -106,7 +106,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task LoadCommand_When_Executed_Should_Load_Data_Success()
         {
-            // Function: X.X — To Be Determined
+            // Function: 9.1 — Patient Count by Gender
             // Arrange
             // Act
             _viewModel.LoadCommand.Execute(null);
@@ -120,7 +120,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task LoadAsync_When_SnapshotServiceThrows_Should_Set_ErrorStatus_FailureGuard()
         {
-            // Function: X.X — To Be Determined
+            // Function: 9.1 — Patient Count by Gender
             // Arrange
             _statisticsServiceMock
                 .Setup(x => x.GetSnapshotAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<string?>(), It.IsAny<int?>()))
@@ -137,7 +137,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task LoadCommand_When_Service_Throws_Should_Set_Error_Status_Failure()
         {
-            // Function: X.X — To Be Determined
+            // Function: 9.1 — Patient Count by Gender
             // Arrange
             _statisticsServiceMock
                 .Setup(x => x.GetSnapshotAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<string?>(), It.IsAny<int?>()))
@@ -154,7 +154,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task LoadCommand_When_Services_Return_Empty_Data_Should_Keep_Collections_Empty_Edge()
         {
-            // Function: X.X — To Be Determined
+            // Function: 9.1 — Patient Count by Gender
             // Arrange
             _statisticsServiceMock
                 .Setup(x => x.GetSnapshotAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<string?>(), It.IsAny<int?>()))
@@ -183,7 +183,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task PrintAsync_When_PrintServiceThrows_Should_Set_ErrorStatus_EdgeGuard()
         {
-            // Function: X.X — To Be Determined
+            // Function: 9.5 — Referral Source Analysis
             // Arrange
             _printServiceMock
                 .Setup(x => x.PrintTextReportAsync(It.IsAny<string>(), It.IsAny<IReadOnlyCollection<string>>(), It.IsAny<string>()))
@@ -200,7 +200,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task PrintCommand_When_Executed_Should_Call_Print_Service_Success()
         {
-            // Function: X.X — To Be Determined
+            // Function: 9.5 — Referral Source Analysis
             // Arrange
             await _viewModel.InvokePrivateAsync("LoadAsync");
 
@@ -218,7 +218,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public void Commands_When_User_Has_No_Permission_Should_Be_Disabled_Failure()
         {
-            // Function: X.X — To Be Determined
+            // Function: 9.6 — User Productivity Report
             // Arrange
             AppSessionTestHelper.Reset();
 

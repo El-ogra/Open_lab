@@ -30,7 +30,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task UpdateSeparationStatusAsync_Should_Keep_Status_Aligned_With_Tracking_State()
         {
-            // Function: X.X — To Be Determined
+            // Function: 6.3 — Track Sample Status
             // Arrange
             // Act
             _db.SampleCollections.Add(new SampleCollection
@@ -60,7 +60,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task UpdateSeparationStatusAsync_WithNonExistentSample_Should_ThrowException_FailureGuard()
         {
-            // Function: X.X — To Be Determined
+            // Function: 6.3 — Track Sample Status
             // Arrange
             var invalidId = 9999;
             
@@ -74,7 +74,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task GetSampleStatusAsync_Should_ReturnSample_IfExists_LogicGuard()
         {
-            // Function: X.X — To Be Determined
+            // Function: 6.3 — Track Sample Status
             // Arrange
             _db.Users.Add(new User { UserId = 1, Username = "TestUser", PasswordHash = "hash" });
             _db.SampleCollections.Add(new SampleCollection
@@ -99,7 +99,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task GetSampleStatusAsync_When_Sample_Does_Not_Exist_Should_Return_Null_FailureGuard()
         {
-            // Function: X.X — To Be Determined
+            // Function: 6.3 — Track Sample Status
             // Arrange
             // Act
             var result = await _service.GetSampleStatusAsync(99999);
@@ -111,7 +111,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task GetPendingTrackingSamplesAsync_Should_Return_OnlyPending_LogicGuard()
         {
-            // Function: X.X — To Be Determined
+            // Function: 6.3 — Track Sample Status
             // Arrange
             var patient = new Patient { LabId = "P1", FullName = "Pending Test Patient" };
             _db.Patients.Add(patient);
@@ -161,7 +161,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task GetPendingTrackingSamplesAsync_When_No_Samples_Should_Return_Empty_Edge()
         {
-            // Function: X.X — To Be Determined
+            // Function: 6.3 — Track Sample Status
             // Arrange
             // Act
             var pendingSamples = await _service.GetPendingTrackingSamplesAsync();

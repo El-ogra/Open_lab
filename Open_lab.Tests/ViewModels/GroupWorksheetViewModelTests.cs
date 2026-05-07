@@ -35,7 +35,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task LoadWorksheetAsync_Should_Load_Group_Worksheet_Rows()
         {
-            // Function: X.X — To Be Determined
+            // Function: 7.3 — Generate Group Worksheet
             // Arrange
             // Act
             _groupWorksheetServiceMock.Setup(x => x.GetGroupWorksheetByGroupAsync(1, It.IsAny<DateTime>(), It.IsAny<DateTime>()))
@@ -53,7 +53,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task LoadGroupsCommand_When_Executed_Should_Load_Groups_Success()
         {
-            // Function: X.X — To Be Determined
+            // Function: 7.3 — Generate Group Worksheet
             // Arrange
             // Act
             _viewModel.LoadGroupsCommand.Execute(null);
@@ -68,7 +68,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task LoadGroupsCommand_When_Service_Throws_Should_Set_Error_Message_Failure()
         {
-            // Function: X.X — To Be Determined
+            // Function: 7.3 — Generate Group Worksheet
             // Arrange
             _testCatalogServiceMock.Setup(x => x.GetTestGroupsAsync()).ThrowsAsync(new InvalidOperationException("groups-failed"));
 
@@ -83,7 +83,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task LoadGroupsCommand_With_Empty_Lists_Should_Keep_Collections_Empty_Edge()
         {
-            // Function: X.X — To Be Determined
+            // Function: 7.3 — Generate Group Worksheet
             // Arrange
             _testCatalogServiceMock.Setup(x => x.GetTestGroupsAsync()).ReturnsAsync(new List<TestGroup>());
             _testCatalogServiceMock.Setup(x => x.GetCustomGroupsAsync()).ReturnsAsync(new List<CustomGroup>());
@@ -101,7 +101,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task PrintAsync_Should_Send_Group_Worksheet_To_Print_Service()
         {
-            // Function: X.X — To Be Determined
+            // Function: 7.3 — Generate Group Worksheet
             // Arrange
             // Act
             _viewModel.Rows.Add(new WorkSheetPatientRow { VisitId = 1, PatientName = "P1", TestsCount = 1 });
@@ -116,7 +116,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task LoadWorksheetCommand_When_No_Selection_Should_Not_Call_Service_Edge()
         {
-            // Function: X.X — To Be Determined
+            // Function: 7.3 — Generate Group Worksheet
             // Arrange
             _viewModel.SelectedGroupId = null;
             _viewModel.SelectedCustomGroupId = null;
@@ -135,7 +135,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task LoadWorksheetAsync_When_ServiceThrows_Should_Set_ErrorStatus_FailureGuard()
         {
-            // Function: X.X — To Be Determined
+            // Function: 7.3 — Generate Group Worksheet
             // Arrange
             _groupWorksheetServiceMock
                 .Setup(x => x.GetGroupWorksheetByGroupAsync(It.IsAny<int>(), It.IsAny<DateTime>(), It.IsAny<DateTime>()))
@@ -154,7 +154,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public void PrintCommand_When_RowsEmpty_Should_Be_Disabled_EdgeGuard()
         {
-            // Function: X.X — To Be Determined
+            // Function: 7.3 — Generate Group Worksheet
             // Arrange
             _viewModel.Rows.Clear();
 
@@ -168,7 +168,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task PrintCommand_When_GroupPrintService_Fails_Should_Set_Error_Message_Failure()
         {
-            // Function: X.X — To Be Determined
+            // Function: 7.3 — Generate Group Worksheet
             // Arrange
             _viewModel.Rows.Add(new WorkSheetPatientRow { VisitId = 2, PatientName = "P2", TestsCount = 1 });
             _printServiceMock

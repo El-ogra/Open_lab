@@ -33,7 +33,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public void SampleCollection_Commands_When_Admin_Should_Be_Enabled()
         {
-            // Function: X.X — To Be Determined
+            // Function: 6.1 — Register Sample Collection
             // Arrange
             // Act
             // Assert
@@ -44,7 +44,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public void MarkCollectedCommand_CanExecute_When_Row_Selected_Should_Return_True()
         {
-            // Function: X.X — To Be Determined
+            // Function: 6.1 — Register Sample Collection
             // Arrange
             // Act
             _viewModel.SelectedRow = new SampleCollectionRow { VisitTestId = 10 };
@@ -55,7 +55,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task LoadAsync_Should_Load_Sample_Collection_Rows()
         {
-            // Function: X.X — To Be Determined
+            // Function: 6.1 — Register Sample Collection
             // Arrange
             // Act
             var rows = new List<SampleCollectionRow> { new SampleCollectionRow { VisitTestId = 1 } };
@@ -73,7 +73,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task LoadCommand_Execute_With_Valid_Data_Should_Load_Items_Success()
         {
-            // Function: X.X — To Be Determined
+            // Function: 6.1 — Register Sample Collection
             // Arrange
             _sampleCollectionServiceMock
                 .Setup(x => x.GetRowsAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>()))
@@ -91,7 +91,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task LoadCommand_Execute_When_Service_Throws_Should_Set_Error_Message_Failure()
         {
-            // Function: X.X — To Be Determined
+            // Function: 6.1 — Register Sample Collection
             // Arrange
             _sampleCollectionServiceMock
                 .Setup(x => x.GetRowsAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>()))
@@ -109,7 +109,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task MarkCollectedAsync_With_Null_SelectedRow_Should_Do_Nothing()
         {
-            // Function: X.X — To Be Determined
+            // Function: 6.1 — Register Sample Collection
             // Arrange
             // Act
             _viewModel.SelectedRow = null;
@@ -122,7 +122,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task MarkCollectedAsync_With_Valid_Row_Should_Call_Service()
         {
-            // Function: X.X — To Be Determined
+            // Function: 6.1 — Register Sample Collection
             // Arrange
             // Act
             _viewModel.SelectedRow = new SampleCollectionRow { VisitTestId = 10 };
@@ -140,7 +140,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task MarkCollectedCommand_When_User_Not_LoggedIn_Should_Reject_Request_Failure()
         {
-            // Function: X.X — To Be Determined
+            // Function: 6.1 — Register Sample Collection
             // Arrange
             AppSessionTestHelper.Reset();
             _viewModel.SelectedRow = new SampleCollectionRow { VisitTestId = 10 };
@@ -157,7 +157,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task MarkCollected_Failure_Should_HandleException_FailureGuard()
         {
-            // Function: X.X — To Be Determined
+            // Function: 6.1 — Register Sample Collection
             // Arrange
             // Act
             _viewModel.SelectedRow = new SampleCollectionRow { VisitTestId = 10 };
@@ -175,7 +175,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task MarkSeparatedAsync_With_Valid_Row_Should_Call_Service()
         {
-            // Function: X.X — To Be Determined
+            // Function: 6.2 — Record Sample Separation
             // Arrange
             // Act
             _viewModel.SelectedRow = new SampleCollectionRow { VisitTestId = 10 };
@@ -194,7 +194,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task MarkSeparated_Failure_Should_HandleException_FailureGuard()
         {
-            // Function: X.X — To Be Determined
+            // Function: 6.2 — Record Sample Separation
             // Arrange
             // Act
             _viewModel.SelectedRow = new SampleCollectionRow { VisitTestId = 10 };
@@ -213,7 +213,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task MarkNotCollectedAsync_With_Valid_Row_Should_Call_Service()
         {
-            // Function: X.X — To Be Determined
+            // Function: 6.2 — Record Sample Separation
             // Arrange
             // Act
             _viewModel.SelectedRow = new SampleCollectionRow { VisitTestId = 10 };
@@ -231,7 +231,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task MarkNotCollectedCommand_When_Service_Throws_Should_Set_Error_Message_Failure()
         {
-            // Function: X.X — To Be Determined
+            // Function: 6.2 — Record Sample Separation
             // Arrange
             _viewModel.SelectedRow = new SampleCollectionRow { VisitTestId = 10 };
             _sampleCollectionServiceMock
@@ -250,7 +250,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task MarkExternalCollectedAsync_With_Valid_Row_Should_Call_Service_SuccessGuard()
         {
-            // Function: X.X — To Be Determined
+            // Function: 6.4 — Mark Taken Outside Lab
             // Arrange
             // Act
             _viewModel.SelectedRow = new SampleCollectionRow { VisitTestId = 20 };
@@ -269,7 +269,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task MarkExternalCollected_Failure_Should_HandleException_FailureGuard()
         {
-            // Function: X.X — To Be Determined
+            // Function: 6.4 — Mark Taken Outside Lab
             // Arrange
             // Act
             _viewModel.SelectedRow = new SampleCollectionRow { VisitTestId = 20 };
@@ -287,7 +287,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task MarkExternalCollectedCommand_When_User_Not_LoggedIn_Should_Reject_Request_Failure()
         {
-            // Function: X.X — To Be Determined
+            // Function: 6.4 — Mark Taken Outside Lab
             // Arrange
             AppSessionTestHelper.Reset();
             _viewModel.SelectedRow = new SampleCollectionRow { VisitTestId = 20 };
@@ -304,7 +304,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task RefreshSampleStatusAsync_Should_UpdateStatus_SuccessGuard()
         {
-            // Function: X.X — To Be Determined
+            // Function: 6.3 — Track Sample Status
             // Arrange
             // Act
             _viewModel.SelectedRow = new SampleCollectionRow { VisitTestId = 30 };
@@ -323,7 +323,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task RefreshSampleStatusAsync_Failure_Should_HandleException_FailureGuard()
         {
-            // Function: X.X — To Be Determined
+            // Function: 6.3 — Track Sample Status
             // Arrange
             // Act
             _viewModel.SelectedRow = new SampleCollectionRow { VisitTestId = 30 };
@@ -341,7 +341,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task RefreshSampleStatusCommand_When_No_Tracking_Record_Should_Show_NotFound_Message_Edge()
         {
-            // Function: X.X — To Be Determined
+            // Function: 6.3 — Track Sample Status
             // Arrange
             _viewModel.SelectedRow = new SampleCollectionRow { VisitTestId = 77 };
             _sampleTrackingServiceMock.Setup(x => x.GetSampleStatusAsync(77)).ReturnsAsync((SampleCollection?)null);

@@ -30,7 +30,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task CreateTestAsync_Should_Create_Test_When_Valid_LogicGuard()
         {
-            // Function: X.X — To Be Determined
+            // Function: 3.1 — Add New Test
             // Arrange
             // Act
             // Refactored to Logic Guard - verifies all fields persisted
@@ -51,7 +51,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task CreateTestAsync_DuplicateCode_Should_Throw()
         {
-            // Function: X.X — To Be Determined
+            // Function: 3.1 — Add New Test
             // Arrange
             _db.Tests.Add(new Test { Code = "DUP", NameReport = "X", NameReceipt = "X", Price = 10m });
             await _db.SaveChangesAsync();
@@ -68,7 +68,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task CreateTestAsync_NegativePrice_Should_Throw()
         {
-            // Function: X.X — To Be Determined
+            // Function: 3.1 — Add New Test
             // Arrange
             var test = new Test { Code = "NEG", NameReport = "N", NameReceipt = "N", Price = -1m };
 
@@ -82,7 +82,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task CreateReferenceRangeAsync_InvalidRange_Should_Throw()
         {
-            // Function: X.X — To Be Determined
+            // Function: 3.3 — Set Reference Values
             // Arrange
             var range = new TestReferenceRange { TestId = 1, AgeFrom = 10, AgeTo = 5, LowValue = 1, HighValue = 2 };
 
@@ -96,7 +96,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task CreateTestCommentAsync_Default_Should_Clear_Other_Defaults_LogicGuard()
         {
-            // Function: X.X — To Be Determined
+            // Function: 3.1 — Add New Test
             // Refactored to Logic Guard - verifies default comment logic
             // Arrange
             var test = new Test { Code = "C1", NameReport = "T", NameReceipt = "T", Price = 1m };
@@ -125,7 +125,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task CreatePriceListAsync_DuplicateForReferral_Should_Throw()
         {
-            // Function: X.X — To Be Determined
+            // Function: 12.1 — Create Contract Entity
             // Arrange
             var pl = new PriceList { Name = "PL1", ReferralId = 1 };
             _db.PriceLists.Add(pl);
@@ -143,7 +143,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task AddPriceListItemAsync_InvalidReferences_Should_Throw()
         {
-            // Function: X.X — To Be Determined
+            // Function: 3.8 — Update Prices
             // Arrange
             var item = new PriceListItem { PriceListId = 999, TestId = 999, Price = 10m };
 
@@ -157,7 +157,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task CreateCustomGroupAsync_NegativePrice_Should_Throw()
         {
-            // Function: X.X — To Be Determined
+            // Function: 3.5 — Create Custom Group
             // Arrange
             var group = new CustomGroup { Name = "G1", Price = -5m };
 
@@ -171,7 +171,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task CreateCustomGroupAsync_Should_Persist_Group_LogicGuard()
         {
-            // Function: X.X — To Be Determined
+            // Function: 3.5 — Create Custom Group
             // Arrange
             // Act
             // Refactored to Logic Guard - verifies all fields persisted
@@ -190,7 +190,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task AddPriceListItemAsync_Should_Add_New_Item_LogicGuard()
         {
-            // Function: X.X — To Be Determined
+            // Function: 3.8 — Update Prices
             // Arrange
             // Act
             // Refactored to Logic Guard - verifies price list item binding
@@ -213,7 +213,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task UpdateTestAsync_Should_Update_Test_Data_Including_Outsource_Flags()
         {
-            // Function: X.X — To Be Determined
+            // Function: 3.2 — Edit Test Data
             // Arrange
             var existing = new Test
             {
@@ -254,7 +254,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task CreateAndUpdateTestComment_Should_Persist_Low_High_Comments_LogicGuard()
         {
-            // Function: X.X — To Be Determined
+            // Function: 3.2 — Edit Test Data
             // Refactored to Logic Guard - verifies low/high comment persistence
             // Arrange
             var test = new Test { Code = "LC1", NameReport = "T", NameReceipt = "T", Price = 5m };
@@ -294,7 +294,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task CreatePriceListAsync_Should_Create_With_Correct_Fields_LogicGuard()
         {
-            // Function: X.X — To Be Determined
+            // Function: 3.7 — Create Price List
             // Refactored to Logic Guard - verifies all price list fields
             // Arrange
             var referral = new Referral { Name = "Ref" };
@@ -321,7 +321,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task CreatePriceListAsync_DuplicateName_For_Same_Referral_Should_Throw_LogicGuard()
         {
-            // Function: X.X — To Be Determined
+            // Function: 12.1 — Create Contract Entity
             // Refactored to Logic Guard - verifies duplicate detection
             // Arrange
             var referral = new Referral { Name = "Ref" };

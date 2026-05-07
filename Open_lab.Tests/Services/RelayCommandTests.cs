@@ -8,7 +8,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public void Constructor_With_Null_Execute_Should_Throw_ArgumentNullException()
         {
-            // Function: X.X — To Be Determined
+            // Function: 13.8 — Set System Password
             // Arrange
             Action act = () => new RelayCommand(null!);
 
@@ -20,7 +20,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public void CanExecute_When_No_CanExecute_Func_Should_Return_True()
         {
-            // Function: X.X — To Be Determined
+            // Function: 13.8 — Set System Password
             // Arrange
             var command = new RelayCommand(_ => { });
 
@@ -34,7 +34,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public void CanExecute_When_CanExecute_Returns_True_Should_Return_True()
         {
-            // Function: X.X — To Be Determined
+            // Function: 13.8 — Set System Password
             // Arrange
             var command = new RelayCommand(_ => { }, _ => true);
 
@@ -48,7 +48,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public void CanExecute_When_CanExecute_Returns_False_Should_Return_False()
         {
-            // Function: X.X — To Be Determined
+            // Function: 13.8 — Set System Password
             // Arrange
             var command = new RelayCommand(_ => { }, _ => false);
 
@@ -62,7 +62,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public void Execute_Should_Invoke_Execute_Action()
         {
-            // Function: X.X — To Be Determined
+            // Function: 13.8 — Set System Password
             // Arrange
             var executed = false;
             var command = new RelayCommand(_ => executed = true);
@@ -77,7 +77,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public void Execute_Should_Pass_Parameter_To_Execute_Action()
         {
-            // Function: X.X — To Be Determined
+            // Function: 13.8 — Set System Password
             // Arrange
             object? receivedParameter = null;
             var command = new RelayCommand(param => receivedParameter = param);
@@ -92,7 +92,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public void RaiseCanExecuteChanged_Should_Trigger_CanExecuteChanged_Event()
         {
-            // Function: X.X — To Be Determined
+            // Function: 13.8 — Set System Password
             // Arrange
             var command = new RelayCommand(_ => { }, _ => true);
             var eventRaised = false;

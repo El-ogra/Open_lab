@@ -20,7 +20,7 @@ namespace Open_lab.Tests.Integration
         [Fact]
         public void OpenLabModulesDocumentation_Should_Define_13_Modules_And_97_Functions()
         {
-            // Function: X.X — To Be Determined
+            // Function: 13.8 — Set System Password
             // Arrange
             // Act
             var markdown = File.ReadAllText(GetModulesDocPath());
@@ -36,7 +36,7 @@ namespace Open_lab.Tests.Integration
         [Fact]
         public void Every_Documented_Function_Should_Have_Model_Service_ViewModel_Mapping()
         {
-            // Function: X.X — To Be Determined
+            // Function: 13.8 — Set System Password
             // Arrange
             // Act
             var documentedIds = ExtractFunctionIds(File.ReadAllText(GetModulesDocPath()));
@@ -52,7 +52,7 @@ namespace Open_lab.Tests.Integration
         [Fact]
         public void Every_Function_Mapping_Should_Have_Service_Interface_And_ViewModel_Commands()
         {
-            // Function: X.X — To Be Determined
+            // Function: 13.8 — Set System Password
             // Arrange
             // Act
             foreach (var item in BuildCases())
@@ -78,7 +78,7 @@ namespace Open_lab.Tests.Integration
         [Fact]
         public void Every_Function_Mapping_Should_Have_Service_And_ViewModel_Test_Evidence()
         {
-            // Function: X.X — To Be Determined
+            // Function: 13.8 — Set System Password
             // Arrange
             // Act
             var serviceTestTexts = Directory.GetFiles(Path.Combine(GetRepositoryRoot(), "Open_lab.Tests", "Services"), "*.cs", SearchOption.AllDirectories)

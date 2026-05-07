@@ -32,7 +32,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task LoadPatientCommand_When_LabId_NotFound_Should_Set_Status_FailureGuard()
         {
-            // Function: X.X — To Be Determined
+            // Function: 4.9 — Compare with History
             // Arrange
             // Act
             _viewModel.LabId = "UNKNOWN";
@@ -49,7 +49,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task LoadPatientCommand_When_Patient_Exists_Should_Load_Test_List_SuccessGuard()
         {
-            // Function: X.X — To Be Determined
+            // Function: 4.9 — Compare with History
             // Arrange
             // Act
             _viewModel.LabId = "L-100";
@@ -74,7 +74,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task LoadHistoryCommand_Should_Group_And_Load_HistoryRows_EdgeGuard()
         {
-            // Function: X.X — To Be Determined
+            // Function: 4.9 — Compare with History
             // Arrange
             // Act
             _viewModel.LabId = "L-200";
@@ -105,7 +105,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task LoadHistoryCommand_When_ServiceThrows_Should_Set_ErrorMessage_FailureGuard()
         {
-            // Function: X.X — To Be Determined
+            // Function: 4.9 — Compare with History
             // Arrange
             // Act
             _viewModel.LabId = "L-300";
@@ -132,7 +132,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task ClearCommand_Should_Reset_State_And_Collections_EdgeGuard()
         {
-            // Function: X.X — To Be Determined
+            // Function: 4.9 — Compare with History
             // Arrange
             // Act
             _viewModel.LabId = "L-RESET";
@@ -160,7 +160,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public void LoadHistoryCommand_CanExecute_Should_Be_False_Without_Patient_Or_Test_FailureGuard()
         {
-            // Function: X.X — To Be Determined
+            // Function: 4.9 — Compare with History
             // Arrange
             // Act
             // Assert

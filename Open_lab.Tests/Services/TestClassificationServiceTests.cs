@@ -30,7 +30,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task GetConsumptionReportAsync_Should_Aggregate_Consumption_Per_Reagent()
         {
-            // Function: X.X — To Be Determined
+            // Function: 7.4 — Test Classification LOG
             // Arrange
             // Act
             var reagent = new Reagent { Name = "R1", Unit = "ml", CurrentStock = 1000m };
@@ -68,7 +68,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task GetConsumptionReportAsync_When_NoVisitTestsInRange_Should_Return_Empty_FailureGuard()
         {
-            // Function: X.X — To Be Determined
+            // Function: 7.4 — Test Classification LOG
             // Arrange
             var reagent = new Reagent { Name = "R2", Unit = "ml", CurrentStock = 500m };
             var test = new Test { Code = "TX", NameReport = "ALT", Price = 20m };
@@ -89,7 +89,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task GetConsumptionReportAsync_With_ZeroAmountConsumption_Should_Keep_ReagentRow_WithZeroTotal_EdgeGuard()
         {
-            // Function: X.X — To Be Determined
+            // Function: 7.4 — Test Classification LOG
             // Arrange
             var reagent = new Reagent { Name = "R-Zero", Unit = "ml", CurrentStock = 500m };
             var test = new Test { Code = "T-ZERO", NameReport = "AST", Price = 20m };

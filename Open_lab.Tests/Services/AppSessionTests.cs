@@ -19,7 +19,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public void HasPermission_When_IsAdmin_True_Should_Always_Return_True()
         {
-            // Function: X.X — To Be Determined
+            // Function: 10.2 — Set Permissions
             // Arrange
             AppSession.IsAdmin = true;
             AppSession.SetPermissions(Array.Empty<string>());
@@ -33,7 +33,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public void HasPermission_When_Not_Admin_But_Has_FullAccess_Should_Return_True()
         {
-            // Function: X.X — To Be Determined
+            // Function: 10.2 — Set Permissions
             // Arrange
             AppSession.IsAdmin = false;
             AppSession.SetPermissions(new[] { PermissionCodes.FullAccess });
@@ -47,7 +47,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public void HasPermission_When_Not_Admin_And_Has_Specific_Permission_Should_Return_True_Only_For_That_Permission()
         {
-            // Function: X.X — To Be Determined
+            // Function: 10.2 — Set Permissions
             // Arrange
             AppSession.IsAdmin = false;
             AppSession.SetPermissions(new[] { PermissionCodes.PatientsView, PermissionCodes.TestsEdit });
@@ -63,7 +63,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public void HasPermission_When_No_Permissions_Should_Return_False()
         {
-            // Function: X.X — To Be Determined
+            // Function: 10.2 — Set Permissions
             // Arrange
             AppSession.IsAdmin = false;
             AppSession.SetPermissions(Array.Empty<string>());
@@ -78,7 +78,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public void Clear_Should_Reset_All_Properties()
         {
-            // Function: X.X — To Be Determined
+            // Function: 10.2 — Set Permissions
             // Arrange
             AppSession.UserId = 42;
             AppSession.Username = "testuser";
@@ -100,7 +100,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public void SetPermissions_Should_Replace_Previous_Permissions()
         {
-            // Function: X.X — To Be Determined
+            // Function: 10.2 — Set Permissions
             // Arrange
             AppSession.IsAdmin = false;
             AppSession.SetPermissions(new[] { PermissionCodes.PatientsView });

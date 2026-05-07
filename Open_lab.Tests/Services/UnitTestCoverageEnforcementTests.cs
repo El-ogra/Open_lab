@@ -12,7 +12,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public void CoverageTracker_When_FunctionMarkedComplete_Should_List_TestNames()
         {
-            // Function: X.X — To Be Determined
+            // Function: 13.8 — Set System Password
             // Arrange
             // Act
             var path = GetCoverageTrackerPath();

@@ -24,7 +24,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task LoadCommand_With_Invalid_VisitId_Should_Show_Validation_Message_FailureGuard()
         {
-            // Function: X.X — To Be Determined
+            // Function: 4.4 — Create Composite Report
             // Arrange
             // Act
             _viewModel.VisitId = 0;
@@ -40,7 +40,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task LoadCommand_With_Existing_Visit_Should_Populate_Report_Data_SuccessGuard()
         {
-            // Function: X.X — To Be Determined
+            // Function: 4.4 — Create Composite Report
             // Arrange
             // Act
             var report = BuildReport(visitId: 22);
@@ -62,7 +62,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task CombinedReport_LoadCommand_When_Service_Throws_Should_Set_Error_Message_FailureGuard()
         {
-            // Function: X.X — To Be Determined
+            // Function: 4.4 — Create Composite Report
             // Arrange
             // Act
             _reportServiceMock
@@ -80,7 +80,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task MoveCommands_Should_Reorder_Items_When_Selection_Changes_EdgeGuard()
         {
-            // Function: X.X — To Be Determined
+            // Function: 4.4 — Create Composite Report
             // Arrange
             // Act
             var report = BuildReport(visitId: 30);

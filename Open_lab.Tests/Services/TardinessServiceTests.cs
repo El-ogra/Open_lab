@@ -29,7 +29,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task GetPunctualityReportAsync_Should_Calculate_Delay_And_Overtime_LogicGuard()
         {
-            // Function: X.X — To Be Determined
+            // Function: 11.4 — Calculate Tardiness
             // Arrange
             // Act
             // Refactored to Logic Guard - verifies precise delay and overtime calculations
@@ -62,7 +62,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task GetPunctualityReportAsync_When_NoLogsInRange_Should_Return_EmptyList_FailureGuard()
         {
-            // Function: X.X — To Be Determined
+            // Function: 11.4 — Calculate Tardiness
             // Arrange
             var user = new User { Username = "u2", FullName = "User Two" };
             _db.Users.Add(user);
@@ -86,7 +86,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task GetPunctualityReportAsync_When_WithinGracePeriod_And_NoLogout_Should_Keep_Delay_And_Overtime_Zero_EdgeGuard()
         {
-            // Function: X.X — To Be Determined
+            // Function: 11.4 — Calculate Tardiness
             // Arrange
             var shift = new ShiftSchedule
             {

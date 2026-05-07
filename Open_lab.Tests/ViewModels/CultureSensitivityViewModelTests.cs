@@ -42,7 +42,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task AddCultureAsync_Should_Send_Full_Metadata_To_Service()
         {
-            // Function: X.X — To Be Determined
+            // Function: 5.1 — Enter Culture Data
             // Arrange
             // Act
             Culture? captured = null;
@@ -77,7 +77,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task AddAntibioticAsync_Should_Send_Safety_Classification_To_Service()
         {
-            // Function: X.X — To Be Determined
+            // Function: 5.2 — Add Antibiotics
             // Arrange
             // Act
             Antibiotic? captured = null;
@@ -106,7 +106,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task BuildResultRowsAsync_When_Visit_Selected_Should_Apply_Filtering()
         {
-            // Function: X.X — To Be Determined
+            // Function: 5.5 — Filter Pregnancy Antibiotics
             // Arrange
             // Act
             _viewModel.SelectedCulture = new Culture
@@ -146,7 +146,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task SaveResultAsync_Should_Save_Classified_Values_Through_Service()
         {
-            // Function: X.X — To Be Determined
+            // Function: 5.3 — Set Sensitivity
             // Arrange
             // Act
             _viewModel.SelectedCulture = new Culture
@@ -191,7 +191,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task PrintCultureReportAsync_Should_Call_Print_Service_With_Results()
         {
-            // Function: X.X — To Be Determined
+            // Function: 5.7 — Print Culture Report
             // Arrange
             // Act
             _viewModel.SelectedCulture = new Culture
@@ -238,7 +238,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task SaveResultAsync_When_SelectionMissing_Should_Set_ValidationMessage_FailureGuard()
         {
-            // Function: X.X — To Be Determined
+            // Function: 5.3 — Set Sensitivity
             // Arrange
             _viewModel.SelectedVisitTest = null;
             _viewModel.SelectedCulture = null;
@@ -254,7 +254,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task PrintCultureReportAsync_When_DataIncomplete_Should_Set_Message_EdgeGuard()
         {
-            // Function: X.X — To Be Determined
+            // Function: 5.7 — Print Culture Report
             // Arrange
             _viewModel.SelectedVisitTest = null;
             _viewModel.SelectedCulture = null;

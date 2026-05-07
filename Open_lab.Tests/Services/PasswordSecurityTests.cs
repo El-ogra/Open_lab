@@ -8,7 +8,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public void GenerateSalt_Should_Return_NonEmpty_Base64_String()
         {
-            // Function: X.X — To Be Determined
+            // Function: 13.8 — Set System Password
             // Arrange
             // Act
             var salt = PasswordSecurity.GenerateSalt();
@@ -21,7 +21,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public void GenerateSalt_Should_Return_Different_Values_On_Multiple_Calls()
         {
-            // Function: X.X — To Be Determined
+            // Function: 13.8 — Set System Password
             // Arrange
             // Act
             var salt1 = PasswordSecurity.GenerateSalt();
@@ -34,7 +34,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public void ComputeSha256_With_Same_Input_And_Salt_Should_Return_Same_Hash()
         {
-            // Function: X.X — To Be Determined
+            // Function: 13.8 — Set System Password
             // Arrange
             const string password = "mysecret";
             var salt = PasswordSecurity.GenerateSalt();
@@ -52,7 +52,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public void ComputeSha256_With_Different_Salts_Should_Return_Different_Hashes()
         {
-            // Function: X.X — To Be Determined
+            // Function: 13.8 — Set System Password
             // Arrange
             const string password = "mysecret";
             var salt1 = PasswordSecurity.GenerateSalt();
@@ -69,7 +69,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public void ComputeSha256_With_Different_Passwords_Same_Salt_Should_Return_Different_Hashes()
         {
-            // Function: X.X — To Be Determined
+            // Function: 13.8 — Set System Password
             // Arrange
             var salt = PasswordSecurity.GenerateSalt();
 
@@ -84,7 +84,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public void Verify_With_Correct_Password_Should_Return_True()
         {
-            // Function: X.X — To Be Determined
+            // Function: 13.8 — Set System Password
             // Arrange
             const string password = "correctpassword";
             var salt = PasswordSecurity.GenerateSalt();
@@ -100,7 +100,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public void Verify_With_Wrong_Password_Should_Return_False()
         {
-            // Function: X.X — To Be Determined
+            // Function: 13.8 — Set System Password
             // Arrange
             const string password = "correctpassword";
             var salt = PasswordSecurity.GenerateSalt();
@@ -116,7 +116,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public void Verify_With_Wrong_Salt_Should_Return_False()
         {
-            // Function: X.X — To Be Determined
+            // Function: 13.8 — Set System Password
             // Arrange
             const string password = "mysecret";
             var salt1 = PasswordSecurity.GenerateSalt();

@@ -14,7 +14,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task LogoutAsync_Should_Close_Attendance_And_Clear_Session()
         {
-            // Function: X.X — To Be Determined
+            // Function: 10.8 — Logout
             // Arrange
             // Act
             AppSessionTestHelper.ResetToAdmin();
@@ -49,7 +49,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task LogoutAsync_When_NoAttendanceLog_Should_NotCall_Close_EdgeGuard()
         {
-            // Function: X.X — To Be Determined
+            // Function: 10.8 — Logout
             // Arrange
             AppSessionTestHelper.ResetToAdmin();
 
@@ -81,7 +81,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task LogoutAsync_When_CloseAttendanceThrows_Should_Still_Clear_AttendanceId_FailureGuard()
         {
-            // Function: X.X — To Be Determined
+            // Function: 10.8 — Logout
             // Arrange
             AppSessionTestHelper.ResetToAdmin();
 

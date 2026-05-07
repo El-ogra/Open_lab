@@ -25,7 +25,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task LoadAsync_Should_Populate_Patient_Worksheet_Rows()
         {
-            // Function: X.X — To Be Determined
+            // Function: 7.1 — Generate Patient Worksheet
             // Arrange
             // Act
             _worksheetServiceMock.Setup(x => x.GetWorksheetByPatientAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>()))
@@ -45,7 +45,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task PrintAsync_Should_Send_Patient_Worksheet_To_Print_Service()
         {
-            // Function: X.X — To Be Determined
+            // Function: 7.1 — Generate Patient Worksheet
             // Arrange
             // Act
             _viewModel.Rows.Add(new WorkSheetPatientRow { VisitId = 1, PatientName = "P1", VisitDate = DateTime.Today, TestsCount = 1 });
@@ -60,7 +60,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task LoadCommand_When_Executed_Should_Load_Patient_Rows_Success()
         {
-            // Function: X.X — To Be Determined
+            // Function: 7.1 — Generate Patient Worksheet
             // Arrange
             _worksheetServiceMock
                 .Setup(x => x.GetWorksheetByPatientAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>()))
@@ -78,7 +78,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task LoadCommand_When_PatientService_Fails_Should_Set_Error_Message_Failure()
         {
-            // Function: X.X — To Be Determined
+            // Function: 7.1 — Generate Patient Worksheet
             // Arrange
             _worksheetServiceMock
                 .Setup(x => x.GetWorksheetByPatientAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>()))
@@ -95,7 +95,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task LoadCommand_When_PatientService_Returns_Empty_Should_Set_Zero_Status_Edge()
         {
-            // Function: X.X — To Be Determined
+            // Function: 7.1 — Generate Patient Worksheet
             // Arrange
             _worksheetServiceMock
                 .Setup(x => x.GetWorksheetByPatientAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>()))
@@ -113,7 +113,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task PrintCommand_When_PatientPrintService_Fails_Should_Set_Error_Message_Failure()
         {
-            // Function: X.X — To Be Determined
+            // Function: 7.1 — Generate Patient Worksheet
             // Arrange
             _viewModel.Rows.Add(new WorkSheetPatientRow { VisitId = 3, PatientName = "P3", TestsCount = 1 });
             _printServiceMock
@@ -131,7 +131,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public void PrintCommand_When_PatientRows_Empty_Should_Be_Disabled_Edge()
         {
-            // Function: X.X — To Be Determined
+            // Function: 7.1 — Generate Patient Worksheet
             // Arrange
             _viewModel.Rows.Clear();
 
@@ -160,7 +160,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task LoadAsync_Should_Populate_Test_Worksheet_Rows()
         {
-            // Function: X.X — To Be Determined
+            // Function: 7.2 — Generate Test Worksheet
             // Arrange
             // Act
             _worksheetServiceMock.Setup(x => x.GetWorksheetByTestAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>()))
@@ -180,7 +180,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task PrintAsync_Should_Send_Test_Worksheet_To_Print_Service()
         {
-            // Function: X.X — To Be Determined
+            // Function: 7.2 — Generate Test Worksheet
             // Arrange
             // Act
             _viewModel.Rows.Add(new WorkSheetTestRow { TestName = "CBC", Count = 3 });
@@ -195,7 +195,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task LoadCommand_When_Executed_Should_Load_Test_Rows_Success()
         {
-            // Function: X.X — To Be Determined
+            // Function: 7.2 — Generate Test Worksheet
             // Arrange
             _worksheetServiceMock
                 .Setup(x => x.GetWorksheetByTestAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>()))
@@ -213,7 +213,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task LoadCommand_When_TestService_Fails_Should_Set_Error_Message_Failure()
         {
-            // Function: X.X — To Be Determined
+            // Function: 7.1 — Generate Patient Worksheet
             // Arrange
             _worksheetServiceMock
                 .Setup(x => x.GetWorksheetByTestAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>()))
@@ -230,7 +230,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task LoadCommand_When_TestService_Returns_Empty_Should_Set_Zero_Status_Edge()
         {
-            // Function: X.X — To Be Determined
+            // Function: 7.1 — Generate Patient Worksheet
             // Arrange
             _worksheetServiceMock
                 .Setup(x => x.GetWorksheetByTestAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>()))
@@ -248,7 +248,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task PrintCommand_When_TestPrintService_Fails_Should_Set_Error_Message_Failure()
         {
-            // Function: X.X — To Be Determined
+            // Function: 7.1 — Generate Patient Worksheet
             // Arrange
             _viewModel.Rows.Add(new WorkSheetTestRow { TestName = "AST", Count = 1 });
             _printServiceMock
@@ -266,7 +266,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public void PrintCommand_When_TestRows_Empty_Should_Be_Disabled_Edge()
         {
-            // Function: X.X — To Be Determined
+            // Function: 7.2 — Generate Test Worksheet
             // Arrange
             _viewModel.Rows.Clear();
 

@@ -39,7 +39,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task BackupCommand_Should_FailIfPathEmpty_FailureGuard()
         {
-            // Function: X.X — To Be Determined
+            // Function: 13.7 — Configure Backup
             // Arrange
             _viewModel.BackupPath = "";
 
@@ -56,7 +56,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task BackupCommand_Should_SetIsLoading_And_CallService_SuccessGuard()
         {
-            // Function: X.X — To Be Determined
+            // Function: 13.7 — Configure Backup
             // Arrange
             _viewModel.BackupPath = "C:\\Backups";
             _mockService.Setup(s => s.BackupAsync(It.IsAny<string>())).Returns(Task.CompletedTask);
@@ -76,7 +76,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task RestoreCommand_Should_FailIfPathEmpty_FailureGuard()
         {
-            // Function: X.X — To Be Determined
+            // Function: 13.7 — Configure Backup
             // Arrange
             _viewModel.RestorePath = "";
 
@@ -93,7 +93,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task RestoreCommand_Should_SetIsLoading_And_CallService_SuccessGuard()
         {
-            // Function: X.X — To Be Determined
+            // Function: 13.7 — Configure Backup
             // Arrange
             _viewModel.RestorePath = "C:\\Backups\\db.bak";
             _mockService.Setup(s => s.RestoreAsync(It.IsAny<string>())).Returns(Task.CompletedTask);
@@ -112,7 +112,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task LoadBackupsCommand_Should_FailIfNoPath_FailureGuard()
         {
-            // Function: X.X — To Be Determined
+            // Function: 13.7 — Configure Backup
             // Arrange
             _viewModel.BackupPath = "";
             _viewModel.RestorePath = "";
@@ -128,7 +128,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task Exception_DuringServiceCall_Should_BeCaught_And_ShowInStatusMessage_FailureGuard()
         {
-            // Function: X.X — To Be Determined
+            // Function: 13.7 — Configure Backup
             // Arrange
             _viewModel.BackupPath = "C:\\BadPath";
             _mockService.Setup(s => s.BackupAsync(It.IsAny<string>())).ThrowsAsync(new Exception("Access Denied"));
@@ -145,7 +145,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task ConfigureScheduleCommand_Should_Fail_When_Directory_Missing_FailureGuard()
         {
-            // Function: X.X — To Be Determined
+            // Function: 13.7 — Configure Backup
             // Arrange
             _viewModel.ScheduledBackupDirectory = string.Empty;
             _viewModel.ScheduledBackupTime = "03:30";
@@ -162,7 +162,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task ConfigureScheduleCommand_Should_Call_Service_And_Enable_Schedule_SuccessGuard()
         {
-            // Function: X.X — To Be Determined
+            // Function: 13.7 — Configure Backup
             // Arrange
             _viewModel.ScheduledBackupDirectory = "C:\\Backups\\Daily";
             _viewModel.ScheduledBackupTime = "03:30";
@@ -188,7 +188,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task DisableScheduleCommand_Should_Call_Service_And_Disable_Schedule_SuccessGuard()
         {
-            // Function: X.X — To Be Determined
+            // Function: 13.7 — Configure Backup
             // Arrange
             _mockService.Setup(s => s.CancelBackupScheduleAsync()).Returns(Task.CompletedTask);
             _mockService.Setup(s => s.GetBackupScheduleStatusAsync()).ReturnsAsync(new BackupScheduleStatus
@@ -211,7 +211,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task ConfigureScheduleCommand_When_Time_Format_Invalid_Should_Set_Validation_Message_Failure()
         {
-            // Function: X.X — To Be Determined
+            // Function: 13.7 — Configure Backup
             // Arrange
             _viewModel.ScheduledBackupDirectory = "C:\\Backups";
             _viewModel.ScheduledBackupTime = "invalid";
@@ -228,7 +228,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task RefreshScheduleCommand_When_Service_Throws_Should_Set_Error_Message_Failure()
         {
-            // Function: X.X — To Be Determined
+            // Function: 13.7 — Configure Backup
             // Arrange
             _mockService.Setup(s => s.GetBackupScheduleStatusAsync()).ThrowsAsync(new InvalidOperationException("schedule-failed"));
 

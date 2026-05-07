@@ -32,7 +32,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task GetPendingInvoicesAsync_Should_Return_Pending_With_Correct_Fields()
         {
-            // Function: X.X — To Be Determined
+            // Function: 12.8 — Generate Contract Invoice
             // Arrange
             // Refactored to Logic Guard - verifies all returned field values
             var patient = new Patient { LabId = "L1", FullName = "P1", Gender = "Male" };
@@ -69,7 +69,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task CreateContractInvoiceAsync_NoPending_Should_Throw()
         {
-            // Function: X.X — To Be Determined
+            // Function: 12.8 — Generate Contract Invoice
             // Arrange
             // Act
             _db.Referrals.Add(new Referral { ReferralId = 2, Name = "R2" });
@@ -83,7 +83,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task CreateContractInvoiceAsync_Should_Create_And_Assign_With_Correct_Aggregates()
         {
-            // Function: X.X — To Be Determined
+            // Function: 12.8 — Generate Contract Invoice
             // Arrange
             // Refactored to Logic Guard - verifies all calculated fields and side effects
             var referral = new Referral { ReferralId = 3, Name = "R3" };
@@ -128,7 +128,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task SettleContractInvoiceAsync_Should_Mark_Invoice_As_Paid()
         {
-            // Function: X.X — To Be Determined
+            // Function: 12.9 — Settle Contract Account
             // Arrange
             var referral = new Referral { Name = "R4" };
             _db.Referrals.Add(referral);
@@ -163,7 +163,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task SettleContractInvoiceAsync_Should_Update_Payment_Status_Only()
         {
-            // Function: X.X — To Be Determined
+            // Function: 12.9 — Settle Contract Account
             // Arrange
             var referral = new Referral { Name = "R5" };
             _db.Referrals.Add(referral);
@@ -197,7 +197,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task SettleContractInvoiceAsync_NotFound_Should_Throw()
         {
-            // Function: X.X — To Be Determined
+            // Function: 12.9 — Settle Contract Account
             // Arrange
             // Act
             Func<Task> act = async () => await _service.SettleContractInvoiceAsync(99999);
@@ -210,7 +210,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task CreateContractInvoiceAsync_Should_Calculate_Correct_Aggregates()
         {
-            // Function: X.X — To Be Determined
+            // Function: 12.8 — Generate Contract Invoice
             // Arrange
             var referral = new Referral { ReferralId = 10, Name = "ContractRef" };
             _db.Referrals.Add(referral);
@@ -245,7 +245,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task CreateContractInvoiceAsync_ReferralNotFound_Should_Throw()
         {
-            // Function: X.X — To Be Determined
+            // Function: 12.8 — Generate Contract Invoice
             // Arrange
             // Act
             Func<Task> act = async () => await _service.CreateContractInvoiceAsync(99999, "CN-X", DateTime.Today, DateTime.Today);
@@ -257,7 +257,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task CreateContractInvoiceAsync_Should_Assign_Invoices_To_Contract()
         {
-            // Function: X.X — To Be Determined
+            // Function: 12.8 — Generate Contract Invoice
             // Arrange
             var referral = new Referral { ReferralId = 11, Name = "RefBind" };
             _db.Referrals.Add(referral);
@@ -287,7 +287,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task GetContractInvoicesAsync_Should_Return_Invoices_Ordered_By_DateTo_Desc_Success()
         {
-            // Function: X.X — To Be Determined
+            // Function: 12.8 — Generate Contract Invoice
             // Arrange
             var referral = new Referral { Name = "HistoryRef" };
             _db.Referrals.Add(referral);
@@ -310,7 +310,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task GetPendingInvoicesAsync_When_Referral_Has_No_Pending_Should_Return_Empty_Edge()
         {
-            // Function: X.X — To Be Determined
+            // Function: 12.8 — Generate Contract Invoice
             // Arrange
             var referral = new Referral { Name = "NoPending" };
             _db.Referrals.Add(referral);
@@ -327,7 +327,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task Referral_DiscountPercentage_Should_Be_Applied_Correctly()
         {
-            // Function: X.X — To Be Determined
+            // Function: 12.3 — Set Entity Discount
             // Arrange
             var referral = new Referral { Name = "DiscountRef", DiscountPercentage = 10m };
             _db.Referrals.Add(referral);
@@ -358,7 +358,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task Referral_ZeroDiscount_Should_Not_Affect_NetTotal()
         {
-            // Function: X.X — To Be Determined
+            // Function: 12.3 — Set Entity Discount
             // Arrange
             var referral = new Referral { Name = "NoDiscountRef", DiscountPercentage = 0m };
             _db.Referrals.Add(referral);
@@ -390,7 +390,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task Patient_ReferralBinding_Should_Persist_Correctly()
         {
-            // Function: X.X — To Be Determined
+            // Function: 12.5 — Assign Patient to Contract
             // Arrange
             var referral = new Referral { Name = "BindRef" };
             _db.Referrals.Add(referral);
@@ -420,7 +420,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task Patient_DuplicateReferralBinding_Should_Allow_Multiple_Visits()
         {
-            // Function: X.X — To Be Determined
+            // Function: 12.5 — Assign Patient to Contract
             // Arrange
             var referral = new Referral { Name = "MultiRef" };
             _db.Referrals.Add(referral);

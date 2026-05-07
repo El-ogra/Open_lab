@@ -20,7 +20,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public void OpenLabModulesDocumentation_Should_Contain_Exactly_97_Functions()
         {
-            // Function: X.X — To Be Determined
+            // Function: 13.8 — Set System Password
             // Arrange
             // Act
             var content = File.ReadAllText(GetModulesDocPath());
@@ -34,7 +34,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public void JobsAndTestsGuide_Should_Reference_All_Documented_Functions()
         {
-            // Function: X.X — To Be Determined
+            // Function: 13.8 — Set System Password
             // Arrange
             // Act
             var modulesIds = ExtractFunctionIds(File.ReadAllText(GetModulesDocPath()));
@@ -50,7 +50,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public void Each_Function_Should_Map_To_Model_Service_ViewModel()
         {
-            // Function: X.X — To Be Determined
+            // Function: 13.8 — Set System Password
             // Arrange
             // Act
             foreach (var item in BuildCases())
@@ -81,7 +81,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public void Function_Mapping_Should_Be_Complete_And_Aligned_With_Documentation()
         {
-            // Function: X.X — To Be Determined
+            // Function: 13.8 — Set System Password
             // Arrange
             // Act
             var mapped = BuildCases().Select(x => x.FunctionId).ToList();

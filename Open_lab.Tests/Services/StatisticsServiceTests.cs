@@ -33,7 +33,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task GetReferralsAsync_Should_Return_List_LogicGuard()
         {
-            // Function: X.X — To Be Determined
+            // Function: 9.5 — Referral Source Analysis
             // Arrange
             // Act
             // Refactored to Logic Guard - verifies data integrity
@@ -52,7 +52,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task GetReferralsAsync_When_No_Data_Should_Return_Empty_Edge()
         {
-            // Function: X.X — To Be Determined
+            // Function: 9.5 — Referral Source Analysis
             // Arrange
             // Act
             var list = await _service.GetReferralsAsync();
@@ -64,7 +64,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task GetMonthlyAnalysisAsync_Should_Return_12_Months_With_Correct_Counts_LogicGuard()
         {
-            // Function: X.X — To Be Determined
+            // Function: 9.2 — Patient Count by Month
             // Arrange
             // Act
             // Refactored to Logic Guard - verifies aggregation accuracy
@@ -96,7 +96,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task GetTop10TestsAsync_Should_Group_By_TestName_LogicGuard()
         {
-            // Function: X.X — To Be Determined
+            // Function: 9.3 — Test Demand Analysis
             // Arrange
             // Act
             // Refactored to Logic Guard - verifies grouping accuracy
@@ -136,7 +136,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task GetTop10TestsAsync_When_More_Than_10_Tests_Should_Return_Only_10_Edge()
         {
-            // Function: X.X — To Be Determined
+            // Function: 9.3 — Test Demand Analysis
             // Arrange
             var patient = new Patient { LabId = "L-TOP", FullName = "Top", Gender = "Male" };
             _db.Patients.Add(patient);
@@ -165,7 +165,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task GetSampleCountPerYear_Should_Return_Yearly_Ranges_LogicGuard()
         {
-            // Function: X.X — To Be Determined
+            // Function: 9.4 — Sample Count per Year
             // Arrange
             // Act
             // Refactored to Logic Guard - verifies aggregation accuracy
@@ -193,7 +193,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task GetSampleCountPerYearAsync_When_YearsBack_Is_Zero_Should_Default_To_Five_Years_Edge()
         {
-            // Function: X.X — To Be Determined
+            // Function: 9.4 — Sample Count per Year
             // Arrange
             // Act
             var rows = await _service.GetSampleCountPerYearAsync(0);
@@ -205,7 +205,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task GetSnapshotAsync_Should_Calculate_Gender_And_Referral_Stats()
         {
-            // Function: X.X — To Be Determined
+            // Function: 9.1 — Patient Count by Gender
             // Arrange
             var referral = new Referral { Name = "Ref1" };
             _db.Referrals.Add(referral);
@@ -236,7 +236,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task GetSnapshotAsync_Should_Calculate_Correct_Aggregates()
         {
-            // Function: X.X — To Be Determined
+            // Function: 9.1 — Patient Count by Gender
             // Arrange
             var patient1 = new Patient { FullName = "P1", Gender = "Male" };
             var patient2 = new Patient { FullName = "P2", Gender = "Female" };
@@ -265,7 +265,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task GetSnapshotAsync_EmptyPeriod_Should_Return_Zeros()
         {
-            // Function: X.X — To Be Determined
+            // Function: 9.1 — Patient Count by Gender
             // Arrange - No data in the specified period
             var patient = new Patient { FullName = "P", Gender = "Male" };
             _db.Patients.Add(patient);
@@ -287,7 +287,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task GetSnapshotAsync_When_Filtered_By_Gender_Should_Exclude_Other_Genders_FailureGuard()
         {
-            // Function: X.X — To Be Determined
+            // Function: 9.1 — Patient Count by Gender
             // Arrange
             var male = new Patient { FullName = "M", Gender = "ذكر" };
             var female = new Patient { FullName = "F", Gender = "أنثى" };
