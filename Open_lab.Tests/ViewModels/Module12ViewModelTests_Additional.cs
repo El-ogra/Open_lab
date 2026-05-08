@@ -966,49 +966,7 @@ namespace Open_lab.Tests.ViewModels
             // Assert
             viewModel.StatusMessage.Should().Contain("Cannot delete referral in use");
         }
-        [Fact]
-        public async Task LinkPriceListToEntity_When_Success_Should_Work_SuccessGuard()
-        {
-            // Function: 12.2 — Link Price List to Entity
-            // Arrange
-            // Act
-            await Task.Delay(10);
-            // Assert
-            Assert.True(true);
-        }
-
-        [Fact]
-        public async Task LinkPriceListToEntity_When_Exception_Should_Throw_FailureGuard()
-        {
-            // Function: 12.2 — Link Price List to Entity
-            // Arrange
-            // Act
-            await Task.Delay(10);
-            // Assert
-            Assert.True(true);
-        }
-
-        [Fact]
-        public async Task AssignPatientToContract_When_Success_Should_Work_SuccessGuard()
-        {
-            // Function: 12.5 — Assign Patient to Contract
-            // Arrange
-            // Act
-            await Task.Delay(10);
-            // Assert
-            Assert.True(true);
-        }
-
-        [Fact]
-        public async Task AssignPatientToContract_When_Exception_Should_Throw_FailureGuard()
-        {
-            // Function: 12.5 — Assign Patient to Contract
-            // Arrange
-            // Act
-            await Task.Delay(10);
-            // Assert
-            Assert.True(true);
-        }
     }
 }
+
 

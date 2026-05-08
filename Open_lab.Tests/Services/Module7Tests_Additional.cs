@@ -488,6 +488,7 @@ namespace Open_lab.Tests
         public async Task GetWorksheetByTestAsync_When_ServiceThrows_Should_Throw_FailureGuard()
         {
             // Function: 7.2 — Generate Test Worksheet
+            // Arrange
             var badService = new WorksheetService(null!);
             // Act
             Func<Task> act = async () => await badService.GetWorksheetByTestAsync(DateTime.MinValue, DateTime.MinValue);
@@ -499,6 +500,7 @@ namespace Open_lab.Tests
         public async Task GetTestClassificationLogAsync_When_ServiceThrows_Should_Throw_FailureGuard()
         {
             // Function: 7.4 — Test Classification LOG
+            // Arrange
             var badService = new TestClassificationService(null!);
             // Act
             Func<Task> act = async () => await badService.GetConsumptionReportAsync(DateTime.MinValue, DateTime.MinValue);

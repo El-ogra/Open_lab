@@ -189,38 +189,7 @@ namespace Open_lab.Tests.ViewModels
             // Assert
             _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
-        [Fact]
-        public async Task ArrangeReportOrder_When_Fails_Should_Set_Error_FailureGuard()
-        {
-            // Function: 4.5 — Arrange Report Order
-            // Arrange
-            // Act
-            await Task.Delay(10);
-            // Assert
-            _viewModel.StatusMessage.Should().NotBeNull();
-        }
-
-        [Fact]
-        public async Task CompareWithHistory_When_Found_Should_Load_SuccessGuard()
-        {
-            // Function: 4.9 — Compare with History
-            // Arrange
-            // Act
-            await Task.Delay(10);
-            // Assert
-            _viewModel.StatusMessage.Should().NotBeNull();
-        }
-
-        [Fact]
-        public async Task CompareWithHistory_When_Fails_Should_Set_Error_FailureGuard()
-        {
-            // Function: 4.9 — Compare with History
-            // Arrange
-            // Act
-            await Task.Delay(10);
-            // Assert
-            _viewModel.StatusMessage.Should().NotBeNull();
-        }
     }
 }
+
 

@@ -182,6 +182,7 @@ namespace Open_lab.Tests.Services
         public async Task SetInvoiceSettings_When_Exception_Should_Throw_FailureGuard()
         {
             // Function: 13.6 — Set Invoice Settings
+            // Arrange
             var badService = new SystemSettingsService(null!);
             // Act
             Func<Task> act = async () => await badService.DeleteSettingAsync(null!);

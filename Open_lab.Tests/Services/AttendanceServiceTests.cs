@@ -257,6 +257,7 @@ namespace Open_lab.Tests.Services
         public async Task ClockInAsync_When_Exception_Should_Throw_FailureGuard()
         {
             // Function: 10.4 — Record Attendance
+            // Arrange
             var badService = new AttendanceService(null!);
             // Act
             Func<Task> act = async () => await badService.CreateLoginAsync(-1, null);
@@ -268,6 +269,7 @@ namespace Open_lab.Tests.Services
         public async Task ClockOutAsync_When_Exception_Should_Throw_FailureGuard()
         {
             // Function: 10.5 — Record Departure
+            // Arrange
             var badService = new AttendanceService(null!);
             // Act
             Func<Task> act = async () => await badService.CloseAsync(-1);
@@ -276,4 +278,3 @@ namespace Open_lab.Tests.Services
         }
     }
 }
-
