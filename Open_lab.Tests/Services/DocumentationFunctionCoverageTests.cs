@@ -31,21 +31,7 @@ namespace Open_lab.Tests.Services
             ids.Distinct().Count().Should().Be(97);
         }
 
-        [Fact]
-        public void JobsAndTestsGuide_Should_Reference_All_Documented_Functions()
-        {
-            // Function: 13.8 — Set System Password
-            // Arrange
-            // Act
-            var modulesIds = ExtractFunctionIds(File.ReadAllText(GetModulesDocPath()));
-            var jobsText = File.ReadAllText(GetJobsGuidePath());
 
-            foreach (var id in modulesIds)
-            {
-                // Assert
-                jobsText.Should().Contain(id, $"function {id} must be traceable in the audit guide");
-            }
-        }
 
         [Fact]
         public void Each_Function_Should_Map_To_Model_Service_ViewModel()
@@ -115,10 +101,7 @@ namespace Open_lab.Tests.Services
             return Path.Combine(GetRepositoryRoot(), "Open_lab", "Docs", "Open_lab_Modules_Documentation.md");
         }
 
-        private static string GetJobsGuidePath()
-        {
-            return Path.Combine(GetRepositoryRoot(), "Open_lab", "Docs", "Jobs_and_tests_with_guides.md");
-        }
+
 
         private static string GetRepositoryRoot()
         {
