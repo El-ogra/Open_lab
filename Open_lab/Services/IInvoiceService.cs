@@ -28,6 +28,12 @@ namespace Open_lab.Services
         /// Calculates the commission amount based on referral commission percentage.
         /// </summary>
         Task<decimal> CalculateReferralCommissionAsync(int referralId, decimal totalAmount);
+
+        /// <summary>
+        /// Calculates the commission amount and persists a DoctorCommission record
+        /// (Gap 2.12 - Doctor-wise Inventory / DoctorCommissions persistence).
+        /// </summary>
+        Task<decimal> CalculateAndRecordReferralCommissionAsync(int referralId, int visitId, decimal totalAmount);
         
         /// <summary>
         /// Logs that an invoice has been printed to the audit trail.

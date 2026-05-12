@@ -263,6 +263,11 @@ namespace Open_lab.Models
         public decimal Price { get; set; }
         public string? Status { get; set; }
 
+        // Gap 4.5 — Arrange Report Order Persistence:
+        // The order in which this test appears inside the printed report for its parent Visit.
+        // 0 means "not yet arranged" — fall back to natural ordering.
+        public int ReportOrder { get; set; }
+
         public Visit Visit { get; set; } = null!;
         public Test Test { get; set; } = null!;
         public ICollection<ResultValue> ResultValues { get; set; } = new HashSet<ResultValue>();

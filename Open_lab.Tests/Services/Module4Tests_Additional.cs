@@ -559,6 +559,8 @@ namespace Open_lab.Tests
         private readonly Mock<IResultsService> _resultsServiceMock;
         private readonly Mock<IReportService> _reportServiceMock;
         private readonly Mock<IPrintService> _printServiceMock;
+        private readonly Mock<IBlankReportService> _blankReportServiceMock;
+        private readonly Mock<IReportOrderService> _reportOrderServiceMock;
         private readonly Mock<ICompareWithHistoryService> _compareServiceMock;
         private readonly Mock<IPatientService> _patientServiceMock;
         private readonly Mock<ITestCatalogService> _catalogServiceMock;
@@ -572,6 +574,8 @@ namespace Open_lab.Tests
             _resultsServiceMock = new Mock<IResultsService>();
             _reportServiceMock = new Mock<IReportService>();
             _printServiceMock = new Mock<IPrintService>();
+            _blankReportServiceMock = new Mock<IBlankReportService>();
+            _reportOrderServiceMock = new Mock<IReportOrderService>();
             _compareServiceMock = new Mock<ICompareWithHistoryService>();
             _patientServiceMock = new Mock<IPatientService>();
             _catalogServiceMock = new Mock<ITestCatalogService>();
@@ -744,17 +748,16 @@ namespace Open_lab.Tests
             // Function: 4.8 — Print Blank Report (Print Logic)
             // Arrange
             // Act
-            var viewModel = new BlankReportViewModel(_reportServiceMock.Object, _printServiceMock.Object);
+            var viewModel = new BlankReportViewModel(_reportServiceMock.Object, _blankReportServiceMock.Object);
             var report = CreateSampleReport(100);
             _reportServiceMock.Setup(x => x.GetVisitReportAsync(100)).ReturnsAsync(report);
             viewModel.VisitId = 100;
 
-            _printServiceMock.Setup(x => x.PrintTextReportAsync(It.IsAny<string>(), It.IsAny<IReadOnlyCollection<string>>(), It.IsAny<string>()))
-                .Returns(Task.CompletedTask);
+            _blankReportServiceMock.Setup(x => x.PrintBlankReportAsync(100)).ReturnsAsync(true);
 
             await viewModel.InvokePrivateAsync("PrintBlankAsync");
 
-            _printServiceMock.Verify(x => x.PrintTextReportAsync(It.IsAny<string>(), It.IsAny<IReadOnlyCollection<string>>(), It.IsAny<string>()), Times.Once);
+            _blankReportServiceMock.Verify(x => x.PrintBlankReportAsync(100), Times.Once);
             // The actual production wording is "تم إرسال التقرير الفارغ للطباعة."; we assert the
             // meaningful business signal that the blank report was successfully dispatched to print.
             // Assert
@@ -767,7 +770,7 @@ namespace Open_lab.Tests
             // Function: 4.8 — Print Blank Report (Null Referral Edge Case)
             // Arrange
             // Act
-            var viewModel = new BlankReportViewModel(_reportServiceMock.Object, _printServiceMock.Object);
+            var viewModel = new BlankReportViewModel(_reportServiceMock.Object, _blankReportServiceMock.Object);
             var report = CreateSampleReportWithNullReferral(200);
             _reportServiceMock.Setup(x => x.GetVisitReportAsync(200)).ReturnsAsync(report);
             viewModel.VisitId = 200;
@@ -870,7 +873,7 @@ namespace Open_lab.Tests
             // Function: 4.5 — Arrange Report Order (Empty Selection Edge)
             // Arrange
             // Act
-            var viewModel = new CombinedReportViewModel(_reportServiceMock.Object);
+            var viewModel = new CombinedReportViewModel(_reportServiceMock.Object, _reportOrderServiceMock.Object);
             viewModel.VisitId = 1;
 
             _reportServiceMock.Setup(s => s.GetCompositeReportAsync(1, It.IsAny<IReadOnlyCollection<int>>()))
@@ -894,7 +897,7 @@ namespace Open_lab.Tests
             // Function: 4.5 — Arrange Report Order (Reordering Logic)
             // Arrange
             // Act
-            var viewModel = new CombinedReportViewModel(_reportServiceMock.Object);
+            var viewModel = new CombinedReportViewModel(_reportServiceMock.Object, _reportOrderServiceMock.Object);
 
             var report = new VisitReportData
             {

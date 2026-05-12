@@ -10,12 +10,14 @@ namespace Open_lab.Tests.ViewModels
     public class BlankReportViewModelTests
     {
         private readonly Mock<IReportService> _reportServiceMock;
+        private readonly Mock<IBlankReportService> _blankReportServiceMock;
         private readonly BlankReportViewModel _viewModel;
 
         public BlankReportViewModelTests()
         {
             _reportServiceMock = new Mock<IReportService>();
-            _viewModel = new BlankReportViewModel(_reportServiceMock.Object);
+            _blankReportServiceMock = new Mock<IBlankReportService>();
+            _viewModel = new BlankReportViewModel(_reportServiceMock.Object, _blankReportServiceMock.Object);
         }
 
         [Fact]
@@ -96,10 +98,12 @@ namespace Open_lab.Tests.ViewModels
             // Act
             _viewModel.VisitId = 7;
 
+            _blankReportServiceMock.Setup(x => x.PrintBlankReportAsync(It.IsAny<int>())).ReturnsAsync(false);
+
             await _viewModel.InvokePrivateAsync("PrintBlankAsync");
 
             // Assert
-            _viewModel.StatusMessage.Should().Be("خدمة الطباعة غير متاحة.");
+            _viewModel.StatusMessage.Should().Be("تعذّر طباعة التقرير الفارغ (لا توجد بيانات أو خدمة الطباعة غير متاحة).");
         }
     }
 }

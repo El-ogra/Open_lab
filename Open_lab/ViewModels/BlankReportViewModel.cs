@@ -1,5 +1,4 @@
 using System;
-using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Open_lab.Models;
@@ -10,7 +9,7 @@ namespace Open_lab.ViewModels
     public class BlankReportViewModel : BaseViewModel
     {
         private readonly IReportService _reportService;
-        private readonly IPrintService? _printService;
+        private readonly IBlankReportService _blankReportService;
         private int _visitId;
         private string _patientName = string.Empty;
         private string _labId = string.Empty;
@@ -22,12 +21,15 @@ namespace Open_lab.ViewModels
         private string _statusMessage = string.Empty;
         private VisitReportData? _reportData;
 
-        public BlankReportViewModel(IReportService reportService, IPrintService? printService = null)
+        // Gap 4.8 — Print Blank Report Architecture Fix:
+        // The ViewModel now depends on IBlankReportService and never builds the
+        // report contents itself or calls IPrintService directly.
+        public BlankReportViewModel(IReportService reportService, IBlankReportService blankReportService)
         {
             _reportService = reportService;
-            _printService = printService;
+            _blankReportService = blankReportService;
             LoadCommand = new RelayCommand(async _ => await LoadAsync());
-            PrintBlankCommand = new RelayCommand(async _ => await PrintBlankAsync(), _ => _printService != null && VisitId > 0);
+            PrintBlankCommand = new RelayCommand(async _ => await PrintBlankAsync(), _ => VisitId > 0);
         }
 
         public int VisitId
@@ -127,14 +129,9 @@ namespace Open_lab.ViewModels
             }
         }
 
+        // Gap 4.8 — All building / printing responsibility delegated to BlankReportService.
         private async Task PrintBlankAsync()
         {
-            if (_printService == null)
-            {
-                StatusMessage = "خدمة الطباعة غير متاحة.";
-                return;
-            }
-
             if (VisitId <= 0)
             {
                 StatusMessage = "يرجى إدخال رقم الزيارة.";
@@ -143,28 +140,13 @@ namespace Open_lab.ViewModels
 
             try
             {
-                _reportData ??= await _reportService.GetVisitReportAsync(VisitId);
-                if (_reportData == null)
+                var success = await _blankReportService.PrintBlankReportAsync(VisitId);
+                if (!success)
                 {
-                    StatusMessage = "لم يتم العثور على بيانات.";
+                    StatusMessage = "تعذّر طباعة التقرير الفارغ (لا توجد بيانات أو خدمة الطباعة غير متاحة).";
                     return;
                 }
 
-                var lines = new ObservableCollection<string>
-                {
-                    $"المريض: {_reportData.Patient.FullName}",
-                    $"Lab ID: {_reportData.Patient.LabId}",
-                    $"التاريخ: {_reportData.Visit.VisitDate:yyyy-MM-dd}",
-                    string.Empty,
-                    "تحاليل مطلوبة (بدون نتائج):"
-                };
-
-                foreach (var test in _reportData.Tests)
-                {
-                    lines.Add($"- {test.Test.NameReport}");
-                }
-
-                await _printService.PrintTextReportAsync("تقرير فارغ", lines, $"BlankReport_{VisitId}");
                 StatusMessage = "تم إرسال التقرير الفارغ للطباعة.";
             }
             catch (Exception ex)

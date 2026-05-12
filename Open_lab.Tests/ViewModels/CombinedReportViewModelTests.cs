@@ -13,12 +13,14 @@ namespace Open_lab.Tests.ViewModels
     public class CombinedReportViewModelTests
     {
         private readonly Mock<IReportService> _reportServiceMock;
+        private readonly Mock<IReportOrderService> _reportOrderServiceMock;
         private readonly CombinedReportViewModel _viewModel;
 
         public CombinedReportViewModelTests()
         {
             _reportServiceMock = new Mock<IReportService>();
-            _viewModel = new CombinedReportViewModel(_reportServiceMock.Object);
+            _reportOrderServiceMock = new Mock<IReportOrderService>();
+            _viewModel = new CombinedReportViewModel(_reportServiceMock.Object, _reportOrderServiceMock.Object);
         }
 
         [Fact]

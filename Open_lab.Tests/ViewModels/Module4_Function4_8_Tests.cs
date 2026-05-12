@@ -18,13 +18,13 @@ namespace Open_lab.Tests.ViewModels
     public class Module4_Function4_8_Tests : IDisposable
     {
         private readonly Mock<IReportService> _reportServiceMock;
-        private readonly Mock<IPrintService> _printServiceMock;
+        private readonly Mock<IBlankReportService> _blankReportServiceMock;
 
         public Module4_Function4_8_Tests()
         {
             AppSessionTestHelper.ResetToAdmin();
             _reportServiceMock = new Mock<IReportService>();
-            _printServiceMock = new Mock<IPrintService>();
+            _blankReportServiceMock = new Mock<IBlankReportService>();
         }
 
         public void Dispose()
@@ -56,7 +56,7 @@ namespace Open_lab.Tests.ViewModels
             // Function: 4.8 — Print Blank Report (Success)
             // Arrange
             // Act
-            var viewModel = new BlankReportViewModel(_reportServiceMock.Object, _printServiceMock.Object);
+            var viewModel = new BlankReportViewModel(_reportServiceMock.Object, _blankReportServiceMock.Object);
             var report = CreateBlankReport(800, "Test Patient");
             _reportServiceMock.Setup(x => x.GetVisitReportAsync(800)).ReturnsAsync(report);
             viewModel.VisitId = 800;
@@ -78,7 +78,7 @@ namespace Open_lab.Tests.ViewModels
             // Function: 4.8 — Print Blank Report (Edge: null referral)
             // Arrange
             // Act
-            var viewModel = new BlankReportViewModel(_reportServiceMock.Object, _printServiceMock.Object);
+            var viewModel = new BlankReportViewModel(_reportServiceMock.Object, _blankReportServiceMock.Object);
             var report = new VisitReportData
             {
                 Visit = new Visit { VisitId = 801, VisitDate = DateTime.Now, Referral = null },
@@ -101,7 +101,7 @@ namespace Open_lab.Tests.ViewModels
             // Function: 4.8 — Print Blank Report (Failure)
             // Arrange
             // Act
-            var viewModel = new BlankReportViewModel(_reportServiceMock.Object, _printServiceMock.Object);
+            var viewModel = new BlankReportViewModel(_reportServiceMock.Object, _blankReportServiceMock.Object);
             _reportServiceMock.Setup(x => x.GetVisitReportAsync(899)).ReturnsAsync((VisitReportData?)null);
             viewModel.VisitId = 899;
 
@@ -118,7 +118,7 @@ namespace Open_lab.Tests.ViewModels
             // Function: 4.8 — Print Blank Report (Edge: invalid input)
             // Arrange
             // Act
-            var viewModel = new BlankReportViewModel(_reportServiceMock.Object, _printServiceMock.Object);
+            var viewModel = new BlankReportViewModel(_reportServiceMock.Object, _blankReportServiceMock.Object);
             viewModel.VisitId = 0;
 
             await viewModel.InvokePrivateAsync("LoadAsync");
@@ -134,11 +134,10 @@ namespace Open_lab.Tests.ViewModels
             // Function: 4.8 — Print Blank Report (Success)
             // Arrange
             // Act
-            var viewModel = new BlankReportViewModel(_reportServiceMock.Object, _printServiceMock.Object);
+            var viewModel = new BlankReportViewModel(_reportServiceMock.Object, _blankReportServiceMock.Object);
             var report = CreateBlankReport(802);
             _reportServiceMock.Setup(x => x.GetVisitReportAsync(802)).ReturnsAsync(report);
-            _printServiceMock.Setup(x => x.PrintTextReportAsync(It.IsAny<string>(), It.IsAny<IReadOnlyCollection<string>>(), It.IsAny<string>()))
-                .Returns(Task.CompletedTask);
+            _blankReportServiceMock.Setup(x => x.PrintBlankReportAsync(802)).ReturnsAsync(true);
             viewModel.VisitId = 802;
             await viewModel.InvokePrivateAsync("LoadAsync");
             await Task.Delay(100);
@@ -146,7 +145,7 @@ namespace Open_lab.Tests.ViewModels
             await viewModel.InvokePrivateAsync("PrintBlankAsync");
             await Task.Delay(100);
 
-            _printServiceMock.Verify(x => x.PrintTextReportAsync("تقرير فارغ", It.IsAny<IReadOnlyCollection<string>>(), It.IsAny<string>()), Times.Once);
+            _blankReportServiceMock.Verify(x => x.PrintBlankReportAsync(802), Times.Once);
             // Assert
             viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
@@ -157,9 +156,10 @@ namespace Open_lab.Tests.ViewModels
             // Function: 4.8 — Print Blank Report (Edge: no print service)
             // Arrange
             // Act
-            var viewModel = new BlankReportViewModel(_reportServiceMock.Object, null);
+            var viewModel = new BlankReportViewModel(_reportServiceMock.Object, _blankReportServiceMock.Object);
             var report = CreateBlankReport(803);
             _reportServiceMock.Setup(x => x.GetVisitReportAsync(803)).ReturnsAsync(report);
+            _blankReportServiceMock.Setup(x => x.PrintBlankReportAsync(803)).ReturnsAsync(false);
             viewModel.VisitId = 803;
             await viewModel.InvokePrivateAsync("LoadAsync");
             await Task.Delay(100);
@@ -168,7 +168,7 @@ namespace Open_lab.Tests.ViewModels
             await Task.Delay(100);
 
             // Assert
-            viewModel.StatusMessage.Should().Contain("غير متاحة");
+            viewModel.StatusMessage.Should().Contain("تعذّر طباعة التقرير الفارغ");
         }
 
         [Fact]
@@ -177,10 +177,10 @@ namespace Open_lab.Tests.ViewModels
             // Function: 4.8 — Print Blank Report (Failure)
             // Arrange
             // Act
-            var viewModel = new BlankReportViewModel(_reportServiceMock.Object, _printServiceMock.Object);
+            var viewModel = new BlankReportViewModel(_reportServiceMock.Object, _blankReportServiceMock.Object);
             var report = CreateBlankReport(804);
             _reportServiceMock.Setup(x => x.GetVisitReportAsync(804)).ReturnsAsync(report);
-            _printServiceMock.Setup(x => x.PrintTextReportAsync(It.IsAny<string>(), It.IsAny<IReadOnlyCollection<string>>(), It.IsAny<string>()))
+            _blankReportServiceMock.Setup(x => x.PrintBlankReportAsync(804))
                 .ThrowsAsync(new InvalidOperationException("Printer error"));
             viewModel.VisitId = 804;
             await viewModel.InvokePrivateAsync("LoadAsync");
@@ -199,7 +199,7 @@ namespace Open_lab.Tests.ViewModels
             // Function: 4.8 — Print Blank Report (multiple tests)
             // Arrange
             // Act
-            var viewModel = new BlankReportViewModel(_reportServiceMock.Object, _printServiceMock.Object);
+            var viewModel = new BlankReportViewModel(_reportServiceMock.Object, _blankReportServiceMock.Object);
             var report = new VisitReportData
             {
                 Visit = new Visit { VisitId = 805, VisitDate = DateTime.Now },
@@ -229,7 +229,7 @@ namespace Open_lab.Tests.ViewModels
             // Arrange
             // Act
             AppSessionTestHelper.Reset();
-            var viewModel = new BlankReportViewModel(_reportServiceMock.Object, _printServiceMock.Object);
+            var viewModel = new BlankReportViewModel(_reportServiceMock.Object, _blankReportServiceMock.Object);
 
             // Assert
             viewModel.PrintBlankCommand.CanExecute(null).Should().BeFalse();

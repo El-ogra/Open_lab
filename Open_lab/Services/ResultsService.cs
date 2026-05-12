@@ -82,12 +82,14 @@ namespace Open_lab.Services
             }
             else
             {
-                // Logic for Function 4.3 (Audit Trail for edits)
+                // Logic for Function 4.3 (Audit Trail for edits) — Gap fix:
+                // Use the real user from the current DbContext session (OpenLabDbContext.CurrentUserId)
+                // instead of the hard-coded "UserId = 1" so audit logs reflect the actual editor.
                 if (existing.Value != value)
                 {
                     _db.AuditLogs.Add(new AuditLog
                     {
-                        UserId = 1, // System default or should be passed from session
+                        UserId = _db.CurrentUserId ?? 0,
                         Action = "EDIT_RESULT",
                         TableName = "ResultValues",
                         RecordId = $"{visitTestId}-{parameterId}",

@@ -17,11 +17,13 @@ namespace Open_lab.Tests.ViewModels
     public class Module4ViewModelCompletion_Part2 : IDisposable
     {
         private readonly Mock<IReportService> _reportServiceMock;
+        private readonly Mock<IReportOrderService> _reportOrderServiceMock;
 
         public Module4ViewModelCompletion_Part2()
         {
             AppSessionTestHelper.ResetToAdmin();
             _reportServiceMock = new Mock<IReportService>();
+            _reportOrderServiceMock = new Mock<IReportOrderService>();
         }
 
         public void Dispose()
@@ -62,7 +64,7 @@ namespace Open_lab.Tests.ViewModels
         {
             // Function: 4.4 — Create Composite Report
             // Arrange
-            var viewModel = new CombinedReportViewModel(_reportServiceMock.Object);
+            var viewModel = new CombinedReportViewModel(_reportServiceMock.Object, _reportOrderServiceMock.Object);
             var report = CreateSampleReport(100, 3);
             _reportServiceMock.Setup(x => x.GetCompositeReportAsync(100, It.IsAny<IReadOnlyCollection<int>>())).ReturnsAsync(report);
             viewModel.VisitId = 100;
@@ -82,7 +84,7 @@ namespace Open_lab.Tests.ViewModels
         {
             // Function: 4.4 — Create Composite Report (Failure)
             // Arrange
-            var viewModel = new CombinedReportViewModel(_reportServiceMock.Object);
+            var viewModel = new CombinedReportViewModel(_reportServiceMock.Object, _reportOrderServiceMock.Object);
             _reportServiceMock.Setup(x => x.GetCompositeReportAsync(999, It.IsAny<IReadOnlyCollection<int>>())).ReturnsAsync((VisitReportData?)null);
             viewModel.VisitId = 999;
 
@@ -100,7 +102,7 @@ namespace Open_lab.Tests.ViewModels
         {
             // Function: 4.4 — Create Composite Report (Edge: invalid input)
             // Arrange
-            var viewModel = new CombinedReportViewModel(_reportServiceMock.Object);
+            var viewModel = new CombinedReportViewModel(_reportServiceMock.Object, _reportOrderServiceMock.Object);
             viewModel.VisitId = 0;
 
             // Act
@@ -117,7 +119,7 @@ namespace Open_lab.Tests.ViewModels
         {
             // Function: 4.4 — Create Composite Report (Exception)
             // Arrange
-            var viewModel = new CombinedReportViewModel(_reportServiceMock.Object);
+            var viewModel = new CombinedReportViewModel(_reportServiceMock.Object, _reportOrderServiceMock.Object);
             _reportServiceMock.Setup(x => x.GetCompositeReportAsync(101, It.IsAny<IReadOnlyCollection<int>>()))
                 .ThrowsAsync(new InvalidOperationException("Database error"));
             viewModel.VisitId = 101;
@@ -135,7 +137,7 @@ namespace Open_lab.Tests.ViewModels
         {
             // Function: 4.4 — Create Composite Report (Edge: no tests)
             // Arrange
-            var viewModel = new CombinedReportViewModel(_reportServiceMock.Object);
+            var viewModel = new CombinedReportViewModel(_reportServiceMock.Object, _reportOrderServiceMock.Object);
             var emptyReport = new VisitReportData
             {
                 Visit = new Visit { VisitId = 102, VisitDate = DateTime.Now },
@@ -159,7 +161,7 @@ namespace Open_lab.Tests.ViewModels
         {
             // Function: 4.5 — Arrange Report Order (Edge: no selection)
             // Arrange
-            var viewModel = new CombinedReportViewModel(_reportServiceMock.Object);
+            var viewModel = new CombinedReportViewModel(_reportServiceMock.Object, _reportOrderServiceMock.Object);
             var report = CreateSampleReport(206, 2);
             _reportServiceMock.Setup(x => x.GetCompositeReportAsync(206, It.IsAny<IReadOnlyCollection<int>>())).ReturnsAsync(report);
             viewModel.VisitId = 206;
@@ -178,7 +180,7 @@ namespace Open_lab.Tests.ViewModels
         {
             // Function: 4.5 — Arrange Report Order
             // Arrange
-            var viewModel = new CombinedReportViewModel(_reportServiceMock.Object);
+            var viewModel = new CombinedReportViewModel(_reportServiceMock.Object, _reportOrderServiceMock.Object);
             var report = CreateSampleReport(207, 3);
             _reportServiceMock.Setup(x => x.GetCompositeReportAsync(207, It.IsAny<IReadOnlyCollection<int>>())).ReturnsAsync(report);
             viewModel.VisitId = 207;
@@ -202,7 +204,7 @@ namespace Open_lab.Tests.ViewModels
         {
             // Function: 4.5 — Arrange Report Order
             // Arrange
-            var viewModel = new CombinedReportViewModel(_reportServiceMock.Object);
+            var viewModel = new CombinedReportViewModel(_reportServiceMock.Object, _reportOrderServiceMock.Object);
             var report = CreateSampleReport(208, 3);
             _reportServiceMock.Setup(x => x.GetCompositeReportAsync(208, It.IsAny<IReadOnlyCollection<int>>())).ReturnsAsync(report);
             viewModel.VisitId = 208;

@@ -373,6 +373,32 @@ namespace Open_lab.Services
             return Math.Round(commissionAmount, 2);
         }
 
+        // Gap 2.12 - Doctor-wise Inventory / DoctorCommissions:
+        // Calculate the commission AND persist a DoctorCommission record so the value becomes
+        // a real financial record (not just a runtime calculation).
+        public async Task<decimal> CalculateAndRecordReferralCommissionAsync(int referralId, int visitId, decimal totalAmount)
+        {
+            var commissionAmount = await CalculateReferralCommissionAsync(referralId, totalAmount);
+            if (commissionAmount <= 0)
+            {
+                return commissionAmount;
+            }
+
+            var commission = new DoctorCommission
+            {
+                ReferralId = referralId,
+                VisitId = visitId,
+                Amount = commissionAmount,
+                DateCalculated = DateTime.UtcNow,
+                IsPaid = false
+            };
+
+            _db.DoctorCommissions.Add(commission);
+            await _db.SaveChangesAsync();
+
+            return commissionAmount;
+        }
+
         public async Task LogInvoicePrintedAsync(int invoiceId, int userId)
         {
             var log = new AuditLog
