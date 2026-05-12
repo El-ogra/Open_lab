@@ -118,6 +118,8 @@ namespace Open_lab.Tests.Services
             await catalog.UpdateTestCommentAsync(comment);
 
             test.IsSendOut = true;
+            test.CostPrice = 60m;
+            test.PatientPrice = 120m;
             await catalog.UpdateTestAsync(test);
 
             var saved = await catalog.GetTestByIdAsync(test.TestId);

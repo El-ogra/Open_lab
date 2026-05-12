@@ -1,5 +1,6 @@
 using System;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Open_lab.Models;
@@ -10,6 +11,7 @@ namespace Open_lab.ViewModels
     public class PatientRegistrationViewModel : BaseViewModel
     {
         private readonly IPatientService _patientService;
+        private readonly ITestCatalogService? _testCatalogService;
         private string _labId = string.Empty;
         private string _fullName = string.Empty;
         private string _gender = string.Empty;
@@ -23,11 +25,19 @@ namespace Open_lab.ViewModels
         private int _patientId;
         private string _statusMessage = string.Empty;
         private Patient? _selectedPatient;
+        private Referral? _selectedReferral;
 
         public PatientRegistrationViewModel(IPatientService patientService)
+            : this(patientService, null)
+        {
+        }
+
+        public PatientRegistrationViewModel(IPatientService patientService, ITestCatalogService? testCatalogService)
         {
             _patientService = patientService;
+            _testCatalogService = testCatalogService;
             Results = new ObservableCollection<Patient>();
+            Referrals = new ObservableCollection<Referral>();
             SaveCommand = new RelayCommand(async _ => await SaveAsync(), _ => AppSession.HasPermission(PermissionCodes.PatientsEdit));
             NewCommand = new RelayCommand(async _ => await ClearFormAsync(), _ => AppSession.HasPermission(PermissionCodes.PatientsEdit));
             GenerateLabIdCommand = new RelayCommand(async _ => await GenerateLabIdAsync(), _ => AppSession.HasPermission(PermissionCodes.PatientsEdit) && PatientId == 0);
@@ -35,7 +45,7 @@ namespace Open_lab.ViewModels
             SearchCommand = new RelayCommand(async _ => await SearchAsync(), _ => AppSession.HasPermission(PermissionCodes.PatientsView));
             DeleteCommand = new RelayCommand(async _ => await DeleteAsync(), _ => AppSession.HasPermission(PermissionCodes.PatientsEdit) && PatientId > 0);
 
-            _ = GenerateLabIdAsync();
+            _ = InitializeAsync();
         }
 
         public int PatientId
@@ -118,6 +128,13 @@ namespace Open_lab.ViewModels
         }
 
         public ObservableCollection<Patient> Results { get; }
+        public ObservableCollection<Referral> Referrals { get; }
+
+        public Referral? SelectedReferral
+        {
+            get => _selectedReferral;
+            set => SetProperty(ref _selectedReferral, value);
+        }
 
         public Patient? SelectedPatient
         {
@@ -157,7 +174,8 @@ namespace Open_lab.ViewModels
                         Gender = Gender,
                         BirthDate = BirthDate,
                         Phone = Phone,
-                        Address = Address
+                        Address = Address,
+                        ReferralId = NormalizeReferralId(SelectedReferral)
                     });
 
                     PatientId = created.PatientId;
@@ -175,8 +193,9 @@ namespace Open_lab.ViewModels
                         Gender = Gender,
                         BirthDate = BirthDate,
                         Phone = Phone,
-                        Address = Address
-                    });
+                        Address = Address,
+                        ReferralId = NormalizeReferralId(SelectedReferral)
+                    }, AppSession.UserId > 0 ? AppSession.UserId : 1);
 
                     await SaveMedicalHistoryAsync();
                     StatusMessage = "تم تحديث بيانات المريض.";
@@ -280,6 +299,7 @@ namespace Open_lab.ViewModels
             Allergies = null;
             Medications = null;
             MedicalNotes = null;
+            SelectedReferral = Referrals.FirstOrDefault(r => r.ReferralId == 0);
             SelectedPatient = null;
             await GenerateLabIdAsync();
         }
@@ -293,7 +313,46 @@ namespace Open_lab.ViewModels
             BirthDate = patient.BirthDate;
             Phone = patient.Phone;
             Address = patient.Address;
+            SelectedReferral = FindReferral(patient.ReferralId);
             await LoadMedicalHistoryAsync(patient.PatientId);
+        }
+
+        private async Task InitializeAsync()
+        {
+            await LoadReferralsAsync();
+            await GenerateLabIdAsync();
+        }
+
+        private async Task LoadReferralsAsync()
+        {
+            Referrals.Clear();
+            Referrals.Add(new Referral { ReferralId = 0, Name = "بدون عقد", ReferralType = "None" });
+            if (_testCatalogService != null)
+            {
+                var referrals = await _testCatalogService.GetReferralsAsync();
+                foreach (var referral in referrals)
+                {
+                    Referrals.Add(referral);
+                }
+            }
+
+            SelectedReferral = Referrals.FirstOrDefault(r => r.ReferralId == 0);
+        }
+
+        private Referral? FindReferral(int? referralId)
+        {
+            if (!referralId.HasValue)
+            {
+                return Referrals.FirstOrDefault(r => r.ReferralId == 0);
+            }
+
+            return Referrals.FirstOrDefault(r => r.ReferralId == referralId.Value)
+                ?? Referrals.FirstOrDefault(r => r.ReferralId == 0);
+        }
+
+        private static int? NormalizeReferralId(Referral? referral)
+        {
+            return referral == null || referral.ReferralId <= 0 ? null : referral.ReferralId;
         }
 
         private async Task LoadMedicalHistoryAsync(int patientId)

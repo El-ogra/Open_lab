@@ -10,14 +10,23 @@ namespace Open_lab.ViewModels
     public class ResultsEntryViewModel : BaseViewModel
     {
         private readonly IResultsService _resultsService;
+        private readonly IPatientService? _patientService;
         private DateTime _dateFrom = DateTime.Today;
         private DateTime _dateTo = DateTime.Today;
         private VisitTestRow? _selectedVisitTest;
         private string _statusMessage = string.Empty;
+        private string _medicalHistorySummary = string.Empty;
+        private bool _hasMedicalAlerts;
 
         public ResultsEntryViewModel(IResultsService resultsService)
+            : this(resultsService, null)
+        {
+        }
+
+        public ResultsEntryViewModel(IResultsService resultsService, IPatientService? patientService)
         {
             _resultsService = resultsService;
+            _patientService = patientService;
             VisitTests = new ObservableCollection<VisitTestRow>();
             ResultItems = new ObservableCollection<ResultEntryItem>();
 
@@ -61,6 +70,18 @@ namespace Open_lab.ViewModels
             private set => SetProperty(ref _statusMessage, value);
         }
 
+        public string MedicalHistorySummary
+        {
+            get => _medicalHistorySummary;
+            private set => SetProperty(ref _medicalHistorySummary, value);
+        }
+
+        public bool HasMedicalAlerts
+        {
+            get => _hasMedicalAlerts;
+            private set => SetProperty(ref _hasMedicalAlerts, value);
+        }
+
         public ICommand LoadVisitTestsCommand { get; }
         public ICommand SaveResultsCommand { get; }
         public ICommand VerifyResultsCommand { get; }
@@ -83,6 +104,7 @@ namespace Open_lab.ViewModels
                     VisitTests.Add(new VisitTestRow
                     {
                         VisitTestId = vt.VisitTestId,
+                        PatientId = vt.Visit?.PatientId ?? 0,
                         TestId = vt.TestId,
                         PatientName = vt.Visit?.Patient?.FullName ?? string.Empty,
                         PatientGender = vt.Visit?.Patient?.Gender ?? string.Empty,
@@ -107,6 +129,8 @@ namespace Open_lab.ViewModels
         private async Task LoadResultsAsync()
         {
             ResultItems.Clear();
+            MedicalHistorySummary = string.Empty;
+            HasMedicalAlerts = false;
             if (SelectedVisitTest == null)
             {
                 return;
@@ -116,6 +140,7 @@ namespace Open_lab.ViewModels
             {
                 var parameters = await _resultsService.GetParametersForTestAsync(SelectedVisitTest.TestId);
                 var results = await _resultsService.GetResultsForVisitTestAsync(SelectedVisitTest.VisitTestId);
+                await LoadMedicalHistoryForSelectedPatientAsync();
 
                 foreach (var param in parameters)
                 {
@@ -158,7 +183,7 @@ namespace Open_lab.ViewModels
             }
             catch
             {
-                // Silent fail for auto-validation to not disturb user typing
+                StatusMessage = "تعذر تطبيق التحقق التلقائي للنتيجة.";
             }
         }
 
@@ -174,7 +199,13 @@ namespace Open_lab.ViewModels
             {
                 foreach (var item in ResultItems)
                 {
-                    await _resultsService.SaveResultAsync(SelectedVisitTest.VisitTestId, item.ParameterId, item.Value, item.Flag, item.Comment);
+                    await _resultsService.SaveResultAsync(
+                        SelectedVisitTest.VisitTestId,
+                        item.ParameterId,
+                        item.Value,
+                        item.Flag,
+                        item.Comment,
+                        AppSession.UserId > 0 ? AppSession.UserId : 1);
                 }
 
                 SelectedVisitTest.Status = "InProgress";
@@ -241,6 +272,31 @@ namespace Open_lab.ViewModels
             (SaveResultsCommand as RelayCommand)?.RaiseCanExecuteChanged();
             (VerifyResultsCommand as RelayCommand)?.RaiseCanExecuteChanged();
             (ReopenResultsCommand as RelayCommand)?.RaiseCanExecuteChanged();
+        }
+
+        private async Task LoadMedicalHistoryForSelectedPatientAsync()
+        {
+            if (_patientService == null || SelectedVisitTest == null || SelectedVisitTest.PatientId <= 0)
+            {
+                return;
+            }
+
+            var history = await _patientService.GetMedicalHistoryAsync(SelectedVisitTest.PatientId);
+            if (history == null)
+            {
+                return;
+            }
+
+            var parts = new[]
+            {
+                string.IsNullOrWhiteSpace(history.ChronicDiseases) ? null : $"الأمراض المزمنة: {history.ChronicDiseases}",
+                string.IsNullOrWhiteSpace(history.Allergies) ? null : $"الحساسيات: {history.Allergies}",
+                string.IsNullOrWhiteSpace(history.Medications) ? null : $"الأدوية الحالية: {history.Medications}",
+                string.IsNullOrWhiteSpace(history.Notes) ? null : $"ملاحظات: {history.Notes}"
+            }.Where(p => p != null);
+
+            MedicalHistorySummary = string.Join(Environment.NewLine, parts);
+            HasMedicalAlerts = !string.IsNullOrWhiteSpace(MedicalHistorySummary);
         }
     }
 }

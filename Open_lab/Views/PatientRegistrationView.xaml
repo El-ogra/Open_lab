@@ -33,6 +33,11 @@
             <TextBlock Text="العنوان" Margin="0,12,0,4" />
             <TextBox Text="{Binding Address, UpdateSourceTrigger=PropertyChanged}" />
 
+            <TextBlock Text="العقد / الجهة" Margin="0,12,0,4" />
+            <ComboBox ItemsSource="{Binding Referrals}"
+                      SelectedItem="{Binding SelectedReferral}"
+                      DisplayMemberPath="Name" />
+
             <TextBlock Text="الأمراض المزمنة" Margin="0,12,0,4" />
             <TextBox Text="{Binding ChronicDiseases, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="45" />
 

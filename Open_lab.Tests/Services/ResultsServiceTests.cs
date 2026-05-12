@@ -503,18 +503,21 @@ namespace Open_lab.Tests.Services
             // Arrange
             var vtId = 5;
             var pId = 20;
+            var user = new User { UserId = 7, Username = "editor", PasswordHash = "hash", Salt = "salt", IsActive = true };
+            _db.Users.Add(user);
             _db.VisitTests.Add(new VisitTest { VisitTestId = vtId, VisitId = 10, TestId = 10 });
             _db.ResultValues.Add(new ResultValue { VisitTestId = vtId, ParameterId = pId, Value = "Initial" });
             await _db.SaveChangesAsync();
 
             // Act - Modify results
-            await _service.SaveResultAsync(vtId, pId, "Modified", "H", "Reason X");
+            await _service.SaveResultAsync(vtId, pId, "Modified", "H", "Reason X", user.UserId);
 
             // Assert
             var log = await _db.AuditLogs.OrderByDescending(l => l.Timestamp).FirstOrDefaultAsync();
             log.Should().NotBeNull();
             log!.Action.Should().Be("EDIT_RESULT");
-            log.NewValues.Should().Contain("Initial");
+            log.UserId.Should().Be(user.UserId);
+            log.OldValues.Should().Contain("Initial");
             log.NewValues.Should().Contain("Modified");
         }
 

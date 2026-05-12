@@ -21,7 +21,7 @@ namespace Open_lab.Services
 
         public Task<Patient?> GetByIdAsync(int patientId)
         {
-            return _db.Patients.AsNoTracking().FirstOrDefaultAsync(p => p.PatientId == patientId);
+            return _db.Patients.AsNoTracking().Include(p => p.Referral).FirstOrDefaultAsync(p => p.PatientId == patientId);
         }
 
         public Task<Patient?> GetByLabIdAsync(string labId)
@@ -31,7 +31,7 @@ namespace Open_lab.Services
                 throw new ArgumentException("LabId is required.", nameof(labId));
             }
 
-            return _db.Patients.AsNoTracking().FirstOrDefaultAsync(p => p.LabId == labId.Trim());
+            return _db.Patients.AsNoTracking().Include(p => p.Referral).FirstOrDefaultAsync(p => p.LabId == labId.Trim());
         }
 
         public Task<MedicalHistory?> GetMedicalHistoryAsync(int patientId)
@@ -84,7 +84,7 @@ namespace Open_lab.Services
 
         public Task<List<Patient>> SearchAsync(string? name, string? phone, DateTime? date = null, string? labId = null)
         {
-            var query = _db.Patients.AsNoTracking().AsQueryable();
+            var query = _db.Patients.AsNoTracking().Include(p => p.Referral).AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(name))
             {
@@ -157,6 +157,7 @@ namespace Open_lab.Services
             }
 
             Normalize(patient);
+            await ValidateReferralAsync(patient.ReferralId);
             if (string.IsNullOrWhiteSpace(patient.LabId))
             {
                 patient.LabId = await GenerateNextLabIdAsync(DateTime.Today);
@@ -175,7 +176,53 @@ namespace Open_lab.Services
             return patient;
         }
 
-        public async Task UpdateAsync(Patient patient)
+        public Task UpdateAsync(Patient patient)
+        {
+            return UpdateCoreAsync(patient, _db.CurrentUserId);
+        }
+
+        public Task UpdateAsync(Patient patient, int userId)
+        {
+            if (userId <= 0)
+            {
+                throw new ArgumentException("UserId is required for patient audit trail.", nameof(userId));
+            }
+
+            return UpdateCoreAsync(patient, userId);
+        }
+
+        public async Task AssignReferralAsync(int patientId, int? referralId, int userId)
+        {
+            if (patientId <= 0)
+            {
+                throw new ArgumentException("PatientId is required.", nameof(patientId));
+            }
+
+            if (userId <= 0)
+            {
+                throw new ArgumentException("UserId is required for contract assignment audit trail.", nameof(userId));
+            }
+
+            await ValidateReferralAsync(referralId);
+
+            var current = await _db.Patients.FirstOrDefaultAsync(p => p.PatientId == patientId);
+            if (current == null)
+            {
+                throw new InvalidOperationException("Patient not found.");
+            }
+
+            if (current.ReferralId == referralId)
+            {
+                return;
+            }
+
+            var oldValues = $"ReferralId={current.ReferralId?.ToString() ?? "null"}";
+            current.ReferralId = referralId;
+            AddAuditLog(userId, "ASSIGN_PATIENT_CONTRACT", current.PatientId.ToString(), oldValues, $"ReferralId={referralId?.ToString() ?? "null"}");
+            await _db.SaveChangesAsync();
+        }
+
+        private async Task UpdateCoreAsync(Patient patient, int? userId)
         {
             if (patient == null)
             {
@@ -183,6 +230,7 @@ namespace Open_lab.Services
             }
 
             Normalize(patient);
+            await ValidateReferralAsync(patient.ReferralId);
             ValidateBusinessRules(patient);
 
             var current = await _db.Patients.FirstOrDefaultAsync(p => p.PatientId == patient.PatientId);
@@ -197,12 +245,21 @@ namespace Open_lab.Services
                 throw new InvalidOperationException("LabId already exists.");
             }
 
+            var oldValues = BuildPatientSnapshot(current);
+
             current.LabId = patient.LabId;
             current.FullName = patient.FullName;
             current.Gender = patient.Gender;
             current.BirthDate = patient.BirthDate;
             current.Phone = patient.Phone;
             current.Address = patient.Address;
+            current.ReferralId = patient.ReferralId;
+
+            var newValues = BuildPatientSnapshot(current);
+            if (userId.HasValue && !string.Equals(oldValues, newValues, StringComparison.Ordinal))
+            {
+                AddAuditLog(userId.Value, "EDIT_PATIENT", current.PatientId.ToString(), oldValues, newValues);
+            }
 
             await _db.SaveChangesAsync();
         }
@@ -232,6 +289,52 @@ namespace Open_lab.Services
             patient.Gender = patient.Gender?.Trim() ?? string.Empty;
             patient.Phone = string.IsNullOrWhiteSpace(patient.Phone) ? null : patient.Phone.Trim();
             patient.Address = string.IsNullOrWhiteSpace(patient.Address) ? null : patient.Address.Trim();
+            if (patient.ReferralId <= 0)
+            {
+                patient.ReferralId = null;
+            }
+        }
+
+        private async Task ValidateReferralAsync(int? referralId)
+        {
+            if (!referralId.HasValue)
+            {
+                return;
+            }
+
+            var exists = await _db.Referrals.AnyAsync(r => r.ReferralId == referralId.Value);
+            if (!exists)
+            {
+                throw new InvalidOperationException("Referral contract not found.");
+            }
+        }
+
+        private void AddAuditLog(int userId, string action, string recordId, string oldValues, string newValues)
+        {
+            _db.AuditLogs.Add(new AuditLog
+            {
+                UserId = userId,
+                Action = action,
+                TableName = "Patients",
+                RecordId = recordId,
+                OldValues = oldValues,
+                NewValues = newValues,
+                Timestamp = DateTime.UtcNow
+            });
+        }
+
+        private static string BuildPatientSnapshot(Patient patient)
+        {
+            return string.Join(" | ", new[]
+            {
+                $"LabId={patient.LabId}",
+                $"FullName={patient.FullName}",
+                $"Gender={patient.Gender}",
+                $"BirthDate={patient.BirthDate:yyyy-MM-dd}",
+                $"Phone={patient.Phone}",
+                $"Address={patient.Address}",
+                $"ReferralId={patient.ReferralId?.ToString() ?? "null"}"
+            });
         }
 
         private static void ValidateBusinessRules(Patient patient)

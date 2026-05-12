@@ -12,6 +12,7 @@ namespace Open_lab.Tests.ViewModels
         private readonly Mock<IReportService> _reportServiceMock;
         private readonly Mock<IPrintService> _printServiceMock;
         private readonly Mock<IResultsService> _resultsServiceMock;
+        private readonly Mock<IReportPdfService> _reportPdfServiceMock;
         private readonly ReportViewerViewModel _viewModel;
 
         public ReportViewerViewModelTests()
@@ -19,7 +20,10 @@ namespace Open_lab.Tests.ViewModels
             _reportServiceMock = new Mock<IReportService>();
             _printServiceMock = new Mock<IPrintService>();
             _resultsServiceMock = new Mock<IResultsService>();
-            _viewModel = new ReportViewerViewModel(_reportServiceMock.Object, _printServiceMock.Object, _resultsServiceMock.Object);
+            _reportPdfServiceMock = new Mock<IReportPdfService>();
+            _reportPdfServiceMock.Setup(x => x.GenerateVisitReportPdfAsync(It.IsAny<VisitReportData>()))
+                .ReturnsAsync(@"C:\tmp\visit-report-test.pdf");
+            _viewModel = new ReportViewerViewModel(_reportServiceMock.Object, _printServiceMock.Object, _resultsServiceMock.Object, _reportPdfServiceMock.Object);
         }
 
         [Fact]
@@ -52,7 +56,9 @@ namespace Open_lab.Tests.ViewModels
             _viewModel.Tests[0].Results[0].Result.Parameter.Should().NotBeNull();
             _viewModel.Tests[0].Results[0].Result.Parameter.Name.Should().Be("Param");
 
-            _viewModel.PreviewContent.Should().Contain("معاينة التقرير");
+            _viewModel.PreviewPdfPath.Should().EndWith(".pdf");
+            _viewModel.PreviewPdfUri.Should().NotBeNull();
+            _reportPdfServiceMock.Verify(x => x.GenerateVisitReportPdfAsync(report), Times.Once);
             _viewModel.StatusMessage.Should().Contain("تم تحميل التقرير");
         }
 

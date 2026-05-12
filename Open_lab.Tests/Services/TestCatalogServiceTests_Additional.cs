@@ -740,7 +740,7 @@ namespace Open_lab.Tests.Services
         }
 
         [Fact]
-        public async Task CreateTestAsync_WithNullCostPrice_ShouldBeAllowed_EdgeGuard()
+        public async Task CreateTestAsync_WithNullCostPrice_ForSendOut_ShouldThrow_EdgeGuard()
         {
             // Function: 3.9 — Mark as Outsourced
             // Arrange
@@ -756,14 +756,14 @@ namespace Open_lab.Tests.Services
             };
 
             // Act
-            var created = await _service.CreateTestAsync(test);
+            Func<Task> act = async () => await _service.CreateTestAsync(test);
 
             // Assert
-            created.CostPrice.Should().BeNull();
+            await act.Should().ThrowAsync<ArgumentException>().WithMessage("*cost price*");
         }
 
         [Fact]
-        public async Task CreateTestAsync_WithNullPatientPrice_ShouldBeAllowed_EdgeGuard()
+        public async Task CreateTestAsync_WithNullPatientPrice_ForSendOut_ShouldThrow_EdgeGuard()
         {
             // Function: 3.9 — Mark as Outsourced
             // Arrange
@@ -779,14 +779,14 @@ namespace Open_lab.Tests.Services
             };
 
             // Act
-            var created = await _service.CreateTestAsync(test);
+            Func<Task> act = async () => await _service.CreateTestAsync(test);
 
             // Assert
-            created.PatientPrice.Should().BeNull();
+            await act.Should().ThrowAsync<ArgumentException>().WithMessage("*patient price*");
         }
 
         [Fact]
-        public async Task CreateTestAsync_WithNegativeCostPrice_ShouldBeAllowed_EdgeGuard()
+        public async Task CreateTestAsync_WithNegativeCostPrice_ForSendOut_ShouldThrow_EdgeGuard()
         {
             // Function: 3.9 — Mark as Outsourced (Edge Case)
             // Arrange
@@ -797,18 +797,19 @@ namespace Open_lab.Tests.Services
                 NameReceipt = "Neg",
                 Price = 50m,
                 IsSendOut = true,
-                CostPrice = -10m
+                CostPrice = -10m,
+                PatientPrice = 50m
             };
 
             // Act
-            var created = await _service.CreateTestAsync(test);
+            Func<Task> act = async () => await _service.CreateTestAsync(test);
 
             // Assert
-            created.CostPrice.Should().Be(-10m);
+            await act.Should().ThrowAsync<ArgumentException>().WithMessage("*cannot be negative*");
         }
 
         [Fact]
-        public async Task CreateTestAsync_WithNegativePatientPrice_ShouldBeAllowed_EdgeGuard()
+        public async Task CreateTestAsync_WithNegativePatientPrice_ForSendOut_ShouldThrow_EdgeGuard()
         {
             // Function: 3.9 — Mark as Outsourced (Edge Case)
             // Arrange
@@ -819,14 +820,15 @@ namespace Open_lab.Tests.Services
                 NameReceipt = "Neg",
                 Price = 50m,
                 IsSendOut = true,
+                CostPrice = 10m,
                 PatientPrice = -10m
             };
 
             // Act
-            var created = await _service.CreateTestAsync(test);
+            Func<Task> act = async () => await _service.CreateTestAsync(test);
 
             // Assert
-            created.PatientPrice.Should().Be(-10m);
+            await act.Should().ThrowAsync<ArgumentException>().WithMessage("*cannot be negative*");
         }
 
         // ========== Additional Service Methods ==========

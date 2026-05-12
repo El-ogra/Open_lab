@@ -16,7 +16,10 @@ namespace Open_lab.Services
         private const string ReportFooterKey = "Report.Footer";
         private const string ReportMarginTopKey = "Report.MarginTop";
         private const string ReportMarginBottomKey = "Report.MarginBottom";
+        private const string ReportMarginLeftKey = "Report.MarginLeft";
+        private const string ReportMarginRightKey = "Report.MarginRight";
         private const string ReportPrimaryColorKey = "Report.PrimaryColor";
+        private const string ReportLogoPathKey = "Report.LogoPath";
         private const string PrinterReportKey = "Printer.Report";
         private const string PrinterReceiptKey = "Printer.Receipt";
         private const string PrinterBarcodeKey = "Printer.Barcode";
@@ -25,6 +28,9 @@ namespace Open_lab.Services
         private const string ReceiptFooterKey = "Receipt.Footer";
         private const string ReceiptShowLogoKey = "Receipt.ShowLogo";
         private const string ReceiptCopiesKey = "Receipt.Copies";
+        private const string InvoiceLogoPathKey = "Invoice.LogoPath";
+        private const string InvoiceCurrencyKey = "Invoice.Currency";
+        private const string InvoiceShowMedicalDetailsKey = "Invoice.ShowMedicalDetails";
         private const string PrinterPaperSizeKey = "Printer.PaperSize";
         private const string DefaultAccountTypeKey = "Invoice.DefaultAccountType";
         private const string MasterPasswordHashKey = "Security.MasterPasswordHash";
@@ -80,7 +86,10 @@ namespace Open_lab.Services
                     s.Key == ReportFooterKey ||
                     s.Key == ReportMarginTopKey ||
                     s.Key == ReportMarginBottomKey ||
+                    s.Key == ReportMarginLeftKey ||
+                    s.Key == ReportMarginRightKey ||
                     s.Key == ReportPrimaryColorKey ||
+                    s.Key == ReportLogoPathKey ||
                     s.Key == PrinterReportKey ||
                     s.Key == PrinterReceiptKey ||
                     s.Key == PrinterBarcodeKey ||
@@ -89,6 +98,9 @@ namespace Open_lab.Services
                     s.Key == ReceiptFooterKey ||
                     s.Key == ReceiptShowLogoKey ||
                     s.Key == ReceiptCopiesKey ||
+                    s.Key == InvoiceLogoPathKey ||
+                    s.Key == InvoiceCurrencyKey ||
+                    s.Key == InvoiceShowMedicalDetailsKey ||
                     s.Key == PrinterPaperSizeKey ||
                     s.Key == DefaultAccountTypeKey ||
                     s.Key == MasterPasswordHashKey)
@@ -100,7 +112,10 @@ namespace Open_lab.Services
                 ReportFooter = GetValue(dictionary, ReportFooterKey, string.Empty),
                 ReportMarginTop = ParseDouble(GetValue(dictionary, ReportMarginTopKey, "1.5"), 1.5),
                 ReportMarginBottom = ParseDouble(GetValue(dictionary, ReportMarginBottomKey, "1.5"), 1.5),
+                ReportMarginLeft = ParseDouble(GetValue(dictionary, ReportMarginLeftKey, "1.5"), 1.5),
+                ReportMarginRight = ParseDouble(GetValue(dictionary, ReportMarginRightKey, "1.5"), 1.5),
                 ReportPrimaryColor = GetValue(dictionary, ReportPrimaryColorKey, "#2B2B2B"),
+                ReportLogoPath = GetValue(dictionary, ReportLogoPathKey, string.Empty),
                 ReportPrinterName = GetValue(dictionary, PrinterReportKey, "Microsoft Print to PDF"),
                 ReceiptPrinterName = GetValue(dictionary, PrinterReceiptKey, "Microsoft Print to PDF"),
                 BarcodePrinterName = GetValue(dictionary, PrinterBarcodeKey, "Microsoft Print to PDF"),
@@ -109,6 +124,9 @@ namespace Open_lab.Services
                 ReceiptFooterText = GetValue(dictionary, ReceiptFooterKey, "شكراً لتعاملكم"),
                 ReceiptShowLogo = ParseBool(GetValue(dictionary, ReceiptShowLogoKey, "false")),
                 ReceiptCopies = ParseInt(GetValue(dictionary, ReceiptCopiesKey, "1"), 1),
+                InvoiceLogoPath = GetValue(dictionary, InvoiceLogoPathKey, string.Empty),
+                InvoiceCurrency = GetValue(dictionary, InvoiceCurrencyKey, "EGP"),
+                InvoiceShowMedicalDetails = ParseBool(GetValue(dictionary, InvoiceShowMedicalDetailsKey, "true")),
                 ReportPaperSize = GetValue(dictionary, PrinterPaperSizeKey, "A4"),
                 DefaultAccountType = GetValue(dictionary, DefaultAccountTypeKey, "Cash"),
                 MasterPasswordHash = dictionary.TryGetValue(MasterPasswordHashKey, out var hash) ? hash : null
@@ -121,7 +139,10 @@ namespace Open_lab.Services
             await SaveSettingAsync(ReportFooterKey, profile.ReportFooter);
             await SaveSettingAsync(ReportMarginTopKey, profile.ReportMarginTop.ToString(CultureInfo.InvariantCulture));
             await SaveSettingAsync(ReportMarginBottomKey, profile.ReportMarginBottom.ToString(CultureInfo.InvariantCulture));
+            await SaveSettingAsync(ReportMarginLeftKey, profile.ReportMarginLeft.ToString(CultureInfo.InvariantCulture));
+            await SaveSettingAsync(ReportMarginRightKey, profile.ReportMarginRight.ToString(CultureInfo.InvariantCulture));
             await SaveSettingAsync(ReportPrimaryColorKey, profile.ReportPrimaryColor);
+            await SaveSettingAsync(ReportLogoPathKey, NormalizeNullable(profile.ReportLogoPath));
             await SaveSettingAsync(PrinterReportKey, profile.ReportPrinterName);
             await SaveSettingAsync(PrinterReceiptKey, profile.ReceiptPrinterName);
             await SaveSettingAsync(PrinterBarcodeKey, profile.BarcodePrinterName);
@@ -130,6 +151,9 @@ namespace Open_lab.Services
             await SaveSettingAsync(ReceiptFooterKey, profile.ReceiptFooterText);
             await SaveSettingAsync(ReceiptShowLogoKey, profile.ReceiptShowLogo ? "true" : "false");
             await SaveSettingAsync(ReceiptCopiesKey, profile.ReceiptCopies.ToString(CultureInfo.InvariantCulture));
+            await SaveSettingAsync(InvoiceLogoPathKey, NormalizeNullable(profile.InvoiceLogoPath));
+            await SaveSettingAsync(InvoiceCurrencyKey, NormalizeCurrency(profile.InvoiceCurrency));
+            await SaveSettingAsync(InvoiceShowMedicalDetailsKey, profile.InvoiceShowMedicalDetails ? "true" : "false");
             await SaveSettingAsync(PrinterPaperSizeKey, profile.ReportPaperSize);
             await SaveSettingAsync(DefaultAccountTypeKey, profile.DefaultAccountType);
 
@@ -183,6 +207,16 @@ namespace Open_lab.Services
         private static string GetValue(IReadOnlyDictionary<string, string?> dictionary, string key, string fallback)
         {
             return dictionary.TryGetValue(key, out var value) && !string.IsNullOrWhiteSpace(value) ? value : fallback;
+        }
+
+        private static string? NormalizeNullable(string? value)
+        {
+            return string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+        }
+
+        private static string NormalizeCurrency(string? value)
+        {
+            return string.IsNullOrWhiteSpace(value) ? "EGP" : value.Trim().ToUpperInvariant();
         }
 
         /// <summary>

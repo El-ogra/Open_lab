@@ -135,6 +135,10 @@ namespace Open_lab.Data
                 entity.Property(e => e.LabId).IsRequired();
                 entity.Property(e => e.FullName).IsRequired();
                 entity.Property(e => e.Gender).IsRequired();
+                entity.HasOne(e => e.Referral)
+                    .WithMany(e => e.Patients)
+                    .HasForeignKey(e => e.ReferralId)
+                    .OnDelete(DeleteBehavior.SetNull);
             });
 
             modelBuilder.Entity<Visit>(entity =>
@@ -179,6 +183,8 @@ namespace Open_lab.Data
                 entity.Property(e => e.NameReport).IsRequired();
                 entity.Property(e => e.NameReceipt).IsRequired();
                 entity.Property(e => e.Price).HasPrecision(18, 2);
+                entity.Property(e => e.CostPrice).HasPrecision(18, 2);
+                entity.Property(e => e.PatientPrice).HasPrecision(18, 2);
                 entity.HasOne(e => e.Group)
                     .WithMany(e => e.Tests)
                     .HasForeignKey(e => e.GroupId);

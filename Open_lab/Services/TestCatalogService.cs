@@ -86,6 +86,8 @@ namespace Open_lab.Services
             current.ReportOrder = test.ReportOrder;
             current.IsRoutine = test.IsRoutine;
             current.IsSendOut = test.IsSendOut;
+            current.CostPrice = test.CostPrice;
+            current.PatientPrice = test.PatientPrice;
 
             await _db.SaveChangesAsync();
         }
@@ -621,6 +623,7 @@ namespace Open_lab.Services
             }
 
             var inUse = await _db.Visits.AnyAsync(v => v.ReferralId == referralId)
+                || await _db.Patients.AnyAsync(p => p.ReferralId == referralId)
                 || await _db.PriceLists.AnyAsync(p => p.ReferralId == referralId);
             if (inUse)
             {
@@ -753,6 +756,24 @@ namespace Open_lab.Services
             if (test.TurnaroundHours < 0)
             {
                 throw new ArgumentException("Turnaround hours cannot be negative.", nameof(test));
+            }
+
+            if (test.IsSendOut)
+            {
+                if (!test.CostPrice.HasValue)
+                {
+                    throw new ArgumentException("External tests require a cost price.", nameof(test));
+                }
+
+                if (!test.PatientPrice.HasValue)
+                {
+                    throw new ArgumentException("External tests require a patient price.", nameof(test));
+                }
+
+                if (test.CostPrice.Value < 0 || test.PatientPrice.Value < 0)
+                {
+                    throw new ArgumentException("External test prices cannot be negative.", nameof(test));
+                }
             }
         }
 

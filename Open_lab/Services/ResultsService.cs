@@ -54,6 +54,21 @@ namespace Open_lab.Services
 
         public async Task SaveResultAsync(int visitTestId, int parameterId, string? value, string? flag, string? comment)
         {
+            await SaveResultCoreAsync(visitTestId, parameterId, value, flag, comment, _db.CurrentUserId);
+        }
+
+        public async Task SaveResultAsync(int visitTestId, int parameterId, string? value, string? flag, string? comment, int userId)
+        {
+            if (userId <= 0)
+            {
+                throw new ArgumentException("UserId is required for result audit trail.", nameof(userId));
+            }
+
+            await SaveResultCoreAsync(visitTestId, parameterId, value, flag, comment, userId);
+        }
+
+        private async Task SaveResultCoreAsync(int visitTestId, int parameterId, string? value, string? flag, string? comment, int? userId)
+        {
             var visitTest = await _db.VisitTests.FirstOrDefaultAsync(vt => vt.VisitTestId == visitTestId);
             if (visitTest == null)
             {
@@ -82,19 +97,19 @@ namespace Open_lab.Services
             }
             else
             {
-                // Logic for Function 4.3 (Audit Trail for edits) — Gap fix:
-                // Use the real user from the current DbContext session (OpenLabDbContext.CurrentUserId)
-                // instead of the hard-coded "UserId = 1" so audit logs reflect the actual editor.
-                if (existing.Value != value)
+                var oldValues = BuildResultSnapshot(existing);
+                var newValues = BuildResultSnapshot(value, flag, comment);
+                if (userId.HasValue && userId.Value > 0 && !string.Equals(oldValues, newValues, StringComparison.Ordinal))
                 {
                     _db.AuditLogs.Add(new AuditLog
                     {
-                        UserId = _db.CurrentUserId ?? 0,
+                        UserId = userId.Value,
                         Action = "EDIT_RESULT",
                         TableName = "ResultValues",
                         RecordId = $"{visitTestId}-{parameterId}",
+                        OldValues = oldValues,
+                        NewValues = newValues,
                         Timestamp = DateTime.UtcNow,
-                        NewValues = $"Old: {existing.Value} | New: {value} | Reason: Manual Edit"
                     });
                 }
 
@@ -252,6 +267,21 @@ namespace Open_lab.Services
             }
 
             return result;
+        }
+
+        private static string BuildResultSnapshot(ResultValue result)
+        {
+            return BuildResultSnapshot(result.Value, result.Flag, result.Comment);
+        }
+
+        private static string BuildResultSnapshot(string? value, string? flag, string? comment)
+        {
+            return string.Join(" | ", new[]
+            {
+                $"Value={value}",
+                $"Flag={flag}",
+                $"Comment={comment}"
+            });
         }
     }
 }

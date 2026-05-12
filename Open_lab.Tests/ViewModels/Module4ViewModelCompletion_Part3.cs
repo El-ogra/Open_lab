@@ -19,6 +19,7 @@ namespace Open_lab.Tests.ViewModels
         private readonly Mock<IReportService> _reportServiceMock;
         private readonly Mock<IPrintService> _printServiceMock;
         private readonly Mock<IResultsService> _resultsServiceMock;
+        private readonly Mock<IReportPdfService> _reportPdfServiceMock;
 
         public Module4ViewModelCompletion_Part3()
         {
@@ -26,6 +27,9 @@ namespace Open_lab.Tests.ViewModels
             _reportServiceMock = new Mock<IReportService>();
             _printServiceMock = new Mock<IPrintService>();
             _resultsServiceMock = new Mock<IResultsService>();
+            _reportPdfServiceMock = new Mock<IReportPdfService>();
+            _reportPdfServiceMock.Setup(x => x.GenerateVisitReportPdfAsync(It.IsAny<VisitReportData>()))
+                .ReturnsAsync(@"C:\tmp\module4-preview.pdf");
         }
 
         public void Dispose()
@@ -60,7 +64,7 @@ namespace Open_lab.Tests.ViewModels
         {
             // Function: 4.6 — Preview Report
             // Arrange
-            var viewModel = new ReportViewerViewModel(_reportServiceMock.Object, _printServiceMock.Object, _resultsServiceMock.Object);
+            var viewModel = new ReportViewerViewModel(_reportServiceMock.Object, _printServiceMock.Object, _resultsServiceMock.Object, _reportPdfServiceMock.Object);
             var report = CreateSampleReport(300);
             _reportServiceMock.Setup(x => x.GetVisitReportAsync(300)).ReturnsAsync(report);
             viewModel.VisitId = 300;
@@ -70,8 +74,9 @@ namespace Open_lab.Tests.ViewModels
             await Task.Delay(100);
 
             // Assert
-            viewModel.PreviewContent.Should().NotBeNullOrEmpty();
-            viewModel.PreviewContent.Should().Contain("Test Patient");
+            viewModel.PreviewPdfPath.Should().EndWith(".pdf");
+            viewModel.PreviewPdfUri.Should().NotBeNull();
+            _reportPdfServiceMock.Verify(x => x.GenerateVisitReportPdfAsync(report), Times.Once);
             viewModel.Report.Should().NotBeNull();
             // viewModel.IsReportLoaded.Should().BeTrue();
         }

@@ -30,6 +30,12 @@
 
         <StackPanel Grid.Row="2" Margin="0,12,0,0">
             <TextBlock Text="نتائج التحليل" FontWeight="Bold" />
+            <Border BorderBrush="#D8A200" BorderThickness="1" Padding="8" Margin="0,6,0,8">
+                <StackPanel>
+                    <TextBlock Text="تنبيهات التاريخ الطبي" FontWeight="Bold" />
+                    <TextBlock Text="{Binding MedicalHistorySummary}" TextWrapping="Wrap" />
+                </StackPanel>
+            </Border>
             <DataGrid ItemsSource="{Binding ResultItems}" AutoGenerateColumns="False" Height="200">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="الباراميتر" Binding="{Binding ParameterName}" Width="*" IsReadOnly="True" />

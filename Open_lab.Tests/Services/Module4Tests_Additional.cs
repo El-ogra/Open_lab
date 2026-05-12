@@ -335,6 +335,7 @@ namespace Open_lab.Tests
             await _db.SaveChangesAsync();
 
             // Create initial result
+            _db.CurrentUserId = 1;
             await _service.SaveResultAsync(5, 30, "100", "N", null);
 
             // Act - Edit the value
@@ -345,8 +346,8 @@ namespace Open_lab.Tests
                 .Where(l => l.Action == "EDIT_RESULT" && l.RecordId == "5-30")
                 .FirstOrDefaultAsync();
             auditLog.Should().NotBeNull();
-            auditLog!.NewValues.Should().Contain("Old: 100");
-            auditLog.NewValues.Should().Contain("New: 105");
+            auditLog!.OldValues.Should().Contain("Value=100");
+            auditLog.NewValues.Should().Contain("Value=105");
         }
 
         [Fact]
@@ -604,14 +605,14 @@ namespace Open_lab.Tests
             viewModel.ResultItems.Add(new ResultEntryItem { ParameterId = 2, Value = "200" });
             viewModel.ResultItems.Add(new ResultEntryItem { ParameterId = 3, Value = "300" });
 
-            _resultsServiceMock.Setup(x => x.SaveResultAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<string?>()))
+            _resultsServiceMock.Setup(x => x.SaveResultAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<int>()))
                 .Returns(Task.CompletedTask);
 
             await viewModel.InvokePrivateAsync("SaveResultsAsync");
 
-            _resultsServiceMock.Verify(x => x.SaveResultAsync(10, 1, "100", It.IsAny<string?>(), It.IsAny<string?>()), Times.Once);
-            _resultsServiceMock.Verify(x => x.SaveResultAsync(10, 2, "200", It.IsAny<string?>(), It.IsAny<string?>()), Times.Once);
-            _resultsServiceMock.Verify(x => x.SaveResultAsync(10, 3, "300", It.IsAny<string?>(), It.IsAny<string?>()), Times.Once);
+            _resultsServiceMock.Verify(x => x.SaveResultAsync(10, 1, "100", It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<int>()), Times.Once);
+            _resultsServiceMock.Verify(x => x.SaveResultAsync(10, 2, "200", It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<int>()), Times.Once);
+            _resultsServiceMock.Verify(x => x.SaveResultAsync(10, 3, "300", It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<int>()), Times.Once);
             // Assert
             viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }

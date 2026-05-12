@@ -12,6 +12,7 @@ namespace Open_lab.Services
         Task<List<ResultValue>> GetResultsForVisitTestAsync(int visitTestId);
         Task<List<TestParameter>> GetParametersForTestAsync(int testId);
         Task SaveResultAsync(int visitTestId, int parameterId, string? value, string? flag, string? comment);
+        Task SaveResultAsync(int visitTestId, int parameterId, string? value, string? flag, string? comment, int userId);
         Task VerifyVisitTestAsync(int visitTestId, int verifiedByUserId);
         Task ReopenVisitTestAsync(int visitTestId);
         Task LogVisitReportPrintedAsync(int visitId, int userId);

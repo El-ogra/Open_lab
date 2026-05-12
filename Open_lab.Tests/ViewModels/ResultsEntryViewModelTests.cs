@@ -73,7 +73,7 @@ namespace Open_lab.Tests.ViewModels
             // Act
             _viewModel.SelectedVisitTest = null;
             await _viewModel.InvokePrivateAsync("SaveResultsAsync");
-            _resultsServiceMock.Verify(x => x.SaveResultAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+            _resultsServiceMock.Verify(x => x.SaveResultAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>()), Times.Never);
             // Assert
             (_viewModel.StatusMessage.Contains("لم يتم تحديد") || _viewModel.StatusMessage.Contains("اختبار")).Should().BeTrue();
             _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
@@ -88,10 +88,10 @@ namespace Open_lab.Tests.ViewModels
             _viewModel.SelectedVisitTest = new VisitTestRow { VisitTestId = 10 };
             _viewModel.ResultItems.Clear();
             _viewModel.ResultItems.Add(new ResultEntryItem { ParameterId = 1, Value = "5.0" });
-            _resultsServiceMock.Setup(x => x.SaveResultAsync(10, 1, "5.0", It.IsAny<string>(), It.IsAny<string>()))
+            _resultsServiceMock.Setup(x => x.SaveResultAsync(10, 1, "5.0", It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>()))
                 .Returns(Task.CompletedTask);
             await _viewModel.InvokePrivateAsync("SaveResultsAsync");
-            _resultsServiceMock.Verify(x => x.SaveResultAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+            _resultsServiceMock.Verify(x => x.SaveResultAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>()), Times.Once);
             // Assert
             _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
@@ -134,7 +134,7 @@ namespace Open_lab.Tests.ViewModels
             _viewModel.ResultItems.Clear();
             _viewModel.ResultItems.Add(new ResultEntryItem { ParameterId = 1, Value = "5.0" });
             _resultsServiceMock
-                .Setup(x => x.SaveResultAsync(10, 1, "5.0", It.IsAny<string>(), It.IsAny<string>()))
+                .Setup(x => x.SaveResultAsync(10, 1, "5.0", It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>()))
                 .ThrowsAsync(new Exception("save-failed"));
 
             await _viewModel.InvokePrivateAsync("SaveResultsAsync");

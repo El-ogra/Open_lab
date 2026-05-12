@@ -481,8 +481,8 @@ namespace Open_lab.Tests.ViewModels
             _viewModel.Gender = "Male";
 
             Patient? capturedPatient = null;
-            _patientServiceMock.Setup(x => x.UpdateAsync(It.IsAny<Patient>()))
-                .Callback<Patient>(p => capturedPatient = p)
+            _patientServiceMock.Setup(x => x.UpdateAsync(It.IsAny<Patient>(), It.IsAny<int>()))
+                .Callback<Patient, int>((p, _) => capturedPatient = p)
                 .Returns(Task.CompletedTask);
             _patientServiceMock.Setup(x => x.SaveMedicalHistoryAsync(500, It.IsAny<MedicalHistory>()))
                 .Returns(Task.CompletedTask);
@@ -493,7 +493,7 @@ namespace Open_lab.Tests.ViewModels
 
             // Assert - Logic Guard: Verify UpdateAsync was called instead of CreateAsync
             _viewModel.StatusMessage.Should().Contain("تم تحديث بيانات المريض");
-            _patientServiceMock.Verify(x => x.UpdateAsync(It.IsAny<Patient>()), Times.Once);
+            _patientServiceMock.Verify(x => x.UpdateAsync(It.IsAny<Patient>(), It.IsAny<int>()), Times.Once);
             _patientServiceMock.Verify(x => x.CreateAsync(It.IsAny<Patient>()), Times.Never);
             capturedPatient.Should().NotBeNull();
             capturedPatient!.FullName.Should().Be("Updated Name");
@@ -581,7 +581,9 @@ namespace Open_lab.Tests.ViewModels
         {
             // Function: 1.7 — Add Medical History
             // Arrange
-            var constructor = typeof(PatientRegistrationViewModel).GetConstructors().Single();
+            var constructor = typeof(PatientRegistrationViewModel).GetConstructors()
+                .OrderByDescending(c => c.GetParameters().Length)
+                .First();
             var parameterTypes = constructor.GetParameters().Select(p => p.ParameterType).ToList();
 
             // Act
@@ -590,8 +592,8 @@ namespace Open_lab.Tests.ViewModels
                 || t.Name.Contains("Visit", StringComparison.OrdinalIgnoreCase));
 
             // Assert
-            parameterTypes.Should().ContainSingle();
-            parameterTypes[0].Should().Be(typeof(IPatientService));
+            parameterTypes.Should().Contain(typeof(IPatientService));
+            parameterTypes.Should().Contain(typeof(ITestCatalogService));
             hasResultEntryDependency.Should().BeFalse("BR-MED-006/007 visibility at result-entry stage cannot be validated from this ViewModel scope.");
         }
     }

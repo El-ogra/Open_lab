@@ -17,7 +17,10 @@ namespace Open_lab.ViewModels
         private string _reportFooter = string.Empty;
         private double _reportMarginTop = 1.5;
         private double _reportMarginBottom = 1.5;
+        private double _reportMarginLeft = 1.5;
+        private double _reportMarginRight = 1.5;
         private string _reportPrimaryColor = "#2B2B2B";
+        private string _reportLogoPath = string.Empty;
         private string _reportPrinterName = "Microsoft Print to PDF";
         private string _receiptPrinterName = "Microsoft Print to PDF";
         private string _barcodePrinterName = "Microsoft Print to PDF";
@@ -26,6 +29,9 @@ namespace Open_lab.ViewModels
         private string _receiptFooterText = "شكراً لتعاملكم";
         private bool _receiptShowLogo;
         private int _receiptCopies = 1;
+        private string _invoiceLogoPath = string.Empty;
+        private string _invoiceCurrency = "EGP";
+        private bool _invoiceShowMedicalDetails = true;
         private string _reportPaperSize = "A4";
         private string _defaultAccountType = "Cash";
         private string _currentMasterPassword = string.Empty;
@@ -73,10 +79,28 @@ namespace Open_lab.ViewModels
             set => SetProperty(ref _reportMarginBottom, value);
         }
 
+        public double ReportMarginLeft
+        {
+            get => _reportMarginLeft;
+            set => SetProperty(ref _reportMarginLeft, value);
+        }
+
+        public double ReportMarginRight
+        {
+            get => _reportMarginRight;
+            set => SetProperty(ref _reportMarginRight, value);
+        }
+
         public string ReportPrimaryColor
         {
             get => _reportPrimaryColor;
             set => SetProperty(ref _reportPrimaryColor, value);
+        }
+
+        public string ReportLogoPath
+        {
+            get => _reportLogoPath;
+            set => SetProperty(ref _reportLogoPath, value);
         }
 
         public string ReportPrinterName
@@ -125,6 +149,24 @@ namespace Open_lab.ViewModels
         {
             get => _receiptCopies;
             set => SetProperty(ref _receiptCopies, value);
+        }
+
+        public string InvoiceLogoPath
+        {
+            get => _invoiceLogoPath;
+            set => SetProperty(ref _invoiceLogoPath, value);
+        }
+
+        public string InvoiceCurrency
+        {
+            get => _invoiceCurrency;
+            set => SetProperty(ref _invoiceCurrency, value);
+        }
+
+        public bool InvoiceShowMedicalDetails
+        {
+            get => _invoiceShowMedicalDetails;
+            set => SetProperty(ref _invoiceShowMedicalDetails, value);
         }
 
         public string ReportPaperSize
@@ -208,7 +250,10 @@ namespace Open_lab.ViewModels
                 ReportFooter = profile.ReportFooter;
                 ReportMarginTop = profile.ReportMarginTop;
                 ReportMarginBottom = profile.ReportMarginBottom;
+                ReportMarginLeft = profile.ReportMarginLeft;
+                ReportMarginRight = profile.ReportMarginRight;
                 ReportPrimaryColor = profile.ReportPrimaryColor;
+                ReportLogoPath = profile.ReportLogoPath;
                 ReportPrinterName = profile.ReportPrinterName;
                 ReceiptPrinterName = profile.ReceiptPrinterName;
                 BarcodePrinterName = profile.BarcodePrinterName;
@@ -217,6 +262,9 @@ namespace Open_lab.ViewModels
                 ReceiptFooterText = profile.ReceiptFooterText;
                 ReceiptShowLogo = profile.ReceiptShowLogo;
                 ReceiptCopies = profile.ReceiptCopies;
+                InvoiceLogoPath = profile.InvoiceLogoPath;
+                InvoiceCurrency = profile.InvoiceCurrency;
+                InvoiceShowMedicalDetails = profile.InvoiceShowMedicalDetails;
                 ReportPaperSize = profile.ReportPaperSize;
                 DefaultAccountType = profile.DefaultAccountType;
 
@@ -243,13 +291,28 @@ namespace Open_lab.ViewModels
                     ReceiptCopies = 1;
                 }
 
+                if (ReportMarginTop < 0 || ReportMarginBottom < 0 || ReportMarginLeft < 0 || ReportMarginRight < 0)
+                {
+                    StatusMessage = "هوامش التقرير لا يمكن أن تكون سالبة.";
+                    return;
+                }
+
+                if (string.IsNullOrWhiteSpace(InvoiceCurrency))
+                {
+                    StatusMessage = "أدخل عملة الفاتورة.";
+                    return;
+                }
+
                 await _settingsService.SaveProfileAsync(new SystemSettingsProfile
                 {
                     ReportHeader = ReportHeader,
                     ReportFooter = ReportFooter,
                     ReportMarginTop = ReportMarginTop,
                     ReportMarginBottom = ReportMarginBottom,
+                    ReportMarginLeft = ReportMarginLeft,
+                    ReportMarginRight = ReportMarginRight,
                     ReportPrimaryColor = ReportPrimaryColor,
+                    ReportLogoPath = ReportLogoPath,
                     ReportPrinterName = ReportPrinterName,
                     ReceiptPrinterName = ReceiptPrinterName,
                     BarcodePrinterName = BarcodePrinterName,
@@ -258,6 +321,9 @@ namespace Open_lab.ViewModels
                     ReceiptFooterText = ReceiptFooterText,
                     ReceiptShowLogo = ReceiptShowLogo,
                     ReceiptCopies = ReceiptCopies,
+                    InvoiceLogoPath = InvoiceLogoPath,
+                    InvoiceCurrency = InvoiceCurrency,
+                    InvoiceShowMedicalDetails = InvoiceShowMedicalDetails,
                     ReportPaperSize = ReportPaperSize,
                     DefaultAccountType = DefaultAccountType
                 });

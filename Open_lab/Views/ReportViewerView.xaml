@@ -1,7 +1,8 @@
 <UserControl x:Class="Open_lab.Views.ReportViewerView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+	             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	             xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
+	             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d">
     <Grid Margin="16">
@@ -48,12 +49,14 @@
             </GroupBox>
 
             <GroupBox Header="معاينة قبل الطباعة" Margin="0,12,0,0">
-                <TextBox Text="{Binding PreviewContent}"
-                         Height="300"
-                         IsReadOnly="True"
-                         TextWrapping="Wrap"
-                         VerticalScrollBarVisibility="Auto"
-                         HorizontalScrollBarVisibility="Auto" />
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="300" />
+                    </Grid.RowDefinitions>
+                    <TextBlock Text="{Binding PreviewPdfPath}" Margin="0,0,0,6" TextWrapping="Wrap" />
+                    <wv2:WebView2 Grid.Row="1" Source="{Binding PreviewPdfUri}" />
+                </Grid>
             </GroupBox>
         </StackPanel>
     </Grid>

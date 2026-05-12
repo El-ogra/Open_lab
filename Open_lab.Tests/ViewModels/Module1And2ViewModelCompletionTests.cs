@@ -50,7 +50,7 @@ namespace Open_lab.Tests.ViewModels
             vm.LabId = "ED-VM-001";
             vm.FullName = "Edit Test";
             vm.Gender = "Male";
-            _patientMock.Setup(x => x.UpdateAsync(It.IsAny<Patient>()))
+            _patientMock.Setup(x => x.UpdateAsync(It.IsAny<Patient>(), It.IsAny<int>()))
                 .ThrowsAsync(new InvalidOperationException("update-failed"));
 
             // Act
@@ -59,7 +59,7 @@ namespace Open_lab.Tests.ViewModels
 
             // Assert
             vm.StatusMessage.Should().Contain("update-failed");
-            _patientMock.Verify(x => x.UpdateAsync(It.IsAny<Patient>()), Times.Once);
+            _patientMock.Verify(x => x.UpdateAsync(It.IsAny<Patient>(), It.IsAny<int>()), Times.Once);
             vm.StatusMessage.Should().NotBeNullOrEmpty();
         }
 

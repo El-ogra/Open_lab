@@ -60,8 +60,8 @@ namespace Open_lab.Services
                 throw new ArgumentException("PatientId is required.", nameof(visit));
             }
 
-            var patientExists = await _db.Patients.AnyAsync(p => p.PatientId == visit.PatientId);
-            if (!patientExists)
+            var patient = await _db.Patients.AsNoTracking().FirstOrDefaultAsync(p => p.PatientId == visit.PatientId);
+            if (patient == null)
             {
                 throw new InvalidOperationException("Patient not found.");
             }
@@ -71,7 +71,17 @@ namespace Open_lab.Services
                 visit.VisitDate = DateTime.Now;
             }
 
+            if (!visit.ReferralId.HasValue && patient.ReferralId.HasValue)
+            {
+                visit.ReferralId = patient.ReferralId.Value;
+            }
+
             visit.AccountType = string.IsNullOrWhiteSpace(visit.AccountType) ? "Cash" : visit.AccountType.Trim();
+            if (visit.ReferralId.HasValue && !string.Equals(visit.AccountType, "Referral", StringComparison.OrdinalIgnoreCase))
+            {
+                visit.AccountType = "Referral";
+            }
+
             if (string.Equals(visit.AccountType, "Referral", StringComparison.OrdinalIgnoreCase) && !visit.ReferralId.HasValue)
             {
                 throw new InvalidOperationException("Referral account type requires a referral.");
@@ -223,6 +233,16 @@ namespace Open_lab.Services
             if (string.Equals(visitTest.Status, "Verified", StringComparison.OrdinalIgnoreCase))
             {
                 throw new InvalidOperationException("Verified tests cannot be removed.");
+            }
+
+            var hasEnteredResult = await _db.ResultValues.AnyAsync(r =>
+                r.VisitTestId == visitTestId &&
+                (!string.IsNullOrWhiteSpace(r.Value) ||
+                 !string.IsNullOrWhiteSpace(r.Flag) ||
+                 !string.IsNullOrWhiteSpace(r.Comment)));
+            if (hasEnteredResult)
+            {
+                throw new InvalidOperationException("Tests cannot be removed after result entry.");
             }
 
             if (visitTest.Visit != null && string.Equals(visitTest.Visit.Status, VisitStatusClosed, StringComparison.OrdinalIgnoreCase))

@@ -198,16 +198,16 @@ namespace Open_lab.Tests.ViewModels
             viewModel.ResultItems.Add(new ResultEntryItem { ParameterId = 1, ParameterName = "P1", Value = "100", Flag = "N" });
             viewModel.ResultItems.Add(new ResultEntryItem { ParameterId = 2, ParameterName = "P2", Value = "200", Flag = "N" });
 
-            _resultsServiceMock.Setup(x => x.SaveResultAsync(40, 1, "100", "N", It.IsAny<string>())).Returns(Task.CompletedTask);
-            _resultsServiceMock.Setup(x => x.SaveResultAsync(40, 2, "200", "N", It.IsAny<string>())).Returns(Task.CompletedTask);
+            _resultsServiceMock.Setup(x => x.SaveResultAsync(40, 1, "100", "N", It.IsAny<string>(), It.IsAny<int>())).Returns(Task.CompletedTask);
+            _resultsServiceMock.Setup(x => x.SaveResultAsync(40, 2, "200", "N", It.IsAny<string>(), It.IsAny<int>())).Returns(Task.CompletedTask);
 
             // Act
             await viewModel.InvokePrivateAsync("SaveResultsAsync");
             await Task.Delay(100);
 
             // Assert
-            _resultsServiceMock.Verify(x => x.SaveResultAsync(40, 1, "100", "N", It.IsAny<string>()), Times.Once);
-            _resultsServiceMock.Verify(x => x.SaveResultAsync(40, 2, "200", "N", It.IsAny<string>()), Times.Once);
+            _resultsServiceMock.Verify(x => x.SaveResultAsync(40, 1, "100", "N", It.IsAny<string>(), It.IsAny<int>()), Times.Once);
+            _resultsServiceMock.Verify(x => x.SaveResultAsync(40, 2, "200", "N", It.IsAny<string>(), It.IsAny<int>()), Times.Once);
             viewModel.StatusMessage.Should().Contain("تم حفظ");
         }
 
@@ -220,7 +220,7 @@ namespace Open_lab.Tests.ViewModels
             viewModel.SelectedVisitTest = new VisitTestRow { VisitTestId = 41, TestId = 1, Status = "Verified" };
             viewModel.ResultItems.Add(new ResultEntryItem { ParameterId = 1, Value = "100" });
 
-            _resultsServiceMock.Setup(x => x.SaveResultAsync(41, 1, "100", It.IsAny<string>(), It.IsAny<string>()))
+            _resultsServiceMock.Setup(x => x.SaveResultAsync(41, 1, "100", It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>()))
                 .ThrowsAsync(new InvalidOperationException("Cannot edit verified results"));
 
             // Act
@@ -366,14 +366,14 @@ namespace Open_lab.Tests.ViewModels
             viewModel.SelectedVisitTest = new VisitTestRow { VisitTestId = 53, TestId = 1, Status = "InProgress" };
             viewModel.ResultItems.Add(new ResultEntryItem { ParameterId = 1, ParameterName = "Glucose", Value = "120", Flag = "N" });
 
-            _resultsServiceMock.Setup(x => x.SaveResultAsync(53, 1, "120", "N", It.IsAny<string>())).Returns(Task.CompletedTask);
+            _resultsServiceMock.Setup(x => x.SaveResultAsync(53, 1, "120", "N", It.IsAny<string>(), It.IsAny<int>())).Returns(Task.CompletedTask);
 
             // Act
             await viewModel.InvokePrivateAsync("SaveResultsAsync");
             await Task.Delay(100);
 
             // Assert
-            _resultsServiceMock.Verify(x => x.SaveResultAsync(53, 1, "120", "N", It.IsAny<string>()), Times.Once);
+            _resultsServiceMock.Verify(x => x.SaveResultAsync(53, 1, "120", "N", It.IsAny<string>(), It.IsAny<int>()), Times.Once);
             viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
     }

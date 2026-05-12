@@ -106,7 +106,9 @@ namespace Open_lab.Models
         public bool IsPregnant { get; set; }
         public string? Phone { get; set; }
         public string? Address { get; set; }
+        public int? ReferralId { get; set; }
 
+        public Referral? Referral { get; set; }
         public MedicalHistory? MedicalHistory { get; set; }
         public ICollection<Visit> Visits { get; set; } = new HashSet<Visit>();
     }
@@ -141,6 +143,7 @@ namespace Open_lab.Models
         public decimal CommissionPercentage { get; set; }
 
         public ICollection<Visit> Visits { get; set; } = new HashSet<Visit>();
+        public ICollection<Patient> Patients { get; set; } = new HashSet<Patient>();
         public ICollection<PriceList> PriceLists { get; set; } = new HashSet<PriceList>();
         public ICollection<ExternalLabSettlement> Settlements { get; set; } = new HashSet<ExternalLabSettlement>();
         public ICollection<ContractInvoice> ContractInvoices { get; set; } = new HashSet<ContractInvoice>();

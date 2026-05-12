@@ -1,6 +1,5 @@
 using System;
 using System.Collections.ObjectModel;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Open_lab.Models;
@@ -13,16 +12,24 @@ namespace Open_lab.ViewModels
         private readonly IReportService _reportService;
         private readonly IPrintService _printService;
         private readonly IResultsService _resultsService;
+        private readonly IReportPdfService? _reportPdfService;
         private int _visitId;
         private string _statusMessage = string.Empty;
         private VisitReportData? _report;
-        private string _previewContent = string.Empty;
+        private string _previewPdfPath = string.Empty;
+        private Uri? _previewPdfUri;
 
         public ReportViewerViewModel(IReportService reportService, IPrintService printService, IResultsService resultsService)
+            : this(reportService, printService, resultsService, null)
+        {
+        }
+
+        public ReportViewerViewModel(IReportService reportService, IPrintService printService, IResultsService resultsService, IReportPdfService? reportPdfService)
         {
             _reportService = reportService;
             _printService = printService;
             _resultsService = resultsService;
+            _reportPdfService = reportPdfService;
             Tests = new ObservableCollection<VisitTestReportItem>();
             LoadReportCommand = new RelayCommand(async _ => await LoadReportAsync());
             PrintCommand = new RelayCommand(async _ => await PrintAsync(false), _ => Report != null);
@@ -56,10 +63,18 @@ namespace Open_lab.ViewModels
 
         public ObservableCollection<VisitTestReportItem> Tests { get; }
 
-        public string PreviewContent
+        public string PreviewPdfPath
         {
-            get => _previewContent;
-            private set => SetProperty(ref _previewContent, value);
+            get => _previewPdfPath;
+            private set => SetProperty(ref _previewPdfPath, value);
+        }
+
+        public string PreviewContent => PreviewPdfPath;
+
+        public Uri? PreviewPdfUri
+        {
+            get => _previewPdfUri;
+            private set => SetProperty(ref _previewPdfUri, value);
         }
 
         public ICommand LoadReportCommand { get; }
@@ -89,9 +104,16 @@ namespace Open_lab.ViewModels
                 {
                     Tests.Add(item);
                 }
-                PreviewContent = BuildPreviewContent(report);
+                if (_reportPdfService != null)
+                {
+                    PreviewPdfPath = await _reportPdfService.GenerateVisitReportPdfAsync(report);
+                    OnPropertyChanged(nameof(PreviewContent));
+                    PreviewPdfUri = new Uri(PreviewPdfPath);
+                }
 
-                StatusMessage = "تم تحميل التقرير.";
+                StatusMessage = string.IsNullOrWhiteSpace(PreviewPdfPath)
+                    ? "تم تحميل التقرير بدون معاينة PDF."
+                    : "تم تحميل التقرير وإنشاء معاينة PDF.";
             }
             catch (Exception ex)
             {
@@ -122,37 +144,5 @@ namespace Open_lab.ViewModels
             }
         }
 
-        private static string BuildPreviewContent(VisitReportData report)
-        {
-            var builder = new StringBuilder();
-            builder.AppendLine("معاينة التقرير");
-            builder.AppendLine($"المريض: {report.Patient.FullName}");
-            builder.AppendLine($"رقم الزيارة: {report.Visit.VisitId} | التاريخ: {report.Visit.VisitDate:yyyy-MM-dd HH:mm}");
-            builder.AppendLine();
-
-            foreach (var test in report.Tests)
-            {
-                builder.AppendLine(test.Test.NameReport);
-
-                foreach (var resultItem in test.Results)
-                {
-                    var result = resultItem.Result;
-                    var line = $"{result.Parameter.Name}: {result.Value ?? "-"}";
-                    if (!string.IsNullOrWhiteSpace(result.Flag))
-                    {
-                        line += $" ({result.Flag})";
-                    }
-
-                    if (!string.IsNullOrWhiteSpace(resultItem.PreviousValue))
-                    {
-                        line += $" [السابق: {resultItem.PreviousValue} بتاريخ {resultItem.PreviousDate:yyyy-MM-dd}]";
-                    }
-
-                    builder.AppendLine($"  {line}");
-                }
-            }
-
-            return builder.ToString();
-        }
     }
 }

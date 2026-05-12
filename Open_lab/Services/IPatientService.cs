@@ -15,6 +15,8 @@ namespace Open_lab.Services
         Task<string> GenerateNextLabIdAsync(DateTime? forDate = null);
         Task<Patient> CreateAsync(Patient patient);
         Task UpdateAsync(Patient patient);
+        Task UpdateAsync(Patient patient, int userId);
+        Task AssignReferralAsync(int patientId, int? referralId, int userId);
         Task DeleteAsync(int patientId);
     }
 }
