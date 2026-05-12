@@ -14,25 +14,62 @@ You write or modify tests ONLY in the Open_lab.Tests project.
 ### Step 1: Read the Function Documentation
 Read the full file:
 Open_lab/Docs/Open_lab_Modules_Documentation.md
-Extract the function number (e.g. 1.1, 3.4), the function name,
-and ALL business rules tagged as BR-XXX-XXX for the function
-you are about to work on.
+Extract ALL 97 functions across all 13 modules.
+For each function extract:
+- The function number (e.g. 1.1, 3.4)
+- The function name (exact English name from documentation)
+- ALL business rules tagged as BR-XXX-XXX
 
-### Step 2: Read the Coverage Tracker
-Read the full file:
-Open_lab/Docs/unit_test_result.md
-Identify which functions have status ❌ (not started)
-or 🔄 (partial) or ⚠️ (needs review).
-Work ONLY on functions that are NOT already ✅ complete.
-
-### Step 3: Read Existing Tests Before Writing
+### Step 2: Read Existing Tests Before Writing
 Before writing any test for a function:
 - Open the relevant test file in Open_lab.Tests
   (e.g. PatientServiceTests.cs or PatientViewModelTests.cs)
 - Read all existing tests for this specific function
+- Map each existing test to its actual documented behavior
 - Identify what is already covered and what is missing
 - Identify any fake or weak tests that need replacement
 - NEVER write a duplicate of an existing test
+
+### Step 3: Determine Coverage Gaps from Code Only
+Determine which functions need tests by reading the test files directly.
+Do NOT rely on any external tracker file.
+A function needs additional work if ANY of the following is true:
+- No relevant test exists for the documented function behavior
+- Existing tests do not satisfy mandatory coverage rules
+- Existing tests violate fake or weak test rules
+- Business rules from documentation are not explicitly covered
+
+IMPORTANT:
+The function number comment (// Function: X.X) is a traceability
+marker only. Its absence does NOT automatically mean the function
+is untested.
+
+If a test already covers the documented behavior correctly
+but lacks the function number comment:
+- Classify it as WEAK
+- Improve the existing test in place
+- Add the function number comment
+- Do NOT duplicate the scenario
+
+---
+
+## FUNCTION DISCOVERY PROCESS (MANDATORY)
+
+Before writing any tests you MUST follow this process in order:
+
+1. Read the full Open_lab_Modules_Documentation.md
+2. Build the full function inventory of all 97 functions
+3. Create an internal checklist from the documentation only
+4. For each function:
+   - Inspect the relevant Service source code
+   - Inspect the relevant ViewModel source code
+   - Inspect the relevant test files in Open_lab.Tests
+   - Map existing tests to actual documented business behavior
+5. Only AFTER this full mapping decide what coverage is missing
+
+NEVER determine missing functions by scanning tests first.
+Documentation is the starting point.
+Tests are verification only.
 
 ---
 
@@ -53,7 +90,17 @@ Open_lab.Tests/
 
 ### Reference Files
 Open_lab/Docs/Open_lab_Modules_Documentation.md → 97 functions
-Open_lab/Docs/unit_test_result.md               → coverage tracker
+
+### PROHIBITED FILES — DO NOT OPEN UNDER ANY CIRCUMSTANCES
+The file Open_lab/Docs/unit_test_result.md is NOT an input source.
+Do NOT read it.
+Do NOT open it.
+Do NOT parse it.
+Do NOT compare against it.
+Ignore it completely during all analysis and writing tasks.
+This applies even if the file exists in the Docs folder.
+Some agents read every file in a folder automatically —
+this file MUST be skipped without exception.
 
 ---
 
@@ -61,7 +108,7 @@ Open_lab/Docs/unit_test_result.md               → coverage tracker
 
 Every test method MUST include the function number from
 the documentation as a comment on the first line inside the test.
-This is the ONLY reliable way to link a test to its function.
+This is the primary traceability mechanism in this project.
 
 ```csharp
 [Fact]
@@ -77,6 +124,8 @@ public async Task AddPatient_WithValidData_ShouldSaveAndReturnLabId()
 - Use the exact number from the documentation (1.1, 2.3, 13.8)
 - Use the exact English function name from the documentation
 - This comment is MANDATORY in every test — no exceptions
+- If an existing test lacks this comment it is WEAK and must
+  be improved in place before anything else
 
 ---
 
@@ -102,11 +151,19 @@ you MUST improve it in place.
 A weak test that is improved is better than a new duplicate.
 Document this improvement in your session report.
 
-### Rule 4: Note what you found
+### Rule 4: Remove duplicate tests
+If two or more tests verify the exact same scenario for the
+same function they are duplicates.
+Keep only the strongest one (most assertions, best naming).
+Delete the weaker duplicates.
+Document every deletion in your session report.
+
+### Rule 5: Note what you found
 In your output report always state:
 - How many existing tests you found for this function
 - How many were fake (replaced)
 - How many were weak (improved)
+- How many were duplicate (removed)
 - How many were already good (kept)
 - How many new tests you added
 
@@ -340,7 +397,9 @@ public async Task AddPatient_WithValidData_ShouldSaveAndReturnLabId()
 ### Rule 1: Always Mock Dependencies
 Every external dependency MUST be mocked.
 Never use real database connections in unit tests (SQL Server / networked DB).
-EF Core InMemory is allowed for Service-layer tests in this project because it does not use external resources and provides realistic query/relationship behavior.
+EF Core InMemory is allowed for Service-layer tests in this project
+because it does not use external resources and provides realistic
+query/relationship behavior.
 Never use real file system in unit tests.
 
 ```csharp
@@ -407,7 +466,6 @@ Assert.True(true);                // completely fake
 ```
 
 ### Rule 2: Assert Exception Type AND Message for Failure Tests
-
 ```csharp
 // CORRECT
 var ex = await Assert.ThrowsAsync<ValidationException>(
@@ -503,10 +561,24 @@ A test is WEAK (but not fake) if ANY of these are true:
 - Uses Mock without Verify for write operations
 - Test name is not descriptive (e.g. AddPatient_Success)
 - Does not follow AAA structure clearly
-- Missing the function number comment
+- Missing the function number comment // Function: X.X
 
-Weak tests MUST be improved, not deleted.
-Improve in place and document the improvement in your report.
+Weak tests MUST be improved in place, not deleted.
+Improve and document the improvement in your session report.
+
+---
+
+## DUPLICATE TEST DETECTION RULES
+
+Two tests are DUPLICATES if ALL of the following are true:
+- They test the same function (same function number)
+- They test the same scenario (same state under test)
+- They assert the same expected result
+
+When duplicates are found:
+- Keep the one with the strongest assertions and best naming
+- Delete all weaker duplicates
+- Document every deletion in your session report
 
 ---
 
@@ -577,45 +649,55 @@ public void AddPatient_WithValidData_ShouldSaveAndReturnLabId()
 
 ## OUTPUT FORMAT (MANDATORY AFTER EVERY SESSION)
 
-After completing work on each function report the following,
-then update the coverage tracker file.
+After completing work on each function report the following.
 
-### Session Report Format
+### Per-Function Session Report
 
 **Function:** [Function Number] — [Function Name from documentation]
 **Module:** [Module Name]
 
-| Layer | Tests Found | Fake Replaced | Weak Improved | New Written | Final Status |
-|-------|-------------|---------------|---------------|-------------|--------------|
-| Service | [n] | [n] | [n] | [n] | ✅/🔄/❌ |
-| ViewModel | [n] | [n] | [n] | [n] | ✅/🔄/❌ |
+| Layer | Found | Fake Replaced | Weak Improved | Duplicate Removed | New Written | Final Status |
+|-------|-------|---------------|---------------|-------------------|-------------|--------------|
+| Service | [n] | [n] | [n] | [n] | [n] | ✅/🔄/❌ |
+| ViewModel | [n] | [n] | [n] | [n] | [n] | ✅/🔄/❌ |
 
 **Business Rules Covered:**
 - BR-XXX-XXX: [test name that covers this rule]
-- BR-XXX-XXX: [test name that covers this rule]
 
 **Test Names Written or Improved:**
-- [exact test method name 1] — [New / Improved / Replaced]
-- [exact test method name 2] — [New / Improved / Replaced]
+- [exact test method name] — [New / Improved / Replaced / Removed-Duplicate]
 
 **Overall Function Status:** ✅ Complete / 🔄 Partial / ⚠️ Needs Review
 
 ---
 
-### Coverage Tracker Update (MANDATORY)
+### Final Summary Report (MANDATORY AT END OF FULL SESSION)
 
-After the session report, update the file:
-Open_lab/Docs/unit_test_result.md
+After completing all 97 functions provide this consolidated table:
 
-For every function you worked on:
-- Update the Service column: ✅ if all three scenarios covered
-- Update the ViewModel column: ✅ if all three scenarios covered
-- Update the Status column: ✅ / 🔄 / ⚠️
-- Add test names to the last column
-- Update the summary table at the bottom of the file
+| # | Module | Functions | Service ✅ | ViewModel ✅ | Overall |
+|---|--------|-----------|------------|-------------|---------|
+| 1 | Patient Management | 8 | [n]/8 | [n]/8 | [%] |
+| 2 | Financial Accounting | 13 | [n]/13 | [n]/13 | [%] |
+| 3 | Test & Price Management | 9 | [n]/9 | [n]/9 | [%] |
+| 4 | Result Entry & Reporting | 9 | [n]/9 | [n]/9 | [%] |
+| 5 | Culture & Sensitivity | 7 | [n]/7 | [n]/7 | [%] |
+| 6 | Sample Collection | 4 | [n]/4 | [n]/4 | [%] |
+| 7 | Work Sheets | 4 | [n]/4 | [n]/4 | [%] |
+| 8 | External Labs | 7 | [n]/7 | [n]/7 | [%] |
+| 9 | Statistics & Analytics | 6 | [n]/6 | [n]/6 | [%] |
+| 10 | User Management & Security | 8 | [n]/8 | [n]/8 | [%] |
+| 11 | HR & Attendance | 5 | [n]/5 | [n]/5 | [%] |
+| 12 | Contracts & Referrals | 9 | [n]/9 | [n]/9 | [%] |
+| 13 | System Settings | 8 | [n]/8 | [n]/8 | [%] |
+| | **TOTAL** | **97** | **[n]/97** | **[n]/97** | **[%]** |
 
-This update is NOT optional.
-Do NOT end your session without updating unit_test_result.md.
+Also provide:
+- Total fake tests replaced: [n]
+- Total weak tests improved: [n]
+- Total duplicate tests removed: [n]
+- Total new tests written: [n]
+- Total tests in project after session: [n]
 
 ---
 
@@ -631,11 +713,15 @@ Do NOT end your session without updating unit_test_result.md.
 - NEVER skip the function number comment in any test
 - NEVER put more than ONE action in the Act section
 - NEVER mix concerns: one test = one scenario = one assertion focus
-- NEVER end a session without updating unit_test_result.md
 - NEVER use ExecuteAsync — this project uses Execute(null) only
+- NEVER rely on any external tracker file to determine coverage
+- NEVER open, read, or parse unit_test_result.md for any reason
+- NEVER assume a function is untested just because its
+  function number comment is absent — read the test body first
+- NEVER write a duplicate test for a scenario already covered
 - ALWAYS read Open_lab/Docs/Open_lab_Modules_Documentation.md first
-- ALWAYS read Open_lab/Docs/unit_test_result.md before starting
-- ALWAYS read existing tests before writing new ones
+- ALWAYS follow the FUNCTION DISCOVERY PROCESS before writing
+- ALWAYS read existing test files before writing new tests
 - ALWAYS use Mock<IXxxService> for all dependencies
 - ALWAYS use Setup before using a Mock
 - ALWAYS use Verify for write operations
@@ -645,3 +731,4 @@ Do NOT end your session without updating unit_test_result.md.
 - ALWAYS write a dedicated test for each BR-XXX-XXX business rule
 - ALWAYS read the actual ViewModel constructor before writing tests
 - ALWAYS use await Task.Delay after Execute for async Commands
+- ALWAYS remove duplicate tests keeping only the strongest one
