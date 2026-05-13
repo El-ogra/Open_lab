@@ -1,0 +1,84 @@
+<UserControl x:Class="Open_lab.Views.WelcomeView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             FlowDirection="RightToLeft">
+    <Grid Background="#F7FAF7">
+        <TextBlock Text="MS SQL SERVER"
+                   HorizontalAlignment="Left"
+                   VerticalAlignment="Top"
+                   Margin="24"
+                   Foreground="#4F5F5C"
+                   FontSize="16"
+                   FontWeight="SemiBold"
+                   FlowDirection="LeftToRight" />
+
+        <Canvas Width="520"
+                Height="360"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center">
+            <Ellipse Width="260"
+                     Height="260"
+                     Canvas.Left="130"
+                     Canvas.Top="25"
+                     Fill="#1F4D3A"
+                     Opacity="0.96" />
+            <TextBlock Text="☘"
+                       Canvas.Left="214"
+                       Canvas.Top="91"
+                       FontSize="78"
+                       Foreground="#DDEFE4"
+                       FlowDirection="LeftToRight" />
+
+            <Ellipse Width="170"
+                     Height="170"
+                     Canvas.Left="64"
+                     Canvas.Top="145"
+                     Fill="#2C6B4F"
+                     Opacity="0.94" />
+            <TextBlock Text="Open"
+                       Canvas.Left="106"
+                       Canvas.Top="203"
+                       FontSize="30"
+                       FontWeight="Bold"
+                       Foreground="White"
+                       FlowDirection="LeftToRight" />
+
+            <Ellipse Width="150"
+                     Height="150"
+                     Canvas.Left="255"
+                     Canvas.Top="145"
+                     Fill="#3E7E58"
+                     Opacity="0.94" />
+            <TextBlock Text="Lab"
+                       Canvas.Left="310"
+                       Canvas.Top="197"
+                       FontSize="30"
+                       FontWeight="Bold"
+                       Foreground="White"
+                       FlowDirection="LeftToRight" />
+
+            <Ellipse Width="120"
+                     Height="120"
+                     Canvas.Left="205"
+                     Canvas.Top="220"
+                     Fill="#5C9A68"
+                     Opacity="0.96" />
+            <TextBlock Text="Sys"
+                       Canvas.Left="247"
+                       Canvas.Top="260"
+                       FontSize="25"
+                       FontWeight="Bold"
+                       Foreground="White"
+                       FlowDirection="LeftToRight" />
+        </Canvas>
+
+        <TextBlock Text="Open Lab System"
+                   HorizontalAlignment="Right"
+                   VerticalAlignment="Bottom"
+                   Margin="24"
+                   Foreground="#41624C"
+                   FontSize="16"
+                   FontWeight="SemiBold"
+                   FlowDirection="LeftToRight" />
+    </Grid>
+</UserControl>

@@ -11,6 +11,12 @@ namespace Open_lab.ViewModels
         private readonly INavigationService _navigationService;
         private readonly IAttendanceService _attendanceService;
         private readonly IMainWindowLayoutService _windowLayoutService;
+        private object _currentView = new WelcomeViewModel();
+        private string _currentUser = string.Empty;
+        private string _lastLoginDate = string.Empty;
+        private string _currentDate = System.DateTime.Now.ToString("yyyy/MM/dd");
+        private string _activeModule = string.Empty;
+        private System.Action? _logoutRequested;
         private bool _isLoggedIn;
 
         public MainViewModel(
@@ -63,12 +69,53 @@ namespace Open_lab.ViewModels
             NavigateUserActivityLogCommand = new RelayCommand(_ => NavigateTo(NavigationTarget.UserActivityLog), _ => CanNavigate(PermissionCodes.UsersView));
             NavigateSystemUsageMonitorCommand = new RelayCommand(_ => NavigateTo(NavigationTarget.SystemUsageMonitor), _ => CanNavigate(PermissionCodes.UsersView));
 
+            NavigateToPatientsCommand = new RelayCommand(_ => NavigateTopModule("المرضى"));
+            NavigateToToolsCommand = new RelayCommand(_ => NavigateTopModule("أدوات"));
+            NavigateToWorksheetCommand = new RelayCommand(_ => NavigateTopModule("ورقة عمل"));
+            NavigateToAccountsCommand = new RelayCommand(_ => NavigateTopModule("حسابات"));
+            NavigateToStatisticsCommand = new RelayCommand(_ => NavigateTopModule("احصاليات"));
+            NavigateToUsersCommand = new RelayCommand(_ => NavigateTopModule("المستخدمين"));
+            NavigateToSystemDataCommand = new RelayCommand(_ => NavigateTopModule("بيانات النظام"));
+            NavigateToSettingsCommand = new RelayCommand(_ => NavigateTopModule("اعدادات"));
+            NavigateToEmployeesCommand = new RelayCommand(_ => NavigateTopModule("الموظفين"));
+            NavigateToDidYouKnowCommand = new RelayCommand(_ => NavigateTopModule("هل تعلم"));
+            NavigateToAboutCommand = new RelayCommand(_ => NavigateTopModule("نبذة"));
             LogoutCommand = new RelayCommand(async _ => await LogoutAsync(), _ => IsLoggedIn);
 
             ShowLogin();
         }
 
         public BaseViewModel CurrentViewModel => _navigationService.CurrentViewModel;
+
+        public object CurrentView
+        {
+            get => _currentView;
+            private set => SetProperty(ref _currentView, value);
+        }
+
+        public string CurrentUser
+        {
+            get => _currentUser;
+            private set => SetProperty(ref _currentUser, value);
+        }
+
+        public string LastLoginDate
+        {
+            get => _lastLoginDate;
+            private set => SetProperty(ref _lastLoginDate, value);
+        }
+
+        public string CurrentDate
+        {
+            get => _currentDate;
+            private set => SetProperty(ref _currentDate, value);
+        }
+
+        public string ActiveModule
+        {
+            get => _activeModule;
+            private set => SetProperty(ref _activeModule, value);
+        }
 
         public bool IsLoggedIn
         {
@@ -120,7 +167,30 @@ namespace Open_lab.ViewModels
         public ICommand NavigateContractInvoiceCommand { get; }
         public ICommand NavigateUserActivityLogCommand { get; }
         public ICommand NavigateSystemUsageMonitorCommand { get; }
+        public ICommand NavigateToPatientsCommand { get; }
+        public ICommand NavigateToToolsCommand { get; }
+        public ICommand NavigateToWorksheetCommand { get; }
+        public ICommand NavigateToAccountsCommand { get; }
+        public ICommand NavigateToStatisticsCommand { get; }
+        public ICommand NavigateToUsersCommand { get; }
+        public ICommand NavigateToSystemDataCommand { get; }
+        public ICommand NavigateToSettingsCommand { get; }
+        public ICommand NavigateToEmployeesCommand { get; }
+        public ICommand NavigateToDidYouKnowCommand { get; }
+        public ICommand NavigateToAboutCommand { get; }
         public ICommand LogoutCommand { get; }
+
+        public void InitializeAfterLogin(string currentUser, string lastLoginDate, System.Action? onLogoutRequested = null)
+        {
+            CurrentUser = currentUser;
+            LastLoginDate = lastLoginDate;
+            CurrentDate = System.DateTime.Now.ToString("yyyy/MM/dd");
+            ActiveModule = string.Empty;
+            CurrentView = new WelcomeViewModel();
+            _logoutRequested = onLogoutRequested;
+            IsLoggedIn = true;
+            _windowLayoutService.ApplyAppLayout();
+        }
 
         private void ShowLogin()
         {
@@ -145,6 +215,12 @@ namespace Open_lab.ViewModels
             _navigationService.Navigate(target);
         }
 
+        private void NavigateTopModule(string moduleName)
+        {
+            ActiveModule = moduleName;
+            CurrentView = new WelcomeViewModel(moduleName);
+        }
+
         private bool CanNavigate(string permissionCode)
         {
             return IsLoggedIn && AppSession.HasPermission(permissionCode);
@@ -153,6 +229,16 @@ namespace Open_lab.ViewModels
         private async Task LogoutAsync()
         {
             await CloseAttendanceAsync();
+            if (_logoutRequested != null)
+            {
+                AppSession.Clear();
+                IsLoggedIn = false;
+                ActiveModule = string.Empty;
+                CurrentView = new WelcomeViewModel();
+                _logoutRequested.Invoke();
+                return;
+            }
+
             ShowLogin();
         }
 
@@ -225,6 +311,17 @@ namespace Open_lab.ViewModels
             (NavigateContractInvoiceCommand as RelayCommand)?.RaiseCanExecuteChanged();
             (NavigateUserActivityLogCommand as RelayCommand)?.RaiseCanExecuteChanged();
             (NavigateSystemUsageMonitorCommand as RelayCommand)?.RaiseCanExecuteChanged();
+            (NavigateToPatientsCommand as RelayCommand)?.RaiseCanExecuteChanged();
+            (NavigateToToolsCommand as RelayCommand)?.RaiseCanExecuteChanged();
+            (NavigateToWorksheetCommand as RelayCommand)?.RaiseCanExecuteChanged();
+            (NavigateToAccountsCommand as RelayCommand)?.RaiseCanExecuteChanged();
+            (NavigateToStatisticsCommand as RelayCommand)?.RaiseCanExecuteChanged();
+            (NavigateToUsersCommand as RelayCommand)?.RaiseCanExecuteChanged();
+            (NavigateToSystemDataCommand as RelayCommand)?.RaiseCanExecuteChanged();
+            (NavigateToSettingsCommand as RelayCommand)?.RaiseCanExecuteChanged();
+            (NavigateToEmployeesCommand as RelayCommand)?.RaiseCanExecuteChanged();
+            (NavigateToDidYouKnowCommand as RelayCommand)?.RaiseCanExecuteChanged();
+            (NavigateToAboutCommand as RelayCommand)?.RaiseCanExecuteChanged();
             (LogoutCommand as RelayCommand)?.RaiseCanExecuteChanged();
         }
     }
