@@ -8,6 +8,9 @@ using Open_lab.ViewModels.SystemData;
 using Open_lab.ViewModels.Accounts;
 using Open_lab.ViewModels.Worksheet;
 using Open_lab.ViewModels.Statistics;
+using Open_lab.ViewModels.Settings;
+using Open_lab.ViewModels.Tools;
+using Open_lab.ViewModels.Users;
 using Open_lab.Views.Shared;
 
 namespace Open_lab.ViewModels
@@ -77,13 +80,13 @@ namespace Open_lab.ViewModels
             NavigateSystemUsageMonitorCommand = new RelayCommand(_ => NavigateTo(NavigationTarget.SystemUsageMonitor), _ => CanNavigate(PermissionCodes.UsersView));
 
             NavigateToPatientsCommand = new RelayCommand(_ => NavigateToPatientsModule());
-            NavigateToToolsCommand = new RelayCommand(_ => NavigateTopModule("أدوات"));
+            NavigateToToolsCommand = new RelayCommand(_ => NavigateToToolsModule());
             NavigateToWorksheetCommand = new RelayCommand(_ => NavigateToWorksheetModule());
             NavigateToAccountsCommand = new RelayCommand(_ => NavigateToAccountsModule());
             NavigateToStatisticsCommand = new RelayCommand(_ => NavigateToStatisticsModule());
-            NavigateToUsersCommand = new RelayCommand(_ => NavigateTopModule("المستخدمين"));
+            NavigateToUsersCommand = new RelayCommand(_ => NavigateToUsersModule());
             NavigateToSystemDataCommand = new RelayCommand(_ => NavigateToSystemDataModule());
-            NavigateToSettingsCommand = new RelayCommand(_ => NavigateTopModule("اعدادات"));
+            NavigateToSettingsCommand = new RelayCommand(_ => NavigateToSettingsModule());
             NavigateToEmployeesCommand = new RelayCommand(_ => NavigateTopModule("الموظفين"));
             NavigateToDidYouKnowCommand = new RelayCommand(_ => NavigateTopModule("هل تعلم"));
             NavigateToAboutCommand = new RelayCommand(_ => NavigateTopModule("نبذة"));
@@ -271,6 +274,27 @@ namespace Open_lab.ViewModels
             CurrentView = new StatisticsModuleViewModel(OpenPlaceholder);
         }
 
+        private void NavigateToSettingsModule()
+        {
+            ActiveModule = "اعدادات";
+            IsToolbarVisible = true;
+            CurrentView = new SettingsModuleViewModel(OpenPlaceholder);
+        }
+
+        private void NavigateToToolsModule()
+        {
+            ActiveModule = "أدوات";
+            IsToolbarVisible = true;
+            CurrentView = new ToolsModuleViewModel(OpenPlaceholder);
+        }
+
+        private void NavigateToUsersModule()
+        {
+            ActiveModule = "المستخدمين";
+            IsToolbarVisible = true;
+            CurrentView = new UsersModuleViewModel(OpenPlaceholder);
+        }
+
         private void OpenPlaceholder(string functionTitle)
         {
             IsToolbarVisible = false;
@@ -308,6 +332,24 @@ namespace Open_lab.ViewModels
             if (ActiveModule == "احصاليات")
             {
                 CurrentView = new StatisticsModuleViewModel(OpenPlaceholder);
+                return;
+            }
+
+            if (ActiveModule == "اعدادات")
+            {
+                CurrentView = new SettingsModuleViewModel(OpenPlaceholder);
+                return;
+            }
+
+            if (ActiveModule == "أدوات")
+            {
+                CurrentView = new ToolsModuleViewModel(OpenPlaceholder);
+                return;
+            }
+
+            if (ActiveModule == "المستخدمين")
+            {
+                CurrentView = new UsersModuleViewModel(OpenPlaceholder);
                 return;
             }
 
