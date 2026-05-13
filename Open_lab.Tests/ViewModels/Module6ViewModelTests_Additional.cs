@@ -389,7 +389,7 @@ namespace Open_lab.Tests
         [Fact]
         public async Task MarkCollected_Followed_By_MarkSeparated_Should_Update_Status_SuccessGuard()
         {
-            // Function: 6.1 + 6.2 — Complete Collection Then Separation
+            // Function: 6.2 — Record Sample Separation
             // Arrange
             // Act
             _viewModel.SelectedRow = new SampleCollectionRow { VisitTestId = 500 };

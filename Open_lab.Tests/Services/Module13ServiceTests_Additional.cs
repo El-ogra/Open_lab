@@ -768,7 +768,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task SaveSettingAsync_WithExistingKey_ShouldUpdateNotInsertDuplicate_SuccessGuard()
         {
-            // Function: 13.x — Generic Settings (used across 13.1-13.6)
+            // Function: 13.6 — Set Invoice Settings
             // Arrange
             await _systemSettingsService.SaveSettingAsync("Test.Key", "Initial");
 
@@ -784,7 +784,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task DeleteSettingAsync_WithExistingKey_ShouldRemoveRow_SuccessGuard()
         {
-            // Function: 13.x — Generic Settings
+            // Function: 13.6 — Set Invoice Settings
             // Arrange
             await _systemSettingsService.SaveSettingAsync("ToBeDeleted", "value");
 
@@ -798,7 +798,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task GetSettingsAsync_WithMultipleKeys_ShouldReturnAllOrderedByKey_SuccessGuard()
         {
-            // Function: 13.x — Generic Settings
+            // Function: 13.6 — Set Invoice Settings
             // Arrange
             await _systemSettingsService.SaveSettingAsync("ZKey", "Z");
             await _systemSettingsService.SaveSettingAsync("AKey", "A");

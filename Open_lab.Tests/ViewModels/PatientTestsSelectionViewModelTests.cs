@@ -124,6 +124,74 @@ namespace Open_lab.Tests.ViewModels
         }
 
         [Fact]
+        public async Task RegisterPatientForExternalTest_WithSendOutTest_ShouldCallVisitServiceAndSyncInvoice()
+        {
+            // Function: 8.2 — Register Patient for External Test
+            // Arrange
+            _viewModel.InvokePrivate("set_VisitId", 120);
+            var externalTest = new Test { TestId = 88, Code = "EXT-88", NameReport = "External Test", NameReceipt = "External Test", Price = 150m, IsSendOut = true };
+            var visitTest = new VisitTest { VisitTestId = 880, VisitId = 120, TestId = 88, Price = 150m, Test = externalTest };
+            _viewModel.SelectedAvailableTest = externalTest;
+
+            _visitServiceMock
+                .Setup(service => service.AddTestToVisitAsync(120, 88, It.IsAny<decimal?>()))
+                .ReturnsAsync(visitTest);
+            _visitServiceMock
+                .Setup(service => service.GetVisitTestsAsync(120))
+                .ReturnsAsync(new List<VisitTest> { visitTest });
+            _invoiceServiceMock
+                .Setup(service => service.CreateOrUpdateInvoiceAsync(120, It.IsAny<decimal>(), It.IsAny<decimal>()))
+                .ReturnsAsync(new Invoice { InvoiceId = 80, VisitId = 120, Total = 150m, NetTotal = 150m, Balance = 150m });
+
+            // Act
+            _viewModel.AddTestCommand.Execute(null);
+            await Task.Delay(100);
+
+            // Assert
+            _visitServiceMock.Verify(service => service.AddTestToVisitAsync(120, 88, It.IsAny<decimal?>()), Times.Once);
+            _invoiceServiceMock.Verify(service => service.CreateOrUpdateInvoiceAsync(120, It.IsAny<decimal>(), It.IsAny<decimal>()), Times.Once);
+            _viewModel.SelectedTests.Should().ContainSingle(item => item.VisitTestId == 880 && item.TestName == "External Test");
+            _viewModel.TotalAmount.Should().Be(150m);
+        }
+
+        [Fact]
+        public async Task RegisterPatientForExternalTest_WhenVisitServiceRejectsSendOutTest_ShouldSetErrorMessage()
+        {
+            // Function: 8.2 — Register Patient for External Test
+            // Arrange
+            _viewModel.InvokePrivate("set_VisitId", 121);
+            var externalTest = new Test { TestId = 89, Code = "EXT-89", NameReport = "Rejected External", NameReceipt = "Rejected External", Price = 175m, IsSendOut = true };
+            _viewModel.SelectedAvailableTest = externalTest;
+
+            _visitServiceMock
+                .Setup(service => service.AddTestToVisitAsync(121, 89, It.IsAny<decimal?>()))
+                .ThrowsAsync(new InvalidOperationException("external queue failed"));
+
+            // Act
+            _viewModel.AddTestCommand.Execute(null);
+            await Task.Delay(100);
+
+            // Assert
+            _visitServiceMock.Verify(service => service.AddTestToVisitAsync(121, 89, It.IsAny<decimal?>()), Times.Once);
+            _viewModel.StatusMessage.Should().Contain("external queue failed");
+        }
+
+        [Fact]
+        public void RegisterPatientForExternalTest_WithoutOpenVisit_ShouldDisableAddCommand()
+        {
+            // Function: 8.2 — Register Patient for External Test
+            // Arrange
+            _viewModel.InvokePrivate("set_VisitId", 0);
+            _viewModel.SelectedAvailableTest = new Test { TestId = 90, Code = "EXT-90", IsSendOut = true };
+
+            // Act
+            var canExecute = _viewModel.AddTestCommand.CanExecute(null);
+
+            // Assert
+            canExecute.Should().BeFalse();
+        }
+
+        [Fact]
         public async Task RemoveTestCommand_Should_Remove_Test_LogicGuard()
         {
             // Function: 1.4 — Delete Tests

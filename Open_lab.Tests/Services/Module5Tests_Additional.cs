@@ -440,7 +440,7 @@ namespace Open_lab.Tests
         [Fact]
         public async Task GetFilteredAntibioticsAsync_Combined_Filter_Pregnant_And_Child_Should_Apply_Both_SuccessGuard()
         {
-            // Function: 5.5 & 5.6 — Combined Filter (BR-MED-006, BR-MED-007)
+            // Function: 5.5 — Filter Pregnancy Antibiotics
             // Production rule: child filter is applied when patient.Age < 12.
             // Arrange - Pregnant child patient (under 12) so BOTH filters apply.
             var safe = await _service.CreateAntibioticAsync(new Antibiotic

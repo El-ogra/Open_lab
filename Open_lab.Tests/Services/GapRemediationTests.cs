@@ -27,8 +27,10 @@ namespace Open_lab.Tests.Services
         }
 
         [Fact]
-        public async Task PatientUpdate_WithUserId_Should_Write_AuditLog()
+        public async Task EditPatientData_WithUserId_ShouldWriteAuditLog()
         {
+            // Function: 1.2 — Edit Patient Data
+            // Arrange
             var user = new User { Username = "auditor", PasswordHash = "hash", Salt = "salt", IsActive = true };
             var patient = new Patient { LabId = "P-AUD-1", FullName = "Old", Gender = "Male" };
             _db.Users.Add(user);
@@ -36,6 +38,8 @@ namespace Open_lab.Tests.Services
             await _db.SaveChangesAsync();
 
             var service = new PatientService(_db);
+
+            // Act
             await service.UpdateAsync(new Patient
             {
                 PatientId = patient.PatientId,
@@ -44,6 +48,7 @@ namespace Open_lab.Tests.Services
                 Gender = "Female"
             }, user.UserId);
 
+            // Assert
             var audit = await _db.AuditLogs.SingleAsync(a => a.Action == "EDIT_PATIENT");
             audit.UserId.Should().Be(user.UserId);
             audit.OldValues.Should().Contain("FullName=Old");
@@ -51,8 +56,10 @@ namespace Open_lab.Tests.Services
         }
 
         [Fact]
-        public async Task RemoveVisitTestAsync_WithEnteredResult_Should_Throw()
+        public async Task DeleteTests_WithEnteredResult_ShouldThrowInvalidOperation()
         {
+            // Function: 1.4 — Delete Tests
+            // Arrange
             var patient = new Patient { LabId = "P-DEL-1", FullName = "Patient", Gender = "Male" };
             var test = new Test { Code = "T-DEL", NameReport = "Delete Guard", NameReceipt = "Delete Guard", Price = 10 };
             _db.Patients.Add(patient);
@@ -73,14 +80,19 @@ namespace Open_lab.Tests.Services
             await _db.SaveChangesAsync();
 
             var service = new VisitService(_db);
+
+            // Act
             Func<Task> act = async () => await service.RemoveVisitTestAsync(visitTest.VisitTestId);
 
+            // Assert
             await act.Should().ThrowAsync<InvalidOperationException>().WithMessage("*result entry*");
         }
 
         [Fact]
-        public async Task SaveResultAsync_EditWithUserId_Should_Write_AuditLog_ForValueFlagAndComment()
+        public async Task EditResults_WithUserId_ShouldWriteAuditLogForValueFlagAndComment()
         {
+            // Function: 4.3 — Edit Results
+            // Arrange
             var user = new User { Username = "result-user", PasswordHash = "hash", Salt = "salt", IsActive = true };
             var patient = new Patient { LabId = "P-RES-1", FullName = "Patient", Gender = "Male" };
             var test = new Test { Code = "T-RES", NameReport = "Result Audit", NameReceipt = "Result Audit", Price = 10 };
@@ -101,8 +113,11 @@ namespace Open_lab.Tests.Services
 
             var service = new ResultsService(_db);
             await service.SaveResultAsync(visitTest.VisitTestId, parameter.ParameterId, "10", "N", "Initial", user.UserId);
+
+            // Act
             await service.SaveResultAsync(visitTest.VisitTestId, parameter.ParameterId, "12", "H", "Changed", user.UserId);
 
+            // Assert
             var audit = await _db.AuditLogs.SingleAsync(a => a.Action == "EDIT_RESULT");
             audit.UserId.Should().Be(user.UserId);
             audit.OldValues.Should().Contain("Value=10").And.Contain("Flag=N").And.Contain("Comment=Initial");
@@ -110,8 +125,10 @@ namespace Open_lab.Tests.Services
         }
 
         [Fact]
-        public async Task VisitCreateAsync_Should_Use_PatientReferral_When_NoVisitReferralProvided()
+        public async Task AssignPatientToContract_WithPatientReferral_ShouldApplyReferralToNewVisit()
         {
+            // Function: 12.5 — Assign Patient to Contract
+            // Arrange
             var referral = new Referral { Name = "Contract A", ReferralType = "Contract" };
             var patient = new Patient { LabId = "P-CON-1", FullName = "Patient", Gender = "Male", Referral = referral };
             _db.Referrals.Add(referral);
@@ -119,17 +136,23 @@ namespace Open_lab.Tests.Services
             await _db.SaveChangesAsync();
 
             var service = new VisitService(_db);
+
+            // Act
             var visit = await service.CreateAsync(new Visit { PatientId = patient.PatientId, VisitDate = DateTime.Now });
 
+            // Assert
             visit.ReferralId.Should().Be(referral.ReferralId);
             visit.AccountType.Should().Be("Referral");
         }
 
         [Fact]
-        public async Task SystemSettingsProfile_Should_Save_And_Load_ReportAndInvoiceCompletionFields()
+        public async Task ConfigureHeaderFooter_WithProfileFields_ShouldPersistReportAndInvoiceSettings()
         {
+            // Function: 13.3 — Configure Header/Footer
+            // Arrange
             var service = new SystemSettingsService(_db);
 
+            // Act
             await service.SaveProfileAsync(new SystemSettingsProfile
             {
                 ReportHeader = "Header",
@@ -149,6 +172,9 @@ namespace Open_lab.Tests.Services
 
             var loaded = await service.GetProfileAsync();
 
+            // Assert
+            loaded.ReportHeader.Should().Be("Header");
+            loaded.ReportFooter.Should().Be("Footer");
             loaded.ReportMarginLeft.Should().Be(3);
             loaded.ReportMarginRight.Should().Be(4);
             loaded.ReportLogoPath.Should().Be(@"C:\logo-report.png");

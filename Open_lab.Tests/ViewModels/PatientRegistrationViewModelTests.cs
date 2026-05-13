@@ -500,6 +500,109 @@ namespace Open_lab.Tests.ViewModels
         }
 
         [Fact]
+        public async Task AssignPatientToContract_WithSelectedReferral_ShouldPassReferralIdToUpdate()
+        {
+            // Function: 12.5 — Assign Patient to Contract
+            // Arrange
+            var catalogMock = new Mock<ITestCatalogService>();
+            var referral = new Referral { ReferralId = 12, Name = "Contract Entity", ReferralType = "Company" };
+            catalogMock.Setup(x => x.GetReferralsAsync()).ReturnsAsync(new List<Referral> { referral });
+            _patientServiceMock.Setup(x => x.GenerateNextLabIdAsync(It.IsAny<DateTime?>())).ReturnsAsync("LAB-CON-001");
+
+            var viewModel = new PatientRegistrationViewModel(_patientServiceMock.Object, catalogMock.Object);
+            await Task.Delay(100);
+            viewModel.InvokePrivate("set_PatientId", 700);
+            viewModel.LabId = "LAB-700";
+            viewModel.FullName = "Contract Patient";
+            viewModel.Gender = "Male";
+            viewModel.SelectedReferral = referral;
+
+            Patient? capturedPatient = null;
+            _patientServiceMock
+                .Setup(x => x.UpdateAsync(It.IsAny<Patient>(), It.IsAny<int>()))
+                .Callback<Patient, int>((patient, _) => capturedPatient = patient)
+                .Returns(Task.CompletedTask);
+            _patientServiceMock
+                .Setup(x => x.SaveMedicalHistoryAsync(700, It.IsAny<MedicalHistory>()))
+                .Returns(Task.CompletedTask);
+
+            // Act
+            viewModel.SaveCommand.Execute(null);
+            await Task.Delay(100);
+
+            // Assert
+            _patientServiceMock.Verify(x => x.UpdateAsync(It.IsAny<Patient>(), It.IsAny<int>()), Times.Once);
+            capturedPatient.Should().NotBeNull();
+            capturedPatient!.ReferralId.Should().Be(12);
+            viewModel.StatusMessage.Should().Contain("تم تحديث بيانات المريض");
+        }
+
+        [Fact]
+        public async Task AssignPatientToContract_WhenServiceRejectsReferral_ShouldShowErrorMessage()
+        {
+            // Function: 12.5 — Assign Patient to Contract
+            // Arrange
+            var rejectedReferral = new Referral { ReferralId = 99, Name = "Rejected Contract", ReferralType = "Company" };
+            var catalogMock = new Mock<ITestCatalogService>();
+            catalogMock.Setup(x => x.GetReferralsAsync()).ReturnsAsync(new List<Referral> { rejectedReferral });
+
+            var viewModel = new PatientRegistrationViewModel(_patientServiceMock.Object, catalogMock.Object);
+            await Task.Delay(100);
+            viewModel.InvokePrivate("set_PatientId", 701);
+            viewModel.LabId = "LAB-701";
+            viewModel.FullName = "Rejected Patient";
+            viewModel.Gender = "Female";
+            viewModel.SelectedReferral = rejectedReferral;
+
+            _patientServiceMock
+                .Setup(x => x.UpdateAsync(It.IsAny<Patient>(), It.IsAny<int>()))
+                .ThrowsAsync(new InvalidOperationException("Referral contract not found."));
+
+            // Act
+            viewModel.SaveCommand.Execute(null);
+            await Task.Delay(100);
+
+            // Assert
+            _patientServiceMock.Verify(x => x.UpdateAsync(It.Is<Patient>(p => p.ReferralId == 99), It.IsAny<int>()), Times.Once);
+            viewModel.StatusMessage.Should().Contain("Referral contract not found");
+        }
+
+        [Fact]
+        public async Task AssignPatientToContract_WithNoReferralSelected_ShouldPassNullReferralId()
+        {
+            // Function: 12.5 — Assign Patient to Contract
+            // Arrange
+            var catalogMock = new Mock<ITestCatalogService>();
+            catalogMock.Setup(x => x.GetReferralsAsync()).ReturnsAsync(new List<Referral>());
+
+            var viewModel = new PatientRegistrationViewModel(_patientServiceMock.Object, catalogMock.Object);
+            await Task.Delay(100);
+            viewModel.InvokePrivate("set_PatientId", 702);
+            viewModel.LabId = "LAB-702";
+            viewModel.FullName = "Cash Patient";
+            viewModel.Gender = "Male";
+            viewModel.SelectedReferral = null;
+
+            Patient? capturedPatient = null;
+            _patientServiceMock
+                .Setup(x => x.UpdateAsync(It.IsAny<Patient>(), It.IsAny<int>()))
+                .Callback<Patient, int>((patient, _) => capturedPatient = patient)
+                .Returns(Task.CompletedTask);
+            _patientServiceMock
+                .Setup(x => x.SaveMedicalHistoryAsync(702, It.IsAny<MedicalHistory>()))
+                .Returns(Task.CompletedTask);
+
+            // Act
+            viewModel.SaveCommand.Execute(null);
+            await Task.Delay(100);
+
+            // Assert
+            _patientServiceMock.Verify(x => x.UpdateAsync(It.IsAny<Patient>(), It.IsAny<int>()), Times.Once);
+            capturedPatient.Should().NotBeNull();
+            capturedPatient!.ReferralId.Should().BeNull();
+        }
+
+        [Fact]
         public async Task SaveAsync_When_No_FullName_Should_Show_Error_LogicGuard()
         {
             // Function: 1.1 — Add New Patient

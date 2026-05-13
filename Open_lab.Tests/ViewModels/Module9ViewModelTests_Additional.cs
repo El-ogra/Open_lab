@@ -680,7 +680,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task AllModule9Data_LoadCommand_ShouldPopulateAllCollectionsInSingleCall_Success()
         {
-            // Function: 9.1, 9.2, 9.3, 9.4, 9.5, 9.6 — اختبار التكامل الكامل
+            // Function: 9.1 — Patient Count by Gender
             // Arrange — جميع الـ setups موجودة في المُنشئ
 
             // Act

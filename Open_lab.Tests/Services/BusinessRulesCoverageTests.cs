@@ -88,9 +88,12 @@ namespace Open_lab.Tests.Services
             using var db = CreateDb();
             var service = new PatientService(db);
 
-            // Act & Assert
+            // Act
+            Func<Task> act = async () => await service.CreateAsync(null!);
+
+            // Assert
             await Assert.ThrowsAsync<ArgumentNullException>(
-                () => service.CreateAsync(null!));
+                act);
         }
 
         [Fact]

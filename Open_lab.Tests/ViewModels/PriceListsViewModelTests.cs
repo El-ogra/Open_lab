@@ -33,9 +33,9 @@ namespace Open_lab.Tests.ViewModels
         }
 
         [Fact]
-        public async Task SaveListAsync_Should_Create_PriceList()
+        public async Task LinkPriceListToEntity_WithSelectedReferral_ShouldCreatePriceListWithReferralId()
         {
-            // Function: 3.7 — Price List - Logic Guard
+            // Function: 12.2 — Link Price List to Entity
             // Arrange
             _viewModel.ListName = "Corporate List";
             _viewModel.SelectedReferral = new Referral { ReferralId = 5, Name = "Ref1" };
@@ -52,6 +52,53 @@ namespace Open_lab.Tests.ViewModels
                 pl.Name == "Corporate List" && pl.ReferralId == 5 && pl.IsDefault == true
             )), Times.Once);
             _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
+        }
+
+        [Fact]
+        public async Task LinkPriceListToEntity_WhenServiceRejectsReferral_ShouldShowErrorMessage()
+        {
+            // Function: 12.2 — Link Price List to Entity
+            // Arrange
+            _viewModel.ListName = "Rejected Referral List";
+            _viewModel.SelectedReferral = new Referral { ReferralId = 77, Name = "Rejected" };
+
+            _testCatalogServiceMock
+                .Setup(x => x.CreatePriceListAsync(It.IsAny<PriceList>()))
+                .ThrowsAsync(new InvalidOperationException("invalid referral"));
+
+            // Act
+            await _viewModel.InvokePrivateAsync("SaveListAsync");
+
+            // Assert
+            _testCatalogServiceMock.Verify(x => x.CreatePriceListAsync(It.Is<PriceList>(pl =>
+                pl.Name == "Rejected Referral List" && pl.ReferralId == 77)), Times.Once);
+            _viewModel.StatusMessage.Should().Contain("invalid referral");
+        }
+
+        [Fact]
+        public async Task LinkPriceListToEntity_WithGeneralList_ShouldCreatePriceListWithoutReferralId()
+        {
+            // Function: 12.2 — Link Price List to Entity
+            // Arrange
+            _viewModel.ListName = "General List";
+            _viewModel.SelectedReferral = new Referral { ReferralId = 0, Name = "عام (بدون جهة)" };
+
+            _testCatalogServiceMock
+                .Setup(x => x.CreatePriceListAsync(It.IsAny<PriceList>()))
+                .ReturnsAsync((PriceList list) => new PriceList
+                {
+                    PriceListId = 10,
+                    Name = list.Name,
+                    ReferralId = list.ReferralId
+                });
+
+            // Act
+            await _viewModel.InvokePrivateAsync("SaveListAsync");
+
+            // Assert
+            _testCatalogServiceMock.Verify(x => x.CreatePriceListAsync(It.Is<PriceList>(pl =>
+                pl.Name == "General List" && pl.ReferralId == null)), Times.Once);
+            _viewModel.StatusMessage.Should().Contain("تم حفظ قائمة الأسعار");
         }
 
         [Fact]

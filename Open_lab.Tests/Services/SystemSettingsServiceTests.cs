@@ -170,7 +170,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task ConfigurePrinters_When_Exception_Should_Throw_FailureGuard()
         {
-            // Function: 13.5 — Configure Printers
+            // System settings persistence failure guard
             // Arrange
             // Act
             Func<Task> act = async () => await _service.SaveSettingAsync(null!, "val");

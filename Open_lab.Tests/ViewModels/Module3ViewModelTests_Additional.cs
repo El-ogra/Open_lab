@@ -948,7 +948,7 @@ namespace Open_lab.Tests.ViewModels
             [Fact]
             public async Task SaveAsync_Update_Existing_Comment_Should_Call_Update_Service_SuccessGuard()
             {
-                // Function: 3.4/3.6 — Add/Low/High Comments (Update Logic)
+                // Function: 3.6 — Add Test Comments
                 // Arrange
                 var test = new Test { TestId = 1 };
                 _viewModel.SelectedTest = test;
@@ -979,7 +979,7 @@ namespace Open_lab.Tests.ViewModels
             [Fact]
             public async Task SaveAsync_With_Empty_Comment_Text_Should_NotCall_Service_EdgeGuard()
             {
-                // Function: 3.4/3.6 — Add/Low/High Comments (Update Logic)
+                // Function: 3.6 — Add Test Comments
                 // Arrange
                 var test = new Test { TestId = 1 };
                 _viewModel.SelectedTest = test;
@@ -1000,7 +1000,7 @@ namespace Open_lab.Tests.ViewModels
             [Fact]
             public async Task DeleteAsync_With_Valid_Selection_Should_Remove_Comment_SuccessGuard()
             {
-                // Function: 3.4/3.6 — Add/Low/High Comments (Update Logic)
+                // Function: 3.6 — Add Test Comments
                 // Arrange
                 var comment = new TestComment { CommentId = 20, TestId = 1, CommentText = "Delete Me" };
                 _viewModel.SelectedComment = comment;
@@ -1019,7 +1019,7 @@ namespace Open_lab.Tests.ViewModels
             [Fact]
             public async Task DeleteAsync_When_Null_Selection_Should_Do_Nothing_EdgeGuard()
             {
-                // Function: 3.4/3.6 — Add/Low/High Comments (Update Logic)
+                // Function: 3.6 — Add Test Comments
                 // Arrange
                 _viewModel.SelectedComment = null;
 
@@ -1034,7 +1034,7 @@ namespace Open_lab.Tests.ViewModels
             [Fact]
             public async Task LoadCommentsAsync_Should_Populate_Comments_SuccessGuard()
             {
-                // Function: 3.4/3.6 — Add/Low/High Comments (Update Logic)
+                // Function: 3.6 — Add Test Comments
                 // Arrange
                 var test = new Test { TestId = 5 };
                 _viewModel.SelectedTest = test;
@@ -1057,7 +1057,7 @@ namespace Open_lab.Tests.ViewModels
             [Fact]
             public async Task LoadCommentsAsync_When_No_Test_Should_Clear_EdgeGuard()
             {
-                // Function: 3.4/3.6 — Add/Low/High Comments (Update Logic)
+                // Function: 3.6 — Add Test Comments
                 // Arrange
                 _viewModel.SelectedTest = null;
                 _viewModel.Comments.Add(new TestComment { CommentId = 99 });
@@ -1072,7 +1072,7 @@ namespace Open_lab.Tests.ViewModels
             [Fact]
             public async Task TestComments_SaveAsync_When_ServiceThrows_Should_Show_Error_FailureGuard()
             {
-                // Function: 3.4/3.6 — Add/Low/High Comments (Update Logic)
+                // Function: 3.6 — Add Test Comments
                 // Arrange
                 _viewModel.SelectedTest = new Test { TestId = 1 };
                 _viewModel.CommentText = "Test Comment";

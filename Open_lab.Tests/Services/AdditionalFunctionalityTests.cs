@@ -425,7 +425,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task AccountsTreasuryService_DoctorCommission_Should_Calculate_Correctly()
         {
-            // Function: 13.5 — Configure Printers
+            // Function: 2.12 — Doctor Compensation Calculation
             // Arrange
             var service = new AccountsTreasuryService(_db);
             var patient = new Patient { LabId = "LDC1", FullName = "P", Gender = "Male" };
@@ -458,7 +458,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task AccountsTreasuryService_DoctorCommission_ZeroPercentage_Should_Be_Zero()
         {
-            // Function: 13.5 — Configure Printers
+            // Function: 2.12 — Doctor Compensation Calculation
             // Arrange
             var service = new AccountsTreasuryService(_db);
             var patient = new Patient { LabId = "LDC2", FullName = "P", Gender = "Male" };
@@ -488,7 +488,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task AccountsTreasuryService_DoctorCommission_HighPercentage_Should_Calculate_Correctly()
         {
-            // Function: 13.5 — Configure Printers
+            // Function: 2.12 — Doctor Compensation Calculation
             // Arrange
             var service = new AccountsTreasuryService(_db);
             var patient = new Patient { LabId = "LDC3", FullName = "P", Gender = "Male" };
@@ -519,7 +519,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task PriceResolutionService_PhysicianPriceList_Should_Prioritize_Physician_Price()
         {
-            // Function: 13.5 — Configure Printers
+            // Function: 12.2 — Price List Binding
             // Arrange
             var service = new PriceResolutionService(_db);
             var test = new Test { Code = "T1", NameReport = "Test1", NameReceipt = "Test1", Price = 100m };
@@ -550,7 +550,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task PriceResolutionService_ReferralPriceList_Should_Fallback_To_Referral_Price()
         {
-            // Function: 13.5 — Configure Printers
+            // Function: 12.2 — Price List Binding
             // Arrange
             var service = new PriceResolutionService(_db);
             var test = new Test { Code = "T2", NameReport = "Test2", NameReceipt = "Test2", Price = 100m };
@@ -584,7 +584,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task PriceResolutionService_NoPriceList_Should_Use_Base_Price()
         {
-            // Function: 13.5 — Configure Printers
+            // Function: 12.2 — Price List Binding
             // Arrange
             var service = new PriceResolutionService(_db);
             var test = new Test { Code = "T3", NameReport = "Test3", NameReceipt = "Test3", Price = 150m };
@@ -604,7 +604,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public void AppSession_Clear_Should_Reset_All_Session_Data()
         {
-            // Function: 13.5 — Configure Printers
+            // Function: 10.8 — Logout
             // Arrange
             Open_lab.ViewModels.AppSession.UserId = 123;
             Open_lab.ViewModels.AppSession.Username = "testuser";
@@ -626,7 +626,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public void AppSession_AfterClear_Should_Not_Have_Permissions()
         {
-            // Function: 13.5 — Configure Printers
+            // Function: 10.8 — Logout
             // Arrange
             Open_lab.ViewModels.AppSession.SetPermissions(new[] { "ADMIN_ACCESS", "USER_ACCESS" });
             Open_lab.ViewModels.AppSession.Clear();
@@ -640,7 +640,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public void AppSession_Clear_Should_Remove_Admin_Privileges()
         {
-            // Function: 13.5 — Configure Printers
+            // Function: 10.8 — Logout
             // Arrange
             Open_lab.ViewModels.AppSession.IsAdmin = true;
             Open_lab.ViewModels.AppSession.SetPermissions(new[] { "SOME_PERM" });
@@ -658,7 +658,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task Patient_With_MedicalHistory_Should_Maintain_Data_Integrity()
         {
-            // Function: 13.5 — Configure Printers
+            // Cross-service data integrity guard
             // Arrange
             // Act
             // Cross-validation between Patient and Medical History
@@ -687,7 +687,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task Physician_PriceList_Assignment_Should_Prioritize_Correctly()
         {
-            // Function: 13.5 — Configure Printers
+            // Function: 12.2 — Price List Binding
             // Arrange
             // Act
             // Cross-validation between Physician and PriceList
@@ -729,7 +729,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task External_Sample_Flag_Should_Not_Affect_Internal_Samples()
         {
-            // Function: 13.5 — Configure Printers
+            // Cross-service sample collection integrity guard
             // Arrange
             // Act
             // Cross-validation of sample collection flagging
@@ -767,7 +767,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task Referral_CommissionPercentage_Should_Be_Calculated_Correctly()
         {
-            // Function: 13.5 — Configure Printers
+            // Function: 12.4 — Contract Commission Logic
             // Arrange
             var referral = new Referral { Name = "CommissionRef", CommissionPercentage = 15m };
             _db.Referrals.Add(referral);
@@ -796,7 +796,7 @@ namespace Open_lab.Tests.Services
         [Fact]
         public async Task Referral_ZeroCommission_Should_Result_In_Zero_Commission()
         {
-            // Function: 13.5 — Configure Printers
+            // Function: 12.4 — Contract Commission Logic
             // Arrange
             var referral = new Referral { Name = "NoCommissionRef", CommissionPercentage = 0m };
             _db.Referrals.Add(referral);

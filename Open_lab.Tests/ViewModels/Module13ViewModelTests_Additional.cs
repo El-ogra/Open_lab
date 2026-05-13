@@ -1053,7 +1053,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task SaveRawSettingCommand_WithValidKeyValue_ShouldCallSaveSettingAsync_SuccessGuard()
         {
-            // Function: 13.x — Generic Settings (used by 13.1-13.6)
+            // Function: 13.6 — Set Invoice Settings
             // Arrange
             var vm = CreateSystemSettingsVm();
             await Task.Delay(80);
@@ -1072,7 +1072,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task SaveRawSettingCommand_WithEmptyKey_ShouldShowValidationAndNotCall_FailureGuard()
         {
-            // Function: 13.x — Generic Settings
+            // Function: 13.6 — Set Invoice Settings
             // Arrange
             var vm = CreateSystemSettingsVm();
             await Task.Delay(80);
@@ -1093,7 +1093,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task DeleteRawSettingCommand_WithSelectedSetting_ShouldCallDeleteAndClearSelection_SuccessGuard()
         {
-            // Function: 13.x — Generic Settings
+            // Function: 13.6 — Set Invoice Settings
             // Arrange
             var vm = CreateSystemSettingsVm();
             await Task.Delay(80);
@@ -1112,7 +1112,7 @@ namespace Open_lab.Tests.ViewModels
         [Fact]
         public async Task ReloadCommand_WhenExecuted_ShouldRefreshProfileAndSettings_SuccessGuard()
         {
-            // Function: 13.x — Generic Settings
+            // Function: 13.6 — Set Invoice Settings
             // Arrange
             var vm = CreateSystemSettingsVm();
             await Task.Delay(80);

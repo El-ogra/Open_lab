@@ -239,5 +239,54 @@ namespace Open_lab.Tests.ViewModels
             // Assert
             _viewModel.StatusMessage.Should().Contain("schedule-failed");
         }
+
+        [Fact]
+        public async Task ConfigureScheduleCommand_When_Service_Throws_Should_Show_Error_And_Stop_Loading_Failure()
+        {
+            // Function: 13.7 — Configure Backup
+            // Arrange
+            _viewModel.ScheduledBackupDirectory = "D:\\Backups\\Daily";
+            _viewModel.ScheduledBackupTime = "04:15";
+            _mockService
+                .Setup(s => s.ConfigureDailyBackupScheduleAsync("D:\\Backups\\Daily", new TimeSpan(4, 15, 0)))
+                .ThrowsAsync(new InvalidOperationException("schedule-save-failed"));
+
+            // Act
+            _viewModel.ConfigureScheduleCommand.Execute(null);
+            await Task.Delay(50);
+
+            // Assert
+            _mockService.Verify(s => s.ConfigureDailyBackupScheduleAsync("D:\\Backups\\Daily", new TimeSpan(4, 15, 0)), Times.Once);
+            _viewModel.StatusMessage.Should().Contain("schedule-save-failed");
+            _viewModel.IsLoading.Should().BeFalse();
+        }
+
+        [Fact]
+        public async Task RefreshScheduleCommand_Should_Copy_Service_Status_Into_ViewModel_Success()
+        {
+            // Function: 13.7 — Configure Backup
+            // Arrange
+            var lastRun = new DateTime(2026, 5, 13, 1, 30, 0, DateTimeKind.Utc);
+            _mockService.Setup(s => s.GetBackupScheduleStatusAsync()).ReturnsAsync(new BackupScheduleStatus
+            {
+                IsEnabled = true,
+                DirectoryPath = "D:\\Backups\\Daily",
+                ScheduledTime = new TimeSpan(1, 30, 0),
+                LastRunUtc = lastRun,
+                LastError = "previous-error"
+            });
+
+            // Act
+            _viewModel.RefreshScheduleCommand.Execute(null);
+            await Task.Delay(50);
+
+            // Assert
+            _viewModel.IsScheduleEnabled.Should().BeTrue();
+            _viewModel.ScheduledBackupDirectory.Should().Be("D:\\Backups\\Daily");
+            _viewModel.ScheduledBackupTime.Should().Be("01:30");
+            _viewModel.LastScheduledRunUtc.Should().Be(lastRun);
+            _viewModel.ScheduleErrorMessage.Should().Be("previous-error");
+            _viewModel.StatusMessage.Should().Be("تم تحديث إعدادات الجدولة.");
+        }
     }
 }
