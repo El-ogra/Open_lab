@@ -6,7 +6,13 @@
              xmlns:patientsVm="clr-namespace:Open_lab.ViewModels.Patients"
              xmlns:patientsViews="clr-namespace:Open_lab.Views.Patients"
              xmlns:systemDataVm="clr-namespace:Open_lab.ViewModels.SystemData"
-             xmlns:systemDataViews="clr-namespace:Open_lab.Views.SystemData">
+             xmlns:systemDataViews="clr-namespace:Open_lab.Views.SystemData"
+             xmlns:accountsVm="clr-namespace:Open_lab.ViewModels.Accounts"
+             xmlns:accountsViews="clr-namespace:Open_lab.Views.Accounts"
+             xmlns:worksheetVm="clr-namespace:Open_lab.ViewModels.Worksheet"
+             xmlns:worksheetViews="clr-namespace:Open_lab.Views.Worksheet"
+             xmlns:statisticsVm="clr-namespace:Open_lab.ViewModels.Statistics"
+             xmlns:statisticsViews="clr-namespace:Open_lab.Views.Statistics">
     <Application.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
         <vm:InverseBooleanConverter x:Key="InverseBooleanConverter" />
@@ -30,6 +36,18 @@
 
         <DataTemplate DataType="{x:Type systemDataVm:SystemDataModuleViewModel}">
             <systemDataViews:SystemDataModuleView />
+        </DataTemplate>
+
+        <DataTemplate DataType="{x:Type accountsVm:AccountsModuleViewModel}">
+            <accountsViews:AccountsModuleView />
+        </DataTemplate>
+
+        <DataTemplate DataType="{x:Type worksheetVm:WorksheetModuleViewModel}">
+            <worksheetViews:WorksheetModuleView />
+        </DataTemplate>
+
+        <DataTemplate DataType="{x:Type statisticsVm:StatisticsModuleViewModel}">
+            <statisticsViews:StatisticsModuleView />
         </DataTemplate>
     </Application.Resources>
 </Application>

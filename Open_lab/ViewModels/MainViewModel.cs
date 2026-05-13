@@ -5,6 +5,9 @@ using System.Windows.Input;
 using Open_lab.Services;
 using Open_lab.ViewModels.Patients;
 using Open_lab.ViewModels.SystemData;
+using Open_lab.ViewModels.Accounts;
+using Open_lab.ViewModels.Worksheet;
+using Open_lab.ViewModels.Statistics;
 using Open_lab.Views.Shared;
 
 namespace Open_lab.ViewModels
@@ -75,9 +78,9 @@ namespace Open_lab.ViewModels
 
             NavigateToPatientsCommand = new RelayCommand(_ => NavigateToPatientsModule());
             NavigateToToolsCommand = new RelayCommand(_ => NavigateTopModule("أدوات"));
-            NavigateToWorksheetCommand = new RelayCommand(_ => NavigateTopModule("ورقة عمل"));
-            NavigateToAccountsCommand = new RelayCommand(_ => NavigateTopModule("حسابات"));
-            NavigateToStatisticsCommand = new RelayCommand(_ => NavigateTopModule("احصاليات"));
+            NavigateToWorksheetCommand = new RelayCommand(_ => NavigateToWorksheetModule());
+            NavigateToAccountsCommand = new RelayCommand(_ => NavigateToAccountsModule());
+            NavigateToStatisticsCommand = new RelayCommand(_ => NavigateToStatisticsModule());
             NavigateToUsersCommand = new RelayCommand(_ => NavigateTopModule("المستخدمين"));
             NavigateToSystemDataCommand = new RelayCommand(_ => NavigateToSystemDataModule());
             NavigateToSettingsCommand = new RelayCommand(_ => NavigateTopModule("اعدادات"));
@@ -247,6 +250,27 @@ namespace Open_lab.ViewModels
             CurrentView = new SystemDataModuleViewModel(OpenPlaceholder);
         }
 
+        private void NavigateToAccountsModule()
+        {
+            ActiveModule = "حسابات";
+            IsToolbarVisible = true;
+            CurrentView = new AccountsModuleViewModel(OpenPlaceholder);
+        }
+
+        private void NavigateToWorksheetModule()
+        {
+            ActiveModule = "ورقة عمل";
+            IsToolbarVisible = true;
+            CurrentView = new WorksheetModuleViewModel(OpenPlaceholder);
+        }
+
+        private void NavigateToStatisticsModule()
+        {
+            ActiveModule = "احصاليات";
+            IsToolbarVisible = true;
+            CurrentView = new StatisticsModuleViewModel(OpenPlaceholder);
+        }
+
         private void OpenPlaceholder(string functionTitle)
         {
             IsToolbarVisible = false;
@@ -266,6 +290,24 @@ namespace Open_lab.ViewModels
             if (ActiveModule == "بيانات النظام")
             {
                 CurrentView = new SystemDataModuleViewModel(OpenPlaceholder);
+                return;
+            }
+
+            if (ActiveModule == "حسابات")
+            {
+                CurrentView = new AccountsModuleViewModel(OpenPlaceholder);
+                return;
+            }
+
+            if (ActiveModule == "ورقة عمل")
+            {
+                CurrentView = new WorksheetModuleViewModel(OpenPlaceholder);
+                return;
+            }
+
+            if (ActiveModule == "احصاليات")
+            {
+                CurrentView = new StatisticsModuleViewModel(OpenPlaceholder);
                 return;
             }
 

@@ -1,0 +1,97 @@
+<UserControl x:Class="Open_lab.Views.Worksheet.WorksheetModuleView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             FlowDirection="RightToLeft">
+    <UserControl.Resources>
+        <Style x:Key="ModuleButtonStyle" TargetType="Button">
+            <Setter Property="Width" Value="250" />
+            <Setter Property="Height" Value="70" />
+            <Setter Property="Margin" Value="15" />
+            <Setter Property="Background" Value="#8DB600" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="FontSize" Value="16" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Root"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="5"
+                                Padding="12">
+                            <ContentPresenter HorizontalAlignment="Stretch" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Root" Property="Opacity" Value="0.88" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Root" Property="Opacity" Value="0.75" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid Background="#25333E">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="215" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0"
+                Margin="20"
+                Padding="22"
+                Background="#FAFAFA"
+                BorderBrush="#D5D8DA"
+                BorderThickness="1"
+                CornerRadius="3">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="260" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <Grid Grid.Column="0" FlowDirection="LeftToRight">
+                    <Ellipse Width="126" Height="126" Fill="#E7F2F4" Stroke="#B5CDD2" StrokeThickness="2" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    <TextBlock Text="&#xE81C;" FontFamily="Segoe MDL2 Assets" Foreground="#376C78" FontSize="64" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Grid>
+
+                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                    <TextBlock Text="من خلال هذه النافذة يمكنك عمل الآتي:"
+                               Foreground="#D56E13"
+                               FontSize="20"
+                               FontWeight="Bold"
+                               Margin="0,0,0,12" />
+                    <TextBlock Text=". طباعة ورقة عمل لمجموعة من المرضى في فترة محددة وذلك بأسمائهم أو أكوادهم" FontSize="16" Foreground="#111" Margin="0,3" />
+                    <TextBlock Text=". طباعة ورقة عمل لتحليل معين في فترة زمنية محددة أو مجموعة من التحاليل التي تم تحديدها" FontSize="16" Foreground="#111" Margin="0,3" />
+                    <TextBlock Text=". وكذلك طباعة ورقة عمل لمجموعة عمل (Log) في الفترة المحددة" FontSize="16" Foreground="#111" Margin="0,3" />
+                    <TextBlock Text=". يمكنك اختيار طباعة التحاليل الغير منتهية فقط أو طباعة الكل" FontSize="16" Foreground="#111" Margin="0,3" />
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <Grid Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <Button Grid.Column="0" Style="{StaticResource ModuleButtonStyle}" Command="{Binding OpenWorksheetByPatientCommand}">
+                <DockPanel LastChildFill="True">
+                    <TextBlock Text="&#xE9F9;" FontFamily="Segoe MDL2 Assets" FontSize="28" DockPanel.Dock="Left" Margin="0,0,12,0" />
+                    <TextBlock Text="ورقة عمل بأسماء المرضى" TextWrapping="Wrap" TextAlignment="Right" VerticalAlignment="Center" />
+                </DockPanel>
+            </Button>
+            <Button Grid.Column="1" Style="{StaticResource ModuleButtonStyle}" Command="{Binding OpenWorksheetByTestCommand}">
+                <DockPanel LastChildFill="True">
+                    <TextBlock Text="&#xE9F9;" FontFamily="Segoe MDL2 Assets" FontSize="28" DockPanel.Dock="Left" Margin="0,0,12,0" />
+                    <TextBlock Text="ورقة عمل بأسماء التحاليل (Log)" TextWrapping="Wrap" TextAlignment="Right" VerticalAlignment="Center" />
+                </DockPanel>
+            </Button>
+        </Grid>
+    </Grid>
+</UserControl>
