@@ -101,12 +101,15 @@
 
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="90" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="30" />
         </Grid.RowDefinitions>
 
-        <Border Grid.Row="0" Background="{StaticResource TopToolbarBrush}">
+        <Border Grid.Row="0"
+                Height="90"
+                Background="{StaticResource TopToolbarBrush}"
+                Visibility="{Binding IsToolbarVisible, Converter={StaticResource BoolToVisibility}}">
             <UniformGrid Columns="12" FlowDirection="RightToLeft">
                 <RadioButton GroupName="TopModules" Style="{StaticResource ToolbarRadioButtonStyle}" Command="{Binding NavigateToPatientsCommand}">
                     <StackPanel>

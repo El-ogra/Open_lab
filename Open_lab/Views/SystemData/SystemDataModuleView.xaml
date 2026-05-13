@@ -1,0 +1,118 @@
+<UserControl x:Class="Open_lab.Views.SystemData.SystemDataModuleView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             FlowDirection="RightToLeft">
+    <UserControl.Resources>
+        <Style x:Key="SystemDataButtonStyle" TargetType="Button">
+            <Setter Property="Height" Value="58" />
+            <Setter Property="Margin" Value="8" />
+            <Setter Property="Background" Value="#8DB600" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="FontSize" Value="15" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Root"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="5"
+                                Padding="12,6">
+                            <ContentPresenter HorizontalAlignment="Stretch" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Root" Property="Opacity" Value="0.88" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Root" Property="Opacity" Value="0.75" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid Background="#25333E">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="215" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0"
+                Margin="20"
+                Padding="22"
+                Background="#FAFAFA"
+                BorderBrush="#D5D8DA"
+                BorderThickness="1"
+                CornerRadius="3">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="260" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <Grid Grid.Column="0" FlowDirection="LeftToRight">
+                    <Rectangle Width="150" Height="120" RadiusX="5" RadiusY="5" Fill="#C6B79A" Stroke="#7D6E55" StrokeThickness="2" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    <Rectangle Width="132" Height="26" Fill="#E7D8B8" Stroke="#7D6E55" StrokeThickness="1" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,-58,0,0" />
+                    <Rectangle Width="132" Height="26" Fill="#E7D8B8" Stroke="#7D6E55" StrokeThickness="1" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    <Rectangle Width="132" Height="26" Fill="#E7D8B8" Stroke="#7D6E55" StrokeThickness="1" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,58,0,0" />
+                    <TextBlock Text="&#xE8B7;" FontFamily="Segoe MDL2 Assets" Foreground="#5B4E3B" FontSize="42" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Grid>
+
+                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                    <TextBlock Text="من خلال هذه النافذة يمكنك عمل الآتي:"
+                               Foreground="#D56E13"
+                               FontSize="20"
+                               FontWeight="Bold"
+                               Margin="0,0,0,12" />
+                    <TextBlock Text=". إدخال وتعديل التحاليل والقيم الطبيعية واختيار الوحدات والمجموعات والباركود الخاص بهم" FontSize="16" Foreground="#111" Margin="0,3" />
+                    <TextBlock Text=". إدخال التعليقات على نتائج التحاليل والمضادات الحيوية والمجموعات الخيوية الخاصة بالمعمل وأسعارها" FontSize="16" Foreground="#111" Margin="0,3" TextWrapping="Wrap" />
+                    <TextBlock Text=". إدخال الجهات المتعامل معها (إحالة - مستقبل - تعاقدات ....) وتحديد الأسعار الخاصة بهم" FontSize="16" Foreground="#111" Margin="0,3" />
+                    <TextBlock Text=". إدخال بيانات أجهزة ومعدات المعمل ومتابعة حالتها والصيانة الدورية وتاريخ المعايرة" FontSize="16" Foreground="#111" Margin="0,3" />
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <Grid Grid.Row="1" Margin="30,18" HorizontalAlignment="Center" VerticalAlignment="Center" FlowDirection="RightToLeft">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="220" />
+                <ColumnDefinition Width="220" />
+                <ColumnDefinition Width="220" />
+                <ColumnDefinition Width="230" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <Button Grid.Row="0" Grid.Column="0" Style="{StaticResource SystemDataButtonStyle}" Command="{Binding OpenTestDataCommand}" Content="بيانات التحاليل" />
+            <Button Grid.Row="0" Grid.Column="1" Style="{StaticResource SystemDataButtonStyle}" Command="{Binding OpenBarcodeTypesCommand}" Content="Barcode Types" />
+            <Button Grid.Row="0" Grid.Column="2" Style="{StaticResource SystemDataButtonStyle}" Command="{Binding OpenCultureAntibioticsCommand}" Content="Culture Antibiotics" />
+
+            <Button Grid.Row="1" Grid.Column="0" Style="{StaticResource SystemDataButtonStyle}" Command="{Binding OpenTestGroupsCommand}" Content="مجموعات التحاليل" />
+            <Button Grid.Row="1" Grid.Column="1" Style="{StaticResource SystemDataButtonStyle}" Command="{Binding OpenTestUnitsCommand}" Content="Test Units" />
+            <Button Grid.Row="1" Grid.Column="2" Style="{StaticResource SystemDataButtonStyle}" Command="{Binding OpenTestCommentsCommand}" Content="Test Comments" />
+
+            <Button Grid.Row="2" Grid.Column="0" Style="{StaticResource SystemDataButtonStyle}" Command="{Binding OpenLabBranchesCommand}" Content="Lab. branches" />
+            <Button Grid.Row="2" Grid.Column="1" Style="{StaticResource SystemDataButtonStyle}" Command="{Binding OpenPatientTitlesCommand}" Content="القاب وتعريفات المرضى" />
+            <Button Grid.Row="2" Grid.Column="2" Style="{StaticResource SystemDataButtonStyle}" Command="{Binding OpenCustomGroupsCommand}" Content="Custom Groups" />
+
+            <Button Grid.Row="3" Grid.Column="0" Style="{StaticResource SystemDataButtonStyle}" Command="{Binding OpenWorkGroupsLogCommand}" Content="مجموعات العمل (Log)" />
+            <Button Grid.Row="3" Grid.Column="1" Style="{StaticResource SystemDataButtonStyle}" Command="{Binding OpenPrintPriceListCommand}" Content="طباعة قائمة اسعار التحاليل" />
+            <Button Grid.Row="3" Grid.Column="2" Style="{StaticResource SystemDataButtonStyle}" Command="{Binding OpenLabEquipmentCommand}" Background="#87CEEB" Foreground="#143347" Content="أجهزة ومعدات المعمل" />
+
+            <StackPanel Grid.Row="0"
+                        Grid.RowSpan="4"
+                        Grid.Column="3"
+                        VerticalAlignment="Center">
+                <Button Style="{StaticResource SystemDataButtonStyle}" Command="{Binding OpenExternalEntitiesCommand}" Background="#FF8C00" Content="الجهات الخارجية والمعدل" />
+                <Button Style="{StaticResource SystemDataButtonStyle}" Command="{Binding OpenExternalPriceListsCommand}" Background="#FF8C00" Content="قائمة أسعار التحاليل للجهات" />
+            </StackPanel>
+        </Grid>
+    </Grid>
+</UserControl>

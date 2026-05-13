@@ -3,6 +3,9 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Open_lab.Services;
+using Open_lab.ViewModels.Patients;
+using Open_lab.ViewModels.SystemData;
+using Open_lab.Views.Shared;
 
 namespace Open_lab.ViewModels
 {
@@ -17,6 +20,7 @@ namespace Open_lab.ViewModels
         private string _currentDate = System.DateTime.Now.ToString("yyyy/MM/dd");
         private string _activeModule = string.Empty;
         private System.Action? _logoutRequested;
+        private bool _isToolbarVisible = true;
         private bool _isLoggedIn;
 
         public MainViewModel(
@@ -69,13 +73,13 @@ namespace Open_lab.ViewModels
             NavigateUserActivityLogCommand = new RelayCommand(_ => NavigateTo(NavigationTarget.UserActivityLog), _ => CanNavigate(PermissionCodes.UsersView));
             NavigateSystemUsageMonitorCommand = new RelayCommand(_ => NavigateTo(NavigationTarget.SystemUsageMonitor), _ => CanNavigate(PermissionCodes.UsersView));
 
-            NavigateToPatientsCommand = new RelayCommand(_ => NavigateTopModule("المرضى"));
+            NavigateToPatientsCommand = new RelayCommand(_ => NavigateToPatientsModule());
             NavigateToToolsCommand = new RelayCommand(_ => NavigateTopModule("أدوات"));
             NavigateToWorksheetCommand = new RelayCommand(_ => NavigateTopModule("ورقة عمل"));
             NavigateToAccountsCommand = new RelayCommand(_ => NavigateTopModule("حسابات"));
             NavigateToStatisticsCommand = new RelayCommand(_ => NavigateTopModule("احصاليات"));
             NavigateToUsersCommand = new RelayCommand(_ => NavigateTopModule("المستخدمين"));
-            NavigateToSystemDataCommand = new RelayCommand(_ => NavigateTopModule("بيانات النظام"));
+            NavigateToSystemDataCommand = new RelayCommand(_ => NavigateToSystemDataModule());
             NavigateToSettingsCommand = new RelayCommand(_ => NavigateTopModule("اعدادات"));
             NavigateToEmployeesCommand = new RelayCommand(_ => NavigateTopModule("الموظفين"));
             NavigateToDidYouKnowCommand = new RelayCommand(_ => NavigateTopModule("هل تعلم"));
@@ -115,6 +119,12 @@ namespace Open_lab.ViewModels
         {
             get => _activeModule;
             private set => SetProperty(ref _activeModule, value);
+        }
+
+        public bool IsToolbarVisible
+        {
+            get => _isToolbarVisible;
+            private set => SetProperty(ref _isToolbarVisible, value);
         }
 
         public bool IsLoggedIn
@@ -187,6 +197,7 @@ namespace Open_lab.ViewModels
             CurrentDate = System.DateTime.Now.ToString("yyyy/MM/dd");
             ActiveModule = string.Empty;
             CurrentView = new WelcomeViewModel();
+            IsToolbarVisible = true;
             _logoutRequested = onLogoutRequested;
             IsLoggedIn = true;
             _windowLayoutService.ApplyAppLayout();
@@ -218,7 +229,47 @@ namespace Open_lab.ViewModels
         private void NavigateTopModule(string moduleName)
         {
             ActiveModule = moduleName;
+            IsToolbarVisible = true;
             CurrentView = new WelcomeViewModel(moduleName);
+        }
+
+        private void NavigateToPatientsModule()
+        {
+            ActiveModule = "المرضى";
+            IsToolbarVisible = true;
+            CurrentView = new PatientModuleViewModel(OpenPlaceholder);
+        }
+
+        private void NavigateToSystemDataModule()
+        {
+            ActiveModule = "بيانات النظام";
+            IsToolbarVisible = true;
+            CurrentView = new SystemDataModuleViewModel(OpenPlaceholder);
+        }
+
+        private void OpenPlaceholder(string functionTitle)
+        {
+            IsToolbarVisible = false;
+            CurrentView = new PlaceholderView(functionTitle, new RelayCommand(_ => ReturnToActiveModule()));
+        }
+
+        private void ReturnToActiveModule()
+        {
+            IsToolbarVisible = true;
+
+            if (ActiveModule == "المرضى")
+            {
+                CurrentView = new PatientModuleViewModel(OpenPlaceholder);
+                return;
+            }
+
+            if (ActiveModule == "بيانات النظام")
+            {
+                CurrentView = new SystemDataModuleViewModel(OpenPlaceholder);
+                return;
+            }
+
+            CurrentView = new WelcomeViewModel(ActiveModule);
         }
 
         private bool CanNavigate(string permissionCode)
@@ -234,6 +285,7 @@ namespace Open_lab.ViewModels
                 AppSession.Clear();
                 IsLoggedIn = false;
                 ActiveModule = string.Empty;
+                IsToolbarVisible = true;
                 CurrentView = new WelcomeViewModel();
                 _logoutRequested.Invoke();
                 return;
