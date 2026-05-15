@@ -69,6 +69,37 @@ namespace Open_lab.Services
             }).ToList();
         }
 
+        public async Task<List<VisitTestRow>> GetVisitTestsAsync(int visitId)
+        {
+            var tests = await _db.VisitTests
+                .AsNoTracking()
+                .Include(t => t.Test)
+                .Include(t => t.Visit)
+                .ThenInclude(v => v.Patient)
+                .Include(t => t.ResultValues)
+                .Where(t => t.VisitId == visitId)
+                .ToListAsync();
+
+            return tests.Select(t => new VisitTestRow
+            {
+                VisitTestId = t.VisitTestId,
+                TestId = t.TestId,
+                TestName = t.Test.NameReport,
+                Status = t.Status,
+                ResultValue = t.ResultValues.FirstOrDefault()?.Value,
+                IsFinished = string.Equals(t.Status, "Completed", StringComparison.OrdinalIgnoreCase) || string.Equals(t.Status, "Verified", StringComparison.OrdinalIgnoreCase) || string.Equals(t.Status, "Delivered", StringComparison.OrdinalIgnoreCase),
+                IsVerified = string.Equals(t.Status, "Verified", StringComparison.OrdinalIgnoreCase) || string.Equals(t.Status, "Delivered", StringComparison.OrdinalIgnoreCase),
+                Price = t.Price,
+                PatientId = t.Visit.PatientId,
+                PatientName = t.Visit.Patient.FullName,
+                PatientAge = t.Visit.Patient.Age ?? 0,
+                PatientGender = t.Visit.Patient.Gender,
+                VisitDate = t.Visit.VisitDate,
+                ShouldPrint = false,
+                ShouldExport = false
+            }).ToList();
+        }
+
         public async Task DeliverAsync(int visitId, int userId)
         {
             var visit = await _db.Visits

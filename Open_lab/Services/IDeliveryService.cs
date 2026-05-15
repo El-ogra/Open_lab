@@ -8,6 +8,7 @@ namespace Open_lab.Services
     public interface IDeliveryService
     {
         Task<List<DeliveryVisitRow>> SearchAsync(DateTime from, DateTime to, string? keyword = null);
+        Task<List<VisitTestRow>> GetVisitTestsAsync(int visitId);
         Task DeliverAsync(int visitId, int userId);
         Task ReopenDeliveryAsync(int visitId);
     }

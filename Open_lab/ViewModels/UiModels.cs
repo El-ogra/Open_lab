@@ -80,6 +80,13 @@ namespace Open_lab.ViewModels
             get => _shouldExport;
             set => SetProperty(ref _shouldExport, value);
         }
+
+        private decimal _price;
+        public decimal Price
+        {
+            get => _price;
+            set => SetProperty(ref _price, value);
+        }
     }
 
     public class ResultEntryItem : BaseViewModel

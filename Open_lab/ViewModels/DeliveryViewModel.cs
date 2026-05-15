@@ -17,6 +17,16 @@ namespace Open_lab.ViewModels
         private decimal _paymentAmount;
         private string _statusMessage = string.Empty;
 
+        private bool _isVIP;
+        private bool _isLab;
+        private bool _isPat;
+        private int _patientAge;
+        private string _patientGender = string.Empty;
+        private string _patientCode = string.Empty;
+        private string _patientReferral = string.Empty;
+        private decimal _totalRequired;
+        private decimal _totalAmount;
+
         public DeliveryViewModel(IDeliveryService deliveryService)
             : this(deliveryService, null)
         {
@@ -32,9 +42,24 @@ namespace Open_lab.ViewModels
             DeliverCommand = new RelayCommand(async _ => await DeliverAsync(), _ => CanDeliver());
             ReopenCommand = new RelayCommand(async _ => await ReopenAsync(), _ => CanReopen());
             PayCommand = new RelayCommand(async _ => await PayAsync(), _ => CanPay());
+
+            RefreshCommand = new RelayCommand(async _ => await LoadAsync());
+            PatientAccountCommand = new RelayCommand(_ => { /* navigate */ });
+            FilterAllCommand = new RelayCommand(_ => { IsVIP = false; IsLab = false; IsPat = false; _ = LoadAsync(); });
         }
 
         public ObservableCollection<DeliveryVisitRow> Visits { get; }
+        public ObservableCollection<VisitTestRow> SelectedVisitTests { get; } = new ObservableCollection<VisitTestRow>();
+
+        public bool IsVIP { get => _isVIP; set => SetProperty(ref _isVIP, value); }
+        public bool IsLab { get => _isLab; set => SetProperty(ref _isLab, value); }
+        public bool IsPat { get => _isPat; set => SetProperty(ref _isPat, value); }
+        public int PatientAge { get => _patientAge; set => SetProperty(ref _patientAge, value); }
+        public string PatientGender { get => _patientGender; set => SetProperty(ref _patientGender, value); }
+        public string PatientCode { get => _patientCode; set => SetProperty(ref _patientCode, value); }
+        public string PatientReferral { get => _patientReferral; set => SetProperty(ref _patientReferral, value); }
+        public decimal TotalRequired { get => _totalRequired; set => SetProperty(ref _totalRequired, value); }
+        public decimal TotalAmount { get => _totalAmount; set => SetProperty(ref _totalAmount, value); }
 
         public DateTime DateFrom
         {
@@ -61,6 +86,7 @@ namespace Open_lab.ViewModels
             {
                 if (SetProperty(ref _selectedVisit, value))
                 {
+                    _ = LoadSelectedVisitDetailsAsync();
                     RaiseActionsState();
                 }
             }
@@ -88,6 +114,38 @@ namespace Open_lab.ViewModels
         public ICommand DeliverCommand { get; }
         public ICommand ReopenCommand { get; }
         public ICommand PayCommand { get; }
+        public ICommand RefreshCommand { get; }
+        public ICommand PatientAccountCommand { get; }
+        public ICommand FilterAllCommand { get; }
+
+        private async Task LoadSelectedVisitDetailsAsync()
+        {
+            SelectedVisitTests.Clear();
+            if (SelectedVisit == null) return;
+
+            try
+            {
+                var tests = await _deliveryService.GetVisitTestsAsync(SelectedVisit.VisitId);
+                foreach (var t in tests)
+                {
+                    SelectedVisitTests.Add(t);
+                }
+
+                if (tests.Any())
+                {
+                    PatientAge = tests.First().PatientAge;
+                    PatientGender = tests.First().PatientGender;
+                    PatientCode = SelectedVisit.PatientName; 
+                    PatientReferral = "Self"; 
+                    TotalAmount = tests.Sum(x => x.Price);
+                    TotalRequired = SelectedVisit.Balance;
+                }
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = "خطأ: " + ex.Message;
+            }
+        }
 
         private async Task LoadAsync()
         {

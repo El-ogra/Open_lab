@@ -24,6 +24,7 @@
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="pack://application:,,,/Styles/PatientSearchStyles.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/Styles/DeliveryStyles.xaml" />
             </ResourceDictionary.MergedDictionaries>
 
             <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
