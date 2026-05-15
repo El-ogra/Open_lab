@@ -13,9 +13,13 @@ namespace Open_lab.ViewModels
         private string _name = string.Empty;
         private string _phone = string.Empty;
         private string _labId = string.Empty;
+        private string _nationalId = string.Empty;
+        private string _ageGroup = "الكل";
         private string _statusMessage = string.Empty;
         private Patient? _selectedPatient;
         private DateTime? _date;
+        private DateTime? _dateFrom;
+        private DateTime? _dateTo;
 
         public PatientSearchViewModel(IPatientSearchService patientSearchService)
         {
@@ -43,10 +47,34 @@ namespace Open_lab.ViewModels
             set => SetProperty(ref _labId, value);
         }
 
+        public string NationalId
+        {
+            get => _nationalId;
+            set => SetProperty(ref _nationalId, value);
+        }
+
+        public string AgeGroup
+        {
+            get => _ageGroup;
+            set => SetProperty(ref _ageGroup, value);
+        }
+
         public DateTime? Date
         {
             get => _date;
             set => SetProperty(ref _date, value);
+        }
+
+        public DateTime? DateFrom
+        {
+            get => _dateFrom;
+            set => SetProperty(ref _dateFrom, value);
+        }
+
+        public DateTime? DateTo
+        {
+            get => _dateTo;
+            set => SetProperty(ref _dateTo, value);
         }
 
         public string StatusMessage
@@ -76,7 +104,24 @@ namespace Open_lab.ViewModels
         {
             try
             {
-                var results = await _patientSearchService.SearchPatientsAsync(Name, Phone, LabId, Date);
+                var hasAdvancedFilters = !string.IsNullOrWhiteSpace(NationalId)
+                    || DateFrom.HasValue
+                    || DateTo.HasValue
+                    || (!string.IsNullOrWhiteSpace(AgeGroup) && !string.Equals(AgeGroup, "الكل", StringComparison.OrdinalIgnoreCase));
+
+                var results = hasAdvancedFilters
+                    ? await _patientSearchService.SearchPatientsAsync(new PatientSearchCriteria
+                    {
+                        Name = Name,
+                        Phone = Phone,
+                        LabId = LabId,
+                        NationalId = NationalId,
+                        Date = Date,
+                        DateFrom = DateFrom,
+                        DateTo = DateTo,
+                        AgeGroup = AgeGroup
+                    })
+                    : await _patientSearchService.SearchPatientsAsync(Name, Phone, LabId, Date);
                 Patients.Clear();
                 foreach (var patient in results)
                 {

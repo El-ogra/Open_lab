@@ -45,4 +45,17 @@ namespace Open_lab.ViewModels
             return false;
         }
     }
+
+    public class StringEqualsConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return string.Equals(value?.ToString(), parameter?.ToString(), StringComparison.OrdinalIgnoreCase);
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return value is bool isChecked && isChecked ? parameter?.ToString() ?? string.Empty : Binding.DoNothing;
+        }
+    }
 }

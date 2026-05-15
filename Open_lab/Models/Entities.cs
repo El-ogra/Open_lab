@@ -104,7 +104,11 @@ namespace Open_lab.Models
         public DateTime? BirthDate { get; set; }
         public int? Age { get; set; }
         public bool IsPregnant { get; set; }
+        public bool IsVip { get; set; }
         public string? Phone { get; set; }
+        public string? HomePhone { get; set; }
+        public string? NationalId { get; set; }
+        public string? Email { get; set; }
         public string? Address { get; set; }
         public int? ReferralId { get; set; }
 

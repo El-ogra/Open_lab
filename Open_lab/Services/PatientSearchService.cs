@@ -18,30 +18,67 @@ namespace Open_lab.Services
 
         public async Task<List<Patient>> SearchPatientsAsync(string? name, string? phone, string? labId, DateTime? date = null)
         {
+            return await SearchPatientsAsync(new PatientSearchCriteria
+            {
+                Name = name,
+                Phone = phone,
+                LabId = labId,
+                Date = date
+            });
+        }
+
+        public async Task<List<Patient>> SearchPatientsAsync(PatientSearchCriteria criteria)
+        {
             var query = _db.Patients.AsNoTracking().AsQueryable();
+            criteria ??= new PatientSearchCriteria();
 
-            if (!string.IsNullOrWhiteSpace(name))
+            if (!string.IsNullOrWhiteSpace(criteria.Name))
             {
-                query = query.Where(p => p.FullName.Contains(name));
+                query = query.Where(p => p.FullName.Contains(criteria.Name));
             }
 
-            if (!string.IsNullOrWhiteSpace(phone))
+            if (!string.IsNullOrWhiteSpace(criteria.Phone))
             {
-                query = query.Where(p => p.Phone != null && p.Phone.Contains(phone));
+                query = query.Where(p =>
+                    (p.Phone != null && p.Phone.Contains(criteria.Phone)) ||
+                    (p.HomePhone != null && p.HomePhone.Contains(criteria.Phone)));
             }
 
-            if (!string.IsNullOrWhiteSpace(labId))
+            if (!string.IsNullOrWhiteSpace(criteria.LabId))
             {
-                query = query.Where(p => p.LabId == labId);
+                query = query.Where(p => p.LabId == criteria.LabId);
             }
 
-            if (date.HasValue)
+            if (!string.IsNullOrWhiteSpace(criteria.NationalId))
             {
-                var searchDate = date.Value.Date;
+                query = query.Where(p => p.NationalId != null && p.NationalId.Contains(criteria.NationalId));
+            }
+
+            if (criteria.Date.HasValue)
+            {
+                var searchDate = criteria.Date.Value.Date;
                 query = query.Where(p => p.Visits.Any(v => v.VisitDate.Date == searchDate));
             }
 
-            return await query.OrderBy(p => p.FullName).ToListAsync();
+            if (criteria.DateFrom.HasValue || criteria.DateTo.HasValue)
+            {
+                var from = (criteria.DateFrom ?? DateTime.MinValue).Date;
+                var to = (criteria.DateTo ?? DateTime.MaxValue).Date.AddDays(1).AddTicks(-1);
+                query = query.Where(p => p.Visits.Any(v => v.VisitDate >= from && v.VisitDate <= to));
+            }
+
+            if (!string.IsNullOrWhiteSpace(criteria.AgeGroup) && !string.Equals(criteria.AgeGroup, "الكل", StringComparison.OrdinalIgnoreCase))
+            {
+                query = criteria.AgeGroup switch
+                {
+                    "أطفال" => query.Where(p => p.Age.HasValue && p.Age.Value < 18),
+                    "بالغين" => query.Where(p => p.Age.HasValue && p.Age.Value >= 18 && p.Age.Value < 60),
+                    "كبار سن" => query.Where(p => p.Age.HasValue && p.Age.Value >= 60),
+                    _ => query
+                };
+            }
+
+            return await query.OrderBy(p => p.FullName).Take(100).ToListAsync();
         }
 
         public Task<List<Visit>> GetPatientVisitsAsync(int patientId)

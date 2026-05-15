@@ -238,9 +238,11 @@ namespace Open_lab.Services
 
         public async Task<decimal> GetVisitTotalAsync(int visitId)
         {
-            var testsTotal = await _db.VisitTests
+            var testPrices = await _db.VisitTests
                 .Where(vt => vt.VisitId == visitId)
-                .SumAsync(vt => vt.Price);
+                .Select(vt => vt.Price)
+                .ToListAsync();
+            var testsTotal = testPrices.Sum();
 
             var invoiceId = await _db.Invoices
                 .Where(i => i.VisitId == visitId)
@@ -252,9 +254,11 @@ namespace Open_lab.Services
                 return testsTotal;
             }
 
-            var chargesTotal = await _db.AdditionalCharges
+            var chargeAmounts = await _db.AdditionalCharges
                 .Where(c => c.InvoiceId == invoiceId.Value)
-                .SumAsync(c => c.Amount);
+                .Select(c => c.Amount)
+                .ToListAsync();
+            var chargesTotal = chargeAmounts.Sum();
 
             return testsTotal + chargesTotal;
         }
@@ -312,9 +316,11 @@ namespace Open_lab.Services
         private async Task RecalculateInvoiceAsync(int invoiceId, decimal manualPaid)
         {
             var invoice = await _db.Invoices.FirstAsync(i => i.InvoiceId == invoiceId);
-            var paidFromPayments = await _db.Payments
+            var paymentAmounts = await _db.Payments
                 .Where(p => p.InvoiceId == invoiceId)
-                .SumAsync(p => p.Amount);
+                .Select(p => p.Amount)
+                .ToListAsync();
+            var paidFromPayments = paymentAmounts.Sum();
 
             invoice.Paid = paidFromPayments + manualPaid;
             invoice.Balance = invoice.NetTotal - invoice.Paid;

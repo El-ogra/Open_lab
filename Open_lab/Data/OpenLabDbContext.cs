@@ -132,9 +132,14 @@ namespace Open_lab.Data
             {
                 entity.HasKey(e => e.PatientId);
                 entity.HasIndex(e => e.LabId).IsUnique();
+                entity.HasIndex(e => e.NationalId);
                 entity.Property(e => e.LabId).IsRequired();
                 entity.Property(e => e.FullName).IsRequired();
                 entity.Property(e => e.Gender).IsRequired();
+                entity.Property(e => e.Phone).HasMaxLength(50);
+                entity.Property(e => e.HomePhone).HasMaxLength(50);
+                entity.Property(e => e.NationalId).HasMaxLength(50);
+                entity.Property(e => e.Email).HasMaxLength(255);
                 entity.HasOne(e => e.Referral)
                     .WithMany(e => e.Patients)
                     .HasForeignKey(e => e.ReferralId)

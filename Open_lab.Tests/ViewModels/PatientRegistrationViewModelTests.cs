@@ -500,6 +500,63 @@ namespace Open_lab.Tests.ViewModels
         }
 
         [Fact]
+        public async Task SaveAsync_With_SelectedTests_Should_CreateVisit_AddTests_And_CreateInvoice()
+        {
+            // Function: 1.1 — Add New Patient with visit tests and invoice
+            // Arrange
+            var visitServiceMock = new Mock<IVisitService>();
+            var invoiceServiceMock = new Mock<IInvoiceService>();
+            var vm = new PatientRegistrationViewModel(
+                _patientServiceMock.Object,
+                null,
+                visitServiceMock.Object,
+                invoiceServiceMock.Object,
+                null,
+                null);
+
+            vm.LabId = "LAB-WF-001";
+            vm.FullName = "Workflow Patient";
+            vm.Gender = "Male";
+            vm.Age = 35;
+            vm.SelectedTests.Add(new SelectedTestItem { TestId = 10, TestName = "CBC", Price = 150m });
+            vm.DiscountPercent = 10m;
+            vm.PaidAmount = 50m;
+
+            _patientServiceMock.Setup(x => x.CreateAsync(It.IsAny<Patient>()))
+                .ReturnsAsync((Patient p) =>
+                {
+                    p.PatientId = 500;
+                    return p;
+                });
+            _patientServiceMock.Setup(x => x.SaveMedicalHistoryAsync(500, It.IsAny<MedicalHistory>()))
+                .Returns(Task.CompletedTask);
+
+            visitServiceMock.Setup(x => x.CreateAsync(It.IsAny<Visit>()))
+                .ReturnsAsync((Visit v) =>
+                {
+                    v.VisitId = 700;
+                    return v;
+                });
+            visitServiceMock.Setup(x => x.GetVisitTestsAsync(700))
+                .ReturnsAsync(new List<VisitTest>());
+            visitServiceMock.Setup(x => x.AddTestToVisitAsync(700, 10, 150m))
+                .ReturnsAsync(new VisitTest { VisitTestId = 900, VisitId = 700, TestId = 10, Price = 150m });
+            invoiceServiceMock.Setup(x => x.CreateOrUpdateInvoiceAsync(700, 15m, 50m))
+                .ReturnsAsync(new Invoice { InvoiceId = 800, VisitId = 700, Total = 150m, Discount = 15m, Paid = 50m, Balance = 85m });
+
+            // Act
+            vm.SaveCommand.Execute(null);
+            await Task.Delay(150);
+
+            // Assert
+            visitServiceMock.Verify(x => x.CreateAsync(It.Is<Visit>(v => v.PatientId == 500)), Times.Once);
+            visitServiceMock.Verify(x => x.AddTestToVisitAsync(700, 10, 150m), Times.Once);
+            invoiceServiceMock.Verify(x => x.CreateOrUpdateInvoiceAsync(700, 15m, 50m), Times.Once);
+            vm.CurrentVisitId.Should().Be(700);
+            vm.SelectedTests[0].VisitTestId.Should().Be(900);
+        }
+
+        [Fact]
         public async Task AssignPatientToContract_WithSelectedReferral_ShouldPassReferralIdToUpdate()
         {
             // Function: 12.5 — Assign Patient to Contract
@@ -680,9 +737,9 @@ namespace Open_lab.Tests.ViewModels
         }
 
         [Fact]
-        public void PatientRegistrationViewModel_Should_Have_Only_PatientService_Dependency_Outside_ResultEntryScope_ProductionGap()
+        public void PatientRegistrationViewModel_Should_Expose_Visit_And_Invoice_Dependencies_For_RegistrationWorkflow()
         {
-            // Function: 1.7 — Add Medical History
+            // Function: 1.1 — Add New Patient with Visit and Invoice
             // Arrange
             var constructor = typeof(PatientRegistrationViewModel).GetConstructors()
                 .OrderByDescending(c => c.GetParameters().Length)
@@ -691,13 +748,14 @@ namespace Open_lab.Tests.ViewModels
 
             // Act
             var hasResultEntryDependency = parameterTypes.Any(t =>
-                t.Name.Contains("Result", StringComparison.OrdinalIgnoreCase)
-                || t.Name.Contains("Visit", StringComparison.OrdinalIgnoreCase));
+                t.Name.Contains("Result", StringComparison.OrdinalIgnoreCase));
 
             // Assert
             parameterTypes.Should().Contain(typeof(IPatientService));
             parameterTypes.Should().Contain(typeof(ITestCatalogService));
-            hasResultEntryDependency.Should().BeFalse("BR-MED-006/007 visibility at result-entry stage cannot be validated from this ViewModel scope.");
+            parameterTypes.Should().Contain(typeof(IVisitService));
+            parameterTypes.Should().Contain(typeof(IInvoiceService));
+            hasResultEntryDependency.Should().BeFalse("registration owns visit and invoice creation but still must not depend on result-entry services.");
         }
     }
 }

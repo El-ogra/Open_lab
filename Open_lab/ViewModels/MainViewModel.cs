@@ -11,7 +11,6 @@ using Open_lab.ViewModels.Statistics;
 using Open_lab.ViewModels.Settings;
 using Open_lab.ViewModels.Tools;
 using Open_lab.ViewModels.Users;
-using Open_lab.Views.Shared;
 
 namespace Open_lab.ViewModels
 {
@@ -230,6 +229,20 @@ namespace Open_lab.ViewModels
         private void NavigateTo(NavigationTarget target)
         {
             _navigationService.Navigate(target);
+            CurrentView = _navigationService.CurrentViewModel;
+            IsToolbarVisible = !IsPatientDetailTarget(target);
+            if (!IsToolbarVisible)
+            {
+                ActiveModule = "المرضى";
+            }
+        }
+
+        private static bool IsPatientDetailTarget(NavigationTarget target)
+        {
+            return target == NavigationTarget.PatientRegistration
+                || target == NavigationTarget.ResultsEntry
+                || target == NavigationTarget.PatientSearch
+                || target == NavigationTarget.Delivery;
         }
 
         private void NavigateTopModule(string moduleName)
@@ -243,7 +256,7 @@ namespace Open_lab.ViewModels
         {
             ActiveModule = "المرضى";
             IsToolbarVisible = true;
-            CurrentView = new PatientModuleViewModel(OpenPlaceholder);
+            CurrentView = new PatientModuleViewModel(NavigateTo);
         }
 
         private void NavigateToSystemDataModule()
@@ -298,7 +311,7 @@ namespace Open_lab.ViewModels
         private void OpenPlaceholder(string functionTitle)
         {
             IsToolbarVisible = false;
-            CurrentView = new PlaceholderView(functionTitle, new RelayCommand(_ => ReturnToActiveModule()));
+            CurrentView = new PlaceholderViewModel(functionTitle, new RelayCommand(_ => ReturnToActiveModule()));
         }
 
         private void ReturnToActiveModule()
@@ -307,7 +320,7 @@ namespace Open_lab.ViewModels
 
             if (ActiveModule == "المرضى")
             {
-                CurrentView = new PatientModuleViewModel(OpenPlaceholder);
+                CurrentView = new PatientModuleViewModel(NavigateTo);
                 return;
             }
 
@@ -404,6 +417,7 @@ namespace Open_lab.ViewModels
             if (e.PropertyName == nameof(INavigationService.CurrentViewModel))
             {
                 OnPropertyChanged(nameof(CurrentViewModel));
+                CurrentView = _navigationService.CurrentViewModel;
             }
         }
 

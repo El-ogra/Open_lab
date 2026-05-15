@@ -79,6 +79,38 @@ namespace Open_lab.Tests.ViewModels
         }
 
         [Fact]
+        public async Task SearchCommand_With_AdvancedFilters_Should_Call_Criteria_Overload()
+        {
+            // Function: 1.5 — Advanced Search Patient filters
+            // Arrange
+            _viewModel.Name = "Ali";
+            _viewModel.NationalId = "298";
+            _viewModel.DateFrom = new DateTime(2026, 5, 1);
+            _viewModel.DateTo = new DateTime(2026, 5, 31);
+            _viewModel.AgeGroup = "بالغين";
+
+            _patientSearchServiceMock
+                .Setup(service => service.SearchPatientsAsync(It.Is<PatientSearchCriteria>(criteria =>
+                    criteria.Name == "Ali" &&
+                    criteria.NationalId == "298" &&
+                    criteria.DateFrom == new DateTime(2026, 5, 1) &&
+                    criteria.DateTo == new DateTime(2026, 5, 31) &&
+                    criteria.AgeGroup == "بالغين")))
+                .ReturnsAsync(new List<Patient>
+                {
+                    new Patient { PatientId = 8, FullName = "Ali Advanced", LabId = "LAB-ADV" }
+                });
+
+            // Act
+            _viewModel.SearchCommand.Execute(null);
+            await Task.Delay(100);
+
+            // Assert
+            _viewModel.Patients.Should().ContainSingle();
+            _viewModel.Patients[0].LabId.Should().Be("LAB-ADV");
+        }
+
+        [Fact]
         public async Task SelectedPatient_Setter_Should_Load_Visits()
         {
             // Function: 1.6 — View Patient History

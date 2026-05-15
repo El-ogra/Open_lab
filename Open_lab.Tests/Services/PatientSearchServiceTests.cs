@@ -80,6 +80,62 @@ namespace Open_lab.Tests.Services
         }
 
         [Fact]
+        public async Task SearchPatient_WithAdvancedFilters_ShouldFilterByDateRangeAgeGroupAndNationalId()
+        {
+            // Function: 1.5 — Advanced patient search
+            // Arrange
+            var child = new Patient { LabId = "LAB-C", FullName = "Child Patient", Gender = "Male", Age = 10, NationalId = "111" };
+            var adult = new Patient { LabId = "LAB-A", FullName = "Adult Patient", Gender = "Female", Age = 33, NationalId = "222" };
+            _db.Patients.AddRange(child, adult);
+            await _db.SaveChangesAsync();
+
+            _db.Visits.AddRange(
+                new Visit { PatientId = child.PatientId, VisitDate = new DateTime(2026, 5, 1) },
+                new Visit { PatientId = adult.PatientId, VisitDate = new DateTime(2026, 5, 10) });
+            await _db.SaveChangesAsync();
+
+            // Act
+            var rows = await _service.SearchPatientsAsync(new PatientSearchCriteria
+            {
+                NationalId = "222",
+                DateFrom = new DateTime(2026, 5, 1),
+                DateTo = new DateTime(2026, 5, 15),
+                AgeGroup = "بالغين"
+            });
+
+            // Assert
+            rows.Should().ContainSingle();
+            rows[0].LabId.Should().Be("LAB-A");
+        }
+
+        [Fact]
+        public async Task SearchPatient_WithDateRange_ShouldLimitToPatientsWithVisitsInsideRange()
+        {
+            // Function: 1.5 — Date range search
+            // Arrange
+            var inside = new Patient { LabId = "LAB-IN", FullName = "Inside", Gender = "Male", Age = 40 };
+            var outside = new Patient { LabId = "LAB-OUT", FullName = "Outside", Gender = "Male", Age = 40 };
+            _db.Patients.AddRange(inside, outside);
+            await _db.SaveChangesAsync();
+
+            _db.Visits.AddRange(
+                new Visit { PatientId = inside.PatientId, VisitDate = new DateTime(2026, 1, 10) },
+                new Visit { PatientId = outside.PatientId, VisitDate = new DateTime(2026, 2, 10) });
+            await _db.SaveChangesAsync();
+
+            // Act
+            var rows = await _service.SearchPatientsAsync(new PatientSearchCriteria
+            {
+                DateFrom = new DateTime(2026, 1, 1),
+                DateTo = new DateTime(2026, 1, 31)
+            });
+
+            // Assert
+            rows.Should().ContainSingle();
+            rows[0].LabId.Should().Be("LAB-IN");
+        }
+
+        [Fact]
         public async Task ViewPatientHistory_WhenVisitsExist_ShouldReturnDescendingByVisitDate()
         {
             // Function: 1.6 — View Patient History

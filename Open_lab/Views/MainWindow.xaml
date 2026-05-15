@@ -8,6 +8,13 @@
         MinWidth="980"
         WindowStartupLocation="CenterScreen"
         FlowDirection="RightToLeft">
+    <Window.InputBindings>
+        <KeyBinding Key="F2" Command="{Binding NavigatePatientRegistrationCommand}" />
+        <KeyBinding Key="F3" Command="{Binding NavigatePatientSearchCommand}" />
+        <KeyBinding Key="F4" Command="{Binding NavigateResultsEntryCommand}" />
+        <KeyBinding Key="F6" Command="{Binding NavigateDeliveryCommand}" />
+    </Window.InputBindings>
+
     <Window.Resources>
         <LinearGradientBrush x:Key="TopToolbarBrush" StartPoint="0,0" EndPoint="1,1">
             <GradientStop Color="#0B2239" Offset="0" />

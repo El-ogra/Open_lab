@@ -6,16 +6,30 @@ namespace Open_lab.ViewModels.Patients
 {
     public class PatientModuleViewModel : BaseViewModel
     {
-        private readonly Action<string> _openPlaceholder;
-
         public PatientModuleViewModel(Action<string> openPlaceholder)
         {
-            _openPlaceholder = openPlaceholder ?? throw new ArgumentNullException(nameof(openPlaceholder));
+            if (openPlaceholder == null)
+            {
+                throw new ArgumentNullException(nameof(openPlaceholder));
+            }
 
-            OpenAddPatientCommand = new RelayCommand(_ => _openPlaceholder("اضافة وتعديل بيانات المرضى"));
-            OpenEnterResultsCommand = new RelayCommand(_ => _openPlaceholder("ادخال نتائج التحاليل"));
-            OpenDeliverResultsCommand = new RelayCommand(_ => _openPlaceholder("تسليم نتائج المرضى"));
-            OpenSearchPatientCommand = new RelayCommand(_ => _openPlaceholder("بحث عن مريض"));
+            OpenAddPatientCommand = new RelayCommand(_ => openPlaceholder("اضافة وتعديل بيانات المرضى"));
+            OpenEnterResultsCommand = new RelayCommand(_ => openPlaceholder("ادخال نتائج التحاليل"));
+            OpenDeliverResultsCommand = new RelayCommand(_ => openPlaceholder("تسليم نتائج المرضى"));
+            OpenSearchPatientCommand = new RelayCommand(_ => openPlaceholder("بحث عن مريض"));
+        }
+
+        public PatientModuleViewModel(Action<NavigationTarget> navigate)
+        {
+            if (navigate == null)
+            {
+                throw new ArgumentNullException(nameof(navigate));
+            }
+
+            OpenAddPatientCommand = new RelayCommand(_ => navigate(NavigationTarget.PatientRegistration));
+            OpenEnterResultsCommand = new RelayCommand(_ => navigate(NavigationTarget.ResultsEntry));
+            OpenDeliverResultsCommand = new RelayCommand(_ => navigate(NavigationTarget.Delivery));
+            OpenSearchPatientCommand = new RelayCommand(_ => navigate(NavigationTarget.PatientSearch));
         }
 
         public ICommand OpenAddPatientCommand { get; }

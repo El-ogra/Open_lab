@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="clr-namespace:Open_lab.ViewModels"
              xmlns:views="clr-namespace:Open_lab.Views"
+             xmlns:sharedViews="clr-namespace:Open_lab.Views.Shared"
              xmlns:patientsVm="clr-namespace:Open_lab.ViewModels.Patients"
              xmlns:patientsViews="clr-namespace:Open_lab.Views.Patients"
              xmlns:systemDataVm="clr-namespace:Open_lab.ViewModels.SystemData"
@@ -23,6 +24,7 @@
         <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
         <vm:InverseBooleanConverter x:Key="InverseBooleanConverter" />
         <vm:InverseBoolToVisibilityConverter x:Key="InverseBoolToVisibilityConverter" />
+        <vm:StringEqualsConverter x:Key="StringEqualsConverter" />
 
         <DataTemplate DataType="{x:Type vm:LoginViewModel}">
             <views:LoginView />
@@ -36,8 +38,28 @@
             <views:WelcomeView />
         </DataTemplate>
 
+        <DataTemplate DataType="{x:Type vm:PlaceholderViewModel}">
+            <sharedViews:PlaceholderView />
+        </DataTemplate>
+
         <DataTemplate DataType="{x:Type patientsVm:PatientModuleViewModel}">
             <patientsViews:PatientModuleView />
+        </DataTemplate>
+
+        <DataTemplate DataType="{x:Type vm:PatientRegistrationViewModel}">
+            <patientsViews:PatientRegistrationView />
+        </DataTemplate>
+
+        <DataTemplate DataType="{x:Type vm:ResultsEntryViewModel}">
+            <patientsViews:ResultsEntryView />
+        </DataTemplate>
+
+        <DataTemplate DataType="{x:Type vm:PatientSearchViewModel}">
+            <patientsViews:PatientSearchView />
+        </DataTemplate>
+
+        <DataTemplate DataType="{x:Type vm:DeliveryViewModel}">
+            <patientsViews:DeliveryView />
         </DataTemplate>
 
         <DataTemplate DataType="{x:Type systemDataVm:SystemDataModuleViewModel}">

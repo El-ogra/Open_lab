@@ -9,20 +9,29 @@ namespace Open_lab.ViewModels
     public class DeliveryViewModel : BaseViewModel
     {
         private readonly IDeliveryService _deliveryService;
+        private readonly IInvoiceService? _invoiceService;
         private DateTime _dateFrom = DateTime.Today;
         private DateTime _dateTo = DateTime.Today;
         private string _keyword = string.Empty;
         private DeliveryVisitRow? _selectedVisit;
+        private decimal _paymentAmount;
         private string _statusMessage = string.Empty;
 
         public DeliveryViewModel(IDeliveryService deliveryService)
+            : this(deliveryService, null)
+        {
+        }
+
+        public DeliveryViewModel(IDeliveryService deliveryService, IInvoiceService? invoiceService)
         {
             _deliveryService = deliveryService;
+            _invoiceService = invoiceService;
             Visits = new ObservableCollection<DeliveryVisitRow>();
 
             SearchCommand = new RelayCommand(async _ => await LoadAsync(), _ => AppSession.HasPermission(PermissionCodes.DeliveryView));
             DeliverCommand = new RelayCommand(async _ => await DeliverAsync(), _ => CanDeliver());
             ReopenCommand = new RelayCommand(async _ => await ReopenAsync(), _ => CanReopen());
+            PayCommand = new RelayCommand(async _ => await PayAsync(), _ => CanPay());
         }
 
         public ObservableCollection<DeliveryVisitRow> Visits { get; }
@@ -57,6 +66,18 @@ namespace Open_lab.ViewModels
             }
         }
 
+        public decimal PaymentAmount
+        {
+            get => _paymentAmount;
+            set
+            {
+                if (SetProperty(ref _paymentAmount, value))
+                {
+                    RaiseActionsState();
+                }
+            }
+        }
+
         public string StatusMessage
         {
             get => _statusMessage;
@@ -66,6 +87,7 @@ namespace Open_lab.ViewModels
         public ICommand SearchCommand { get; }
         public ICommand DeliverCommand { get; }
         public ICommand ReopenCommand { get; }
+        public ICommand PayCommand { get; }
 
         private async Task LoadAsync()
         {
@@ -128,6 +150,39 @@ namespace Open_lab.ViewModels
             }
         }
 
+        private async Task PayAsync()
+        {
+            if (SelectedVisit == null || _invoiceService == null)
+            {
+                StatusMessage = "لا توجد زيارة محددة أو خدمة الفواتير غير متاحة.";
+                return;
+            }
+
+            try
+            {
+                var invoice = await _invoiceService.GetByVisitIdAsync(SelectedVisit.VisitId);
+                if (invoice == null)
+                {
+                    StatusMessage = "لا توجد فاتورة لهذه الزيارة.";
+                    return;
+                }
+
+                await _invoiceService.AddPaymentAsync(
+                    invoice.InvoiceId,
+                    PaymentAmount,
+                    "Cash",
+                    AppSession.UserId > 0 ? AppSession.UserId : 1);
+
+                PaymentAmount = 0;
+                await LoadAsync();
+                StatusMessage = "تم تسجيل الدفع بنجاح.";
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = "خطأ: " + ex.Message;
+            }
+        }
+
         private bool CanDeliver()
         {
             return AppSession.HasPermission(PermissionCodes.DeliveryEdit)
@@ -143,11 +198,20 @@ namespace Open_lab.ViewModels
                 && SelectedVisit.IsDelivered;
         }
 
+        private bool CanPay()
+        {
+            return AppSession.HasPermission(PermissionCodes.DeliveryEdit)
+                && _invoiceService != null
+                && SelectedVisit != null
+                && PaymentAmount > 0;
+        }
+
         private void RaiseActionsState()
         {
             (SearchCommand as RelayCommand)?.RaiseCanExecuteChanged();
             (DeliverCommand as RelayCommand)?.RaiseCanExecuteChanged();
             (ReopenCommand as RelayCommand)?.RaiseCanExecuteChanged();
+            (PayCommand as RelayCommand)?.RaiseCanExecuteChanged();
         }
     }
 }
