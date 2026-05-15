@@ -5,82 +5,97 @@
              Background="#13314F">
     <UserControl.Resources>
 
-        <!-- ========= ألوان الواجهة الموحدة ========= -->
+        <!-- ========= ألوان الواجهة الموحدة المستوحاة من الصورة ========= -->
         <SolidColorBrush x:Key="NavyBackground" Color="#13314F" />
         <SolidColorBrush x:Key="PanelBorder"    Color="#1F4F86" />
-        <SolidColorBrush x:Key="HeaderOrange"   Color="#F39C12" />
+        <SolidColorBrush x:Key="HeaderOrange"   Color="#D35400" />
+        <SolidColorBrush x:Key="BrightOrange"   Color="#E67E22" />
         <SolidColorBrush x:Key="HeaderYellow"   Color="#F1C40F" />
-        <SolidColorBrush x:Key="OliveGreen"     Color="#6E8B3D" />
-        <SolidColorBrush x:Key="FreshGreen"     Color="#8DB600" />
-        <SolidColorBrush x:Key="DangerRed"      Color="#D9534F" />
-        <SolidColorBrush x:Key="InfoBlue"       Color="#2E86C1" />
-        <SolidColorBrush x:Key="FieldLabelBg"   Color="#2980B9" />
-        <SolidColorBrush x:Key="YellowPanel"    Color="#F4D03F" />
+        <SolidColorBrush x:Key="OliveGreen"     Color="#808000" />
+        <SolidColorBrush x:Key="FreshGreen"     Color="#27AE60" />
+        <SolidColorBrush x:Key="LimeGreen"      Color="#8DB600" />
+        <SolidColorBrush x:Key="DangerRed"      Color="#C0392B" />
+        <SolidColorBrush x:Key="InfoBlue"       Color="#2980B9" />
+        <SolidColorBrush x:Key="LabelBlue"      Color="#3498DB" />
+        <SolidColorBrush x:Key="YellowPanel"    Color="#F1C40F" />
+        <SolidColorBrush x:Key="DarkBlueHeader" Color="#0B243B" />
 
-        <!-- ========= نمط ترويسة المجموعة (عنوان برتقالي) ========= -->
+        <!-- ========= نمط ترويسة المجموعة (أزرق غامق مع نص أصفر) ========= -->
         <Style x:Key="GroupHeaderStyle" TargetType="Border">
-            <Setter Property="Background" Value="{StaticResource HeaderOrange}" />
-            <Setter Property="CornerRadius" Value="3" />
-            <Setter Property="Padding" Value="8,3" />
+            <Setter Property="Background" Value="{StaticResource DarkBlueHeader}" />
+            <Setter Property="CornerRadius" Value="2" />
+            <Setter Property="Padding" Value="10,2" />
             <Setter Property="HorizontalAlignment" Value="Right" />
-            <Setter Property="Margin" Value="0,0,8,-12" />
+            <Setter Property="Margin" Value="0,0,10,-12" />
+            <Setter Property="BorderBrush" Value="{StaticResource PanelBorder}" />
+            <Setter Property="BorderThickness" Value="1" />
         </Style>
         <Style x:Key="GroupHeaderText" TargetType="TextBlock">
-            <Setter Property="Foreground" Value="White" />
+            <Setter Property="Foreground" Value="{StaticResource HeaderYellow}" />
             <Setter Property="FontWeight" Value="Bold" />
-            <Setter Property="FontSize" Value="13" />
+            <Setter Property="FontSize" Value="12" />
         </Style>
 
         <!-- ========= نمط الإطار الأزرق الرئيسي ========= -->
         <Style x:Key="GroupBoxStyle" TargetType="Border">
-            <Setter Property="Background" Value="{StaticResource NavyBackground}" />
+            <Setter Property="Background" Value="Transparent" />
             <Setter Property="BorderBrush" Value="{StaticResource PanelBorder}" />
-            <Setter Property="BorderThickness" Value="1.5" />
-            <Setter Property="CornerRadius" Value="4" />
-            <Setter Property="Padding" Value="10,16,10,8" />
-            <Setter Property="Margin" Value="6,8,6,4" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="2" />
+            <Setter Property="Padding" Value="8,14,8,6" />
+            <Setter Property="Margin" Value="4,6,4,2" />
         </Style>
 
         <!-- ========= نمط ليبل أزرق للحقول ========= -->
         <Style x:Key="FieldLabelStyle" TargetType="Border">
-            <Setter Property="Background" Value="{StaticResource FieldLabelBg}" />
-            <Setter Property="CornerRadius" Value="2" />
-            <Setter Property="Padding" Value="6,3" />
-            <Setter Property="Margin" Value="2" />
-            <Setter Property="MinWidth" Value="95" />
+            <Setter Property="Background" Value="{StaticResource LabelBlue}" />
+            <Setter Property="CornerRadius" Value="1" />
+            <Setter Property="Padding" Value="4,2" />
+            <Setter Property="Margin" Value="1" />
+            <Setter Property="MinWidth" Value="85" />
+            <Setter Property="Height" Value="26" />
         </Style>
         <Style x:Key="FieldLabelText" TargetType="TextBlock">
             <Setter Property="Foreground" Value="White" />
             <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="FontSize" Value="11.5" />
             <Setter Property="HorizontalAlignment" Value="Center" />
             <Setter Property="VerticalAlignment" Value="Center" />
         </Style>
 
-        <!-- ========= نمط أزرار الإجراءات (متعدد الألوان) ========= -->
+        <!-- ========= نمط أزرار الإجراءات ========= -->
         <Style x:Key="ActionButtonStyle" TargetType="Button">
-            <Setter Property="MinWidth" Value="92" />
-            <Setter Property="Height" Value="32" />
-            <Setter Property="Margin" Value="3" />
+            <Setter Property="MinWidth" Value="80" />
+            <Setter Property="Height" Value="28" />
+            <Setter Property="Margin" Value="2" />
             <Setter Property="Background" Value="{StaticResource FreshGreen}" />
-            <Setter Property="Foreground" Value="White" />
-            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Foreground" Value="Black" />
+            <Setter Property="BorderThickness" Value="0.5" />
+            <Setter Property="BorderBrush" Value="#444" />
             <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="FontSize" Value="12" />
             <Setter Property="Cursor" Value="Hand" />
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
                         <Border x:Name="Root"
                                 Background="{TemplateBinding Background}"
-                                CornerRadius="3">
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="2">
                             <ContentPresenter HorizontalAlignment="Center"
                                               VerticalAlignment="Center" />
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Root" Property="Opacity" Value="0.85" />
+                                <Setter TargetName="Root" Property="Opacity" Value="0.8" />
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="Root" Property="Opacity" Value="0.7" />
+                                <Setter TargetName="Root" Property="Background" Value="White" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="Root" Property="Background" Value="#BDC3C7" />
+                                <Setter Property="Foreground" Value="#7F8C8D" />
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -88,14 +103,15 @@
             </Setter>
         </Style>
 
-        <!-- ========= نمط أزرار العينات الخضراء ========= -->
+        <!-- ========= نمط أزرار العينات ========= -->
         <Style x:Key="SampleButtonStyle" TargetType="ToggleButton">
-            <Setter Property="MinWidth" Value="78" />
-            <Setter Property="Height" Value="28" />
-            <Setter Property="Margin" Value="3" />
-            <Setter Property="Background" Value="{StaticResource FreshGreen}" />
-            <Setter Property="Foreground" Value="White" />
-            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="MinWidth" Value="70" />
+            <Setter Property="Height" Value="24" />
+            <Setter Property="Margin" Value="2" />
+            <Setter Property="Background" Value="White" />
+            <Setter Property="Foreground" Value="{StaticResource HeaderOrange}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="BorderBrush" Value="{StaticResource HeaderOrange}" />
             <Setter Property="FontWeight" Value="Bold" />
             <Setter Property="Cursor" Value="Hand" />
             <Setter Property="Template">
@@ -103,16 +119,16 @@
                     <ControlTemplate TargetType="ToggleButton">
                         <Border x:Name="Root"
                                 Background="{TemplateBinding Background}"
-                                CornerRadius="3">
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="1">
                             <ContentPresenter HorizontalAlignment="Center"
                                               VerticalAlignment="Center" />
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsChecked" Value="True">
-                                <Setter TargetName="Root" Property="Background" Value="#F39C12" />
-                            </Trigger>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Root" Property="Opacity" Value="0.85" />
+                                <Setter TargetName="Root" Property="Background" Value="{StaticResource HeaderYellow}" />
+                                <Setter Property="Foreground" Value="Black" />
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -120,33 +136,32 @@
             </Setter>
         </Style>
 
-        <!-- ========= نمط الـ CheckBox الزيتوني ========= -->
+        <!-- ========= نمط الـ CheckBox المستطيل الملون ========= -->
         <Style x:Key="OliveCheckBoxStyle" TargetType="CheckBox">
             <Setter Property="Foreground" Value="White" />
-            <Setter Property="FontSize" Value="12" />
+            <Setter Property="FontSize" Value="11" />
             <Setter Property="VerticalAlignment" Value="Center" />
-            <Setter Property="Margin" Value="2,2" />
-            <Setter Property="Padding" Value="6,3" />
+            <Setter Property="Margin" Value="1" />
             <Setter Property="Background" Value="{StaticResource OliveGreen}" />
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="CheckBox">
                         <Border Background="{TemplateBinding Background}"
-                                CornerRadius="2"
-                                Padding="4,3">
+                                CornerRadius="0"
+                                Padding="3,2">
                             <DockPanel LastChildFill="True">
                                 <Border DockPanel.Dock="Left"
-                                        Width="16" Height="16"
+                                        Width="14" Height="14"
                                         Background="White"
-                                        BorderBrush="#444"
+                                        BorderBrush="#333"
                                         BorderThickness="1"
-                                        Margin="0,0,6,0">
+                                        Margin="0,0,4,0">
                                     <Path x:Name="CheckMark"
                                           Stretch="Fill"
-                                          Stroke="#1F4F86"
+                                          Stroke="Black"
                                           StrokeThickness="2"
                                           Data="M 0 5 L 4 9 L 10 0"
-                                          Margin="2"
+                                          Margin="1"
                                           Visibility="Collapsed" />
                                 </Border>
                                 <ContentPresenter VerticalAlignment="Center" />
@@ -162,29 +177,29 @@
             </Setter>
         </Style>
 
-        <!-- ========= نمط حقل النص الأبيض ========= -->
+        <!-- ========= حقول النص ========= -->
         <Style x:Key="WhiteTextBoxStyle" TargetType="TextBox">
             <Setter Property="Background" Value="White" />
             <Setter Property="Foreground" Value="Black" />
-            <Setter Property="Padding" Value="4,3" />
+            <Setter Property="Padding" Value="2,1" />
             <Setter Property="BorderBrush" Value="#7FB3D5" />
             <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="MinHeight" Value="24" />
-            <Setter Property="Margin" Value="2" />
+            <Setter Property="MinHeight" Value="22" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="Margin" Value="1" />
         </Style>
 
-        <!-- ========= نمط ComboBox أبيض ========= -->
         <Style x:Key="WhiteComboBoxStyle" TargetType="ComboBox">
             <Setter Property="Background" Value="White" />
-            <Setter Property="MinHeight" Value="24" />
-            <Setter Property="Margin" Value="2" />
+            <Setter Property="Height" Value="24" />
+            <Setter Property="Margin" Value="1" />
         </Style>
 
-        <!-- ========= نمط الـ RadioButton ========= -->
         <Style x:Key="WhiteRadioStyle" TargetType="RadioButton">
             <Setter Property="Foreground" Value="White" />
             <Setter Property="VerticalAlignment" Value="Center" />
-            <Setter Property="Margin" Value="6,0,12,0" />
+            <Setter Property="Margin" Value="4,0,8,0" />
+            <Setter Property="FontSize" Value="11" />
         </Style>
 
     </UserControl.Resources>
@@ -206,37 +221,37 @@
         <!-- ============================================================ -->
         <!-- 1) الشريط العلوي: التاريخ والوقت (الاستلام + الدخول)         -->
         <!-- ============================================================ -->
-        <Border Grid.Row="0" Style="{StaticResource GroupBoxStyle}" Padding="8" Margin="6,4">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-
-                <!-- تاريخ الاستلام -->
-                <StackPanel Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,12,0">
-                    <Border Style="{StaticResource FieldLabelStyle}" MinWidth="110">
-                        <TextBlock Text="تاريخ الاستلام" Style="{StaticResource FieldLabelText}" />
-                    </Border>
-                    <DatePicker Width="130" SelectedDate="{Binding ReceptionDate}" Margin="2" />
-                    <TextBox Width="80"
-                             Style="{StaticResource WhiteTextBoxStyle}"
-                             Text="{Binding ReceptionTimeText, UpdateSourceTrigger=PropertyChanged}"
-                             ToolTip="وقت الاستلام (HH:mm tt)" />
-                </StackPanel>
-
-                <!-- تاريخ الدخول -->
-                <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
-                    <Border Style="{StaticResource FieldLabelStyle}" MinWidth="110">
+        <Border Grid.Row="0" Margin="4,2" Padding="2" Background="#13314F" BorderBrush="{StaticResource PanelBorder}" BorderThickness="0,0,0,1">
+            <DockPanel LastChildFill="False">
+                <!-- تاريخ الدخول (يمين) -->
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Margin="4,0">
+                    <Border Style="{StaticResource FieldLabelStyle}" Background="{StaticResource InfoBlue}" MinWidth="90">
                         <TextBlock Text="تاريخ الدخول" Style="{StaticResource FieldLabelText}" />
                     </Border>
-                    <DatePicker Width="130" SelectedDate="{Binding EntryDate}" Margin="2" />
-                    <TextBox Width="80"
+                    <DatePicker Width="115" SelectedDate="{Binding EntryDate}" Margin="1" />
+                    <TextBox Width="75"
                              Style="{StaticResource WhiteTextBoxStyle}"
                              Text="{Binding EntryTimeText, UpdateSourceTrigger=PropertyChanged}"
-                             ToolTip="وقت الدخول (HH:mm tt)" />
+                             FontWeight="Bold" />
                 </StackPanel>
-            </Grid>
+
+                <!-- تاريخ الاستلام (يسار الدخول) -->
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Margin="10,0">
+                    <Border Style="{StaticResource FieldLabelStyle}" Background="{StaticResource InfoBlue}" MinWidth="100">
+                        <TextBlock Text="تاريخ الاستلام" Style="{StaticResource FieldLabelText}" />
+                    </Border>
+                    <DatePicker Width="115" SelectedDate="{Binding ReceptionDate}" Margin="1" />
+                    <TextBox Width="75"
+                             Style="{StaticResource WhiteTextBoxStyle}"
+                             Text="{Binding ReceptionTimeText, UpdateSourceTrigger=PropertyChanged}"
+                             FontWeight="Bold" />
+                </StackPanel>
+
+                <!-- وقت النظام (اختياري - يظهر كـ 09:00 PM في الصورة) -->
+                <Border DockPanel.Dock="Left" Background="White" Padding="6,2" Margin="4,0" CornerRadius="1">
+                    <TextBlock Text="{Binding SystemTimeText, FallbackValue='09:00 PM'}" FontWeight="Bold" Foreground="Black" VerticalAlignment="Center"/>
+                </Border>
+            </DockPanel>
         </Border>
 
         <!-- ============================================================ -->
@@ -244,14 +259,14 @@
         <!-- ============================================================ -->
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="1.05*" />
-                <!-- لوحة قائمة التحاليل + الملخص المالي -->
                 <ColumnDefinition Width="1.85*" />
-                <!-- لوحة بيانات المريض الكاملة -->
+                <!-- لوحة بيانات المريض الكاملة (على اليمين) -->
+                <ColumnDefinition Width="1.05*" />
+                <!-- لوحة قائمة التحاليل + الملخص المالي (على الشمال) -->
             </Grid.ColumnDefinitions>
 
             <!-- ============== العمود الأيسر: قائمة التحاليل + ملخص مالي ============== -->
-            <Grid Grid.Column="0">
+            <Grid Grid.Column="1">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*" />
                     <RowDefinition Height="Auto" />
@@ -259,107 +274,77 @@
 
                 <!-- *********** لوحة Routine test menu *********** -->
                 <Border Grid.Row="0"
-                        Background="{StaticResource YellowPanel}"
-                        BorderBrush="#B7950B"
+                        Background="#0D47A1"
+                        BorderBrush="{StaticResource PanelBorder}"
                         BorderThickness="1"
-                        CornerRadius="3"
-                        Margin="6,4">
+                        CornerRadius="2"
+                        Margin="4">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*"    />
                             <RowDefinition Height="Auto" />
-                            <RowDefinition Height="*" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="160" />
                         </Grid.RowDefinitions>
 
-                        <!-- العنوان -->
-                        <Border Grid.Row="0" Background="#C0392B" CornerRadius="3" Padding="6">
+                        <!-- العنوان: أصفر مع نص أزرق غامق -->
+                        <Border Grid.Row="0" Background="{StaticResource HeaderYellow}" Padding="8,4">
                             <TextBlock Text="Routine test menu"
-                                       Foreground="White"
+                                       Foreground="#13314F"
                                        FontWeight="Bold"
                                        FontSize="14"
                                        HorizontalAlignment="Center"
                                        FlowDirection="LeftToRight" />
                         </Border>
 
-                        <!-- الصف الثاني: التصنيف + البحث -->
-                        <Grid Grid.Row="1" Margin="4,6,4,4">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="130" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <ComboBox Grid.Column="0" SelectedIndex="0" Style="{StaticResource WhiteComboBoxStyle}"
-                                      FlowDirection="LeftToRight">
-                                <ComboBoxItem Content="Rotine Tests" />
-                                <ComboBoxItem Content="Send Out" />
-                                <ComboBoxItem Content="All" />
-                            </ComboBox>
-                            <TextBox Grid.Column="1"
-                                     Style="{StaticResource WhiteTextBoxStyle}"
-                                     Text="{Binding TestSearchText, UpdateSourceTrigger=PropertyChanged}"
-                                     ToolTip="كتابة جزء من اسم التحليل للفلترة" />
-                        </Grid>
-
-                        <!-- الصف الثالث: Selected Test + العداد -->
-                        <Grid Grid.Row="2" Margin="4,2">
+                        <!-- الصف الثاني: التصنيف + البحث + عنوان القائمة المختارة -->
+                        <Grid Grid.Row="1" Margin="2,4">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
-                            <Border Grid.Column="0" Background="#1F4F86" CornerRadius="2" Padding="6,3"
-                                    HorizontalAlignment="Stretch" Margin="0,0,4,0">
-                                <TextBlock Text="Selected Test" Foreground="White" FontWeight="Bold"
-                                           HorizontalAlignment="Center" FlowDirection="LeftToRight" />
-                            </Border>
-                            <Border Grid.Column="1" Background="#F39C12" CornerRadius="2" Padding="8,3"
-                                    MinWidth="38">
-                                <TextBlock Text="{Binding SelectedTests.Count}"
-                                           Foreground="White" FontWeight="Bold"
-                                           HorizontalAlignment="Center" />
-                            </Border>
+                            
+                            <!-- فوق القائمة المختارة (الجهة اليمنى) -->
+                            <Grid Grid.Column="0" Margin="2,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="70" />
+                                </Grid.ColumnDefinitions>
+                                <Border Grid.Column="0" Background="{StaticResource InfoBlue}" Padding="6,2" Margin="0,0,2,0">
+                                    <TextBlock Text="Selected Test" Foreground="White" FontWeight="Bold"
+                                               HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="11"/>
+                                </Border>
+                                <Border Grid.Column="1" Background="{StaticResource BrightOrange}" MinWidth="30">
+                                    <TextBlock Text="{Binding SelectedTests.Count}"
+                                               Foreground="White" FontWeight="Bold"
+                                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                            </Grid>
+
+                            <!-- فوق القائمة المتاحة (الجهة اليسرى) -->
+                            <DockPanel Grid.Column="1" Margin="2,0">
+                                <ComboBox DockPanel.Dock="Left" SelectedIndex="0" Style="{StaticResource WhiteComboBoxStyle}" Width="100" FlowDirection="LeftToRight">
+                                    <ComboBoxItem Content="Rotine Tests" />
+                                    <ComboBoxItem Content="Send Out" />
+                                    <ComboBoxItem Content="All" />
+                                </ComboBox>
+                                <TextBox Style="{StaticResource WhiteTextBoxStyle}"
+                                         Text="{Binding TestSearchText, UpdateSourceTrigger=PropertyChanged}" />
+                            </DockPanel>
                         </Grid>
 
-                        <!-- قائمة التحاليل المتاحة -->
-                        <DataGrid Grid.Row="3"
-                                  Margin="4,4"
-                                  Background="White"
-                                  ItemsSource="{Binding AvailableTests}"
-                                  SelectedItem="{Binding SelectedAvailableTest}"
-                                  AutoGenerateColumns="False"
-                                  CanUserAddRows="False"
-                                  IsReadOnly="True"
-                                  HeadersVisibility="Column"
-                                  RowBackground="White"
-                                  AlternatingRowBackground="#F5F5F5"
-                                  FlowDirection="LeftToRight">
-                            <DataGrid.Columns>
-                                <DataGridTextColumn Header="Test Name" Binding="{Binding NameReport}" Width="*" />
-                            </DataGrid.Columns>
-                        </DataGrid>
+                        <!-- القوائم المتوازية (المتاحة والمختارة) -->
+                        <Grid Grid.Row="2" Margin="2">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
 
-                        <!-- أزرار قائمة التحاليل -->
-                        <UniformGrid Grid.Row="4" Columns="3" Margin="4,4">
-                            <Button Content="Add select test"
-                                    Command="{Binding AddTestCommand}"
-                                    Style="{StaticResource ActionButtonStyle}"
-                                    Background="#27AE60" />
-                            <Button Content="Delete"
-                                    Command="{Binding RemoveTestCommand}"
-                                    Style="{StaticResource ActionButtonStyle}"
-                                    Background="#A6A66E" />
-                            <Button Content="All"
-                                    Command="{Binding AddAllTestsCommand}"
-                                    Style="{StaticResource ActionButtonStyle}"
-                                    Background="#A6A66E" />
-                        </UniformGrid>
-
-                        <!-- التحاليل المختارة -->
-                        <Border Grid.Row="6" Background="White" Margin="4,4" BorderBrush="#B7950B" BorderThickness="1">
-                            <DataGrid ItemsSource="{Binding SelectedTests}"
+                            <!-- قائمة التحاليل المختارة (يمين) -->
+                            <DataGrid Grid.Column="0"
+                                      Margin="1"
+                                      Background="White"
+                                      ItemsSource="{Binding SelectedTests}"
                                       SelectedItem="{Binding SelectedTest}"
                                       AutoGenerateColumns="False"
                                       CanUserAddRows="False"
@@ -368,21 +353,45 @@
                                       FlowDirection="LeftToRight">
                                 <DataGrid.Columns>
                                     <DataGridTextColumn Header="Selected" Binding="{Binding TestName}" Width="*" />
-                                    <DataGridTextColumn Header="Price"    Binding="{Binding Price}"    Width="70" />
+                                    <DataGridTextColumn Header="Price"    Binding="{Binding Price}"    Width="50" />
                                 </DataGrid.Columns>
                             </DataGrid>
-                        </Border>
+
+                            <!-- قائمة التحاليل المتاحة (يسار) -->
+                            <DataGrid Grid.Column="1"
+                                      Margin="1"
+                                      Background="#E8F1F8"
+                                      ItemsSource="{Binding AvailableTests}"
+                                      SelectedItem="{Binding SelectedAvailableTest}"
+                                      AutoGenerateColumns="False"
+                                      CanUserAddRows="False"
+                                      IsReadOnly="True"
+                                      HeadersVisibility="Column"
+                                      RowHeaderWidth="15"
+                                      FlowDirection="LeftToRight">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Test Name" Binding="{Binding NameReport}" Width="*" />
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </Grid>
+
+                        <!-- أزرار التحكم -->
+                        <UniformGrid Grid.Row="3" Columns="3" Margin="2">
+                            <Button Content="All" Command="{Binding AddAllTestsCommand}" Style="{StaticResource ActionButtonStyle}" Background="{StaticResource OliveGreen}" />
+                            <Button Content="Delete" Command="{Binding RemoveTestCommand}" Style="{StaticResource ActionButtonStyle}" Background="{StaticResource OliveGreen}" />
+                            <Button Content="Add select test" Command="{Binding AddTestCommand}" Style="{StaticResource ActionButtonStyle}" Background="{StaticResource LimeGreen}" />
+                        </UniformGrid>
                     </Grid>
                 </Border>
 
-                <!-- *********** الملخص المالي السفلي *********** -->
+                <!-- *********** الملخص المالي السفلي (أصفر) *********** -->
                 <Border Grid.Row="1"
-                        Background="{StaticResource HeaderOrange}"
-                        BorderBrush="#B7950B"
+                        Background="{StaticResource YellowPanel}"
+                        BorderBrush="{StaticResource PanelBorder}"
                         BorderThickness="1"
-                        CornerRadius="3"
-                        Margin="6,4"
-                        Padding="6">
+                        CornerRadius="2"
+                        Margin="4"
+                        Padding="4">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
@@ -396,100 +405,108 @@
                             <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
 
-                        <!-- يسار: 3 أزرار الحركات والتراجع -->
-                        <Border Grid.Row="0" Grid.Column="0" Background="#3CB371" CornerRadius="2" Padding="3,2" Margin="2">
+                        <!-- اليمين: القيم المالية (Column 0) -->
+                        <Border Grid.Row="0" Grid.Column="0" Background="{StaticResource InfoBlue}" Padding="4,2" Margin="1">
                             <DockPanel LastChildFill="True">
-                                <TextBlock Text="الباقي للمعمل" Foreground="White" FontWeight="Bold"
-                                           DockPanel.Dock="Right" Margin="6,0" VerticalAlignment="Center"/>
-                                <TextBox Text="{Binding BalanceForLab, StringFormat=N1, Mode=OneWay}" Width="60"
-                                         Style="{StaticResource WhiteTextBoxStyle}" IsReadOnly="True"
+                                <TextBlock Text="إجمالي التحاليل" Foreground="White" FontWeight="Bold" FontSize="11"
+                                           DockPanel.Dock="Right" Margin="4,0" VerticalAlignment="Center"/>
+                                <TextBox Text="{Binding TotalAmount, StringFormat=N0, Mode=OneWay}" Width="50"
+                                         Style="{StaticResource WhiteTextBoxStyle}" IsReadOnly="True" FontWeight="Bold"
                                          HorizontalContentAlignment="Center"/>
                             </DockPanel>
                         </Border>
-                        <Border Grid.Row="0" Grid.Column="1" Background="#2E86C1" CornerRadius="2" Padding="3,2" Margin="2">
+                        <Border Grid.Row="1" Grid.Column="0" Background="{StaticResource InfoBlue}" Padding="4,2" Margin="1">
                             <DockPanel LastChildFill="True">
-                                <TextBlock Text="إجمالي التحاليل" Foreground="White" FontWeight="Bold"
-                                           DockPanel.Dock="Right" Margin="6,0" VerticalAlignment="Center"/>
-                                <TextBox Text="{Binding TotalAmount, StringFormat=N1, Mode=OneWay}" Width="60"
-                                         Style="{StaticResource WhiteTextBoxStyle}" IsReadOnly="True"
+                                <TextBlock Text="الخصم" Foreground="White" FontWeight="Bold" FontSize="11"
+                                           DockPanel.Dock="Right" Margin="4,0" VerticalAlignment="Center"/>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBox Text="{Binding DiscountPercent, UpdateSourceTrigger=PropertyChanged}" Width="35"
+                                             Style="{StaticResource WhiteTextBoxStyle}" FontWeight="Bold"
+                                             HorizontalContentAlignment="Center"/>
+                                    <ComboBox Grid.Column="1" Width="40" Style="{StaticResource WhiteComboBoxStyle}" FontSize="10">
+                                        <ComboBoxItem Content="%" IsSelected="True"/>
+                                    </ComboBox>
+                                </Grid>
+                            </DockPanel>
+                        </Border>
+                        <Border Grid.Row="2" Grid.Column="0" Background="{StaticResource InfoBlue}" Padding="4,2" Margin="1">
+                            <DockPanel LastChildFill="True">
+                                <TextBlock Text="قيمة الخصم" Foreground="White" FontWeight="Bold" FontSize="11"
+                                           DockPanel.Dock="Right" Margin="4,0" VerticalAlignment="Center"/>
+                                <TextBox Text="{Binding DiscountAmount, StringFormat=N0, Mode=OneWay}" Width="50"
+                                         Style="{StaticResource WhiteTextBoxStyle}" IsReadOnly="True" FontWeight="Bold"
                                          HorizontalContentAlignment="Center"/>
                             </DockPanel>
                         </Border>
-
-                        <Border Grid.Row="1" Grid.Column="0" Background="#3CB371" CornerRadius="2" Padding="3,2" Margin="2">
+                        <Border Grid.Row="3" Grid.Column="0" Background="{StaticResource InfoBlue}" Padding="4,2" Margin="1">
                             <DockPanel LastChildFill="True">
-                                <TextBlock Text="الباقي للمريض" Foreground="White" FontWeight="Bold"
-                                           DockPanel.Dock="Right" Margin="6,0" VerticalAlignment="Center"/>
-                                <TextBox Text="{Binding BalanceForPatient, StringFormat=N1, Mode=OneWay}" Width="60"
-                                         Style="{StaticResource WhiteTextBoxStyle}" IsReadOnly="True"
+                                <TextBlock Text="التكلفة بعد الخصم" Foreground="White" FontWeight="Bold" FontSize="11"
+                                           DockPanel.Dock="Right" Margin="4,0" VerticalAlignment="Center"/>
+                                <TextBox Text="{Binding NetTotal, StringFormat=N0, Mode=OneWay}" Width="50"
+                                         Style="{StaticResource WhiteTextBoxStyle}" IsReadOnly="True" FontWeight="Bold"
                                          HorizontalContentAlignment="Center"/>
                             </DockPanel>
                         </Border>
-                        <Border Grid.Row="1" Grid.Column="1" Background="#2E86C1" CornerRadius="2" Padding="3,2" Margin="2">
+                        <Border Grid.Row="4" Grid.Column="0" Background="{StaticResource InfoBlue}" Padding="4,2" Margin="1">
                             <DockPanel LastChildFill="True">
-                                <TextBlock Text="الخصم %" Foreground="White" FontWeight="Bold"
-                                           DockPanel.Dock="Right" Margin="6,0" VerticalAlignment="Center"/>
-                                <TextBox Text="{Binding DiscountPercent, UpdateSourceTrigger=PropertyChanged}" Width="60"
-                                         Style="{StaticResource WhiteTextBoxStyle}"
-                                         HorizontalContentAlignment="Center"/>
-                            </DockPanel>
-                        </Border>
-
-                        <Border Grid.Row="2" Grid.Column="0" Background="White" CornerRadius="2" Padding="3,2" Margin="2">
-                            <DockPanel LastChildFill="True">
-                                <TextBlock Text="المدفوع" Foreground="#C0392B" FontWeight="Bold"
-                                           DockPanel.Dock="Right" Margin="6,0" VerticalAlignment="Center"/>
-                                <TextBox Text="{Binding PaidAmount, UpdateSourceTrigger=PropertyChanged}" Width="60"
-                                         Style="{StaticResource WhiteTextBoxStyle}"
-                                         HorizontalContentAlignment="Center"/>
-                            </DockPanel>
-                        </Border>
-                        <Border Grid.Row="2" Grid.Column="1" Background="#2E86C1" CornerRadius="2" Padding="3,2" Margin="2">
-                            <DockPanel LastChildFill="True">
-                                <TextBlock Text="قيمة الخصم" Foreground="White" FontWeight="Bold"
-                                           DockPanel.Dock="Right" Margin="6,0" VerticalAlignment="Center"/>
-                                <TextBox Text="{Binding DiscountAmount, StringFormat=N1, Mode=OneWay}" Width="60"
-                                         Style="{StaticResource WhiteTextBoxStyle}" IsReadOnly="True"
-                                         HorizontalContentAlignment="Center"/>
-                            </DockPanel>
-                        </Border>
-
-                        <Border Grid.Row="3" Grid.Column="1" Background="#2E86C1" CornerRadius="2" Padding="3,2" Margin="2">
-                            <DockPanel LastChildFill="True">
-                                <TextBlock Text="التكلفة بعد الخصم" Foreground="White" FontWeight="Bold"
-                                           DockPanel.Dock="Right" Margin="6,0" VerticalAlignment="Center"/>
-                                <TextBox Text="{Binding NetTotal, StringFormat=N1, Mode=OneWay}" Width="60"
-                                         Style="{StaticResource WhiteTextBoxStyle}" IsReadOnly="True"
+                                <TextBlock Text="المدفوع سابقا" Foreground="White" FontWeight="Bold" FontSize="11"
+                                           DockPanel.Dock="Right" Margin="4,0" VerticalAlignment="Center"/>
+                                <TextBox Text="{Binding PreviousPaidAmount, UpdateSourceTrigger=PropertyChanged}" Width="50"
+                                         Style="{StaticResource WhiteTextBoxStyle}" FontWeight="Bold"
                                          HorizontalContentAlignment="Center"/>
                             </DockPanel>
                         </Border>
 
-                        <Border Grid.Row="4" Grid.Column="1" Background="#2E86C1" CornerRadius="2" Padding="3,2" Margin="2">
+                        <!-- اليسار: البواقي والمدفوع (Column 1) -->
+                        <Border Grid.Row="0" Grid.Column="1" Background="{StaticResource BrightOrange}" Padding="4,2" Margin="1">
                             <DockPanel LastChildFill="True">
-                                <TextBlock Text="المدفوع سابقا" Foreground="White" FontWeight="Bold"
-                                           DockPanel.Dock="Right" Margin="6,0" VerticalAlignment="Center"/>
-                                <TextBox Text="{Binding PreviousPaidAmount, UpdateSourceTrigger=PropertyChanged}" Width="60"
-                                         Style="{StaticResource WhiteTextBoxStyle}"
+                                <TextBlock Text="الباقي للمعمل" Foreground="White" FontWeight="Bold" FontSize="11"
+                                           DockPanel.Dock="Right" Margin="4,0" VerticalAlignment="Center"/>
+                                <TextBox Text="{Binding BalanceForLab, StringFormat=N1, Mode=OneWay}" Width="50"
+                                         Style="{StaticResource WhiteTextBoxStyle}" IsReadOnly="True" FontWeight="Bold"
+                                         HorizontalContentAlignment="Center"/>
+                            </DockPanel>
+                        </Border>
+                        <Border Grid.Row="1" Grid.Column="1" Background="{StaticResource BrightOrange}" Padding="4,2" Margin="1">
+                            <DockPanel LastChildFill="True">
+                                <TextBlock Text="الباقي للمريض" Foreground="White" FontWeight="Bold" FontSize="11"
+                                           DockPanel.Dock="Right" Margin="4,0" VerticalAlignment="Center"/>
+                                <TextBox Text="{Binding BalanceForPatient, StringFormat=N1, Mode=OneWay}" Width="50"
+                                         Style="{StaticResource WhiteTextBoxStyle}" IsReadOnly="True" FontWeight="Bold"
+                                         HorizontalContentAlignment="Center"/>
+                            </DockPanel>
+                        </Border>
+                        <Border Grid.Row="2" Grid.Column="1" Background="{StaticResource DangerRed}" Padding="4,2" Margin="1">
+                            <DockPanel LastChildFill="True">
+                                <TextBlock Text="المدفوع" Foreground="White" FontWeight="Bold" FontSize="11"
+                                           DockPanel.Dock="Right" Margin="4,0" VerticalAlignment="Center"/>
+                                <TextBox Text="{Binding PaidAmount, UpdateSourceTrigger=PropertyChanged}" Width="50"
+                                         Style="{StaticResource WhiteTextBoxStyle}" FontWeight="Bold"
                                          HorizontalContentAlignment="Center"/>
                             </DockPanel>
                         </Border>
 
-                        <!-- أزرار صغيرة -->
-                        <UniformGrid Grid.Row="3" Grid.Column="0" Columns="3" Margin="2">
-                            <Button Content="حركة" Command="{Binding ShowMovementCommand}" Style="{StaticResource ActionButtonStyle}" Background="#27AE60" MinWidth="50" Height="26"/>
-                            <Button Content="تراجع" Command="{Binding UndoCommand}"        Style="{StaticResource ActionButtonStyle}" Background="#F1C40F" Foreground="Black" MinWidth="50" Height="26"/>
-                            <Button Content="خالص" Command="{Binding SettleCommand}"      Style="{StaticResource ActionButtonStyle}" Background="#27AE60" MinWidth="50" Height="26"/>
+                        <!-- أزرار الحركات (تحت البواقي في العمود 1) -->
+                        <UniformGrid Grid.Row="3" Grid.RowSpan="2" Grid.Column="1" Columns="2" Margin="1">
+                            <Button Content="حركة" Command="{Binding ShowMovementCommand}" Style="{StaticResource ActionButtonStyle}" Background="{StaticResource FreshGreen}" Height="24" FontSize="10"/>
+                            <Button Content="تراجع" Command="{Binding UndoCommand}"        Style="{StaticResource ActionButtonStyle}" Background="{StaticResource FreshGreen}" Height="24" FontSize="10"/>
+                            <Button Content="خالص" Command="{Binding SettleCommand}"      Style="{StaticResource ActionButtonStyle}" Background="{StaticResource FreshGreen}" Height="24" FontSize="10"/>
+                            <Button Content="طباعة" Style="{StaticResource ActionButtonStyle}" Background="{StaticResource FreshGreen}" Height="24" FontSize="10"/>
                         </UniformGrid>
                     </Grid>
                 </Border>
             </Grid>
 
             <!-- ============== العمود الأيمن: بيانات المريض + الجهة + المعلومات الإضافية ============== -->
-            <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto">
+            <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto">
                 <StackPanel>
 
                     <!-- ============ مجموعة بيانات المريض ============ -->
-                    <Grid Margin="6,12,6,4">
+                    <Grid Margin="4,8,4,2">
                         <Border Style="{StaticResource GroupBoxStyle}">
                             <Grid>
                                 <Grid.ColumnDefinitions>
@@ -508,14 +525,14 @@
                                 </Grid.RowDefinitions>
 
                                 <!-- صف 0: Lab ID + كود المريض -->
-                                <Border Grid.Row="0" Grid.Column="0" Background="#27AE60" CornerRadius="2" Padding="6,3" Margin="2">
-                                    <TextBlock Text="Lab. ID" Foreground="White" FontWeight="Bold" HorizontalAlignment="Center"/>
+                                <Border Grid.Row="0" Grid.Column="0" Background="{StaticResource FreshGreen}" CornerRadius="1" Padding="8,2" Margin="1">
+                                    <TextBlock Text="Lab. ID" Foreground="White" FontWeight="Bold" FontSize="11" HorizontalAlignment="Center"/>
                                 </Border>
                                 <TextBox Grid.Row="0" Grid.Column="1"
                                          Style="{StaticResource WhiteTextBoxStyle}"
                                          Text="{Binding LabId, UpdateSourceTrigger=PropertyChanged}" />
-                                <Border Grid.Row="0" Grid.Column="2" Background="{StaticResource HeaderOrange}" CornerRadius="2" Padding="6,3" Margin="2">
-                                    <TextBlock Text="كود المريض" Foreground="White" FontWeight="Bold" HorizontalAlignment="Center"/>
+                                <Border Grid.Row="0" Grid.Column="2" Background="{StaticResource BrightOrange}" CornerRadius="1" Padding="8,2" Margin="1">
+                                    <TextBlock Text="كود المريض" Foreground="White" FontWeight="Bold" FontSize="11" HorizontalAlignment="Center"/>
                                 </Border>
                                 <TextBox Grid.Row="0" Grid.Column="3"
                                          Style="{StaticResource WhiteTextBoxStyle}"
@@ -525,7 +542,7 @@
                                 <Border Grid.Row="1" Grid.Column="0" Style="{StaticResource FieldLabelStyle}">
                                     <TextBlock Text="Sex" Style="{StaticResource FieldLabelText}" FlowDirection="LeftToRight"/>
                                 </Border>
-                                <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal">
+                                <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
                                     <RadioButton Content="Male"
                                                  Style="{StaticResource WhiteRadioStyle}"
                                                  IsChecked="{Binding Gender, Converter={StaticResource StringEqualsConverter}, ConverterParameter=Male}" />
@@ -537,7 +554,7 @@
                                                  IsChecked="{Binding Gender, Converter={StaticResource StringEqualsConverter}, ConverterParameter=Unknown}" />
                                 </StackPanel>
                                 <CheckBox Grid.Row="1" Grid.Column="2" Content="VIP" Foreground="White"
-                                          VerticalAlignment="Center" Margin="6,0"
+                                          VerticalAlignment="Center" Margin="4,0" FontSize="11"
                                           IsChecked="{Binding IsVip}" />
                                 <ComboBox Grid.Row="1" Grid.Column="3"
                                           Style="{StaticResource WhiteComboBoxStyle}"
@@ -554,19 +571,25 @@
                                 <TextBox Grid.Row="2" Grid.Column="1"
                                          Style="{StaticResource WhiteTextBoxStyle}"
                                          Text="{Binding FullName, UpdateSourceTrigger=PropertyChanged}" />
-                                <ComboBox Grid.Row="2" Grid.Column="2"
-                                          Style="{StaticResource WhiteComboBoxStyle}"
-                                          SelectedItem="{Binding Title, Mode=TwoWay}"
-                                          IsEditable="True"
-                                          MinWidth="80">
-                                    <ComboBoxItem Content="السيد/" />
-                                    <ComboBoxItem Content="السيدة/" />
-                                    <ComboBoxItem Content="الآنسة/" />
-                                    <ComboBoxItem Content="الطفل/" />
-                                </ComboBox>
-                                <TextBox Grid.Row="2" Grid.Column="3"
-                                         Style="{StaticResource WhiteTextBoxStyle}"
-                                         Text="{Binding PatientTitleNote, UpdateSourceTrigger=PropertyChanged}" />
+                                <Grid Grid.Row="2" Grid.Column="2" Grid.ColumnSpan="2">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <ComboBox Grid.Column="0"
+                                              Style="{StaticResource WhiteComboBoxStyle}"
+                                              SelectedItem="{Binding Title, Mode=TwoWay}"
+                                              IsEditable="True"
+                                              Width="80">
+                                        <ComboBoxItem Content="السيد/" />
+                                        <ComboBoxItem Content="السيدة/" />
+                                        <ComboBoxItem Content="الآنسة/" />
+                                        <ComboBoxItem Content="الطفل/" />
+                                    </ComboBox>
+                                    <TextBox Grid.Column="1"
+                                             Style="{StaticResource WhiteTextBoxStyle}"
+                                             Text="{Binding PatientTitleNote, UpdateSourceTrigger=PropertyChanged}" />
+                                </Grid>
 
                                 <!-- صف 3: السن + عنوان المريض -->
                                 <Border Grid.Row="3" Grid.Column="0" Style="{StaticResource FieldLabelStyle}">
@@ -575,7 +598,7 @@
                                 <Grid Grid.Row="3" Grid.Column="1">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="90" />
+                                        <ColumnDefinition Width="80" />
                                     </Grid.ColumnDefinitions>
                                     <TextBox Grid.Column="0"
                                              Style="{StaticResource WhiteTextBoxStyle}"
@@ -632,7 +655,7 @@
                     </Grid>
 
                     <!-- ============ مجموعة بيانات الطبيب أو الجهة ============ -->
-                    <Grid Margin="6,14,6,4">
+                    <Grid Margin="4,10,4,2">
                         <Border Style="{StaticResource GroupBoxStyle}">
                             <Grid>
                                 <Grid.ColumnDefinitions>
@@ -656,17 +679,28 @@
                                           ItemsSource="{Binding Referrals}"
                                           SelectedItem="{Binding SelectedReferral}"
                                           DisplayMemberPath="Name" />
-                                <CheckBox Grid.Row="0" Grid.Column="2" Content="Print" Foreground="White"
-                                          VerticalAlignment="Center" Margin="6,0"
-                                          IsChecked="{Binding PrintReferralOnReport}" FlowDirection="LeftToRight" />
-                                <ComboBox Grid.Row="0" Grid.Column="3"
-                                          Style="{StaticResource WhiteComboBoxStyle}"
-                                          SelectedItem="{Binding DoctorTitle, Mode=TwoWay}"
-                                          IsEditable="True">
-                                    <ComboBoxItem Content="د./" />
-                                    <ComboBoxItem Content="أ.د./" />
-                                    <ComboBoxItem Content="م.د./" />
-                                </ComboBox>
+                                <Grid Grid.Row="0" Grid.Column="2" Grid.ColumnSpan="2">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <CheckBox Grid.Column="0" Content="Print" Foreground="White"
+                                              VerticalAlignment="Center" Margin="4,0" FontSize="11"
+                                              IsChecked="{Binding PrintReferralOnReport}" FlowDirection="LeftToRight" />
+                                    <TextBox Grid.Column="1"
+                                             Style="{StaticResource WhiteTextBoxStyle}"
+                                             Text="{Binding ReferralTitleNote}" />
+                                    <ComboBox Grid.Column="2"
+                                              Style="{StaticResource WhiteComboBoxStyle}"
+                                              SelectedItem="{Binding DoctorTitle, Mode=TwoWay}"
+                                              IsEditable="True"
+                                              Width="60">
+                                        <ComboBoxItem Content="د./" />
+                                        <ComboBoxItem Content="أ.د./" />
+                                        <ComboBoxItem Content="م.د./" />
+                                    </ComboBox>
+                                </Grid>
 
                                 <!-- صف 1: تليفون + عنوان الجهة -->
                                 <Border Grid.Row="1" Grid.Column="0" Style="{StaticResource FieldLabelStyle}">
@@ -692,9 +726,18 @@
                                 <Border Grid.Row="2" Grid.Column="2" Style="{StaticResource FieldLabelStyle}">
                                     <TextBlock Text="اسم المسؤول" Style="{StaticResource FieldLabelText}" />
                                 </Border>
-                                <TextBox Grid.Row="2" Grid.Column="3"
-                                         Style="{StaticResource WhiteTextBoxStyle}"
-                                         Text="{Binding ReferralResponsible, UpdateSourceTrigger=PropertyChanged}" />
+                                <Grid Grid.Row="2" Grid.Column="3">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBox Grid.Column="0"
+                                             Style="{StaticResource WhiteTextBoxStyle}"
+                                             Text="{Binding ReferralResponsible, UpdateSourceTrigger=PropertyChanged}" />
+                                    <ComboBox Grid.Column="1" Style="{StaticResource WhiteComboBoxStyle}" Width="50">
+                                        <ComboBoxItem Content="د./" />
+                                    </ComboBox>
+                                </Grid>
                             </Grid>
                         </Border>
                         <Border Style="{StaticResource GroupHeaderStyle}" VerticalAlignment="Top">
@@ -703,54 +746,52 @@
                     </Grid>
 
                     <!-- ============ مجموعة معلومات اضافية ============ -->
-                    <Grid Margin="6,14,6,4">
+                    <Grid Margin="4,10,4,2">
                         <Border Style="{StaticResource GroupBoxStyle}">
                             <StackPanel>
                                 <!-- صف صائم + ساعات الصيام + هل سبق التحليل -->
-                                <Grid Margin="2,4">
+                                <Grid Margin="1">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="Auto" />
                                         <ColumnDefinition Width="Auto" />
                                         <ColumnDefinition Width="Auto" />
                                         <ColumnDefinition Width="*" />
                                         <ColumnDefinition Width="Auto" />
-                                        <ColumnDefinition Width="Auto" />
                                     </Grid.ColumnDefinitions>
                                     <CheckBox Grid.Column="0" Content="صائم" Style="{StaticResource OliveCheckBoxStyle}"
                                               IsChecked="{Binding IsFasting}" />
-                                    <Border Grid.Column="1" Style="{StaticResource FieldLabelStyle}" MinWidth="125">
+                                    <Border Grid.Column="1" Style="{StaticResource FieldLabelStyle}" MinWidth="110">
                                         <TextBlock Text="عدد ساعات الصيام" Style="{StaticResource FieldLabelText}" />
                                     </Border>
                                     <TextBox  Grid.Column="2"
                                               Style="{StaticResource WhiteTextBoxStyle}"
-                                              Width="50"
+                                              Width="40"
                                               Text="{Binding FastingHours, UpdateSourceTrigger=PropertyChanged}" />
-                                    <CheckBox Grid.Column="5"
+                                    <CheckBox Grid.Column="4"
                                               Content="هل سبق لك التحليل بمعملنا"
                                               Style="{StaticResource OliveCheckBoxStyle}"
                                               IsChecked="{Binding HadPreviousAnalysisHere}" />
                                 </Grid>
 
-                                <!-- شبكة الـ checkboxes الإضافية (صفان × 4 أعمدة) -->
-                                <UniformGrid Columns="4" Margin="2,2">
+                                <!-- شبكة الـ checkboxes الإضافية -->
+                                <UniformGrid Columns="3" Margin="1">
                                     <CheckBox Content="هل يأخذ علاج لسيولة الدم" Style="{StaticResource OliveCheckBoxStyle}" IsChecked="{Binding TakesBloodThinners}" />
                                     <CheckBox Content="هل يأخذ علاج مضاد حيوي"   Style="{StaticResource OliveCheckBoxStyle}" IsChecked="{Binding TakesAntibiotics}" />
-                                    <CheckBox Content="هل سبق تك التحليل بمعملنا" Style="{StaticResource OliveCheckBoxStyle}" IsChecked="{Binding TakesDiabetesMedication}" />
                                     <CheckBox Content="هل يأخذ علاج للسكر"        Style="{StaticResource OliveCheckBoxStyle}" IsChecked="{Binding TakesDiabetesTreatment}" />
 
                                     <CheckBox Content="هل يأخذ علاج للفيروسات"    Style="{StaticResource OliveCheckBoxStyle}" IsChecked="{Binding TakesAntiVirals}" />
-                                    <CheckBox Content="هل يأخذ علاج مضاد حيوي"   Style="{StaticResource OliveCheckBoxStyle}" IsChecked="{Binding TakesAntibioticAlt}" />
                                     <CheckBox Content="هل سبق نقل دم"             Style="{StaticResource OliveCheckBoxStyle}" IsChecked="{Binding HadBloodTransfusion}" />
                                     <CheckBox Content="هل يأخذ علاج للغدد"        Style="{StaticResource OliveCheckBoxStyle}" IsChecked="{Binding TakesGlandsTreatment}" />
 
                                     <CheckBox Content="للسيدات هل يوجد حمل"       Style="{StaticResource OliveCheckBoxStyle}" IsChecked="{Binding IsPregnant}" />
                                     <CheckBox Content="هل المريض مدخن"            Style="{StaticResource OliveCheckBoxStyle}" IsChecked="{Binding IsSmoker}" />
                                     <CheckBox Content="هل يأخذ علاج للكبد"        Style="{StaticResource OliveCheckBoxStyle}" IsChecked="{Binding TakesLiverTreatment}" />
+
                                     <CheckBox Content="هل تم عمل اشعة بالصبغة"    Style="{StaticResource OliveCheckBoxStyle}" IsChecked="{Binding HadContrastImaging}" />
                                 </UniformGrid>
 
                                 <!-- أزرار العينات -->
-                                <WrapPanel Margin="2,8,2,2" FlowDirection="LeftToRight">
+                                <WrapPanel Margin="1,4,1,1" FlowDirection="LeftToRight">
                                     <ToggleButton Content="Blood" Style="{StaticResource SampleButtonStyle}" IsChecked="{Binding HasBloodSample}" />
                                     <ToggleButton Content="Urine" Style="{StaticResource SampleButtonStyle}" IsChecked="{Binding HasUrineSample}" />
                                     <ToggleButton Content="Stool" Style="{StaticResource SampleButtonStyle}" IsChecked="{Binding HasStoolSample}" />
@@ -758,26 +799,26 @@
                                     <ToggleButton Content="CSF"   Style="{StaticResource SampleButtonStyle}" IsChecked="{Binding HasCsfSample}" />
                                     <ToggleButton Content="Taken outside Lab"
                                                   Style="{StaticResource SampleButtonStyle}"
-                                                  Background="#F39C12"
-                                                  MinWidth="135"
+                                                  Background="{StaticResource BrightOrange}"
+                                                  Foreground="White"
+                                                  MinWidth="130"
                                                   IsChecked="{Binding TakenOutsideLab}" />
                                 </WrapPanel>
 
-                                <!-- ملاحظات -->
-                                <Grid Margin="2,4,2,2">
+                                <Grid Margin="1,4,1,1">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*" />
                                         <ColumnDefinition Width="Auto" />
                                     </Grid.ColumnDefinitions>
                                     <TextBox Grid.Column="0"
                                              Style="{StaticResource WhiteTextBoxStyle}"
-                                             MinHeight="46"
+                                             MinHeight="40"
                                              AcceptsReturn="True"
                                              TextWrapping="Wrap"
                                              Text="{Binding MedicalNotes, UpdateSourceTrigger=PropertyChanged}" />
-                                    <Border Grid.Column="1" Background="{StaticResource HeaderOrange}" CornerRadius="2"
-                                            Padding="10,4" Margin="2" VerticalAlignment="Center">
-                                        <TextBlock Text="ملاحظات" Foreground="White" FontWeight="Bold" />
+                                    <Border Grid.Column="1" Background="{StaticResource BrightOrange}" CornerRadius="1"
+                                            Padding="12,2" Margin="1" VerticalAlignment="Stretch">
+                                        <TextBlock Text="ملاحظات" Foreground="White" FontWeight="Bold" VerticalAlignment="Center" />
                                     </Border>
                                 </Grid>
                             </StackPanel>
@@ -791,23 +832,23 @@
         </Grid>
 
         <!-- ============================================================ -->
-        <!-- 3) شريط أزرار الإجراءات السفلي (الإرسال/الباركود/...)         -->
+        <!-- 3) شريط أزرار الإجراءات السفلي                               -->
         <!-- ============================================================ -->
-        <Border Grid.Row="2" Margin="6,4" Padding="4" Background="#1F4F86" CornerRadius="3">
-            <WrapPanel HorizontalAlignment="Center">
-                <Button Content="الإرسال"      Command="{Binding SendCommand}"        Style="{StaticResource ActionButtonStyle}" Background="#F1C40F" Foreground="Black" />
-                <Button Content="الباركود"     Command="{Binding ShowBarcodeCommand}" Style="{StaticResource ActionButtonStyle}" Background="#27AE60" />
-                <Button Content="حذف"          Command="{Binding DeleteCommand}"      Style="{StaticResource ActionButtonStyle}" Background="{StaticResource DangerRed}" />
-                <Button Content="حفظ"          Command="{Binding SaveCommand}"        Style="{StaticResource ActionButtonStyle}" Background="#27AE60" />
-                <Button Content="تعديل"        Command="{Binding EditCommand}"        Style="{StaticResource ActionButtonStyle}" Background="#27AE60" />
-                <Button Content="إضافة مريض"   Command="{Binding NewCommand}"         Style="{StaticResource ActionButtonStyle}" Background="#27AE60" />
-            </WrapPanel>
+        <Border Grid.Row="2" Margin="4,2" Padding="2" Background="Transparent">
+            <UniformGrid Columns="6">
+                <Button Content="إضافة مريض"   Command="{Binding NewCommand}"         Style="{StaticResource ActionButtonStyle}" Background="{StaticResource LimeGreen}" />
+                <Button Content="تعديل"        Command="{Binding EditCommand}"        Style="{StaticResource ActionButtonStyle}" Background="{StaticResource LimeGreen}" />
+                <Button Content="حفظ"          Command="{Binding SaveCommand}"        Style="{StaticResource ActionButtonStyle}" Background="{StaticResource LimeGreen}" />
+                <Button Content="حذف"          Command="{Binding DeleteCommand}"      Style="{StaticResource ActionButtonStyle}" Background="{StaticResource BrightOrange}" />
+                <Button Content="الباركود"     Command="{Binding ShowBarcodeCommand}" Style="{StaticResource ActionButtonStyle}" Background="{StaticResource LimeGreen}" />
+                <Button Content="الإيصال"      Command="{Binding SendCommand}"        Style="{StaticResource ActionButtonStyle}" Background="{StaticResource LimeGreen}" />
+            </UniformGrid>
         </Border>
 
         <!-- ============================================================ -->
         <!-- 4) الشريط السفلي: القائمة الرئيسية + النتائج + مرضى اليوم    -->
         <!-- ============================================================ -->
-        <Border Grid.Row="3" Margin="6,2" Padding="4" Background="#13314F">
+        <Border Grid.Row="3" Margin="4,2" Padding="4" Background="#13314F">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
@@ -820,15 +861,16 @@
                         Command="{Binding DataContext.NavigateToPatientsCommand, RelativeSource={RelativeSource AncestorType=Window}}"
                         Style="{StaticResource ActionButtonStyle}"
                         Background="#2E86C1"
-                        MinWidth="130" />
+                        Foreground="White"
+                        MinWidth="120" />
                 <Button Grid.Column="1" Content="نتائج التحاليل"
                         Command="{Binding DataContext.NavigateResultsEntryCommand, RelativeSource={RelativeSource AncestorType=Window}}"
                         Style="{StaticResource ActionButtonStyle}"
                         Background="White"
                         Foreground="Black"
-                        MinWidth="120" />
+                        MinWidth="100" />
                 <ComboBox Grid.Column="2"
-                          Margin="6,2"
+                          Margin="6,0"
                           Style="{StaticResource WhiteComboBoxStyle}"
                           ItemsSource="{Binding QuickPatientsList}"
                           SelectedItem="{Binding QuickSelectedPatient}"
@@ -837,14 +879,15 @@
                         Command="{Binding ShowTodayPatientsCommand}"
                         Style="{StaticResource ActionButtonStyle}"
                         Background="#2E86C1"
-                        MinWidth="110" />
+                        Foreground="White"
+                        MinWidth="100" />
             </Grid>
         </Border>
 
         <!-- ============================================================ -->
-        <!-- 5) رسالة الحالة (تظهر تحت كل شيء)                            -->
+        <!-- 5) رسالة الحالة                                              -->
         <!-- ============================================================ -->
         <TextBlock Grid.Row="4" Text="{Binding StatusMessage}"
-                   Foreground="#F1C40F" Margin="12,2" FontWeight="Bold" />
+                    Foreground="{StaticResource HeaderYellow}" Margin="10,0" FontWeight="Bold" FontSize="11" />
     </Grid>
 </UserControl>
