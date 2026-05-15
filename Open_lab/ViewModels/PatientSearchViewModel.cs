@@ -158,5 +158,48 @@ namespace Open_lab.ViewModels
                 StatusMessage = $"خطأ: {ex.Message}";
             }
         }
+
+        // New properties for the updated UI
+        private string _mobilePhone = string.Empty;
+        public string MobilePhone
+        {
+            get => _mobilePhone;
+            set => SetProperty(ref _mobilePhone, value);
+        }
+
+        private string _ageFrom = string.Empty;
+        public string AgeFrom
+        {
+            get => _ageFrom;
+            set => SetProperty(ref _ageFrom, value);
+        }
+
+        private string _ageTo = string.Empty;
+        public string AgeTo
+        {
+            get => _ageTo;
+            set => SetProperty(ref _ageTo, value);
+        }
+
+        private string _nameExact = string.Empty;
+        public string NameExact
+        {
+            get => _nameExact;
+            set => SetProperty(ref _nameExact, value);
+        }
+
+        private string _doctorName = string.Empty;
+        public string DoctorName
+        {
+            get => _doctorName;
+            set => SetProperty(ref _doctorName, value);
+        }
+
+        // Dummy collection for Patient Tests
+        public ObservableCollection<string> PatientTests { get; } = new ObservableCollection<string>();
+
+        // New Commands
+        private ICommand? _deletePatientCommand;
+        public ICommand DeletePatientCommand => _deletePatientCommand ??= new RelayCommand(_ => { /* Empty Command */ });
     }
 }
