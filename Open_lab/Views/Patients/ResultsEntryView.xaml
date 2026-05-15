@@ -124,7 +124,7 @@
                         <ColumnDefinition Width="220" />
                     </Grid.ColumnDefinitions>
                     <GroupBox Header="التعليق والتاريخ المرضي">
-                        <TextBox Text="{Binding MedicalHistorySummary}" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" />
+                        <TextBox Text="{Binding MedicalHistorySummary, Mode=OneWay}" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" />
                     </GroupBox>
                     <StackPanel Grid.Column="1" VerticalAlignment="Center">
                         <Button Content="حفظ" Command="{Binding SaveResultsCommand}" Style="{StaticResource ActionButtonStyle}" />
