@@ -10,8 +10,32 @@ namespace Open_lab.ViewModels
         public decimal Price { get; set; }
     }
 
-    public class VisitTestRow
+    public class VisitSummary : BaseViewModel
     {
+        private string _patientQuickSearch = string.Empty;
+
+        public int VisitId { get; set; }
+        public int PatientId { get; set; }
+        public string PatientCode { get; set; } = string.Empty;
+        public string PatientName { get; set; } = string.Empty;
+        public string Gender { get; set; } = string.Empty;
+        public int Age { get; set; }
+        public string ReferralSource { get; set; } = string.Empty;
+        public string LabId { get; set; } = string.Empty;
+        public string? PatientPhoto { get; set; }
+        public DateTime VisitDate { get; set; }
+        public string DisplayText => $"{VisitId} - {VisitDate:yyyy-MM-dd}";
+    }
+
+    public class VisitTestRow : BaseViewModel
+    {
+        private string? _resultValue;
+        private string? _status;
+        private bool _isFinished;
+        private bool _isVerified;
+        private bool _shouldPrint;
+        private bool _shouldExport;
+
         public int VisitTestId { get; set; }
         public int PatientId { get; set; }
         public int TestId { get; set; }
@@ -20,7 +44,42 @@ namespace Open_lab.ViewModels
         public int PatientAge { get; set; }
         public string TestName { get; set; } = string.Empty;
         public DateTime VisitDate { get; set; }
-        public string? Status { get; set; }
+
+        public string? ResultValue
+        {
+            get => _resultValue;
+            set => SetProperty(ref _resultValue, value);
+        }
+
+        public string? Status
+        {
+            get => _status;
+            set => SetProperty(ref _status, value);
+        }
+
+        public bool IsFinished
+        {
+            get => _isFinished;
+            set => SetProperty(ref _isFinished, value);
+        }
+
+        public bool IsVerified
+        {
+            get => _isVerified;
+            set => SetProperty(ref _isVerified, value);
+        }
+
+        public bool ShouldPrint
+        {
+            get => _shouldPrint;
+            set => SetProperty(ref _shouldPrint, value);
+        }
+
+        public bool ShouldExport
+        {
+            get => _shouldExport;
+            set => SetProperty(ref _shouldExport, value);
+        }
     }
 
     public class ResultEntryItem : BaseViewModel

@@ -3,141 +3,322 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              FlowDirection="RightToLeft"
              Background="#F3F7F0">
-    <UserControl.InputBindings>
-        <KeyBinding Key="F5" Command="{Binding LoadVisitTestsCommand}" />
-        <KeyBinding Key="F8" Command="{Binding VerifyResultsCommand}" />
-        <KeyBinding Key="F9" Command="{Binding ReopenResultsCommand}" />
-        <KeyBinding Key="F12" Command="{Binding SaveResultsCommand}" />
-    </UserControl.InputBindings>
     <UserControl.Resources>
-        <Style x:Key="PanelStyle" TargetType="Border">
-            <Setter Property="Background" Value="White" />
-            <Setter Property="BorderBrush" Value="#D7E0D2" />
-            <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="CornerRadius" Value="4" />
-            <Setter Property="Padding" Value="10" />
-            <Setter Property="Margin" Value="6" />
+        <!-- DataGrid Row Style for conditional formatting -->
+        <Style x:Key="TestRowStyle" TargetType="DataGridRow">
+            <Setter Property="Background" Value="#FFFFF0" />
+            <Style.Triggers>
+                <!-- IsVerified Priority -->
+                <DataTrigger Binding="{Binding IsVerified}" Value="True">
+                    <Setter Property="Background" Value="#E0F7FA" /> <!-- Light Blue -->
+                </DataTrigger>
+                <!-- IsFinished Priority (if not verified) -->
+                <MultiDataTrigger>
+                    <MultiDataTrigger.Conditions>
+                        <Condition Binding="{Binding IsFinished}" Value="True" />
+                        <Condition Binding="{Binding IsVerified}" Value="False" />
+                    </MultiDataTrigger.Conditions>
+                    <Setter Property="Background" Value="#E8F5E9" /> <!-- Light Green -->
+                </MultiDataTrigger>
+            </Style.Triggers>
         </Style>
-        <Style x:Key="ActionButtonStyle" TargetType="Button">
-            <Setter Property="MinWidth" Value="95" />
-            <Setter Property="Height" Value="32" />
-            <Setter Property="Margin" Value="4" />
-            <Setter Property="Background" Value="#6E9F16" />
-            <Setter Property="Foreground" Value="White" />
-            <Setter Property="BorderThickness" Value="0" />
-            <Setter Property="FontWeight" Value="SemiBold" />
-            <Setter Property="Cursor" Value="Hand" />
+
+        <!-- Cell Style for "Result" column to handle "See Report" color -->
+        <Style x:Key="ResultCellStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="Black" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding ResultValue}" Value="See Report">
+                    <Setter Property="Foreground" Value="#0000FF" /> <!-- Blue Text -->
+                </DataTrigger>
+            </Style.Triggers>
         </Style>
+
+        <!-- Simple Boolean to Visibility Converter (If Needed) -->
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
     </UserControl.Resources>
 
-    <Grid Margin="8">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
-            <RowDefinition Height="Auto" />
-        </Grid.RowDefinitions>
+    <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="360" />
-            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="180" /> <!-- Right Column: Today's Patients -->
+            <ColumnDefinition Width="*" />   <!-- Left Column: Main Content -->
         </Grid.ColumnDefinitions>
 
-        <Border Grid.Row="0" Grid.ColumnSpan="2" Style="{StaticResource PanelStyle}">
-            <DockPanel>
-                <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">
-                    <TextBlock Text="من تاريخ" VerticalAlignment="Center" Margin="0,0,6,0" />
-                    <DatePicker SelectedDate="{Binding DateFrom}" Width="130" />
-                    <TextBlock Text="إلى" VerticalAlignment="Center" Margin="12,0,6,0" />
-                    <DatePicker SelectedDate="{Binding DateTo}" Width="130" />
-                    <Button Content="F5 / Refresh" Command="{Binding LoadVisitTestsCommand}" Style="{StaticResource ActionButtonStyle}" />
-                </StackPanel>
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                    <Button Content="F2 بيانات المرضى" Command="{Binding DataContext.NavigatePatientRegistrationCommand, RelativeSource={RelativeSource AncestorType=Window}}" Style="{StaticResource ActionButtonStyle}" />
-                    <Button Content="F3 البحث" Command="{Binding DataContext.NavigatePatientSearchCommand, RelativeSource={RelativeSource AncestorType=Window}}" Style="{StaticResource ActionButtonStyle}" />
-                    <Button Content="F6 التسليم" Command="{Binding DataContext.NavigateDeliveryCommand, RelativeSource={RelativeSource AncestorType=Window}}" Style="{StaticResource ActionButtonStyle}" />
-                    <Button Content="القائمة الرئيسية" Command="{Binding DataContext.NavigateToPatientsCommand, RelativeSource={RelativeSource AncestorType=Window}}" Style="{StaticResource ActionButtonStyle}" />
-                </StackPanel>
-            </DockPanel>
-        </Border>
+        <!-- ======================================================= -->
+        <!-- Right Column: Today's Patients -->
+        <!-- ======================================================= -->
+        <StackPanel Grid.Column="0" Background="#F0F0F0">
+            <!-- Top Bar -->
+            <Border Background="#FF8C00" Padding="5">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="عدد المرضى اليوم" Foreground="White" FontWeight="Bold" VerticalAlignment="Center" />
+                    <TextBlock Grid.Column="1" Text="{Binding TodayPatientsCount}" Foreground="White" FontWeight="Bold" VerticalAlignment="Center" Margin="5,0,0,0" />
+                </Grid>
+            </Border>
 
-        <Border Grid.Row="1" Grid.Column="0" Style="{StaticResource PanelStyle}">
-            <DockPanel>
-                <TextBlock DockPanel.Dock="Top" Text="مرضى اليوم / تحاليل الفترة" FontSize="16" FontWeight="Bold" Margin="0,0,0,8" />
-                <DataGrid ItemsSource="{Binding VisitTests}"
-                          SelectedItem="{Binding SelectedVisitTest}"
-                          AutoGenerateColumns="False"
-                          CanUserAddRows="False"
-                          IsReadOnly="True">
-                    <DataGrid.Columns>
-                        <DataGridTextColumn Header="الحالة" Binding="{Binding Status}" Width="80" />
-                        <DataGridTextColumn Header="المريض" Binding="{Binding PatientName}" Width="*" />
-                        <DataGridTextColumn Header="التحليل" Binding="{Binding TestName}" Width="*" />
-                    </DataGrid.Columns>
-                </DataGrid>
-            </DockPanel>
-        </Border>
+            <!-- Quick Search -->
+            <TextBox Text="{Binding PatientQuickSearch, UpdateSourceTrigger=PropertyChanged}" Margin="5" Padding="2" />
 
-        <Grid Grid.Row="1" Grid.Column="1">
+            <!-- Patients ListBox -->
+            <ListBox ItemsSource="{Binding TodayPatients}" SelectedItem="{Binding SelectedVisit}" Height="550" Margin="5,0,5,5">
+                <ListBox.ItemContainerStyle>
+                    <Style TargetType="ListBoxItem">
+                        <Style.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter Property="Background" Value="#4CAF50" />
+                                <Setter Property="Foreground" Value="White" />
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </ListBox.ItemContainerStyle>
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding PatientName}" Padding="2" />
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+
+            <!-- Filter Buttons -->
+            <UniformGrid Columns="3" Margin="5,0,5,5">
+                <Button Content="VIP" Command="{Binding FilterVipCommand}" Background="#DAA520" Foreground="White" Margin="1" Padding="2" FontSize="11" />
+                <Button Content="Patient" Command="{Binding FilterAllCommand}" Background="Gray" Foreground="White" Margin="1" Padding="2" FontSize="11" />
+                <Button Content="Lab to" Command="{Binding FilterLabCommand}" Background="Gray" Foreground="White" Margin="1" Padding="2" FontSize="11" />
+            </UniformGrid>
+
+            <!-- Refresh Button -->
+            <Button Content="Refresh" Command="{Binding RefreshCommand}" Background="#4CAF50" Foreground="White" Margin="5,0,5,5" Padding="5" />
+        </StackPanel>
+
+        <!-- ======================================================= -->
+        <!-- Left Column: Main Content -->
+        <!-- ======================================================= -->
+        <Grid Grid.Column="1">
             <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="*" />
-                <RowDefinition Height="170" />
-                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" /> <!-- Top Bars -->
+                <RowDefinition Height="*" />    <!-- Grid + Notes -->
+                <RowDefinition Height="40" />   <!-- Bottom Buttons -->
             </Grid.RowDefinitions>
 
-            <Border Grid.Row="0" Style="{StaticResource PanelStyle}">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="120" />
-                        <ColumnDefinition Width="120" />
-                        <ColumnDefinition Width="100" />
-                    </Grid.ColumnDefinitions>
-                    <TextBlock Text="{Binding SelectedVisitTest.PatientName, TargetNullValue=لا يوجد مريض محدد}" FontSize="18" FontWeight="Bold" />
-                    <TextBlock Grid.Column="1" Text="{Binding SelectedVisitTest.PatientGender, StringFormat=الجنس: {0}}" />
-                    <TextBlock Grid.Column="2" Text="{Binding SelectedVisitTest.PatientAge, StringFormat=السن: {0}}" />
-                    <Border Grid.Column="3" Background="#DFF0D8" Padding="8,3" CornerRadius="3">
-                        <TextBlock Text="زيارات: -" HorizontalAlignment="Center" />
-                    </Border>
-                </Grid>
-            </Border>
-
-            <Border Grid.Row="1" Style="{StaticResource PanelStyle}">
-                <DockPanel>
-                    <TextBlock DockPanel.Dock="Top" Text="نافذة إدخال نتيجة التحليل المحدد" FontSize="16" FontWeight="Bold" Margin="0,0,0,8" />
-                    <DataGrid ItemsSource="{Binding ResultItems}"
-                              AutoGenerateColumns="False"
-                              CanUserAddRows="False">
-                        <DataGrid.Columns>
-                            <DataGridTextColumn Header="البند" Binding="{Binding ParameterName}" IsReadOnly="True" Width="*" />
-                            <DataGridTextColumn Header="النتيجة" Binding="{Binding Value, UpdateSourceTrigger=PropertyChanged}" Width="170" />
-                            <DataGridTextColumn Header="Flag" Binding="{Binding Flag}" Width="90" />
-                            <DataGridTextColumn Header="تعليق" Binding="{Binding Comment}" Width="2*" />
-                        </DataGrid.Columns>
-                    </DataGrid>
-                </DockPanel>
-            </Border>
-
-            <Border Grid.Row="2" Style="{StaticResource PanelStyle}">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="220" />
-                    </Grid.ColumnDefinitions>
-                    <GroupBox Header="التعليق والتاريخ المرضي">
-                        <TextBox Text="{Binding MedicalHistorySummary, Mode=OneWay}" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" />
-                    </GroupBox>
-                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                        <Button Content="حفظ" Command="{Binding SaveResultsCommand}" Style="{StaticResource ActionButtonStyle}" />
-                        <Button Content="اعتماد / F8" Command="{Binding VerifyResultsCommand}" Style="{StaticResource ActionButtonStyle}" />
-                        <Button Content="إعادة فتح / F9" Command="{Binding ReopenResultsCommand}" Style="{StaticResource ActionButtonStyle}" Background="#D98B20" />
-                        <Button Content="معاينة الطباعة" Style="{StaticResource ActionButtonStyle}" ToolTip="تحتاج ربط IPrintService بواجهة المعاينة." />
+            <!-- ROW 0: Top Bars -->
+            <StackPanel Grid.Row="0">
+                <!-- Navigation Bar -->
+                <Border Background="#F3F7F0" Padding="5">
+                    <StackPanel Orientation="Horizontal" FlowDirection="RightToLeft">
+                        <Button Content="F2 بيانات المرضى" Command="{Binding DataContext.NavigatePatientRegistrationCommand, RelativeSource={RelativeSource AncestorType=Window}}" Margin="2" Padding="10,4" Background="White" BorderBrush="LightGray" />
+                        <Button Content="F3 البحث" Command="{Binding DataContext.NavigatePatientSearchCommand, RelativeSource={RelativeSource AncestorType=Window}}" Margin="2" Padding="10,4" Background="White" BorderBrush="LightGray" />
+                        <Button Content="F4 نتائج" Margin="2" Padding="10,4" Background="#6E9F16" Foreground="White" BorderBrush="Transparent" />
+                        <Button Content="F6 التسليم" Command="{Binding DataContext.NavigateDeliveryCommand, RelativeSource={RelativeSource AncestorType=Window}}" Margin="2" Padding="10,4" Background="White" BorderBrush="LightGray" />
+                        <Button Content="القائمة الرئيسية" Command="{Binding DataContext.NavigateToPatientsCommand, RelativeSource={RelativeSource AncestorType=Window}}" Margin="2" Padding="10,4" Background="White" BorderBrush="LightGray" />
+                        
+                        <!-- Date Filters -->
+                        <TextBlock Text="من تاريخ" VerticalAlignment="Center" Margin="15,0,5,0" />
+                        <DatePicker SelectedDate="{Binding DateFrom}" Width="120" VerticalAlignment="Center" />
+                        <TextBlock Text="إلى" VerticalAlignment="Center" Margin="10,0,5,0" />
+                        <DatePicker SelectedDate="{Binding DateTo}" Width="120" VerticalAlignment="Center" />
+                        <Button Content="F5 / Refresh" Command="{Binding SearchByDateCommand}" Margin="10,2,2,2" Padding="15,4" Background="#6E9F16" Foreground="White" BorderThickness="0" />
                     </StackPanel>
-                </Grid>
-            </Border>
+                </Border>
 
-            <TextBlock Grid.Row="3" Text="{Binding StatusMessage}" Foreground="#245423" Margin="8,0" />
+                <!-- Selected Patient Bar (Golden) -->
+                <Border Background="#DAA520" Height="65" Margin="5,0,5,5" Visibility="{Binding SelectedVisit, Converter={StaticResource BoolToVis}, FallbackValue=Collapsed}">
+                    <!-- Custom converter logic or trigger might be needed if BoolToVis expects a boolean, but since SelectedVisit is an object, a trigger is better if BoolToVis doesn't support null checks. We will use a DataTrigger in Style instead -->
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Setter Property="Visibility" Value="Visible" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding SelectedVisit}" Value="{x:Null}">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                    <Grid Margin="5">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="60" /> <!-- Image -->
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <!-- Row 0 Data -->
+                        <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" FlowDirection="RightToLeft">
+                            <TextBlock Text="الكود" VerticalAlignment="Center" Foreground="White" Margin="0,0,5,0" />
+                            <Border Background="#FF6600" Padding="5,0" Margin="0,0,15,0" CornerRadius="2">
+                                <TextBlock Text="{Binding SelectedVisit.PatientCode}" Foreground="White" FontWeight="Bold" VerticalAlignment="Center" />
+                            </Border>
+
+                            <TextBlock Text="الاسم /" VerticalAlignment="Center" Foreground="White" Margin="0,0,5,0" />
+                            <Border Background="White" Width="250" Padding="5,0" Margin="0,0,15,0" CornerRadius="2">
+                                <TextBlock Text="{Binding SelectedVisit.PatientName}" FontWeight="Bold" VerticalAlignment="Center" />
+                            </Border>
+
+                            <TextBlock Text="النوع" VerticalAlignment="Center" Foreground="White" Margin="0,0,5,0" />
+                            <TextBlock Text="{Binding SelectedVisit.Gender}" VerticalAlignment="Center" Foreground="White" FontWeight="Bold" />
+                        </StackPanel>
+
+                        <!-- Row 1 Data -->
+                        <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal" FlowDirection="RightToLeft" Margin="0,5,0,0">
+                            <TextBlock Text="العمر" VerticalAlignment="Center" Foreground="White" Margin="0,0,5,0" />
+                            <Border Background="White" Padding="5,0" Margin="0,0,5,0" CornerRadius="2" MinWidth="40">
+                                <TextBlock Text="{Binding SelectedVisit.Age}" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                            </Border>
+                            <TextBlock Text="Years/Months" VerticalAlignment="Center" Foreground="White" Margin="0,0,15,0" FontSize="10" />
+
+                            <TextBlock Text="الجهة /" VerticalAlignment="Center" Foreground="White" Margin="0,0,5,0" />
+                            <Border Background="White" Width="200" Padding="5,0" Margin="0,0,15,0" CornerRadius="2">
+                                <TextBlock Text="{Binding SelectedVisit.ReferralSource}" VerticalAlignment="Center" />
+                            </Border>
+
+                            <Border Background="#8BC34A" Padding="5,0" Margin="0,0,5,0" CornerRadius="2">
+                                <TextBlock Text="Lab ID" Foreground="White" VerticalAlignment="Center" />
+                            </Border>
+                            <Border Background="#C5E1A5" Padding="10,0" Margin="0,0,5,0" CornerRadius="2">
+                                <TextBlock Text="{Binding SelectedVisit.LabId}" FontWeight="Bold" VerticalAlignment="Center" />
+                            </Border>
+                        </StackPanel>
+
+                        <!-- Image -->
+                        <Border Grid.Column="1" Grid.RowSpan="2" Background="White" Width="50" Height="55" HorizontalAlignment="Left" BorderBrush="Gray" BorderThickness="1">
+                            <!-- Image source binding. Assuming fallback to an icon or empty -->
+                            <Image Source="{Binding SelectedVisit.PatientPhoto}" Stretch="Uniform" />
+                        </Border>
+                    </Grid>
+                </Border>
+            </StackPanel>
+
+            <!-- ROW 1: DataGrid + Notes -->
+            <Grid Grid.Row="1" Margin="5">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <!-- Visit Dropdown -->
+                <ComboBox Grid.Row="0" ItemsSource="{Binding Visits}" SelectedItem="{Binding SelectedVisitDetail}" DisplayMemberPath="DisplayText" Width="200" HorizontalAlignment="Left" Margin="0,0,0,5" FlowDirection="LeftToRight">
+                </ComboBox>
+
+                <!-- DataGrid -->
+                <DataGrid x:Name="TestResultsGrid" Grid.Row="1" 
+                          ItemsSource="{Binding VisitTests}"
+                          CanUserAddRows="False" CanUserDeleteRows="False"
+                          AutoGenerateColumns="False" SelectionMode="Single"
+                          RowStyle="{StaticResource TestRowStyle}"
+                          AlternatingRowBackground="White"
+                          GridLinesVisibility="All" HeadersVisibility="Column"
+                          FlowDirection="LeftToRight"
+                          BorderBrush="#1E3A6E" BorderThickness="2">
+                    <DataGrid.Columns>
+                        <!-- 1: Test Abbreviation -->
+                        <DataGridTextColumn Header="Test Abbreviation" Binding="{Binding TestName}" Width="180" IsReadOnly="True" />
+                        
+                        <!-- 2: P -->
+                        <DataGridTemplateColumn Header="P" Width="30">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Button Content="P" Command="{Binding DataContext.ShowPreviousResultCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" Margin="2" Padding="0" Background="LightGray" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <!-- 3: T -->
+                        <DataGridTemplateColumn Header="T" Width="30">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Button Content="T" Command="{Binding DataContext.ShowNormalRangeCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" Margin="2" Padding="0" Background="LightGray" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <!-- 4: Result -->
+                        <DataGridTemplateColumn Header="Result" Width="150">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding ResultValue}" Style="{StaticResource ResultCellStyle}" VerticalAlignment="Center" Margin="5,0" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                            <DataGridTemplateColumn.CellEditingTemplate>
+                                <DataTemplate>
+                                    <TextBox Text="{Binding ResultValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Background="White" BorderThickness="0" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellEditingTemplate>
+                        </DataGridTemplateColumn>
+
+                        <!-- 5: Status -->
+                        <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="100" IsReadOnly="True" />
+
+                        <!-- 6: Finish -->
+                        <DataGridTemplateColumn Header="Finish" Width="55">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Border BorderBrush="#FF8C00" BorderThickness="1" Margin="2">
+                                        <CheckBox IsChecked="{Binding IsFinished, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                    </Border>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <!-- 7: Verify -->
+                        <DataGridTemplateColumn Header="Verify" Width="55">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Border BorderBrush="#FF8C00" BorderThickness="1" Margin="2">
+                                        <CheckBox IsChecked="{Binding IsVerified, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                    </Border>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <!-- 8: Print -->
+                        <DataGridTemplateColumn Header="Print" Width="55">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Border BorderBrush="#FF8C00" BorderThickness="1" Margin="2">
+                                        <CheckBox IsChecked="{Binding ShouldPrint, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                    </Border>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <!-- 9: Export -->
+                        <DataGridTemplateColumn Header="Export" Width="55">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Border BorderBrush="#FF8C00" BorderThickness="1" Margin="2">
+                                        <CheckBox IsChecked="{Binding ShouldExport, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                    </Border>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+
+                <!-- Notes Bar -->
+                <StackPanel Grid.Row="2" Orientation="Horizontal" FlowDirection="RightToLeft" Background="#F5F5F5" Height="35" Margin="0,5,0,0">
+                    <Button Content="طبعت" Command="{Binding MarkPrintedAllCommand}" Background="Gray" Foreground="White" Width="60" Margin="5" />
+                    <Button Content="مراجعة" Command="{Binding MarkVerifiedAllCommand}" Background="Gray" Foreground="White" Width="60" Margin="5" />
+                    <Button Content="تمت" Command="{Binding MarkFinishedAllCommand}" Background="#4CAF50" Foreground="White" Width="60" Margin="5" />
+
+                    <TextBox Text="{Binding VisitNotes, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="300" Background="#FFEEDD" Margin="20,5,5,5" VerticalContentAlignment="Center" />
+                    <TextBlock Text="ملاحظات:" VerticalAlignment="Center" Margin="5,0" />
+                </StackPanel>
+            </Grid>
+
+            <!-- ROW 2: Bottom Buttons -->
+            <StackPanel Grid.Row="2" Orientation="Horizontal" FlowDirection="RightToLeft" Background="#1E3A6E" Height="40">
+                <Button Content="القائمة الرئيسية" Command="{Binding DataContext.NavigateToPatientsCommand, RelativeSource={RelativeSource AncestorType=Window}}" Background="#4CAF50" Foreground="White" Width="120" Margin="10,5,5,5" FontWeight="Bold" BorderThickness="0" />
+                <Button Content="تقرير فارغ" Command="{Binding PrintBlankReportCommand}" Background="#E5E500" Foreground="Black" Width="90" Margin="5" BorderThickness="0" />
+                <Button Content="التاريخ المرضي" Command="{Binding ShowMedicalHistoryCommand}" Background="#8BC34A" Foreground="Black" Width="100" Margin="5" BorderThickness="0" />
+                <Button Content="طباعة طرق" Command="{Binding PrintMethodsCommand}" Background="#8BC34A" Foreground="Black" Width="90" Margin="5" BorderThickness="0" />
+                <Button Content="ورقة العمل" Command="{Binding PrintWorksheetCommand}" Background="#8BC34A" Foreground="Black" Width="90" Margin="5" BorderThickness="0" />
+                <Button Content="تقرير مجمع" Command="{Binding PrintGroupReportCommand}" Background="#DAA520" Foreground="Black" Width="90" Margin="5" BorderThickness="0" />
+                <Button Content="بيانات المريض" Command="{Binding GoToPatientDataCommand}" Background="White" Foreground="Black" Width="100" Margin="5" BorderThickness="0" />
+            </StackPanel>
         </Grid>
-
-        <TextBlock Grid.Row="2" Grid.ColumnSpan="2" Text="الاختصارات: F2 بيانات المرضى، F3 البحث، F4 هذه الشاشة، F5 تحديث، F6 التسليم، F8 اعتماد، F9 إعادة فتح." Foreground="#566" Margin="8" />
     </Grid>
 </UserControl>

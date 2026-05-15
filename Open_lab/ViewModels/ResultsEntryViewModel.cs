@@ -11,29 +11,71 @@ namespace Open_lab.ViewModels
     {
         private readonly IResultsService _resultsService;
         private readonly IPatientService? _patientService;
+        private readonly IVisitService? _visitService;
+
         private DateTime _dateFrom = DateTime.Today;
         private DateTime _dateTo = DateTime.Today;
-        private VisitTestRow? _selectedVisitTest;
         private string _statusMessage = string.Empty;
         private string _medicalHistorySummary = string.Empty;
+        private string _visitNotes = string.Empty;
         private bool _hasMedicalAlerts;
+        
+        private int _todayPatientsCount;
+        private string _patientQuickSearch = string.Empty;
+        private VisitSummary? _selectedVisit;
+        private VisitSummary? _selectedVisitDetail;
 
         public ResultsEntryViewModel(IResultsService resultsService)
-            : this(resultsService, null)
+            : this(resultsService, null, null)
         {
         }
 
         public ResultsEntryViewModel(IResultsService resultsService, IPatientService? patientService)
+            : this(resultsService, patientService, null)
+        {
+        }
+
+        public ResultsEntryViewModel(IResultsService resultsService, IPatientService? patientService, IVisitService? visitService)
         {
             _resultsService = resultsService;
             _patientService = patientService;
+            _visitService = visitService;
+
+            TodayPatients = new ObservableCollection<VisitSummary>();
             VisitTests = new ObservableCollection<VisitTestRow>();
+            Visits = new ObservableCollection<VisitSummary>();
             ResultItems = new ObservableCollection<ResultEntryItem>();
 
+            RefreshCommand = new RelayCommand(async _ => await RefreshAsync());
+            SearchByDateCommand = new RelayCommand(async _ => await SearchByDateAsync());
+            SelectPatientCommand = new RelayCommand(async _ => await SelectPatientAsync());
             LoadVisitTestsCommand = new RelayCommand(async _ => await LoadVisitTestsAsync(), _ => AppSession.HasPermission(PermissionCodes.ResultsView));
             SaveResultsCommand = new RelayCommand(async _ => await SaveResultsAsync(), _ => AppSession.HasPermission(PermissionCodes.ResultsEdit) && SelectedVisitTest != null && !IsSelectedVerified());
             VerifyResultsCommand = new RelayCommand(async _ => await VerifyResultsAsync(), _ => AppSession.HasPermission(PermissionCodes.ResultsEdit) && SelectedVisitTest != null);
             ReopenResultsCommand = new RelayCommand(async _ => await ReopenResultsAsync(), _ => AppSession.HasPermission(PermissionCodes.ResultsEdit) && SelectedVisitTest != null && IsSelectedVerified());
+
+            MarkFinishedAllCommand = new RelayCommand(async _ => await MarkFinishedAllAsync());
+            MarkVerifiedAllCommand = new RelayCommand(async _ => await MarkVerifiedAllAsync());
+            MarkPrintedAllCommand = new RelayCommand(async _ => await MarkPrintedAllAsync());
+
+            ShowMedicalHistoryCommand = new RelayCommand(async _ => await LoadMedicalHistoryAsync());
+            PrintGroupReportCommand = new RelayCommand(_ => { StatusMessage = "Printing Group Report..."; });
+            PrintWorksheetCommand = new RelayCommand(_ => { StatusMessage = "Printing Worksheet..."; });
+            PrintMethodsCommand = new RelayCommand(_ => { StatusMessage = "Printing Methods..."; });
+            PrintBlankReportCommand = new RelayCommand(_ => { StatusMessage = "Printing Blank Report..."; });
+            GoToPatientDataCommand = new RelayCommand(_ => { StatusMessage = "Navigating to Patient Data..."; });
+
+            FilterVipCommand = new RelayCommand(_ => { StatusMessage = "Filtering VIP..."; });
+            FilterAllCommand = new RelayCommand(_ => { StatusMessage = "Filtering All..."; });
+            FilterLabCommand = new RelayCommand(_ => { StatusMessage = "Filtering Lab To..."; });
+            
+            ShowPreviousResultCommand = new RelayCommand(_ => { StatusMessage = "Showing Previous Results..."; });
+            ShowNormalRangeCommand = new RelayCommand(_ => { StatusMessage = "Showing Normal Range..."; });
+        }
+
+        private async Task InitializeAsync()
+        {
+            await RefreshAsync();
         }
 
         public DateTime DateFrom
@@ -48,8 +90,67 @@ namespace Open_lab.ViewModels
             set => SetProperty(ref _dateTo, value);
         }
 
-        public ObservableCollection<VisitTestRow> VisitTests { get; }
-        public ObservableCollection<ResultEntryItem> ResultItems { get; }
+        public string StatusMessage
+        {
+            get => _statusMessage;
+            private set => SetProperty(ref _statusMessage, value);
+        }
+
+        public string MedicalHistorySummary
+        {
+            get => _medicalHistorySummary;
+            set => SetProperty(ref _medicalHistorySummary, value);
+        }
+
+        public string VisitNotes
+        {
+            get => _visitNotes;
+            set => SetProperty(ref _visitNotes, value);
+        }
+
+        public bool HasMedicalAlerts
+        {
+            get => _hasMedicalAlerts;
+            private set => SetProperty(ref _hasMedicalAlerts, value);
+        }
+
+        public int TodayPatientsCount
+        {
+            get => _todayPatientsCount;
+            private set => SetProperty(ref _todayPatientsCount, value);
+        }
+
+        public string PatientQuickSearch
+        {
+            get => _patientQuickSearch;
+            set => SetProperty(ref _patientQuickSearch, value);
+        }
+
+        public VisitSummary? SelectedVisit
+        {
+            get => _selectedVisit;
+            set
+            {
+                if (SetProperty(ref _selectedVisit, value))
+                {
+                    _ = SelectPatientAsync();
+                }
+            }
+        }
+
+        private VisitTestRow? _selectedVisitTest;
+
+        public VisitSummary? SelectedVisitDetail
+        {
+            get => _selectedVisitDetail;
+            set
+            {
+                if (SetProperty(ref _selectedVisitDetail, value))
+                {
+                    _ = LoadVisitTestsAsync();
+                }
+            }
+        }
 
         public VisitTestRow? SelectedVisitTest
         {
@@ -64,42 +165,106 @@ namespace Open_lab.ViewModels
             }
         }
 
-        public string StatusMessage
-        {
-            get => _statusMessage;
-            private set => SetProperty(ref _statusMessage, value);
-        }
+        public ObservableCollection<VisitSummary> TodayPatients { get; }
+        public ObservableCollection<VisitTestRow> VisitTests { get; }
+        public ObservableCollection<VisitSummary> Visits { get; }
+        public ObservableCollection<ResultEntryItem> ResultItems { get; }
 
-        public string MedicalHistorySummary
-        {
-            get => _medicalHistorySummary;
-            private set => SetProperty(ref _medicalHistorySummary, value);
-        }
-
-        public bool HasMedicalAlerts
-        {
-            get => _hasMedicalAlerts;
-            private set => SetProperty(ref _hasMedicalAlerts, value);
-        }
-
+        public ICommand RefreshCommand { get; }
+        public ICommand SearchByDateCommand { get; }
+        public ICommand SelectPatientCommand { get; }
         public ICommand LoadVisitTestsCommand { get; }
         public ICommand SaveResultsCommand { get; }
         public ICommand VerifyResultsCommand { get; }
         public ICommand ReopenResultsCommand { get; }
+        
+        public ICommand MarkFinishedAllCommand { get; }
+        public ICommand MarkVerifiedAllCommand { get; }
+        public ICommand MarkPrintedAllCommand { get; }
+        
+        public ICommand ShowMedicalHistoryCommand { get; }
+        public ICommand PrintGroupReportCommand { get; }
+        public ICommand PrintWorksheetCommand { get; }
+        public ICommand PrintMethodsCommand { get; }
+        public ICommand PrintBlankReportCommand { get; }
+        public ICommand GoToPatientDataCommand { get; }
+        
+        public ICommand FilterVipCommand { get; }
+        public ICommand FilterAllCommand { get; }
+        public ICommand FilterLabCommand { get; }
 
-        private async Task LoadVisitTestsAsync()
+        public ICommand ShowPreviousResultCommand { get; }
+        public ICommand ShowNormalRangeCommand { get; }
+
+        private async Task RefreshAsync()
         {
-            await LoadVisitTestsCoreAsync(true);
+            await SearchByDateAsync();
         }
 
-        private async Task LoadVisitTestsCoreAsync(bool updateStatus)
+        private async Task SearchByDateAsync()
         {
             try
             {
                 var visitTests = await _resultsService.GetVisitTestsByDateAsync(DateFrom, DateTo.AddDays(1).AddSeconds(-1));
+                if (visitTests == null) return;
+                
+                var uniqueVisits = visitTests
+                    .Where(vt => vt.Visit != null)
+                    .Select(vt => vt.Visit)
+                    .GroupBy(v => v!.VisitId)
+                    .Select(g => g.First())
+                    .Select(v => new VisitSummary
+                    {
+                        VisitId = v!.VisitId,
+                        PatientId = v.PatientId,
+                        PatientCode = v.Patient?.LabId ?? string.Empty,
+                        PatientName = v.Patient?.FullName ?? string.Empty,
+                        Gender = v.Patient?.Gender ?? string.Empty,
+                        Age = v.Patient?.Age ?? 0,
+                        ReferralSource = v.Referral?.Name ?? string.Empty,
+                        LabId = v.Patient?.LabId ?? string.Empty,
+                        VisitDate = v.VisitDate
+                    })
+                    .ToList();
+
+                TodayPatients.Clear();
+                foreach (var visit in uniqueVisits)
+                {
+                    TodayPatients.Add(visit);
+                }
+                TodayPatientsCount = TodayPatients.Count;
+                StatusMessage = $"تم تحميل {TodayPatientsCount} مريض.";
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = $"خطأ: {ex.Message}";
+            }
+        }
+
+        private async Task SelectPatientAsync()
+        {
+            if (SelectedVisit == null) return;
+            
+            Visits.Clear();
+            Visits.Add(SelectedVisit);
+            SelectedVisitDetail = SelectedVisit;
+            
+            await LoadMedicalHistoryAsync();
+        }
+
+        private async Task LoadVisitTestsAsync()
+        {
+            try
+            {
+                var results = await _resultsService.GetVisitTestsByDateAsync(DateFrom, DateTo.AddDays(1).AddSeconds(-1));
+                if (results == null) results = new System.Collections.Generic.List<Open_lab.Models.VisitTest>();
+
+                var visitTestsToLoad = SelectedVisitDetail == null 
+                    ? results 
+                    : results.Where(vt => vt.VisitId == SelectedVisitDetail.VisitId).ToList();
 
                 VisitTests.Clear();
-                foreach (var vt in visitTests)
+                foreach (var vt in visitTestsToLoad)
                 {
                     VisitTests.Add(new VisitTestRow
                     {
@@ -111,14 +276,13 @@ namespace Open_lab.ViewModels
                         PatientAge = vt.Visit?.Patient?.Age ?? 0,
                         TestName = vt.Test?.NameReport ?? string.Empty,
                         VisitDate = vt.Visit?.VisitDate ?? DateTime.MinValue,
-                        Status = vt.Status
+                        Status = vt.Status,
+                        IsFinished = vt.Status == "Verified" || vt.Status == "Finished",
+                        IsVerified = vt.Status == "Verified"
                     });
                 }
-
-                if (updateStatus)
-                {
-                    StatusMessage = $"تم تحميل {VisitTests.Count} تحليل.";
-                }
+                
+                StatusMessage = $"تم تحميل {VisitTests.Count} تحليل.";
             }
             catch (Exception ex)
             {
@@ -140,7 +304,7 @@ namespace Open_lab.ViewModels
             {
                 var parameters = await _resultsService.GetParametersForTestAsync(SelectedVisitTest.TestId);
                 var results = await _resultsService.GetResultsForVisitTestAsync(SelectedVisitTest.VisitTestId);
-                await LoadMedicalHistoryForSelectedPatientAsync();
+                await LoadMedicalHistoryAsync();
 
                 foreach (var param in parameters)
                 {
@@ -191,7 +355,7 @@ namespace Open_lab.ViewModels
         {
             if (SelectedVisitTest == null)
             {
-                StatusMessage = "لم يتم تحديد اختبار لحفظ نتائجه.";
+                StatusMessage = "خطأ: لم يتم تحديد اختبار لحفظ نتائجه.";
                 return;
             }
 
@@ -231,8 +395,8 @@ namespace Open_lab.ViewModels
                 await _resultsService.VerifyVisitTestAsync(SelectedVisitTest.VisitTestId, AppSession.UserId > 0 ? AppSession.UserId : 1);
                 SelectedVisitTest.Status = "Verified";
                 RaiseCommandStates();
-                StatusMessage = "تم اعتماد النتائج وقفلها.";
                 await LoadVisitTestsAsync();
+                StatusMessage = $"تم اعتماد النتائج وقفلها. ({StatusMessage})";
             }
             catch (Exception ex)
             {
@@ -253,8 +417,8 @@ namespace Open_lab.ViewModels
                 await _resultsService.ReopenVisitTestAsync(SelectedVisitTest.VisitTestId);
                 SelectedVisitTest.Status = "InProgress";
                 RaiseCommandStates();
-                StatusMessage = "تم إعادة فتح النتائج للتعديل.";
-                await LoadVisitTestsCoreAsync(false);
+                await LoadVisitTestsAsync();
+                StatusMessage = $"تم إعادة فتح النتائج للتعديل. ({StatusMessage})";
             }
             catch (Exception ex)
             {
@@ -274,16 +438,49 @@ namespace Open_lab.ViewModels
             (ReopenResultsCommand as RelayCommand)?.RaiseCanExecuteChanged();
         }
 
-        private async Task LoadMedicalHistoryForSelectedPatientAsync()
+        private async Task MarkFinishedAllAsync()
         {
-            if (_patientService == null || SelectedVisitTest == null || SelectedVisitTest.PatientId <= 0)
+            foreach (var test in VisitTests)
+            {
+                test.IsFinished = true;
+            }
+            StatusMessage = "تم تعيين الكل كمنتهي.";
+            await Task.CompletedTask;
+        }
+
+        private async Task MarkVerifiedAllAsync()
+        {
+            foreach (var test in VisitTests)
+            {
+                test.IsVerified = true;
+                test.IsFinished = true;
+            }
+            StatusMessage = "تم تعيين الكل كمعتمد.";
+            await Task.CompletedTask;
+        }
+
+        private async Task MarkPrintedAllAsync()
+        {
+            foreach (var test in VisitTests)
+            {
+                test.ShouldPrint = true;
+            }
+            StatusMessage = "تم تعيين الكل كطباعة.";
+            await Task.CompletedTask;
+        }
+
+        private async Task LoadMedicalHistoryAsync()
+        {
+            if (_patientService == null || SelectedVisit == null || SelectedVisit.PatientId <= 0)
             {
                 return;
             }
 
-            var history = await _patientService.GetMedicalHistoryAsync(SelectedVisitTest.PatientId);
+            var history = await _patientService.GetMedicalHistoryAsync(SelectedVisit.PatientId);
             if (history == null)
             {
+                MedicalHistorySummary = string.Empty;
+                HasMedicalAlerts = false;
                 return;
             }
 
