@@ -78,7 +78,7 @@ namespace Open_lab.Services
                 {
                     var result = resultItem.Result;
                     var resultText = $"- {result.Parameter.Name}: {result.Value ?? "-"} {result.Flag}";
-                    
+
                     if (!string.IsNullOrWhiteSpace(resultItem.PreviousValue))
                     {
                         resultText += $" [Prev: {resultItem.PreviousValue} on {resultItem.PreviousDate:yyyy-MM-dd}]";
@@ -199,7 +199,7 @@ namespace Open_lab.Services
 
             var document = CreateDocument("تقرير مزرعة وحساسية", 11);
             document.Blocks.Add(CreateHeader("تقرير مزرعة وحساسية (Culture & Sensitivity Report)"));
-            
+
             document.Blocks.Add(new Paragraph(new Run($"المريض: {data.PatientName} | Lab ID: {data.LabId}")));
             document.Blocks.Add(new Paragraph(new Run($"تاريخ الزيارة: {data.VisitDate:yyyy-MM-dd} | المزرعة: {data.CultureName}")));
 
@@ -229,6 +229,63 @@ namespace Open_lab.Services
             document.Blocks.Add(table);
 
             PrintDocument(document, $"CultureReport_{data.LabId}");
+            return Task.CompletedTask;
+        }
+
+        // CRITICAL FIX Phase 0: Implement actual barcode image printing (C-04)
+        // Previously only printed text, now prints actual barcode images
+        public Task PrintBarcodeImageAsync(string title, System.Windows.Media.ImageSource? barcodeImage, string barcodeText, string? additionalInfo = null)
+        {
+            if (string.IsNullOrWhiteSpace(title))
+            {
+                throw new ArgumentException("العنوان مطلوب.", nameof(title));
+            }
+
+            var document = CreateDocument(title, 12);
+            document.Blocks.Add(CreateHeader(title));
+
+            // Add barcode image if provided
+            if (barcodeImage != null)
+            {
+                var image = new System.Windows.Controls.Image
+                {
+                    Source = barcodeImage,
+                    Stretch = System.Windows.Media.Stretch.Uniform,
+                    Width = 300,
+                    Height = 80
+                };
+
+                var container = new System.Windows.Documents.BlockUIContainer(image)
+                {
+                    Margin = new Thickness(0, 10, 0, 10)
+                };
+                document.Blocks.Add(container);
+            }
+
+            // Add barcode text (for scanner readability if image fails)
+            if (!string.IsNullOrWhiteSpace(barcodeText))
+            {
+                document.Blocks.Add(new Paragraph(new Run($"الكود: {barcodeText}"))
+                {
+                    FontSize = 14,
+                    FontWeight = FontWeights.Bold,
+                    TextAlignment = System.Windows.TextAlignment.Center,
+                    Margin = new Thickness(0, 5, 0, 5)
+                });
+            }
+
+            // Add additional info if provided
+            if (!string.IsNullOrWhiteSpace(additionalInfo))
+            {
+                document.Blocks.Add(new Paragraph(new Run(additionalInfo))
+                {
+                    FontSize = 10,
+                    TextAlignment = System.Windows.TextAlignment.Center,
+                    Foreground = System.Windows.Media.Brushes.Gray
+                });
+            }
+
+            PrintDocument(document, $"Barcode_{barcodeText}");
             return Task.CompletedTask;
         }
 

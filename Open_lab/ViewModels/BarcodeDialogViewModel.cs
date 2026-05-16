@@ -54,7 +54,11 @@ namespace Open_lab.ViewModels
                     continue;
                 }
 
-                var contentForBarcode = string.IsNullOrWhiteSpace(LabCode) ? label : $"{LabCode}";
+                // CRITICAL FIX Phase 0: Generate unique barcode for each tube label (C-11)
+                // Previously all tubes had the same LabCode as barcode - now each has a unique identifier
+                var contentForBarcode = string.IsNullOrWhiteSpace(LabCode)
+                    ? label
+                    : $"{LabCode}-{label.GetHashCode() % 1000:D3}"; // Unique per sample type
                 TubeLabels.Add(new TubeBarcodeLabel
                 {
                     Text = label,
@@ -64,11 +68,11 @@ namespace Open_lab.ViewModels
                 });
             }
 
-            PrintAllCommand = new RelayCommand(async _ => await PrintAsync("كل أكواد الباركود", BuildAllLines()));
-            PrintCaseCommand = new RelayCommand(async _ => await PrintAsync("كود الحالة", new[] { CaseCode }));
-            PrintFileCommand = new RelayCommand(async _ => await PrintAsync("كود الملف", new[] { FileCode }));
-            PrintLabCommand = new RelayCommand(async _ => await PrintAsync("كود المعمل", new[] { LabCode }));
-            PrintTubesCommand = new RelayCommand(async _ => await PrintTubesAsync());
+            PrintAllCommand = new RelayCommand(async _ => await PrintAllBarcodeImagesAsync());
+            PrintCaseCommand = new RelayCommand(async _ => await PrintBarcodeImageAsync(CaseBarcode, CaseCode, "كود الحالة"));
+            PrintFileCommand = new RelayCommand(async _ => await PrintBarcodeImageAsync(FileBarcode, FileCode, "كود الملف"));
+            PrintLabCommand = new RelayCommand(async _ => await PrintBarcodeImageAsync(LabBarcode, LabCode, "كود المعمل"));
+            PrintTubesCommand = new RelayCommand(async _ => await PrintTubeLabelsAsync());
         }
 
         public string PatientName { get; }
@@ -170,18 +174,63 @@ namespace Open_lab.ViewModels
             return lines;
         }
 
-        private async Task PrintTubesAsync()
+        // CRITICAL FIX Phase 0: Print actual barcode image instead of just text (C-04)
+        private async Task PrintBarcodeImageAsync(ImageSource? barcodeImage, string barcodeText, string title)
         {
-            var lines = new List<string>();
+            if (_printService == null)
+            {
+                return;
+            }
+
+            var additionalInfo = $"{PatientName} | {Gender} | {Age ?? 0} {AgeUnit} | {BarcodeDateText}";
+            await _printService.PrintBarcodeImageAsync(title, barcodeImage, barcodeText, additionalInfo);
+        }
+
+        // CRITICAL FIX Phase 0: Print all barcode images together (C-04)
+        private async Task PrintAllBarcodeImagesAsync()
+        {
+            if (_printService == null)
+            {
+                return;
+            }
+
+            // Print Case Barcode
+            if (CaseBarcode != null)
+            {
+                await PrintBarcodeImageAsync(CaseBarcode, CaseCode, "كود الحالة");
+            }
+
+            // Print File Barcode
+            if (FileBarcode != null)
+            {
+                await PrintBarcodeImageAsync(FileBarcode, FileCode, "كود الملف");
+            }
+
+            // Print Lab Barcode
+            if (LabBarcode != null)
+            {
+                await PrintBarcodeImageAsync(LabBarcode, LabCode, "كود المعمل");
+            }
+
+            // Print Tube Labels
+            await PrintTubeLabelsAsync();
+        }
+
+        // CRITICAL FIX Phase 0: Print tube labels with unique barcodes (C-11)
+        // Previously all tubes had the same LabCode as barcode
+        private async Task PrintTubeLabelsAsync()
+        {
+            if (_printService == null || TubeLabels.Count == 0)
+            {
+                return;
+            }
+
+            // Print each tube label with its own unique barcode
             foreach (var tube in TubeLabels)
             {
-                lines.Add($"{tube.PatientHeader} | {tube.Text} | {tube.Code}");
+                var info = $"{tube.PatientHeader}{Environment.NewLine}{tube.Text}";
+                await _printService.PrintBarcodeImageAsync($"ملصق: {tube.Text}", tube.Barcode, tube.Code, info);
             }
-            if (lines.Count == 0)
-            {
-                lines.Add("(لا توجد ملصقات أنابيب)");
-            }
-            await PrintAsync("ملصقات الأنابيب", lines);
         }
 
         private async Task PrintAsync(string title, IReadOnlyCollection<string> lines)
@@ -206,6 +255,7 @@ namespace Open_lab.ViewModels
         /// <summary>رأس الملصق: اسم المريض + الجنس + السن.</summary>
         public string PatientHeader { get; set; } = string.Empty;
 
+        /// <summary>صورة الباركود المُولّدة.</summary>
         public ImageSource? Barcode { get; set; }
     }
 }

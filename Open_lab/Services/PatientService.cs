@@ -255,6 +255,15 @@ namespace Open_lab.Services
             current.Address = patient.Address;
             current.ReferralId = patient.ReferralId;
 
+            // CRITICAL FIX Phase 0: These 6 fields were silently dropped during patient updates
+            // (C-02: Silent Data Loss Bug - Fixed in Phase 0)
+            current.Age = patient.Age;
+            current.IsVip = patient.IsVip;
+            current.IsPregnant = patient.IsPregnant;
+            current.HomePhone = patient.HomePhone;
+            current.NationalId = patient.NationalId;
+            current.Email = patient.Email;
+
             var newValues = BuildPatientSnapshot(current);
             if (userId.HasValue && !string.Equals(oldValues, newValues, StringComparison.Ordinal))
             {
@@ -333,7 +342,14 @@ namespace Open_lab.Services
                 $"BirthDate={patient.BirthDate:yyyy-MM-dd}",
                 $"Phone={patient.Phone}",
                 $"Address={patient.Address}",
-                $"ReferralId={patient.ReferralId?.ToString() ?? "null"}"
+                $"ReferralId={patient.ReferralId?.ToString() ?? "null"}",
+                // CRITICAL FIX Phase 0: Audit snapshot now includes all patient fields (C-02)
+                $"Age={patient.Age}",
+                $"IsVip={patient.IsVip}",
+                $"IsPregnant={patient.IsPregnant}",
+                $"HomePhone={patient.HomePhone}",
+                $"NationalId={patient.NationalId}",
+                $"Email={patient.Email}"
             });
         }
 

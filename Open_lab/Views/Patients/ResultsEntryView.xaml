@@ -10,7 +10,8 @@
             <Style.Triggers>
                 <!-- IsVerified Priority -->
                 <DataTrigger Binding="{Binding IsVerified}" Value="True">
-                    <Setter Property="Background" Value="#E0F7FA" /> <!-- Light Blue -->
+                    <Setter Property="Background" Value="#E0F7FA" />
+                    <!-- Light Blue -->
                 </DataTrigger>
                 <!-- IsFinished Priority (if not verified) -->
                 <MultiDataTrigger>
@@ -18,7 +19,8 @@
                         <Condition Binding="{Binding IsFinished}" Value="True" />
                         <Condition Binding="{Binding IsVerified}" Value="False" />
                     </MultiDataTrigger.Conditions>
-                    <Setter Property="Background" Value="#E8F5E9" /> <!-- Light Green -->
+                    <Setter Property="Background" Value="#E8F5E9" />
+                    <!-- Light Green -->
                 </MultiDataTrigger>
             </Style.Triggers>
         </Style>
@@ -28,7 +30,8 @@
             <Setter Property="Foreground" Value="Black" />
             <Style.Triggers>
                 <DataTrigger Binding="{Binding ResultValue}" Value="See Report">
-                    <Setter Property="Foreground" Value="#0000FF" /> <!-- Blue Text -->
+                    <Setter Property="Foreground" Value="#0000FF" />
+                    <!-- Blue Text -->
                 </DataTrigger>
             </Style.Triggers>
         </Style>
@@ -39,8 +42,10 @@
 
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="180" /> <!-- Right Column: Today's Patients -->
-            <ColumnDefinition Width="*" />   <!-- Left Column: Main Content -->
+            <ColumnDefinition Width="180" />
+            <!-- Right Column: Today's Patients -->
+            <ColumnDefinition Width="*" />
+            <!-- Left Column: Main Content -->
         </Grid.ColumnDefinitions>
 
         <!-- ======================================================= -->
@@ -97,9 +102,12 @@
         <!-- ======================================================= -->
         <Grid Grid.Column="1">
             <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" /> <!-- Top Bars -->
-                <RowDefinition Height="*" />    <!-- Grid + Notes -->
-                <RowDefinition Height="40" />   <!-- Bottom Buttons -->
+                <RowDefinition Height="Auto" />
+                <!-- Top Bars -->
+                <RowDefinition Height="*" />
+                <!-- Grid + Notes -->
+                <RowDefinition Height="40" />
+                <!-- Bottom Buttons -->
             </Grid.RowDefinitions>
 
             <!-- ROW 0: Top Bars -->
@@ -112,7 +120,7 @@
                         <Button Content="F4 نتائج" Margin="2" Padding="10,4" Background="#6E9F16" Foreground="White" BorderBrush="Transparent" />
                         <Button Content="F6 التسليم" Command="{Binding DataContext.NavigateDeliveryCommand, RelativeSource={RelativeSource AncestorType=Window}}" Margin="2" Padding="10,4" Background="White" BorderBrush="LightGray" />
                         <Button Content="القائمة الرئيسية" Command="{Binding DataContext.NavigateToPatientsCommand, RelativeSource={RelativeSource AncestorType=Window}}" Margin="2" Padding="10,4" Background="White" BorderBrush="LightGray" />
-                        
+
                         <!-- Date Filters -->
                         <TextBlock Text="من تاريخ" VerticalAlignment="Center" Margin="15,0,5,0" />
                         <DatePicker SelectedDate="{Binding DateFrom}" Width="120" VerticalAlignment="Center" />
@@ -138,7 +146,8 @@
                     <Grid Margin="5">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="60" /> <!-- Image -->
+                            <ColumnDefinition Width="60" />
+                            <!-- Image -->
                         </Grid.ColumnDefinitions>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="*" />
@@ -204,7 +213,7 @@
                 </ComboBox>
 
                 <!-- DataGrid -->
-                <DataGrid x:Name="TestResultsGrid" Grid.Row="1" 
+                <DataGrid x:Name="TestResultsGrid" Grid.Row="1"
                           ItemsSource="{Binding VisitTests}"
                           CanUserAddRows="False" CanUserDeleteRows="False"
                           AutoGenerateColumns="False" SelectionMode="Single"
@@ -216,7 +225,7 @@
                     <DataGrid.Columns>
                         <!-- 1: Test Abbreviation -->
                         <DataGridTextColumn Header="Test Abbreviation" Binding="{Binding TestName}" Width="180" IsReadOnly="True" />
-                        
+
                         <!-- 2: P -->
                         <DataGridTemplateColumn Header="P" Width="30">
                             <DataGridTemplateColumn.CellTemplate>
@@ -300,11 +309,18 @@
 
                 <!-- Notes Bar -->
                 <StackPanel Grid.Row="2" Orientation="Horizontal" FlowDirection="RightToLeft" Background="#F5F5F5" Height="35" Margin="0,5,0,0">
+                    <!-- CRITICAL FIX Phase 0: Save/Verify/Reopen buttons were MISSING (C-03) -->
+                    <Button Content="حفظ" Command="{Binding SaveResultsCommand}" Background="#4CAF50" Foreground="White" Width="70" Margin="5" FontWeight="Bold" />
+                    <Button Content="اعتماد" Command="{Binding VerifyResultsCommand}" Background="#2196F3" Foreground="White" Width="70" Margin="5" FontWeight="Bold" />
+                    <Button Content="إعادة فتح" Command="{Binding ReopenResultsCommand}" Background="#FF9800" Foreground="White" Width="80" Margin="5" FontWeight="Bold" />
+
+                    <Separator Width="2" Background="#CCC" Margin="10,3" />
+
                     <Button Content="طبعت" Command="{Binding MarkPrintedAllCommand}" Background="Gray" Foreground="White" Width="60" Margin="5" />
                     <Button Content="مراجعة" Command="{Binding MarkVerifiedAllCommand}" Background="Gray" Foreground="White" Width="60" Margin="5" />
                     <Button Content="تمت" Command="{Binding MarkFinishedAllCommand}" Background="#4CAF50" Foreground="White" Width="60" Margin="5" />
 
-                    <TextBox Text="{Binding VisitNotes, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="300" Background="#FFEEDD" Margin="20,5,5,5" VerticalContentAlignment="Center" />
+                    <TextBox Text="{Binding VisitNotes, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="200" Background="#FFEEDD" Margin="20,5,5,5" VerticalContentAlignment="Center" />
                     <TextBlock Text="ملاحظات:" VerticalAlignment="Center" Margin="5,0" />
                 </StackPanel>
             </Grid>

@@ -199,6 +199,11 @@ namespace Open_lab.ViewModels
             UndoCommand = new RelayCommand(_ => UndoLastChange(), _ => true);
             SettleCommand = new RelayCommand(_ => SettleBalance(), _ => true);
 
+            // CRITICAL FIX Phase 0: WorksheetCommand and InsuranceCommand were MISSING (C-01)
+            // Added placeholder implementations - can be enhanced in Phase 1 with full functionality
+            WorksheetCommand = new RelayCommand(_ => ShowWorksheet(), _ => CurrentVisitId > 0 || PatientId > 0);
+            InsuranceCommand = new RelayCommand(_ => ShowInsuranceInfo(), _ => CurrentVisitId > 0);
+
             if (initialize)
             {
                 _ = InitializeAsync();
@@ -934,6 +939,9 @@ namespace Open_lab.ViewModels
         public ICommand ShowMovementCommand { get; }
         public ICommand UndoCommand { get; }
         public ICommand SettleCommand { get; }
+        // CRITICAL FIX Phase 0: Added missing WorksheetCommand and InsuranceCommand (C-01)
+        public ICommand WorksheetCommand { get; }
+        public ICommand InsuranceCommand { get; }
 
         // ============ Methods ============
 
@@ -1317,38 +1325,57 @@ namespace Open_lab.ViewModels
                 return;
             }
 
-            var visit = CurrentVisitId > 0
-                ? await _visitService.GetByIdAsync(CurrentVisitId)
-                : null;
+            // CRITICAL FIX Phase 0: Wrap in TransactionScope for atomicity (C-09)
+            // Previously patient + visit + invoice could be partially saved
+            using var transaction = new System.Transactions.TransactionScope(
+                System.Transactions.TransactionScopeOption.Required,
+                new System.Transactions.TransactionOptions { Timeout = TimeSpan.FromSeconds(30) });
 
-            if (visit == null)
+            try
             {
-                visit = await _visitService.CreateAsync(new Visit
-                {
-                    PatientId = PatientId,
-                    VisitDate = DateTime.Now,
-                    AccountType = string.Equals(AccountType, "Lab to Lab", StringComparison.OrdinalIgnoreCase) ? "Referral" : "Cash",
-                    ReferralId = NormalizeReferralId(SelectedReferral),
-                    Status = "Open"
-                });
-                CurrentVisitId = visit.VisitId;
-            }
+                var visit = CurrentVisitId > 0
+                    ? await _visitService.GetByIdAsync(CurrentVisitId)
+                    : null;
 
-            var existingTests = await _visitService.GetVisitTestsAsync(visit.VisitId);
-            foreach (var selected in SelectedTests)
-            {
-                if (existingTests.Any(t => t.TestId == selected.TestId))
+                if (visit == null)
                 {
-                    continue;
+                    visit = await _visitService.CreateAsync(new Visit
+                    {
+                        PatientId = PatientId,
+                        VisitDate = DateTime.Now,
+                        AccountType = string.Equals(AccountType, "Lab to Lab", StringComparison.OrdinalIgnoreCase) ? "Referral" : "Cash",
+                        ReferralId = NormalizeReferralId(SelectedReferral),
+                        Status = "Open"
+                    });
+                    CurrentVisitId = visit.VisitId;
                 }
 
-                var added = await _visitService.AddTestToVisitAsync(visit.VisitId, selected.TestId, selected.Price);
-                selected.VisitTestId = added.VisitTestId;
-            }
+                var existingTests = await _visitService.GetVisitTestsAsync(visit.VisitId);
+                foreach (var selected in SelectedTests)
+                {
+                    if (existingTests.Any(t => t.TestId == selected.TestId))
+                    {
+                        continue;
+                    }
 
-            var discount = DiscountAmount;
-            var invoice = await _invoiceService.CreateOrUpdateInvoiceAsync(visit.VisitId, discount, PaidAmount + PreviousPaidAmount);
-            StatusMessage = $"تم حفظ الزيارة #{visit.VisitId} والفاتورة #{invoice.InvoiceId}.";
+                    var added = await _visitService.AddTestToVisitAsync(visit.VisitId, selected.TestId, selected.Price);
+                    selected.VisitTestId = added.VisitTestId;
+                }
+
+                var discount = DiscountAmount;
+                var invoice = await _invoiceService.CreateOrUpdateInvoiceAsync(visit.VisitId, discount, PaidAmount + PreviousPaidAmount);
+
+                // CRITICAL FIX: Commit transaction only after all operations succeed
+                transaction.Complete();
+
+                StatusMessage = $"تم حفظ الزيارة #{visit.VisitId} والفاتورة #{invoice.InvoiceId}.";
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = $"خطأ في حفظ البيانات: {ex.Message}";
+                // Transaction is automatically rolled back when disposed
+                throw;
+            }
         }
 
         private void ShowBarcode()
@@ -1528,6 +1555,40 @@ namespace Open_lab.ViewModels
                 Medications = Medications,
                 Notes = MedicalNotes
             });
+        }
+
+        // CRITICAL FIX Phase 0: Added missing command methods (C-01)
+        private void ShowWorksheet()
+        {
+            // TODO Phase 1: Implement full worksheet printing functionality
+            // This will show a worksheet with patient tests for lab technicians
+            StatusMessage = "ورقة العمل: جاري تحميل التحاليل المختارة للمريض...";
+
+            if (SelectedTests.Count == 0)
+            {
+                StatusMessage = "تنبيه: لا توجد تحاليل مختارة للمريض.";
+                return;
+            }
+
+            // Show worksheet in a dialog or print directly
+            // For now, just show a status message
+            var testList = string.Join(", ", SelectedTests.Select(t => t.TestName));
+            StatusMessage = $"ورقة العمل: {SelectedTests.Count} تحليل - {testList}";
+        }
+
+        private void ShowInsuranceInfo()
+        {
+            // TODO Phase 1: Implement full insurance info functionality
+            // This will show insurance/contract information for the patient
+            StatusMessage = "معلومات التأمين: جاري تحميل بيانات الجهة المحوّلة...";
+
+            if (SelectedReferral == null)
+            {
+                StatusMessage = "تنبيه: المريض ليس لديه جهة إحالة مسجلة.";
+                return;
+            }
+
+            StatusMessage = $"التأمين: {SelectedReferral.Name} - جاري تحميل التفاصيل...";
         }
     }
 }

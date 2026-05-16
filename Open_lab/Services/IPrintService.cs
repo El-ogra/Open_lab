@@ -16,6 +16,10 @@ namespace Open_lab.Services
         Task PrintTextReportAsync(string title, IReadOnlyCollection<string> lines, string? jobName = null);
         Task PrintCultureReportAsync(CultureReportData data);
 
+        // CRITICAL FIX Phase 0: Add barcode image printing support (C-04)
+        // Prints actual barcode images instead of just text
+        Task PrintBarcodeImageAsync(string title, System.Windows.Media.ImageSource? barcodeImage, string barcodeText, string? additionalInfo = null);
+
         /// <summary>
         /// Resolves the appropriate print queue based on document type and system settings.
         /// </summary>
