@@ -273,6 +273,97 @@ namespace Open_lab.Services
             await _db.SaveChangesAsync();
         }
 
+        // ============================================================================
+        // CRITICAL FIX Phase 0 (Fix #2): Atomic registration saved inside ONE transaction
+        // Wraps the multi-step "Patient + Visit + VisitTests + Invoice" sequence so that
+        // partial failures roll the database back to a consistent state.
+        //
+        // IMPORTANT: Uses EF Core's explicit BeginTransactionAsync (NOT TransactionScope
+        // / System.Transactions.Transaction) because SQLite does not support ambient
+        // transactions. This also fixes the SQLite integration test that was throwing
+        // "An ambient transaction has been detected, but the current provider does not
+        // support ambient transactions."
+        // ============================================================================
+        public async Task<int> SaveRegistrationAsync(
+            Patient patient,
+            Visit visit,
+            IEnumerable<VisitTest> visitTests,
+            Invoice invoice)
+        {
+            if (patient == null)
+            {
+                throw new ArgumentNullException(nameof(patient));
+            }
+
+            if (visit == null)
+            {
+                throw new ArgumentNullException(nameof(visit));
+            }
+
+            if (invoice == null)
+            {
+                throw new ArgumentNullException(nameof(invoice));
+            }
+
+            var visitTestList = visitTests?.ToList() ?? new List<VisitTest>();
+
+            await using var transaction = await _db.Database.BeginTransactionAsync();
+            try
+            {
+                // 1) Patient: create new or use existing PatientId.
+                if (patient.PatientId == 0)
+                {
+                    Normalize(patient);
+                    await ValidateReferralAsync(patient.ReferralId);
+                    if (string.IsNullOrWhiteSpace(patient.LabId))
+                    {
+                        patient.LabId = await GenerateNextLabIdAsync(DateTime.Today);
+                    }
+
+                    ValidateBusinessRules(patient);
+
+                    var labIdInUse = await _db.Patients.AnyAsync(p => p.LabId == patient.LabId);
+                    if (labIdInUse)
+                    {
+                        throw new InvalidOperationException("LabId already exists.");
+                    }
+
+                    _db.Patients.Add(patient);
+                    await _db.SaveChangesAsync();
+                }
+
+                // 2) Visit linked to the patient.
+                visit.PatientId = patient.PatientId;
+                _db.Visits.Add(visit);
+                await _db.SaveChangesAsync();
+
+                // 3) Visit tests linked to the visit.
+                foreach (var visitTest in visitTestList)
+                {
+                    visitTest.VisitId = visit.VisitId;
+                    _db.VisitTests.Add(visitTest);
+                }
+
+                if (visitTestList.Count > 0)
+                {
+                    await _db.SaveChangesAsync();
+                }
+
+                // 4) Invoice linked to the visit.
+                invoice.VisitId = visit.VisitId;
+                _db.Invoices.Add(invoice);
+                await _db.SaveChangesAsync();
+
+                await transaction.CommitAsync();
+                return visit.VisitId;
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+        }
+
         public async Task DeleteAsync(int patientId)
         {
             var patient = await _db.Patients.FirstOrDefaultAsync(p => p.PatientId == patientId);

@@ -93,8 +93,12 @@
                             <ColumnDefinition/>
                             <ColumnDefinition/>
                         </Grid.ColumnDefinitions>
-                        <Border Grid.Column="0" Style="{StaticResource SearchHeaderStyle}" Margin="0,0,2,2"><TextBlock Text="بحث بالتليفون" Style="{StaticResource SearchHeaderTextStyle}" FlowDirection="RightToLeft"/></Border>
-                        <Border Grid.Column="1" Style="{StaticResource SearchHeaderStyle}" Margin="2,0,0,2"><TextBlock Text="بحث بالجوال" Style="{StaticResource SearchHeaderTextStyle}" FlowDirection="RightToLeft"/></Border>
+                        <Border Grid.Column="0" Style="{StaticResource SearchHeaderStyle}" Margin="0,0,2,2">
+                            <TextBlock Text="بحث بالتليفون" Style="{StaticResource SearchHeaderTextStyle}" FlowDirection="RightToLeft"/>
+                        </Border>
+                        <Border Grid.Column="1" Style="{StaticResource SearchHeaderStyle}" Margin="2,0,0,2">
+                            <TextBlock Text="بحث بالجوال" Style="{StaticResource SearchHeaderTextStyle}" FlowDirection="RightToLeft"/>
+                        </Border>
                     </Grid>
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -107,29 +111,42 @@
                 </StackPanel>
 
                 <StackPanel Grid.Row="0" Grid.Column="1" Margin="2">
-                    <Border Style="{StaticResource SearchHeaderStyle}" Margin="0,0,0,2"><TextBlock Text="بحث بسن المريض" Style="{StaticResource SearchHeaderTextStyle}" FlowDirection="RightToLeft"/></Border>
+                    <Border Style="{StaticResource SearchHeaderStyle}" Margin="0,0,0,2">
+                        <TextBlock Text="بحث بسن المريض" Style="{StaticResource SearchHeaderTextStyle}" FlowDirection="RightToLeft"/>
+                    </Border>
                     <StackPanel Orientation="Horizontal" FlowDirection="RightToLeft">
                         <RadioButton Content="حر" Foreground="White" IsChecked="True" Margin="0,0,5,0" VerticalAlignment="Center" FlowDirection="RightToLeft"/>
                         <RadioButton Content="مقيد" Foreground="White" Margin="0,0,5,0" VerticalAlignment="Center" FlowDirection="RightToLeft"/>
-                        <ComboBox SelectedIndex="0" Margin="0,0,5,0" FlowDirection="LeftToRight"><ComboBoxItem Content="Years"/></ComboBox>
-                        <Border Background="{StaticResource AppOrange}" Padding="2,0" Margin="0,0,5,0"><TextBlock Text="من" Foreground="White" VerticalAlignment="Center" FlowDirection="RightToLeft"/></Border>
+                        <ComboBox SelectedIndex="0" Margin="0,0,5,0" FlowDirection="LeftToRight">
+                            <ComboBoxItem Content="Years"/>
+                        </ComboBox>
+                        <Border Background="{StaticResource AppOrange}" Padding="2,0" Margin="0,0,5,0">
+                            <TextBlock Text="من" Foreground="White" VerticalAlignment="Center" FlowDirection="RightToLeft"/>
+                        </Border>
                         <TextBox Width="30" Text="{Binding AgeFrom, FallbackValue=''}" FlowDirection="LeftToRight"/>
-                        <Border Background="{StaticResource AppOrange}" Padding="2,0" Margin="5,0,5,0"><TextBlock Text="إلى" Foreground="White" VerticalAlignment="Center" FlowDirection="RightToLeft"/></Border>
+                        <Border Background="{StaticResource AppOrange}" Padding="2,0" Margin="5,0,5,0">
+                            <TextBlock Text="إلى" Foreground="White" VerticalAlignment="Center" FlowDirection="RightToLeft"/>
+                        </Border>
                         <TextBox Width="30" Text="{Binding AgeTo, FallbackValue=''}" FlowDirection="LeftToRight"/>
                     </StackPanel>
                 </StackPanel>
 
                 <StackPanel Grid.Row="0" Grid.Column="2" Margin="2">
-                    <Border Style="{StaticResource SearchHeaderStyle}" Margin="0,0,0,2"><TextBlock Text="بحث بالنوع" Style="{StaticResource SearchHeaderTextStyle}" FlowDirection="RightToLeft"/></Border>
-                    <ComboBox SelectedItem="{Binding AgeGroup}" FlowDirection="RightToLeft">
-                        <ComboBoxItem Content="الكل"/>
-                        <ComboBoxItem Content="ذكر"/>
-                        <ComboBoxItem Content="أنثى"/>
+                    <Border Style="{StaticResource SearchHeaderStyle}" Margin="0,0,0,2">
+                        <TextBlock Text="بحث بالفئة العمرية" Style="{StaticResource SearchHeaderTextStyle}" FlowDirection="RightToLeft"/>
+                    </Border>
+                    <ComboBox SelectedValue="{Binding AgeGroup}" SelectedValuePath="Content" FlowDirection="RightToLeft">
+                        <ComboBoxItem Content="الكل" IsSelected="True"/>
+                        <ComboBoxItem Content="أطفال"/>
+                        <ComboBoxItem Content="بالغين"/>
+                        <ComboBoxItem Content="كبار سن"/>
                     </ComboBox>
                 </StackPanel>
 
                 <StackPanel Grid.Row="0" Grid.Column="3" Margin="2">
-                    <Border Style="{StaticResource SearchHeaderStyle}" Margin="0,0,0,2"><TextBlock Text="بحث باسم المريض (مطابق)" Style="{StaticResource SearchHeaderTextStyle}" FlowDirection="RightToLeft"/></Border>
+                    <Border Style="{StaticResource SearchHeaderStyle}" Margin="0,0,0,2">
+                        <TextBlock Text="بحث باسم المريض (مطابق)" Style="{StaticResource SearchHeaderTextStyle}" FlowDirection="RightToLeft"/>
+                    </Border>
                     <TextBox Text="{Binding NameExact, FallbackValue=''}" FlowDirection="RightToLeft"/>
                 </StackPanel>
 
@@ -142,29 +159,41 @@
 
                 <!-- Row 1 -->
                 <StackPanel Grid.Row="1" Grid.Column="0" Margin="2">
-                    <Border Style="{StaticResource SearchHeaderStyle}" Margin="0,0,0,2"><TextBlock Text="بحث بالرقم القومي" Style="{StaticResource SearchHeaderTextStyle}" FlowDirection="RightToLeft"/></Border>
+                    <Border Style="{StaticResource SearchHeaderStyle}" Margin="0,0,0,2">
+                        <TextBlock Text="بحث بالرقم القومي" Style="{StaticResource SearchHeaderTextStyle}" FlowDirection="RightToLeft"/>
+                    </Border>
                     <TextBox Text="{Binding NationalId}" FlowDirection="LeftToRight"/>
                 </StackPanel>
 
                 <StackPanel Grid.Row="1" Grid.Column="1" Margin="2">
-                    <Border Style="{StaticResource SearchHeaderStyle}" Margin="0,0,0,2"><TextBlock Text="بحث بتاريخ الطلب" Style="{StaticResource SearchHeaderTextStyle}" FlowDirection="RightToLeft"/></Border>
+                    <Border Style="{StaticResource SearchHeaderStyle}" Margin="0,0,0,2">
+                        <TextBlock Text="بحث بتاريخ الطلب" Style="{StaticResource SearchHeaderTextStyle}" FlowDirection="RightToLeft"/>
+                    </Border>
                     <StackPanel Orientation="Horizontal" FlowDirection="RightToLeft">
                         <RadioButton Content="حر" Foreground="White" IsChecked="True" Margin="0,0,5,0" VerticalAlignment="Center" FlowDirection="RightToLeft"/>
                         <RadioButton Content="مقيد" Foreground="White" Margin="0,0,5,0" VerticalAlignment="Center" FlowDirection="RightToLeft"/>
-                        <Border Background="{StaticResource AppOrange}" Padding="2,0" Margin="0,0,5,0"><TextBlock Text="من" Foreground="White" VerticalAlignment="Center" FlowDirection="RightToLeft"/></Border>
+                        <Border Background="{StaticResource AppOrange}" Padding="2,0" Margin="0,0,5,0">
+                            <TextBlock Text="من" Foreground="White" VerticalAlignment="Center" FlowDirection="RightToLeft"/>
+                        </Border>
                         <DatePicker SelectedDate="{Binding DateFrom}" Width="90" FlowDirection="LeftToRight"/>
-                        <Border Background="{StaticResource AppOrange}" Padding="2,0" Margin="5,0,5,0"><TextBlock Text="إلى" Foreground="White" VerticalAlignment="Center" FlowDirection="RightToLeft"/></Border>
+                        <Border Background="{StaticResource AppOrange}" Padding="2,0" Margin="5,0,5,0">
+                            <TextBlock Text="إلى" Foreground="White" VerticalAlignment="Center" FlowDirection="RightToLeft"/>
+                        </Border>
                         <DatePicker SelectedDate="{Binding DateTo}" Width="90" FlowDirection="LeftToRight"/>
                     </StackPanel>
                 </StackPanel>
 
                 <StackPanel Grid.Row="1" Grid.Column="2" Margin="2">
-                    <Border Style="{StaticResource SearchHeaderStyle}" Margin="0,0,0,2"><TextBlock Text="بحث باسم الطبيب" Style="{StaticResource SearchHeaderTextStyle}" FlowDirection="RightToLeft"/></Border>
+                    <Border Style="{StaticResource SearchHeaderStyle}" Margin="0,0,0,2">
+                        <TextBlock Text="بحث باسم الطبيب" Style="{StaticResource SearchHeaderTextStyle}" FlowDirection="RightToLeft"/>
+                    </Border>
                     <ComboBox SelectedItem="{Binding DoctorName, FallbackValue=''}" FlowDirection="RightToLeft"/>
                 </StackPanel>
 
                 <StackPanel Grid.Row="1" Grid.Column="3" Margin="2">
-                    <Border Style="{StaticResource SearchHeaderStyle}" Margin="0,0,0,2"><TextBlock Text="بحث باسم المريض (عشوائي)" Style="{StaticResource SearchHeaderTextStyle}" FlowDirection="RightToLeft"/></Border>
+                    <Border Style="{StaticResource SearchHeaderStyle}" Margin="0,0,0,2">
+                        <TextBlock Text="بحث باسم المريض (عشوائي)" Style="{StaticResource SearchHeaderTextStyle}" FlowDirection="RightToLeft"/>
+                    </Border>
                     <TextBox Text="{Binding Name}" FlowDirection="RightToLeft"/>
                 </StackPanel>
 
@@ -182,12 +211,12 @@
                 <Button Content="بيانات المريض" Command="{Binding DataContext.NavigatePatientRegistrationCommand, RelativeSource={RelativeSource AncestorType=Window}}" Style="{StaticResource GreyActionButtonStyle}" FlowDirection="RightToLeft"/>
                 <Button Content="نتائج التحاليل" Command="{Binding DataContext.NavigateResultsEntryCommand, RelativeSource={RelativeSource AncestorType=Window}}" Style="{StaticResource GreyActionButtonStyle}" FlowDirection="RightToLeft"/>
                 <Button Content="حذف المريض" Command="{Binding DeletePatientCommand}" Style="{StaticResource OrangeActionButtonStyle}" FlowDirection="RightToLeft"/>
-                <Button Content="نتائج لم تدخل" Style="{StaticResource YellowActionButtonStyle}" FlowDirection="RightToLeft"/>
-                <Button Content="نتائج لم تراجع" Style="{StaticResource GreenActionButtonStyle}" FlowDirection="RightToLeft"/>
-                <Button Content="نتائج لم تطبع" Style="{StaticResource GreenActionButtonStyle}" FlowDirection="RightToLeft"/>
-                <Button Content="نتائج لم تسلم" Style="{StaticResource GreenActionButtonStyle}" FlowDirection="RightToLeft"/>
-                <Button Content="حساب مفتوح" Style="{StaticResource GreenActionButtonStyle}" FlowDirection="RightToLeft"/>
-                <Button Content="نتائج مجمعة" Style="{StaticResource BlueActionButtonStyle}" FlowDirection="RightToLeft"/>
+                <Button Content="نتائج لم تدخل" IsEnabled="False" ToolTip="قيد التطوير" Style="{StaticResource YellowActionButtonStyle}" FlowDirection="RightToLeft"/>
+                <Button Content="نتائج لم تراجع" IsEnabled="False" ToolTip="قيد التطوير" Style="{StaticResource GreenActionButtonStyle}" FlowDirection="RightToLeft"/>
+                <Button Content="نتائج لم تطبع" IsEnabled="False" ToolTip="قيد التطوير" Style="{StaticResource GreenActionButtonStyle}" FlowDirection="RightToLeft"/>
+                <Button Content="نتائج لم تسلم" IsEnabled="False" ToolTip="قيد التطوير" Style="{StaticResource GreenActionButtonStyle}" FlowDirection="RightToLeft"/>
+                <Button Content="حساب مفتوح" IsEnabled="False" ToolTip="قيد التطوير" Style="{StaticResource GreenActionButtonStyle}" FlowDirection="RightToLeft"/>
+                <Button Content="نتائج مجمعة" IsEnabled="False" ToolTip="قيد التطوير" Style="{StaticResource BlueActionButtonStyle}" FlowDirection="RightToLeft"/>
                 <Button Content="القائمة الرئيسية" Command="{Binding DataContext.NavigateToPatientsCommand, RelativeSource={RelativeSource AncestorType=Window}}" Style="{StaticResource BlueActionButtonStyle}" FlowDirection="RightToLeft"/>
             </WrapPanel>
         </Border>

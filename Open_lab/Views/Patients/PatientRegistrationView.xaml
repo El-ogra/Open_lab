@@ -397,7 +397,8 @@
                                           SelectedItem="{Binding TestCategoryFilter, Mode=TwoWay}"
                                           Style="{StaticResource WhiteComboBoxStyle}"
                                           Width="85" FlowDirection="LeftToRight">
-                                    <ComboBoxItem Content="Rotine Tests" IsSelected="True" />
+                                    <!-- CRITICAL FIX Phase 0: Typo "Rotine" → "Routine" to match ViewModel default value (C-05) -->
+                                    <ComboBoxItem Content="Routine Tests" IsSelected="True" />
                                     <ComboBoxItem Content="Send Out" />
                                     <ComboBoxItem Content="All" />
                                 </ComboBox>

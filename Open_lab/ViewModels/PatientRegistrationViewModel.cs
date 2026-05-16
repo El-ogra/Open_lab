@@ -200,9 +200,11 @@ namespace Open_lab.ViewModels
             SettleCommand = new RelayCommand(_ => SettleBalance(), _ => true);
 
             // CRITICAL FIX Phase 0: WorksheetCommand and InsuranceCommand were MISSING (C-01)
-            // Added placeholder implementations - can be enhanced in Phase 1 with full functionality
-            WorksheetCommand = new RelayCommand(_ => ShowWorksheet(), _ => CurrentVisitId > 0 || PatientId > 0);
-            InsuranceCommand = new RelayCommand(_ => ShowInsuranceInfo(), _ => CurrentVisitId > 0);
+            // Implemented with informative StatusMessage feedback (per spec: "لا تتركهما فارغين تماماً")
+            // - WorksheetCommand: lists selected tests for technicians (placeholder)
+            // - InsuranceCommand:  displays referral/insurance contract (placeholder)
+            WorksheetCommand = new RelayCommand(_ => ShowWorksheet(), _ => true);
+            InsuranceCommand = new RelayCommand(_ => ShowInsuranceInfo(), _ => true);
 
             if (initialize)
             {
@@ -1557,38 +1559,33 @@ namespace Open_lab.ViewModels
             });
         }
 
-        // CRITICAL FIX Phase 0: Added missing command methods (C-01)
+        // CRITICAL FIX Phase 0: WorksheetCommand handler — was previously missing (C-01).
+        // Per spec: "أوامر تعرض رسالة 'قيد التطوير' في StatusMessage. لا تتركهما فارغين تماماً".
+        // Implementation: surfaces the selected-tests context that a future printable
+        // worksheet will use, while flagging the feature as still under development.
         private void ShowWorksheet()
         {
-            // TODO Phase 1: Implement full worksheet printing functionality
-            // This will show a worksheet with patient tests for lab technicians
-            StatusMessage = "ورقة العمل: جاري تحميل التحاليل المختارة للمريض...";
-
             if (SelectedTests.Count == 0)
             {
-                StatusMessage = "تنبيه: لا توجد تحاليل مختارة للمريض.";
+                StatusMessage = "ورقة العمل (قيد التطوير): لا توجد تحاليل مختارة للمريض حالياً.";
                 return;
             }
 
-            // Show worksheet in a dialog or print directly
-            // For now, just show a status message
             var testList = string.Join(", ", SelectedTests.Select(t => t.TestName));
-            StatusMessage = $"ورقة العمل: {SelectedTests.Count} تحليل - {testList}";
+            StatusMessage = $"ورقة العمل (قيد التطوير): {SelectedTests.Count} تحليل — {testList}.";
         }
 
+        // CRITICAL FIX Phase 0: InsuranceCommand handler — was previously missing (C-01).
+        // Per spec: shows a placeholder StatusMessage instead of being a no-op.
         private void ShowInsuranceInfo()
         {
-            // TODO Phase 1: Implement full insurance info functionality
-            // This will show insurance/contract information for the patient
-            StatusMessage = "معلومات التأمين: جاري تحميل بيانات الجهة المحوّلة...";
-
-            if (SelectedReferral == null)
+            if (SelectedReferral == null || SelectedReferral.ReferralId <= 0)
             {
-                StatusMessage = "تنبيه: المريض ليس لديه جهة إحالة مسجلة.";
+                StatusMessage = "إكارنية التأمين (قيد التطوير): المريض ليس لديه جهة إحالة مسجلة.";
                 return;
             }
 
-            StatusMessage = $"التأمين: {SelectedReferral.Name} - جاري تحميل التفاصيل...";
+            StatusMessage = $"إكارنية التأمين (قيد التطوير): الجهة المُحوِّلة = {SelectedReferral.Name}.";
         }
     }
 }

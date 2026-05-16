@@ -135,8 +135,8 @@ namespace Open_lab.ViewModels
                 {
                     PatientAge = tests.First().PatientAge;
                     PatientGender = tests.First().PatientGender;
-                    PatientCode = SelectedVisit.PatientName; 
-                    PatientReferral = "Self"; 
+                    PatientCode = SelectedVisit.LabId;
+                    PatientReferral = "Self";
                     TotalAmount = tests.Sum(x => x.Price);
                     TotalRequired = SelectedVisit.Balance;
                 }

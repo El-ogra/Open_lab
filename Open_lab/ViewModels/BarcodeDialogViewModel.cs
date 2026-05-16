@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using Open_lab.Services;
@@ -55,13 +58,14 @@ namespace Open_lab.ViewModels
                 }
 
                 // CRITICAL FIX Phase 0: Generate unique barcode for each tube label (C-11)
-                // Previously all tubes had the same LabCode as barcode - now each has a unique identifier
+                // كل ملصق يُشفّر قيمة مختلفة تتضمن نوع العينة + كود المريض (LabCode)
+                var safeLabel = label.Trim();
                 var contentForBarcode = string.IsNullOrWhiteSpace(LabCode)
-                    ? label
-                    : $"{LabCode}-{label.GetHashCode() % 1000:D3}"; // Unique per sample type
+                    ? safeLabel
+                    : $"{LabCode}-{safeLabel}";
                 TubeLabels.Add(new TubeBarcodeLabel
                 {
-                    Text = label,
+                    Text = safeLabel,
                     Code = contentForBarcode,
                     PatientHeader = PatientHeaderText,
                     Barcode = SafeGenerate(barcodeService, contentForBarcode, 300, 64)
@@ -233,14 +237,173 @@ namespace Open_lab.ViewModels
             }
         }
 
-        private async Task PrintAsync(string title, IReadOnlyCollection<string> lines)
+        /// <summary>
+        /// CRITICAL FIX Phase 0: بناء FlowDocument يحوي صور الباركود الفعلية (ImageSource)
+        /// لكل ملصق أنبوب بدلاً من إرسال نصوص فقط عبر PrintTextReportAsync.
+        /// كل ملصق يحتوي على: صورة الباركود، نص اسم العينة، اسم المريض، وتاريخ الزيارة.
+        /// </summary>
+        private Task PrintAsync(string title, IReadOnlyCollection<string> lines)
         {
-            if (_printService == null)
+            if (TubeLabels.Count == 0 && CaseBarcode == null && FileBarcode == null && LabBarcode == null)
+            {
+                return Task.CompletedTask;
+            }
+
+            var doc = new FlowDocument
+            {
+                PagePadding = new Thickness(24),
+                ColumnGap = 0,
+                ColumnWidth = double.PositiveInfinity,
+                FlowDirection = FlowDirection.RightToLeft
+            };
+
+            var section = new Section();
+
+            // رأس المستند
+            if (!string.IsNullOrWhiteSpace(title))
+            {
+                section.Blocks.Add(new Paragraph(new Run(title))
+                {
+                    FontSize = 18,
+                    FontWeight = FontWeights.Bold,
+                    TextAlignment = TextAlignment.Center
+                });
+            }
+
+            section.Blocks.Add(new Paragraph(new Run(PatientHeaderText))
+            {
+                FontSize = 12,
+                TextAlignment = TextAlignment.Center
+            });
+
+            section.Blocks.Add(new Paragraph(new Run(BarcodeDateText))
+            {
+                FontSize = 11,
+                TextAlignment = TextAlignment.Center,
+                Foreground = Brushes.DimGray
+            });
+
+            // الباركودات الرئيسية: Case / File / Lab
+            AppendBarcodeBlock(section, CaseBarcode, "كود الحالة", CaseCode);
+            AppendBarcodeBlock(section, FileBarcode, "كود الملف", FileCode);
+            AppendBarcodeBlock(section, LabBarcode, "كود المعمل", LabCode);
+
+            // ملصقات الأنابيب — صورة باركود فعلية لكل عينة + اسم العينة + اسم المريض + التاريخ
+            foreach (var label in TubeLabels)
+            {
+                if (label.Barcode == null)
+                {
+                    continue;
+                }
+
+                // فاصل بين الملصقات
+                section.Blocks.Add(new BlockUIContainer(new Separator()));
+
+                // صورة الباركود
+                var image = new Image
+                {
+                    Source = label.Barcode,
+                    Width = 200,
+                    Height = 80,
+                    Stretch = Stretch.Uniform,
+                    HorizontalAlignment = HorizontalAlignment.Center
+                };
+                var imageBlock = new BlockUIContainer(image)
+                {
+                    TextAlignment = TextAlignment.Center
+                };
+                section.Blocks.Add(imageBlock);
+
+                // نص اسم العينة (نوع التحليل)
+                section.Blocks.Add(new Paragraph(new Run(label.Text))
+                {
+                    FontSize = 14,
+                    FontWeight = FontWeights.Bold,
+                    TextAlignment = TextAlignment.Center
+                });
+
+                // الكود المُشفّر داخل الباركود (مرجع نصي)
+                section.Blocks.Add(new Paragraph(new Run(label.Code))
+                {
+                    FontSize = 10,
+                    TextAlignment = TextAlignment.Center,
+                    Foreground = Brushes.Gray
+                });
+
+                // اسم المريض
+                section.Blocks.Add(new Paragraph(new Run(PatientName))
+                {
+                    FontSize = 11,
+                    TextAlignment = TextAlignment.Center
+                });
+
+                // تاريخ الزيارة
+                section.Blocks.Add(new Paragraph(new Run(BarcodeDateText))
+                {
+                    FontSize = 10,
+                    TextAlignment = TextAlignment.Center,
+                    Foreground = Brushes.DimGray
+                });
+            }
+
+            doc.Blocks.Add(section);
+
+            // إرسال المستند للطابعة عبر PrintDialog
+            try
+            {
+                var pd = new System.Windows.Controls.PrintDialog();
+                if (pd.ShowDialog() == true)
+                {
+                    var paginator = ((IDocumentPaginatorSource)doc).DocumentPaginator;
+                    pd.PrintDocument(paginator, string.IsNullOrWhiteSpace(title) ? "Barcode Labels" : title);
+                }
+            }
+            catch
+            {
+                // فشل عرض PrintDialog (مثلاً في بيئة headless) — تجاهل بصمت
+            }
+
+            return Task.CompletedTask;
+        }
+
+        /// <summary>
+        /// يُلحق كتلة باركود رئيسية (Case/File/Lab) بالـ Section مع صورته وعنوانه ونصه.
+        /// </summary>
+        private static void AppendBarcodeBlock(Section section, ImageSource? barcode, string title, string code)
+        {
+            if (barcode == null || string.IsNullOrWhiteSpace(code))
             {
                 return;
             }
 
-            await _printService.PrintTextReportAsync(title, lines, title);
+            section.Blocks.Add(new BlockUIContainer(new Separator()));
+
+            section.Blocks.Add(new Paragraph(new Run(title))
+            {
+                FontSize = 13,
+                FontWeight = FontWeights.Bold,
+                TextAlignment = TextAlignment.Center
+            });
+
+            var image = new Image
+            {
+                Source = barcode,
+                Width = 240,
+                Height = 90,
+                Stretch = Stretch.Uniform,
+                HorizontalAlignment = HorizontalAlignment.Center
+            };
+            section.Blocks.Add(new BlockUIContainer(image)
+            {
+                TextAlignment = TextAlignment.Center
+            });
+
+            section.Blocks.Add(new Paragraph(new Run(code))
+            {
+                FontSize = 11,
+                TextAlignment = TextAlignment.Center,
+                Foreground = Brushes.Gray
+            });
         }
     }
 

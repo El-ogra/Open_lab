@@ -309,15 +309,15 @@
 
                 <!-- Notes Bar -->
                 <StackPanel Grid.Row="2" Orientation="Horizontal" FlowDirection="RightToLeft" Background="#F5F5F5" Height="35" Margin="0,5,0,0">
-                    <!-- CRITICAL FIX Phase 0: Save/Verify/Reopen buttons were MISSING (C-03) -->
-                    <Button Content="حفظ" Command="{Binding SaveResultsCommand}" Background="#4CAF50" Foreground="White" Width="70" Margin="5" FontWeight="Bold" />
-                    <Button Content="اعتماد" Command="{Binding VerifyResultsCommand}" Background="#2196F3" Foreground="White" Width="70" Margin="5" FontWeight="Bold" />
+                    <!-- CRITICAL FIX Phase 0: Save/Verify/Reopen buttons were MISSING (C-03) — labels normalized to spec -->
+                    <Button Content="حفظ النتائج" Command="{Binding SaveResultsCommand}" Background="#4CAF50" Foreground="White" Width="90" Margin="5" FontWeight="Bold" />
+                    <Button Content="مراجعة" Command="{Binding VerifyResultsCommand}" Background="#2196F3" Foreground="White" Width="70" Margin="5" FontWeight="Bold" />
                     <Button Content="إعادة فتح" Command="{Binding ReopenResultsCommand}" Background="#FF9800" Foreground="White" Width="80" Margin="5" FontWeight="Bold" />
 
                     <Separator Width="2" Background="#CCC" Margin="10,3" />
 
                     <Button Content="طبعت" Command="{Binding MarkPrintedAllCommand}" Background="Gray" Foreground="White" Width="60" Margin="5" />
-                    <Button Content="مراجعة" Command="{Binding MarkVerifiedAllCommand}" Background="Gray" Foreground="White" Width="60" Margin="5" />
+                    <Button Content="مراجعة الكل" Command="{Binding MarkVerifiedAllCommand}" Background="Gray" Foreground="White" Width="80" Margin="5" />
                     <Button Content="تمت" Command="{Binding MarkFinishedAllCommand}" Background="#4CAF50" Foreground="White" Width="60" Margin="5" />
 
                     <TextBox Text="{Binding VisitNotes, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="200" Background="#FFEEDD" Margin="20,5,5,5" VerticalContentAlignment="Center" />
