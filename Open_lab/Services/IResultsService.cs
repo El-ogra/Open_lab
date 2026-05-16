@@ -15,6 +15,9 @@ namespace Open_lab.Services
         Task SaveResultAsync(int visitTestId, int parameterId, string? value, string? flag, string? comment, int userId);
         Task VerifyVisitTestAsync(int visitTestId, int verifiedByUserId);
         Task ReopenVisitTestAsync(int visitTestId);
+        Task MarkVisitTestsCompletedAsync(IEnumerable<int> visitTestIds);
+        Task MarkVisitTestsVerifiedAsync(IEnumerable<int> visitTestIds, int verifiedByUserId);
+        Task MarkVisitTestsPrintedAsync(IEnumerable<int> visitTestIds, int userId);
         Task LogVisitReportPrintedAsync(int visitId, int userId);
         Task<ReferenceRangeResult> ValidateResultAsync(int testId, string value, string gender, int age);
     }

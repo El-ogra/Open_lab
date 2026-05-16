@@ -248,4 +248,49 @@ public class PatientScreensSqliteIntegrationTests : SqliteIntegrationTestBase
         var deliveredTest = await Db.VisitTests.AsNoTracking().SingleAsync(vt => vt.VisitId == visit.VisitId);
         deliveredTest.Status.Should().Be("Delivered");
     }
+
+    [Fact]
+    public async Task ResultsEntry_MarkFinishedAll_ShouldPersistCompletedStatuses()
+    {
+        var test = await SeedTestAsync("FIN", "Finish Test", 60m);
+        var patient = new Patient { LabId = "LAB-F-001", FullName = "Finish Patient", Gender = "Male", Age = 33 };
+        Db.Patients.Add(patient);
+        await Db.SaveChangesAsync();
+        var visit = new Visit { PatientId = patient.PatientId, VisitDate = DateTime.Today.AddHours(12), AccountType = "Cash", Status = "Open" };
+        Db.Visits.Add(visit);
+        await Db.SaveChangesAsync();
+        Db.VisitTests.Add(new VisitTest { VisitId = visit.VisitId, TestId = test.TestId, Price = 60m, Status = "Pending" });
+        await Db.SaveChangesAsync();
+
+        var viewModel = new ResultsEntryViewModel(new ResultsService(Db), new PatientService(Db))
+        {
+            DateFrom = DateTime.Today,
+            DateTo = DateTime.Today
+        };
+        viewModel.LoadVisitTestsCommand.Execute(null);
+        await WaitUntilAsync(() => viewModel.VisitTests.Count == 1, "Visit tests were not loaded for bulk finish.");
+
+        viewModel.MarkFinishedAllCommand.Execute(null);
+        await WaitUntilAsync(() => Db.VisitTests.AsNoTracking().Any(vt => vt.VisitId == visit.VisitId && vt.Status == "Completed"), "Bulk finish did not persist Completed status.");
+    }
+
+    [Fact]
+    public async Task PatientSearch_DeletePatient_ShouldRemovePatientWithoutVisits()
+    {
+        var patient = new Patient { LabId = "LAB-DEL-001", FullName = "Delete Search Patient", Gender = "Female", Age = 25 };
+        Db.Patients.Add(patient);
+        await Db.SaveChangesAsync();
+
+        var viewModel = new PatientSearchViewModel(new PatientSearchService(Db))
+        {
+            LabId = "LAB-DEL-001",
+            ConfirmAction = (_, _) => true
+        };
+        viewModel.SearchCommand.Execute(null);
+        await WaitUntilAsync(() => viewModel.Patients.Count == 1, "Delete patient search did not find patient.");
+
+        viewModel.SelectedPatient = viewModel.Patients.Single();
+        viewModel.DeletePatientCommand.Execute(null);
+        await WaitUntilAsync(() => !Db.Patients.AsNoTracking().Any(p => p.PatientId == patient.PatientId), "Delete patient command did not remove patient.");
+    }
 }

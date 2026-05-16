@@ -197,13 +197,10 @@ namespace Open_lab.ViewModels
             ShowTodayPatientsCommand = new RelayCommand(async _ => await LoadTodayPatientsAsync(), _ => AppSession.HasPermission(PermissionCodes.PatientsView));
             ShowMovementCommand = new RelayCommand(_ => ShowMovement(), _ => CurrentVisitId > 0);
             UndoCommand = new RelayCommand(_ => UndoLastChange(), _ => true);
-            SettleCommand = new RelayCommand(_ => SettleBalance(), _ => true);
+            SettleCommand = new RelayCommand(async _ => await SettleBalanceAsync(), _ => true);
 
-            // CRITICAL FIX Phase 0: WorksheetCommand and InsuranceCommand were MISSING (C-01)
-            // Implemented with informative StatusMessage feedback (per spec: "لا تتركهما فارغين تماماً")
-            // - WorksheetCommand: lists selected tests for technicians (placeholder)
-            // - InsuranceCommand:  displays referral/insurance contract (placeholder)
-            WorksheetCommand = new RelayCommand(_ => ShowWorksheet(), _ => true);
+            // WorksheetCommand now sends the selected patient tests to the worksheet printer.
+            WorksheetCommand = new RelayCommand(async _ => await PrintWorksheetAsync(), _ => true);
             InsuranceCommand = new RelayCommand(_ => ShowInsuranceInfo(), _ => true);
 
             if (initialize)
@@ -1466,19 +1463,52 @@ namespace Open_lab.ViewModels
                 return;
             }
 
-            var lines = new List<string>
+            var visitTests = SelectedTests.Select(t => new VisitTest
             {
-                $"المريض: {FullName}",
-                $"Lab ID: {LabId}",
-                $"الزيارة: {CurrentVisitId}",
-                $"الإجمالي: {TotalAmount:N2}",
-                $"الخصم: {DiscountAmount:N2}",
-                $"الصافي: {NetAmount:N2}",
-                $"المدفوع: {(PaidAmount + PreviousPaidAmount):N2}",
-                $"الباقي: {BalanceForLab:N2}"
+                VisitId = CurrentVisitId,
+                TestId = t.TestId,
+                Price = t.Price,
+                Status = "Open",
+                Test = new Test
+                {
+                    TestId = t.TestId,
+                    NameReport = t.TestName,
+                    NameReceipt = t.TestName,
+                    Price = t.Price
+                }
+            }).ToList();
+
+            var receipt = new ReceiptData
+            {
+                Visit = new Visit
+                {
+                    VisitId = CurrentVisitId,
+                    PatientId = PatientId,
+                    VisitDate = EntryDate,
+                    Status = "Open"
+                },
+                Patient = new Patient
+                {
+                    PatientId = PatientId,
+                    LabId = LabId,
+                    FullName = FullName,
+                    Gender = Gender,
+                    Age = Age
+                },
+                VisitTests = visitTests,
+                Invoice = new Invoice
+                {
+                    VisitId = CurrentVisitId,
+                    Total = TotalAmount,
+                    Discount = DiscountAmount,
+                    NetTotal = NetAmount,
+                    Paid = PaidAmount + PreviousPaidAmount,
+                    Balance = BalanceForLab,
+                    Status = BalanceForLab <= 0 ? "Closed" : "Open"
+                }
             };
 
-            await _printService.PrintTextReportAsync("إيصال زيارة", lines, $"Receipt_{CurrentVisitId}");
+            await _printService.PrintReceiptAsync(receipt, LabId);
             StatusMessage = "تم إرسال الإيصال للطباعة.";
         }
 
@@ -1494,7 +1524,7 @@ namespace Open_lab.ViewModels
             StatusMessage = "تم التراجع عن آخر تعديل مالي.";
         }
 
-        private void SettleBalance()
+        private async Task SettleBalanceAsync()
         {
             // "خالص" — يجعل المدفوع مساوياً للصافي بحيث يصبح الباقي 0
             var remaining = NetAmount - PreviousPaidAmount;
@@ -1503,7 +1533,18 @@ namespace Open_lab.ViewModels
                 remaining = 0;
             }
             PaidAmount = remaining;
-            StatusMessage = "تم تعليم الفاتورة كـ (خالص).";
+
+            if (_invoiceService != null && CurrentVisitId > 0)
+            {
+                await _invoiceService.CreateOrUpdateInvoiceAsync(CurrentVisitId, DiscountAmount, PaidAmount + PreviousPaidAmount);
+                PreviousPaidAmount += PaidAmount;
+                PaidAmount = 0;
+                RaiseFinancialTotals();
+                StatusMessage = "تم تعليم الفاتورة كـ (خالص) وحفظ الدفع.";
+                return;
+            }
+
+            StatusMessage = "تم تعليم الفاتورة كـ (خالص). احفظ الزيارة لتثبيت الدفع.";
         }
 
         private void RaiseFinancialTotals()
@@ -1559,20 +1600,33 @@ namespace Open_lab.ViewModels
             });
         }
 
-        // CRITICAL FIX Phase 0: WorksheetCommand handler — was previously missing (C-01).
-        // Per spec: "أوامر تعرض رسالة 'قيد التطوير' في StatusMessage. لا تتركهما فارغين تماماً".
-        // Implementation: surfaces the selected-tests context that a future printable
-        // worksheet will use, while flagging the feature as still under development.
-        private void ShowWorksheet()
+        private async Task PrintWorksheetAsync()
         {
             if (SelectedTests.Count == 0)
             {
-                StatusMessage = "ورقة العمل (قيد التطوير): لا توجد تحاليل مختارة للمريض حالياً.";
+                StatusMessage = "لا توجد تحاليل مختارة لطباعة ورقة العمل.";
                 return;
             }
 
-            var testList = string.Join(", ", SelectedTests.Select(t => t.TestName));
-            StatusMessage = $"ورقة العمل (قيد التطوير): {SelectedTests.Count} تحليل — {testList}.";
+            if (_printService == null)
+            {
+                StatusMessage = "خدمة الطباعة غير متاحة.";
+                return;
+            }
+
+            var rows = new List<WorkSheetPatientRow>
+            {
+                new WorkSheetPatientRow
+                {
+                    VisitId = CurrentVisitId,
+                    PatientName = FullName,
+                    VisitDate = EntryDate,
+                    TestsCount = SelectedTests.Count
+                }
+            };
+
+            await _printService.PrintWorksheetByPatientAsync(EntryDate.Date, EntryDate.Date, rows);
+            StatusMessage = "تم إرسال ورقة عمل المريض للطباعة.";
         }
 
         // CRITICAL FIX Phase 0: InsuranceCommand handler — was previously missing (C-01).

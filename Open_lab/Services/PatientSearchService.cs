@@ -46,7 +46,8 @@ namespace Open_lab.Services
 
             if (!string.IsNullOrWhiteSpace(criteria.LabId))
             {
-                query = query.Where(p => p.LabId == criteria.LabId);
+                var labId = criteria.LabId.Trim();
+                query = query.Where(p => p.LabId.Contains(labId));
             }
 
             if (!string.IsNullOrWhiteSpace(criteria.NationalId))
@@ -67,6 +68,16 @@ namespace Open_lab.Services
                 query = query.Where(p => p.Visits.Any(v => v.VisitDate >= from && v.VisitDate <= to));
             }
 
+            if (criteria.AgeFrom.HasValue)
+            {
+                query = query.Where(p => p.Age.HasValue && p.Age.Value >= criteria.AgeFrom.Value);
+            }
+
+            if (criteria.AgeTo.HasValue)
+            {
+                query = query.Where(p => p.Age.HasValue && p.Age.Value <= criteria.AgeTo.Value);
+            }
+
             if (!string.IsNullOrWhiteSpace(criteria.AgeGroup) && !string.Equals(criteria.AgeGroup, "الكل", StringComparison.OrdinalIgnoreCase))
             {
                 query = criteria.AgeGroup switch
@@ -84,9 +95,40 @@ namespace Open_lab.Services
         public Task<List<Visit>> GetPatientVisitsAsync(int patientId)
         {
             return _db.Visits.AsNoTracking()
+                .Include(v => v.Invoice)
+                .Include(v => v.VisitTests)
                 .Where(v => v.PatientId == patientId)
                 .OrderByDescending(v => v.VisitDate)
                 .ToListAsync();
+        }
+
+        public Task<List<VisitTest>> GetPatientVisitTestsAsync(int patientId)
+        {
+            return _db.VisitTests.AsNoTracking()
+                .Include(vt => vt.Test)
+                .Include(vt => vt.Visit)
+                .Where(vt => vt.Visit.PatientId == patientId)
+                .OrderByDescending(vt => vt.Visit.VisitDate)
+                .ThenBy(vt => vt.Test.NameReport)
+                .ToListAsync();
+        }
+
+        public async Task DeletePatientAsync(int patientId)
+        {
+            var patient = await _db.Patients.FirstOrDefaultAsync(p => p.PatientId == patientId);
+            if (patient == null)
+            {
+                return;
+            }
+
+            var hasVisits = await _db.Visits.AnyAsync(v => v.PatientId == patientId);
+            if (hasVisits)
+            {
+                throw new InvalidOperationException("لا يمكن حذف مريض لديه زيارات مسجلة.");
+            }
+
+            _db.Patients.Remove(patient);
+            await _db.SaveChangesAsync();
         }
     }
 }

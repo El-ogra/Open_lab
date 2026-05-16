@@ -24,6 +24,7 @@ namespace Open_lab.Services
                 .Include(vt => vt.Visit)
                 .ThenInclude(v => v.Patient)
                 .Include(vt => vt.Test)
+                .Include(vt => vt.ResultValues)
                 .Where(vt => vt.Visit.VisitDate >= from && vt.Visit.VisitDate <= to)
                 .OrderBy(vt => vt.Visit.VisitDate)
                 .ToListAsync();
@@ -198,6 +199,59 @@ namespace Open_lab.Services
 
             visitTest.Status = "InProgress";
             await _db.SaveChangesAsync();
+        }
+
+        public async Task MarkVisitTestsCompletedAsync(IEnumerable<int> visitTestIds)
+        {
+            var ids = visitTestIds.Distinct().ToList();
+            if (ids.Count == 0)
+            {
+                return;
+            }
+
+            var tests = await _db.VisitTests
+                .Where(vt => ids.Contains(vt.VisitTestId))
+                .ToListAsync();
+
+            foreach (var test in tests)
+            {
+                if (!string.Equals(test.Status, "Verified", StringComparison.OrdinalIgnoreCase) &&
+                    !string.Equals(test.Status, "Delivered", StringComparison.OrdinalIgnoreCase))
+                {
+                    test.Status = "Completed";
+                }
+            }
+
+            await _db.SaveChangesAsync();
+        }
+
+        public async Task MarkVisitTestsVerifiedAsync(IEnumerable<int> visitTestIds, int verifiedByUserId)
+        {
+            foreach (var id in visitTestIds.Distinct())
+            {
+                await VerifyVisitTestAsync(id, verifiedByUserId);
+            }
+        }
+
+        public async Task MarkVisitTestsPrintedAsync(IEnumerable<int> visitTestIds, int userId)
+        {
+            var ids = visitTestIds.Distinct().ToList();
+            if (ids.Count == 0)
+            {
+                return;
+            }
+
+            var visitIds = await _db.VisitTests
+                .AsNoTracking()
+                .Where(vt => ids.Contains(vt.VisitTestId))
+                .Select(vt => vt.VisitId)
+                .Distinct()
+                .ToListAsync();
+
+            foreach (var visitId in visitIds)
+            {
+                await LogVisitReportPrintedAsync(visitId, userId);
+            }
         }
 
         public async Task LogVisitReportPrintedAsync(int visitId, int userId)

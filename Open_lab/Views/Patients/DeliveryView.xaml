@@ -201,7 +201,7 @@
                     <ToggleButton Grid.Row="1" Grid.Column="0" Content="VIP" IsChecked="{Binding IsVIP}" Margin="2" Background="{StaticResource DeliveryPanelGreen}" Foreground="White"/>
                     <ToggleButton Grid.Row="1" Grid.Column="1" Content="Pat" IsChecked="{Binding IsPat}" Margin="2" Background="{StaticResource DeliveryPanelGreen}" Foreground="White"/>
                     <ToggleButton Grid.Row="1" Grid.Column="2" Content="Lab" IsChecked="{Binding IsLab}" Margin="2" Background="{StaticResource DeliveryPanelGreen}" Foreground="White"/>
-                    <Button Grid.Row="1" Grid.Column="3" Content="£" Style="{StaticResource DeliveryYellowButtonStyle}" Margin="2"/>
+                    <ToggleButton Grid.Row="1" Grid.Column="3" Content="لم تسلم" IsChecked="{Binding UndeliveredOnly}" Margin="2" Background="{StaticResource DeliveryOrange}" Foreground="White"/>
 
                     <!-- Date From / To -->
                     <Grid Grid.Row="2" Grid.ColumnSpan="4" Margin="2">

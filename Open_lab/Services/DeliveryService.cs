@@ -19,12 +19,20 @@ namespace Open_lab.Services
 
         public async Task<List<DeliveryVisitRow>> SearchAsync(DateTime from, DateTime to, string? keyword = null)
         {
+            return await SearchAsync(from, to, keyword, new DeliverySearchFilter());
+        }
+
+        public async Task<List<DeliveryVisitRow>> SearchAsync(DateTime from, DateTime to, string? keyword, DeliverySearchFilter filter)
+        {
             var query = _db.Visits
                 .AsNoTracking()
                 .Include(v => v.Patient)
+                .Include(v => v.Referral)
                 .Include(v => v.Invoice)
                 .Include(v => v.VisitTests)
                 .Where(v => v.VisitDate >= from && v.VisitDate <= to);
+
+            filter ??= new DeliverySearchFilter();
 
             if (!string.IsNullOrWhiteSpace(keyword))
             {
@@ -35,11 +43,30 @@ namespace Open_lab.Services
                     v.VisitId.ToString().Contains(term));
             }
 
+            if (filter.VipOnly)
+            {
+                query = query.Where(v => v.Patient.IsVip);
+            }
+
+            if (filter.PatientOnly)
+            {
+                query = query.Where(v => string.IsNullOrWhiteSpace(v.AccountType) ||
+                    v.AccountType == "Cash" ||
+                    v.AccountType == "Individual");
+            }
+
+            if (filter.LabOnly)
+            {
+                query = query.Where(v => v.ReferralId.HasValue ||
+                    v.AccountType == "Referral" ||
+                    v.AccountType == "Lab to Lab");
+            }
+
             var visits = await query
                 .OrderByDescending(v => v.VisitDate)
                 .ToListAsync();
 
-            return visits.Select(v =>
+            var rows = visits.Select(v =>
             {
                 var testsCount = v.VisitTests.Count;
                 var verifiedCount = v.VisitTests.Count(t => string.Equals(t.Status, "Verified", StringComparison.OrdinalIgnoreCase));
@@ -67,6 +94,13 @@ namespace Open_lab.Services
                     IsDelivered = isDelivered
                 };
             }).ToList();
+
+            if (filter.UndeliveredOnly)
+            {
+                rows = rows.Where(r => !r.IsDelivered).ToList();
+            }
+
+            return rows;
         }
 
         public async Task<List<VisitTestRow>> GetVisitTestsAsync(int visitId)

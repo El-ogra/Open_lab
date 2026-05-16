@@ -152,7 +152,7 @@
 
                 <StackPanel Grid.Row="0" Grid.Column="4" Margin="10,2,2,2">
                     <Border Background="White" BorderBrush="Black" BorderThickness="1" Padding="5">
-                        <TextBlock Text="&lt;&lt;Enter ID&gt;&gt;" FontWeight="Bold" HorizontalAlignment="Center"/>
+                        <TextBox Text="{Binding LabId, UpdateSourceTrigger=PropertyChanged}" FontWeight="Bold" HorizontalContentAlignment="Center" BorderThickness="0" FlowDirection="LeftToRight"/>
                     </Border>
                     <Button Content="🔄 New search" Command="{Binding SearchCommand}" Style="{StaticResource GreenActionButtonStyle}" Margin="0,5,0,0" FlowDirection="LeftToRight"/>
                 </StackPanel>

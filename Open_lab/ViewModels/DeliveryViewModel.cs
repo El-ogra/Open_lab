@@ -20,6 +20,7 @@ namespace Open_lab.ViewModels
         private bool _isVIP;
         private bool _isLab;
         private bool _isPat;
+        private bool _undeliveredOnly = true;
         private int _patientAge;
         private string _patientGender = string.Empty;
         private string _patientCode = string.Empty;
@@ -45,15 +46,16 @@ namespace Open_lab.ViewModels
 
             RefreshCommand = new RelayCommand(async _ => await LoadAsync());
             PatientAccountCommand = new RelayCommand(_ => { /* navigate */ });
-            FilterAllCommand = new RelayCommand(_ => { IsVIP = false; IsLab = false; IsPat = false; _ = LoadAsync(); });
+            FilterAllCommand = new RelayCommand(_ => { IsVIP = false; IsLab = false; IsPat = false; UndeliveredOnly = false; _ = LoadAsync(); });
         }
 
         public ObservableCollection<DeliveryVisitRow> Visits { get; }
         public ObservableCollection<VisitTestRow> SelectedVisitTests { get; } = new ObservableCollection<VisitTestRow>();
 
-        public bool IsVIP { get => _isVIP; set => SetProperty(ref _isVIP, value); }
-        public bool IsLab { get => _isLab; set => SetProperty(ref _isLab, value); }
-        public bool IsPat { get => _isPat; set => SetProperty(ref _isPat, value); }
+        public bool IsVIP { get => _isVIP; set { if (SetProperty(ref _isVIP, value)) _ = LoadAsync(); } }
+        public bool IsLab { get => _isLab; set { if (SetProperty(ref _isLab, value)) _ = LoadAsync(); } }
+        public bool IsPat { get => _isPat; set { if (SetProperty(ref _isPat, value)) _ = LoadAsync(); } }
+        public bool UndeliveredOnly { get => _undeliveredOnly; set { if (SetProperty(ref _undeliveredOnly, value)) _ = LoadAsync(); } }
         public int PatientAge { get => _patientAge; set => SetProperty(ref _patientAge, value); }
         public string PatientGender { get => _patientGender; set => SetProperty(ref _patientGender, value); }
         public string PatientCode { get => _patientCode; set => SetProperty(ref _patientCode, value); }
@@ -151,7 +153,17 @@ namespace Open_lab.ViewModels
         {
             try
             {
-                var rows = await _deliveryService.SearchAsync(DateFrom, DateTo.AddDays(1).AddSeconds(-1), Keyword);
+                var rows = await _deliveryService.SearchAsync(
+                    DateFrom,
+                    DateTo.AddDays(1).AddSeconds(-1),
+                    Keyword,
+                    new DeliverySearchFilter
+                    {
+                        VipOnly = IsVIP,
+                        LabOnly = IsLab,
+                        PatientOnly = IsPat,
+                        UndeliveredOnly = UndeliveredOnly
+                    });
                 Visits.Clear();
                 foreach (var row in rows)
                 {

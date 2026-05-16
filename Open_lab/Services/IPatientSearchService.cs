@@ -9,6 +9,8 @@ namespace Open_lab.Services
         Task<List<Patient>> SearchPatientsAsync(string? name, string? phone, string? labId, DateTime? date = null);
         Task<List<Patient>> SearchPatientsAsync(PatientSearchCriteria criteria);
         Task<List<Visit>> GetPatientVisitsAsync(int patientId);
+        Task<List<VisitTest>> GetPatientVisitTestsAsync(int patientId);
+        Task DeletePatientAsync(int patientId);
     }
 
     public class PatientSearchCriteria
@@ -20,6 +22,8 @@ namespace Open_lab.Services
         public DateTime? Date { get; set; }
         public DateTime? DateFrom { get; set; }
         public DateTime? DateTo { get; set; }
+        public int? AgeFrom { get; set; }
+        public int? AgeTo { get; set; }
         public string? AgeGroup { get; set; }
     }
 }

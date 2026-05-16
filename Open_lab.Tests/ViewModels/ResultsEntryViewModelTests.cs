@@ -189,6 +189,53 @@ namespace Open_lab.Tests.ViewModels
             // Assert
             _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
+
+        [Fact]
+        public async Task SaveResultsCommand_Should_Save_Selected_ResultItems()
+        {
+            _resultsServiceMock.Setup(x => x.GetParametersForTestAsync(10))
+                .ReturnsAsync(new List<TestParameter> { new TestParameter { ParameterId = 2, TestId = 10, Name = "Hb" } });
+            _resultsServiceMock.Setup(x => x.GetResultsForVisitTestAsync(5))
+                .ReturnsAsync(new List<ResultValue>());
+
+            _viewModel.SelectedVisitTest = new VisitTestRow
+            {
+                VisitTestId = 5,
+                TestId = 10,
+                PatientAge = 30,
+                PatientGender = "Male",
+                ResultValue = "13.5"
+            };
+            await Task.Delay(100);
+
+            _viewModel.SaveResultsCommand.Execute(null);
+            await Task.Delay(100);
+
+            _resultsServiceMock.Verify(x => x.SaveResultAsync(
+                5,
+                2,
+                "13.5",
+                It.IsAny<string?>(),
+                It.IsAny<string?>(),
+                It.IsAny<int>()), Times.Once);
+            _viewModel.SelectedVisitTest.Status.Should().Be("Completed");
+        }
+
+        [Fact]
+        public async Task MarkFinishedAndPrintedCommands_Should_Call_Persistent_Service_Methods()
+        {
+            _viewModel.VisitTests.Add(new VisitTestRow { VisitTestId = 1, Status = "Pending" });
+            _viewModel.VisitTests.Add(new VisitTestRow { VisitTestId = 2, Status = "InProgress" });
+
+            _viewModel.MarkFinishedAllCommand.Execute(null);
+            await Task.Delay(100);
+            _viewModel.MarkPrintedAllCommand.Execute(null);
+            await Task.Delay(100);
+
+            _resultsServiceMock.Verify(x => x.MarkVisitTestsCompletedAsync(It.Is<IEnumerable<int>>(ids => ids.SequenceEqual(new[] { 1, 2 }))), Times.Once);
+            _resultsServiceMock.Verify(x => x.MarkVisitTestsPrintedAsync(It.Is<IEnumerable<int>>(ids => ids.SequenceEqual(new[] { 1, 2 })), It.IsAny<int>()), Times.Once);
+            _viewModel.VisitTests.Should().OnlyContain(t => t.IsFinished && t.ShouldPrint);
+        }
     }
 }
 

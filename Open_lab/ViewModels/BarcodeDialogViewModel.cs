@@ -22,6 +22,8 @@ namespace Open_lab.ViewModels
     public class BarcodeDialogViewModel : BaseViewModel
     {
         private readonly IPrintService? _printService;
+        private static double _savedOffsetX;
+        private static double _savedOffsetY;
         private double _offsetX;
         private double _offsetY;
 
@@ -30,6 +32,8 @@ namespace Open_lab.ViewModels
             if (barcodeService == null) throw new ArgumentNullException(nameof(barcodeService));
             data ??= new BarcodeDialogData();
             _printService = printService;
+            _offsetX = _savedOffsetX;
+            _offsetY = _savedOffsetY;
 
             PatientName = data.PatientName;
             Gender = string.IsNullOrWhiteSpace(data.Gender) ? "—" : data.Gender;
@@ -106,13 +110,25 @@ namespace Open_lab.ViewModels
         public double OffsetX
         {
             get => _offsetX;
-            set => SetProperty(ref _offsetX, value);
+            set
+            {
+                if (SetProperty(ref _offsetX, value))
+                {
+                    _savedOffsetX = value;
+                }
+            }
         }
 
         public double OffsetY
         {
             get => _offsetY;
-            set => SetProperty(ref _offsetY, value);
+            set
+            {
+                if (SetProperty(ref _offsetY, value))
+                {
+                    _savedOffsetY = value;
+                }
+            }
         }
 
         private string BuildPatientHeader()
@@ -193,31 +209,7 @@ namespace Open_lab.ViewModels
         // CRITICAL FIX Phase 0: Print all barcode images together (C-04)
         private async Task PrintAllBarcodeImagesAsync()
         {
-            if (_printService == null)
-            {
-                return;
-            }
-
-            // Print Case Barcode
-            if (CaseBarcode != null)
-            {
-                await PrintBarcodeImageAsync(CaseBarcode, CaseCode, "كود الحالة");
-            }
-
-            // Print File Barcode
-            if (FileBarcode != null)
-            {
-                await PrintBarcodeImageAsync(FileBarcode, FileCode, "كود الملف");
-            }
-
-            // Print Lab Barcode
-            if (LabBarcode != null)
-            {
-                await PrintBarcodeImageAsync(LabBarcode, LabCode, "كود المعمل");
-            }
-
-            // Print Tube Labels
-            await PrintTubeLabelsAsync();
+            await PrintAsync("طباعة كل الأكواد", BuildAllLines());
         }
 
         // CRITICAL FIX Phase 0: Print tube labels with unique barcodes (C-11)
@@ -251,7 +243,7 @@ namespace Open_lab.ViewModels
 
             var doc = new FlowDocument
             {
-                PagePadding = new Thickness(24),
+                PagePadding = new Thickness(24 + OffsetX, 24 + OffsetY, 24, 24),
                 ColumnGap = 0,
                 ColumnWidth = double.PositiveInfinity,
                 FlowDirection = FlowDirection.RightToLeft

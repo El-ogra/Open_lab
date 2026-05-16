@@ -189,5 +189,52 @@ namespace Open_lab.Tests.ViewModels
             // Assert
             _viewModel.Visits.Should().BeEmpty();
         }
+
+        [Fact]
+        public async Task SelectedPatient_Should_Load_PatientTests_List()
+        {
+            var patient = new Patient { PatientId = 77, FullName = "Test Patient" };
+            _patientSearchServiceMock.Setup(service => service.GetPatientVisitsAsync(77))
+                .ReturnsAsync(new List<Visit>());
+            _patientSearchServiceMock.Setup(service => service.GetPatientVisitTestsAsync(77))
+                .ReturnsAsync(new List<VisitTest>
+                {
+                    new VisitTest
+                    {
+                        VisitTestId = 1,
+                        TestId = 10,
+                        Status = "Verified",
+                        Test = new Test { TestId = 10, NameReport = "CBC", NameReceipt = "CBC" },
+                        Visit = new Visit { VisitId = 5, PatientId = 77, VisitDate = new DateTime(2026, 5, 16) }
+                    }
+                });
+
+            _viewModel.SelectedPatient = patient;
+            await Task.Delay(100);
+
+            _viewModel.PatientTests.Should().ContainSingle();
+            _viewModel.PatientTests[0].Should().Contain("CBC");
+        }
+
+        [Fact]
+        public async Task DeletePatientCommand_When_Confirmed_Should_Delete_And_Remove_Row()
+        {
+            var patient = new Patient { PatientId = 88, FullName = "Delete Me", LabId = "LAB-88" };
+            _viewModel.ConfirmAction = (_, _) => true;
+            _viewModel.Patients.Add(patient);
+            _patientSearchServiceMock.Setup(service => service.GetPatientVisitsAsync(88))
+                .ReturnsAsync(new List<Visit>());
+            _patientSearchServiceMock.Setup(service => service.GetPatientVisitTestsAsync(88))
+                .ReturnsAsync(new List<VisitTest>());
+
+            _viewModel.SelectedPatient = patient;
+            await Task.Delay(50);
+            _viewModel.DeletePatientCommand.Execute(null);
+            await Task.Delay(100);
+
+            _patientSearchServiceMock.Verify(service => service.DeletePatientAsync(88), Times.Once);
+            _viewModel.Patients.Should().BeEmpty();
+            _viewModel.SelectedPatient.Should().BeNull();
+        }
     }
 }

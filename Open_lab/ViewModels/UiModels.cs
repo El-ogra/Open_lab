@@ -22,6 +22,7 @@ namespace Open_lab.ViewModels
         public int Age { get; set; }
         public string ReferralSource { get; set; } = string.Empty;
         public string LabId { get; set; } = string.Empty;
+        public string StatusMarker { get; set; } = string.Empty;
         public string? PatientPhoto { get; set; }
         public DateTime VisitDate { get; set; }
         public string DisplayText => $"{VisitId} - {VisitDate:yyyy-MM-dd}";

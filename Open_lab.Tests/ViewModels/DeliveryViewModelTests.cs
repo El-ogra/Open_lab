@@ -70,5 +70,35 @@ namespace Open_lab.Tests.ViewModels
             vm.StatusMessage.Should().Contain("لا توجد فاتورة");
             _invoiceServiceMock.Verify(x => x.AddPaymentAsync(It.IsAny<int>(), It.IsAny<decimal>(), It.IsAny<string>(), It.IsAny<int>()), Times.Never);
         }
+
+        [Fact]
+        public async Task SearchCommand_Should_Pass_Delivery_Filters_To_Service()
+        {
+            var vm = new DeliveryViewModel(_deliveryServiceMock.Object, _invoiceServiceMock.Object)
+            {
+                IsVIP = true,
+                UndeliveredOnly = true
+            };
+
+            _deliveryServiceMock.Setup(x => x.SearchAsync(
+                    It.IsAny<DateTime>(),
+                    It.IsAny<DateTime>(),
+                    It.IsAny<string?>(),
+                    It.IsAny<DeliverySearchFilter>()))
+                .ReturnsAsync(new List<DeliveryVisitRow>
+                {
+                    new DeliveryVisitRow { VisitId = 1, PatientName = "VIP Pending", IsDelivered = false }
+                });
+
+            vm.SearchCommand.Execute(null);
+            await Task.Delay(100);
+
+            _deliveryServiceMock.Verify(x => x.SearchAsync(
+                It.IsAny<DateTime>(),
+                It.IsAny<DateTime>(),
+                It.IsAny<string?>(),
+                It.Is<DeliverySearchFilter>(filter => filter.VipOnly && filter.UndeliveredOnly)), Times.AtLeastOnce);
+            vm.Visits.Should().ContainSingle();
+        }
     }
 }

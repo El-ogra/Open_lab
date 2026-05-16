@@ -1,8 +1,10 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using Microsoft.Extensions.DependencyInjection;
 using Open_lab.Services;
 
 namespace Open_lab.ViewModels
@@ -12,6 +14,7 @@ namespace Open_lab.ViewModels
         private readonly IResultsService _resultsService;
         private readonly IPatientService? _patientService;
         private readonly IVisitService? _visitService;
+        private readonly IPrintService? _printService;
 
         private DateTime _dateFrom = DateTime.Today;
         private DateTime _dateTo = DateTime.Today;
@@ -36,10 +39,17 @@ namespace Open_lab.ViewModels
         }
 
         public ResultsEntryViewModel(IResultsService resultsService, IPatientService? patientService, IVisitService? visitService)
+            : this(resultsService, patientService, visitService, null)
+        {
+        }
+
+        [ActivatorUtilitiesConstructor]
+        public ResultsEntryViewModel(IResultsService resultsService, IPatientService? patientService, IVisitService? visitService, IPrintService? printService)
         {
             _resultsService = resultsService;
             _patientService = patientService;
             _visitService = visitService;
+            _printService = printService;
 
             TodayPatients = new ObservableCollection<VisitSummary>();
             VisitTests = new ObservableCollection<VisitTestRow>();
@@ -60,7 +70,7 @@ namespace Open_lab.ViewModels
 
             ShowMedicalHistoryCommand = new RelayCommand(async _ => await LoadMedicalHistoryAsync());
             PrintGroupReportCommand = new RelayCommand(_ => { StatusMessage = "Printing Group Report..."; });
-            PrintWorksheetCommand = new RelayCommand(_ => { StatusMessage = "Printing Worksheet..."; });
+            PrintWorksheetCommand = new RelayCommand(async _ => await PrintWorksheetAsync(), _ => VisitTests.Count > 0);
             PrintMethodsCommand = new RelayCommand(_ => { StatusMessage = "Printing Methods..."; });
             PrintBlankReportCommand = new RelayCommand(_ => { StatusMessage = "Printing Blank Report..."; });
             GoToPatientDataCommand = new RelayCommand(_ => { StatusMessage = "Navigating to Patient Data..."; });
@@ -223,7 +233,8 @@ namespace Open_lab.ViewModels
                         Age = v.Patient?.Age ?? 0,
                         ReferralSource = v.Referral?.Name ?? string.Empty,
                         LabId = v.Patient?.LabId ?? string.Empty,
-                        VisitDate = v.VisitDate
+                        VisitDate = v.VisitDate,
+                        StatusMarker = BuildVisitStatusMarker(visitTests.Where(vt => vt.VisitId == v.VisitId))
                     })
                     .ToList();
 
@@ -276,6 +287,7 @@ namespace Open_lab.ViewModels
                         PatientAge = vt.Visit?.Patient?.Age ?? 0,
                         TestName = vt.Test?.NameReport ?? string.Empty,
                         VisitDate = vt.Visit?.VisitDate ?? DateTime.MinValue,
+                        ResultValue = vt.ResultValues?.FirstOrDefault()?.Value,
                         Status = vt.Status,
                         IsFinished = vt.Status == "Verified" || vt.Status == "Finished",
                         IsVerified = vt.Status == "Verified"
@@ -283,6 +295,7 @@ namespace Open_lab.ViewModels
                 }
                 
                 StatusMessage = $"تم تحميل {VisitTests.Count} تحليل.";
+                (PrintWorksheetCommand as RelayCommand)?.RaiseCanExecuteChanged();
             }
             catch (Exception ex)
             {
@@ -319,6 +332,11 @@ namespace Open_lab.ViewModels
                         OnValueChanged = async i => await AutoValidateResultAsync(i)
                     };
                     ResultItems.Add(item);
+                }
+
+                if (ResultItems.Count > 0 && string.IsNullOrWhiteSpace(SelectedVisitTest.ResultValue))
+                {
+                    SelectedVisitTest.ResultValue = ResultItems.FirstOrDefault(i => !string.IsNullOrWhiteSpace(i.Value))?.Value;
                 }
             }
             catch (Exception ex)
@@ -361,6 +379,11 @@ namespace Open_lab.ViewModels
 
             try
             {
+                if (ResultItems.Count > 0 && !string.IsNullOrWhiteSpace(SelectedVisitTest.ResultValue))
+                {
+                    ResultItems[0].Value = SelectedVisitTest.ResultValue;
+                }
+
                 foreach (var item in ResultItems)
                 {
                     await _resultsService.SaveResultAsync(
@@ -372,7 +395,7 @@ namespace Open_lab.ViewModels
                         AppSession.UserId > 0 ? AppSession.UserId : 1);
                 }
 
-                SelectedVisitTest.Status = "InProgress";
+                SelectedVisitTest.Status = ResultItems.Any(i => !string.IsNullOrWhiteSpace(i.Value)) ? "Completed" : "InProgress";
                 RaiseCommandStates();
                 StatusMessage = "تم حفظ النتائج.";
             }
@@ -440,33 +463,85 @@ namespace Open_lab.ViewModels
 
         private async Task MarkFinishedAllAsync()
         {
+            var ids = VisitTests.Select(t => t.VisitTestId).ToList();
+            await _resultsService.MarkVisitTestsCompletedAsync(ids);
+
             foreach (var test in VisitTests)
             {
                 test.IsFinished = true;
+                if (!string.Equals(test.Status, "Verified", StringComparison.OrdinalIgnoreCase) &&
+                    !string.Equals(test.Status, "Delivered", StringComparison.OrdinalIgnoreCase))
+                {
+                    test.Status = "Completed";
+                }
             }
             StatusMessage = "تم تعيين الكل كمنتهي.";
-            await Task.CompletedTask;
         }
 
         private async Task MarkVerifiedAllAsync()
         {
+            var userId = AppSession.UserId > 0 ? AppSession.UserId : 1;
+            await _resultsService.MarkVisitTestsVerifiedAsync(VisitTests.Select(t => t.VisitTestId), userId);
+
             foreach (var test in VisitTests)
             {
                 test.IsVerified = true;
                 test.IsFinished = true;
+                test.Status = "Verified";
             }
             StatusMessage = "تم تعيين الكل كمعتمد.";
-            await Task.CompletedTask;
         }
 
         private async Task MarkPrintedAllAsync()
         {
+            var userId = AppSession.UserId > 0 ? AppSession.UserId : 1;
+            await _resultsService.MarkVisitTestsPrintedAsync(VisitTests.Select(t => t.VisitTestId), userId);
+
             foreach (var test in VisitTests)
             {
                 test.ShouldPrint = true;
             }
             StatusMessage = "تم تعيين الكل كطباعة.";
-            await Task.CompletedTask;
+        }
+
+        private async Task PrintWorksheetAsync()
+        {
+            if (_printService == null)
+            {
+                StatusMessage = "خدمة الطباعة غير متاحة.";
+                return;
+            }
+
+            if (VisitTests.Count == 0)
+            {
+                StatusMessage = "لا توجد تحاليل لطباعة ورقة العمل.";
+                return;
+            }
+
+            var rows = VisitTests
+                .GroupBy(t => new { t.PatientId, t.PatientName, t.VisitDate, VisitId = SelectedVisitDetail?.VisitId ?? SelectedVisit?.VisitId ?? 0 })
+                .Select(g => new WorkSheetPatientRow
+                {
+                    VisitId = g.Key.VisitId,
+                    PatientName = g.Key.PatientName,
+                    VisitDate = g.Key.VisitDate,
+                    TestsCount = g.Count()
+                })
+                .ToList();
+
+            await _printService.PrintWorksheetByPatientAsync(DateFrom.Date, DateTo.Date, rows);
+            StatusMessage = "تم إرسال ورقة العمل للطباعة.";
+        }
+
+        private static string BuildVisitStatusMarker(IEnumerable<Open_lab.Models.VisitTest> tests)
+        {
+            var list = tests.ToList();
+            if (list.Count == 0) return "جديد";
+            if (list.Any(t => string.Equals(t.Status, "Delivered", StringComparison.OrdinalIgnoreCase))) return "تم التسليم";
+            if (list.All(t => string.Equals(t.Status, "Verified", StringComparison.OrdinalIgnoreCase))) return "تمت المراجعة";
+            if (list.Any(t => string.Equals(t.Status, "Completed", StringComparison.OrdinalIgnoreCase))) return "لم تراجع";
+            if (list.Any(t => string.Equals(t.Status, "InProgress", StringComparison.OrdinalIgnoreCase))) return "لم تكتمل";
+            return "جديد";
         }
 
         private async Task LoadMedicalHistoryAsync()

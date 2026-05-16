@@ -81,7 +81,10 @@
                 </ListBox.ItemContainerStyle>
                 <ListBox.ItemTemplate>
                     <DataTemplate>
-                        <TextBlock Text="{Binding PatientName}" Padding="2" />
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="{Binding StatusMarker}" FontWeight="Bold" Width="75" Padding="2" />
+                            <TextBlock Text="{Binding PatientName}" Padding="2" />
+                        </StackPanel>
                     </DataTemplate>
                 </ListBox.ItemTemplate>
             </ListBox>
@@ -204,6 +207,7 @@
             <Grid Grid.Row="1" Margin="5">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
+                    <RowDefinition Height="2*" />
                     <RowDefinition Height="*" />
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
@@ -215,6 +219,7 @@
                 <!-- DataGrid -->
                 <DataGrid x:Name="TestResultsGrid" Grid.Row="1"
                           ItemsSource="{Binding VisitTests}"
+                          SelectedItem="{Binding SelectedVisitTest, Mode=TwoWay}"
                           CanUserAddRows="False" CanUserDeleteRows="False"
                           AutoGenerateColumns="False" SelectionMode="Single"
                           RowStyle="{StaticResource TestRowStyle}"
@@ -307,8 +312,26 @@
                     </DataGrid.Columns>
                 </DataGrid>
 
+                <DataGrid Grid.Row="2"
+                          ItemsSource="{Binding ResultItems}"
+                          CanUserAddRows="False"
+                          AutoGenerateColumns="False"
+                          GridLinesVisibility="All"
+                          HeadersVisibility="Column"
+                          FlowDirection="LeftToRight"
+                          BorderBrush="#1E3A6E"
+                          BorderThickness="2"
+                          Margin="0,5,0,0">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Parameter" Binding="{Binding ParameterName}" Width="180" IsReadOnly="True" />
+                        <DataGridTextColumn Header="Value" Binding="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="160" />
+                        <DataGridTextColumn Header="Flag" Binding="{Binding Flag, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="90" />
+                        <DataGridTextColumn Header="Comment" Binding="{Binding Comment, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="*" />
+                    </DataGrid.Columns>
+                </DataGrid>
+
                 <!-- Notes Bar -->
-                <StackPanel Grid.Row="2" Orientation="Horizontal" FlowDirection="RightToLeft" Background="#F5F5F5" Height="35" Margin="0,5,0,0">
+                <StackPanel Grid.Row="3" Orientation="Horizontal" FlowDirection="RightToLeft" Background="#F5F5F5" Height="35" Margin="0,5,0,0">
                     <!-- CRITICAL FIX Phase 0: Save/Verify/Reopen buttons were MISSING (C-03) — labels normalized to spec -->
                     <Button Content="حفظ النتائج" Command="{Binding SaveResultsCommand}" Background="#4CAF50" Foreground="White" Width="90" Margin="5" FontWeight="Bold" />
                     <Button Content="مراجعة" Command="{Binding VerifyResultsCommand}" Background="#2196F3" Foreground="White" Width="70" Margin="5" FontWeight="Bold" />

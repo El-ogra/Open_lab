@@ -757,5 +757,134 @@ namespace Open_lab.Tests.ViewModels
             parameterTypes.Should().Contain(typeof(IInvoiceService));
             hasResultEntryDependency.Should().BeFalse("registration owns visit and invoice creation but still must not depend on result-entry services.");
         }
+
+        [Fact]
+        public async Task PrintReceiptCommand_Should_Print_Receipt_With_SelectedTests_And_InvoiceTotals()
+        {
+            var printMock = new Mock<IPrintService>();
+            var visitMock = new Mock<IVisitService>();
+            var invoiceMock = new Mock<IInvoiceService>();
+            var vm = new PatientRegistrationViewModel(
+                _patientServiceMock.Object,
+                null,
+                visitMock.Object,
+                invoiceMock.Object,
+                null,
+                printMock.Object);
+
+            vm.LabId = "LAB-20";
+            vm.FullName = "Receipt Patient";
+            vm.SelectedTests.Add(new SelectedTestItem { TestId = 1, TestName = "CBC", Price = 120m });
+            vm.DiscountPercent = 10m;
+            vm.PaidAmount = 50m;
+
+            _patientServiceMock.Setup(x => x.CreateAsync(It.IsAny<Patient>()))
+                .ReturnsAsync((Patient patient) =>
+                {
+                    patient.PatientId = 10;
+                    return patient;
+                });
+            _patientServiceMock.Setup(x => x.SaveMedicalHistoryAsync(10, It.IsAny<MedicalHistory>()))
+                .Returns(Task.CompletedTask);
+            visitMock.Setup(x => x.CreateAsync(It.IsAny<Visit>()))
+                .ReturnsAsync((Visit visit) =>
+                {
+                    visit.VisitId = 20;
+                    return visit;
+                });
+            visitMock.Setup(x => x.GetVisitTestsAsync(20)).ReturnsAsync(new List<VisitTest>());
+            visitMock.Setup(x => x.AddTestToVisitAsync(20, 1, 120m))
+                .ReturnsAsync(new VisitTest { VisitTestId = 30, VisitId = 20, TestId = 1, Price = 120m });
+            invoiceMock.Setup(x => x.CreateOrUpdateInvoiceAsync(20, 12m, 50m))
+                .ReturnsAsync(new Invoice { InvoiceId = 40, VisitId = 20, Discount = 12m, Paid = 50m });
+
+            vm.SaveCommand.Execute(null);
+            await Task.Delay(150);
+            vm.PrintReceiptCommand.Execute(null);
+            await Task.Delay(100);
+
+            printMock.Verify(x => x.PrintReceiptAsync(
+                It.Is<ReceiptData>(data =>
+                    data.Patient.FullName == "Receipt Patient" &&
+                    data.VisitTests.Count == 1 &&
+                    data.Invoice != null &&
+                    data.Invoice.Discount == 12m),
+                "LAB-20"), Times.Once);
+        }
+
+        [Fact]
+        public async Task WorksheetCommand_Should_Print_Patient_Worksheet()
+        {
+            var printMock = new Mock<IPrintService>();
+            var vm = new PatientRegistrationViewModel(
+                _patientServiceMock.Object,
+                null,
+                null,
+                null,
+                null,
+                printMock.Object);
+
+            vm.FullName = "Worksheet Patient";
+            vm.SelectedTests.Add(new SelectedTestItem { TestId = 2, TestName = "Glucose", Price = 80m });
+
+            vm.WorksheetCommand.Execute(null);
+            await Task.Delay(100);
+
+            printMock.Verify(x => x.PrintWorksheetByPatientAsync(
+                It.IsAny<DateTime>(),
+                It.IsAny<DateTime>(),
+                It.Is<IReadOnlyCollection<WorkSheetPatientRow>>(rows =>
+                    rows.Count == 1 &&
+                    rows.Single().PatientName == "Worksheet Patient" &&
+                    rows.Single().TestsCount == 1)), Times.Once);
+        }
+
+        [Fact]
+        public async Task SettleCommand_When_VisitSaved_Should_Save_InvoicePayment()
+        {
+            var visitMock = new Mock<IVisitService>();
+            var invoiceMock = new Mock<IInvoiceService>();
+
+            var vm = new PatientRegistrationViewModel(
+                _patientServiceMock.Object,
+                null,
+                visitMock.Object,
+                invoiceMock.Object,
+                null,
+                null);
+
+            vm.FullName = "Settle Patient";
+            vm.LabId = "LAB-44";
+            vm.SelectedTests.Add(new SelectedTestItem { TestId = 3, TestName = "ALT", Price = 100m });
+            _patientServiceMock.Setup(x => x.CreateAsync(It.IsAny<Patient>()))
+                .ReturnsAsync((Patient patient) =>
+                {
+                    patient.PatientId = 44;
+                    return patient;
+                });
+            _patientServiceMock.Setup(x => x.SaveMedicalHistoryAsync(44, It.IsAny<MedicalHistory>()))
+                .Returns(Task.CompletedTask);
+            visitMock.Setup(x => x.CreateAsync(It.IsAny<Visit>()))
+                .ReturnsAsync((Visit visit) =>
+                {
+                    visit.VisitId = 44;
+                    return visit;
+                });
+            visitMock.Setup(x => x.GetVisitTestsAsync(44)).ReturnsAsync(new List<VisitTest>());
+            visitMock.Setup(x => x.AddTestToVisitAsync(44, 3, 100m))
+                .ReturnsAsync(new VisitTest { VisitTestId = 55, VisitId = 44, TestId = 3, Price = 100m });
+            invoiceMock.Setup(x => x.CreateOrUpdateInvoiceAsync(44, 0m, 0m))
+                .ReturnsAsync(new Invoice { VisitId = 44, Total = 100m, NetTotal = 100m, Paid = 0m, Balance = 100m });
+            invoiceMock.Setup(x => x.CreateOrUpdateInvoiceAsync(44, 0m, 100m))
+                .ReturnsAsync(new Invoice { VisitId = 44, Total = 100m, NetTotal = 100m, Paid = 100m, Balance = 0m });
+
+            vm.SaveCommand.Execute(null);
+            await Task.Delay(150);
+            vm.SettleCommand.Execute(null);
+            await Task.Delay(100);
+
+            invoiceMock.Verify(x => x.CreateOrUpdateInvoiceAsync(44, 0m, 100m), Times.Once);
+            vm.BalanceForLab.Should().Be(0m);
+        }
     }
 }

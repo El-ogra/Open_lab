@@ -1,6 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
 using Open_lab.Models;
 using Open_lab.Services;
@@ -26,7 +29,9 @@ namespace Open_lab.ViewModels
             _patientSearchService = patientSearchService;
             Patients = new ObservableCollection<Patient>();
             Visits = new ObservableCollection<Visit>();
+            PatientTests = new ObservableCollection<string>();
             SearchCommand = new RelayCommand(async _ => await SearchAsync());
+            DeletePatientCommand = new RelayCommand(async _ => await DeletePatientAsync(), _ => SelectedPatient != null);
         }
 
         public string Name
@@ -85,6 +90,7 @@ namespace Open_lab.ViewModels
 
         public ObservableCollection<Patient> Patients { get; }
         public ObservableCollection<Visit> Visits { get; }
+        public ObservableCollection<string> PatientTests { get; }
 
         public Patient? SelectedPatient
         {
@@ -93,12 +99,16 @@ namespace Open_lab.ViewModels
             {
                 if (SetProperty(ref _selectedPatient, value))
                 {
+                    (DeletePatientCommand as RelayCommand)?.RaiseCanExecuteChanged();
                     _ = LoadVisitsAsync();
                 }
             }
         }
 
         public ICommand SearchCommand { get; }
+        public ICommand DeletePatientCommand { get; }
+        public Func<string, string, bool> ConfirmAction { get; set; } =
+            (message, title) => MessageBox.Show(message, title, MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes;
 
         private async Task SearchAsync()
         {
@@ -107,6 +117,8 @@ namespace Open_lab.ViewModels
                 var hasAdvancedFilters = !string.IsNullOrWhiteSpace(NationalId)
                     || DateFrom.HasValue
                     || DateTo.HasValue
+                    || ParseNullableInt(AgeFrom).HasValue
+                    || ParseNullableInt(AgeTo).HasValue
                     || (!string.IsNullOrWhiteSpace(AgeGroup) && !string.Equals(AgeGroup, "الكل", StringComparison.OrdinalIgnoreCase));
 
                 var results = hasAdvancedFilters
@@ -119,6 +131,8 @@ namespace Open_lab.ViewModels
                         Date = Date,
                         DateFrom = DateFrom,
                         DateTo = DateTo,
+                        AgeFrom = ParseNullableInt(AgeFrom),
+                        AgeTo = ParseNullableInt(AgeTo),
                         AgeGroup = AgeGroup
                     })
                     : await _patientSearchService.SearchPatientsAsync(Name, Phone, LabId, Date);
@@ -139,6 +153,7 @@ namespace Open_lab.ViewModels
         private async Task LoadVisitsAsync()
         {
             Visits.Clear();
+            PatientTests.Clear();
             if (SelectedPatient == null)
             {
                 return;
@@ -146,12 +161,22 @@ namespace Open_lab.ViewModels
 
             try
             {
-                var visits = await _patientSearchService.GetPatientVisitsAsync(SelectedPatient.PatientId);
+                var visits = await _patientSearchService.GetPatientVisitsAsync(SelectedPatient.PatientId) ?? new List<Visit>();
                 foreach (var visit in visits)
                 {
                     Visits.Add(visit);
                 }
-                StatusMessage = $"تم تحميل {Visits.Count} زيارة.";
+
+                var tests = await _patientSearchService.GetPatientVisitTestsAsync(SelectedPatient.PatientId) ?? new List<VisitTest>();
+                foreach (var test in tests)
+                {
+                    var name = string.IsNullOrWhiteSpace(test.Test?.NameReceipt)
+                        ? test.Test?.NameReport
+                        : test.Test.NameReceipt;
+                    PatientTests.Add($"{test.Visit.VisitDate:yyyy-MM-dd} | {name ?? test.TestId.ToString()} | {test.Status}");
+                }
+
+                StatusMessage = $"تم تحميل {Visits.Count} زيارة و {PatientTests.Count} تحليل.";
             }
             catch (Exception ex)
             {
@@ -195,11 +220,39 @@ namespace Open_lab.ViewModels
             set => SetProperty(ref _doctorName, value);
         }
 
-        // Dummy collection for Patient Tests
-        public ObservableCollection<string> PatientTests { get; } = new ObservableCollection<string>();
+        private async Task DeletePatientAsync()
+        {
+            if (SelectedPatient == null)
+            {
+                StatusMessage = "حدد مريضاً قبل الحذف.";
+                return;
+            }
 
-        // New Commands
-        private ICommand? _deletePatientCommand;
-        public ICommand DeletePatientCommand => _deletePatientCommand ??= new RelayCommand(_ => { /* Empty Command */ });
+            if (!ConfirmAction($"هل تريد حذف المريض {SelectedPatient.FullName}؟", "تأكيد حذف المريض"))
+            {
+                StatusMessage = "تم إلغاء الحذف.";
+                return;
+            }
+
+            try
+            {
+                var patient = SelectedPatient;
+                await _patientSearchService.DeletePatientAsync(patient.PatientId);
+                Patients.Remove(patient);
+                Visits.Clear();
+                PatientTests.Clear();
+                SelectedPatient = null;
+                StatusMessage = "تم حذف المريض.";
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = $"خطأ: {ex.Message}";
+            }
+        }
+
+        private static int? ParseNullableInt(string value)
+        {
+            return int.TryParse(value, out var parsed) ? parsed : null;
+        }
     }
 }
