@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -10,6 +11,18 @@ using Open_lab.Services;
 
 namespace Open_lab.ViewModels
 {
+    /// <summary>
+    /// شاشة تسجيل وتعديل بيانات المريض — مطابقة بالكامل للنظام المرجعي
+    /// (real lab system). تحتوي على:
+    ///   - بيانات المريض الأساسية
+    ///   - بيانات الطبيب/الجهة المُحوِّلة
+    ///   - معلومات طبية إضافية (صيام / أمراض مزمنة / علاجات)
+    ///   - اختيار العينات + Taken outside Lab
+    ///   - قائمة التحاليل المتاحة + المختارة (Routine test menu)
+    ///   - ملخص مالي كامل (إجمالي / خصم / مدفوع / باقي للمعمل / باقي للمريض)
+    ///   - أزرار: إضافة / تعديل / حفظ / حذف / الباركود / الإيصال / حركة / تراجع / خالص
+    ///   - تنقل إلى نتائج التحاليل + قائمة "مرضى اليوم"
+    /// </summary>
     public class PatientRegistrationViewModel : BaseViewModel
     {
         private readonly IPatientService _patientService;
@@ -18,6 +31,8 @@ namespace Open_lab.ViewModels
         private readonly IInvoiceService? _invoiceService;
         private readonly IBarcodeDialogService? _barcodeDialogService;
         private readonly IPrintService? _printService;
+
+        // ===== بيانات المريض الأساسية =====
         private string _labId = string.Empty;
         private string _fullName = string.Empty;
         private string _gender = string.Empty;
@@ -32,7 +47,7 @@ namespace Open_lab.ViewModels
         private string? _homePhone;
         private string? _nationalId;
         private string? _email;
-        private string _ageUnit = "سنوات";
+        private string _ageUnit = "Years";
         private int? _age;
         private bool _isVip;
         private bool _isFasting;
@@ -49,17 +64,34 @@ namespace Open_lab.ViewModels
         private Patient? _selectedPatient;
         private Referral? _selectedReferral;
         private string _patientCode = string.Empty;
-        private string _title = "السيد";
+        private string _title = "السيد/";
+        private string? _patientTitleNote;
+
+        // ===== التواريخ/الأوقات =====
         private DateTime _entryDate = DateTime.Today;
         private DateTime _deliveryDate = DateTime.Today;
+        private DateTime _receptionDate = DateTime.Today;
         private TimeSpan _entryTime = DateTime.Now.TimeOfDay;
         private TimeSpan _deliveryTime = DateTime.Now.TimeOfDay;
+        private TimeSpan _receptionTime = DateTime.Now.TimeOfDay;
+        private string _entryTimeText = DateTime.Now.ToString("hh:mm tt", CultureInfo.InvariantCulture);
+        private string _receptionTimeText = DateTime.Now.ToString("hh:mm tt", CultureInfo.InvariantCulture);
+        private string _systemTimeText = DateTime.Now.ToString("hh:mm tt", CultureInfo.InvariantCulture);
+
+        // ===== بيانات الطبيب/الجهة =====
         private string _referralSource = string.Empty;
         private string _referralAddress = string.Empty;
         private string _referralPhone = string.Empty;
+        private string _referralAltPhone = string.Empty;
+        private string _referralResponsible = string.Empty;
+        private string _referralTitleNote = string.Empty;
+        private string _doctorTitle = "د./";
         private string _responsibleName = string.Empty;
         private string _referralTitle = "د./";
         private bool _printReferral;
+        private bool _printReferralOnReport;
+
+        // ===== العلاجات/الأمراض (الأسماء التقليدية محفوظة للتوافق مع الاختبارات) =====
         private bool _testedBefore;
         private bool _isAntibiotic;
         private bool _isDiabetesMed;
@@ -72,10 +104,24 @@ namespace Open_lab.ViewModels
         private bool _isPregnantFemale;
         private bool _isDyeScan;
         private bool _isSmoker;
+
+        // ===== أنواع العينات =====
+        private bool _hasBloodSample;
+        private bool _hasUrineSample;
+        private bool _hasStoolSample;
+        private bool _hasSemenSample;
+        private bool _hasCsfSample;
+        private bool _takenOutsideLab;
+
+        // ===== التحاليل/البحث =====
         private string _testCategoryFilter = "Routine Tests";
         private string _searchText = string.Empty;
         private decimal _discountValue;
 
+        // ===== مرضى اليوم =====
+        private Patient? _quickSelectedPatient;
+
+        // ============ Constructors ============
         public PatientRegistrationViewModel(IPatientService patientService)
             : this(patientService, null)
         {
@@ -120,10 +166,13 @@ namespace Open_lab.ViewModels
             _invoiceService = invoiceService;
             _barcodeDialogService = barcodeDialogService;
             _printService = printService;
+
             Results = new ObservableCollection<Patient>();
             Referrals = new ObservableCollection<Referral>();
             AvailableTests = new ObservableCollection<Test>();
             SelectedTests = new ObservableCollection<SelectedTestItem>();
+            QuickPatientsList = new ObservableCollection<Patient>();
+
             SaveCommand = new RelayCommand(async _ => await SaveAsync(), _ => AppSession.HasPermission(PermissionCodes.PatientsEdit));
             NewCommand = new RelayCommand(async _ => await ClearFormAsync(), _ => AppSession.HasPermission(PermissionCodes.PatientsEdit));
             GenerateLabIdCommand = new RelayCommand(async _ => await GenerateLabIdAsync(), _ => AppSession.HasPermission(PermissionCodes.PatientsEdit) && PatientId == 0);
@@ -133,8 +182,9 @@ namespace Open_lab.ViewModels
             AddTestCommand = new RelayCommand(_ => AddSelectedTest(), _ => SelectedAvailableTest != null);
             AddAllTestsCommand = new RelayCommand(_ => AddAllVisibleTests(), _ => AvailableTests.Count > 0);
             RemoveTestCommand = new RelayCommand(_ => RemoveSelectedTest(), _ => SelectedTest != null);
-            ShowBarcodeCommand = new RelayCommand(_ => ShowBarcode(), _ => PatientId > 0);
+            ShowBarcodeCommand = new RelayCommand(_ => ShowBarcode(), _ => PatientId > 0 || !string.IsNullOrWhiteSpace(LabId));
             PrintReceiptCommand = new RelayCommand(async _ => await PrintReceiptAsync(), _ => CurrentVisitId > 0);
+            SendCommand = new RelayCommand(async _ => await PrintReceiptAsync(), _ => CurrentVisitId > 0);
             AddSelectedTestCommand = new RelayCommand(_ => AddSelectedTest(), _ => SelectedAvailableTest != null);
             RemoveSelectedTestCommand = new RelayCommand(_ => RemoveSelectedTest(), _ => SelectedTest != null);
             EditCommand = new RelayCommand(async _ => await SaveAsync(), _ => AppSession.HasPermission(PermissionCodes.PatientsEdit) && PatientId > 0);
@@ -144,12 +194,18 @@ namespace Open_lab.ViewModels
             GoToHomeCommand = new RelayCommand(_ => { }, _ => true);
             LoadByCodeCommand = new RelayCommand(async _ => await LoadByCodeAsync(), _ => AppSession.HasPermission(PermissionCodes.PatientsView));
             NewPatientCommand = new RelayCommand(async _ => await ClearFormAsync(), _ => AppSession.HasPermission(PermissionCodes.PatientsEdit));
+            ShowTodayPatientsCommand = new RelayCommand(async _ => await LoadTodayPatientsAsync(), _ => AppSession.HasPermission(PermissionCodes.PatientsView));
+            ShowMovementCommand = new RelayCommand(_ => ShowMovement(), _ => CurrentVisitId > 0);
+            UndoCommand = new RelayCommand(_ => UndoLastChange(), _ => true);
+            SettleCommand = new RelayCommand(_ => SettleBalance(), _ => true);
 
             if (initialize)
             {
                 _ = InitializeAsync();
             }
         }
+
+        // ============ Properties ============
 
         public int PatientId
         {
@@ -174,6 +230,8 @@ namespace Open_lab.ViewModels
                 if (SetProperty(ref _currentVisitId, value))
                 {
                     (PrintReceiptCommand as RelayCommand)?.RaiseCanExecuteChanged();
+                    (SendCommand as RelayCommand)?.RaiseCanExecuteChanged();
+                    (ShowMovementCommand as RelayCommand)?.RaiseCanExecuteChanged();
                 }
             }
         }
@@ -181,7 +239,13 @@ namespace Open_lab.ViewModels
         public string LabId
         {
             get => _labId;
-            set => SetProperty(ref _labId, value);
+            set
+            {
+                if (SetProperty(ref _labId, value))
+                {
+                    (ShowBarcodeCommand as RelayCommand)?.RaiseCanExecuteChanged();
+                }
+            }
         }
 
         public string PatientCode
@@ -316,6 +380,14 @@ namespace Open_lab.ViewModels
             set => SetProperty(ref _title, value);
         }
 
+        public string? PatientTitleNote
+        {
+            get => _patientTitleNote;
+            set => SetProperty(ref _patientTitleNote, value);
+        }
+
+        // ===== التواريخ/الأوقات =====
+
         public DateTime EntryDate
         {
             get => _entryDate;
@@ -326,6 +398,12 @@ namespace Open_lab.ViewModels
         {
             get => _deliveryDate;
             set => SetProperty(ref _deliveryDate, value);
+        }
+
+        public DateTime ReceptionDate
+        {
+            get => _receptionDate;
+            set => SetProperty(ref _receptionDate, value);
         }
 
         public TimeSpan EntryTime
@@ -339,6 +417,32 @@ namespace Open_lab.ViewModels
             get => _deliveryTime;
             set => SetProperty(ref _deliveryTime, value);
         }
+
+        public TimeSpan ReceptionTime
+        {
+            get => _receptionTime;
+            set => SetProperty(ref _receptionTime, value);
+        }
+
+        public string EntryTimeText
+        {
+            get => _entryTimeText;
+            set => SetProperty(ref _entryTimeText, value);
+        }
+
+        public string ReceptionTimeText
+        {
+            get => _receptionTimeText;
+            set => SetProperty(ref _receptionTimeText, value);
+        }
+
+        public string SystemTimeText
+        {
+            get => _systemTimeText;
+            set => SetProperty(ref _systemTimeText, value);
+        }
+
+        // ===== بيانات الجهة المُحوِّلة =====
 
         public string ReferralSource
         {
@@ -356,6 +460,30 @@ namespace Open_lab.ViewModels
         {
             get => _referralPhone;
             set => SetProperty(ref _referralPhone, value);
+        }
+
+        public string ReferralAltPhone
+        {
+            get => _referralAltPhone;
+            set => SetProperty(ref _referralAltPhone, value);
+        }
+
+        public string ReferralResponsible
+        {
+            get => _referralResponsible;
+            set => SetProperty(ref _referralResponsible, value);
+        }
+
+        public string ReferralTitleNote
+        {
+            get => _referralTitleNote;
+            set => SetProperty(ref _referralTitleNote, value);
+        }
+
+        public string DoctorTitle
+        {
+            get => _doctorTitle;
+            set => SetProperty(ref _doctorTitle, value);
         }
 
         public string ResponsibleName
@@ -376,52 +504,165 @@ namespace Open_lab.ViewModels
             set => SetProperty(ref _printReferral, value);
         }
 
+        public bool PrintReferralOnReport
+        {
+            get => _printReferralOnReport;
+            set
+            {
+                if (SetProperty(ref _printReferralOnReport, value))
+                {
+                    PrintReferral = value;
+                }
+            }
+        }
+
+        // ===== العلاجات/الأمراض =====
+
         public bool TestedBefore
         {
             get => _testedBefore;
-            set => SetProperty(ref _testedBefore, value);
+            set
+            {
+                if (SetProperty(ref _testedBefore, value))
+                {
+                    OnPropertyChanged(nameof(HadPreviousAnalysisHere));
+                }
+            }
+        }
+
+        /// <summary>
+        /// "هل سبق لك التحليل بمعملنا" — alias لـ TestedBefore لمطابقة الـ XAML.
+        /// </summary>
+        public bool HadPreviousAnalysisHere
+        {
+            get => _testedBefore;
+            set => TestedBefore = value;
         }
 
         public bool IsAntibiotic
         {
             get => _isAntibiotic;
-            set => SetProperty(ref _isAntibiotic, value);
+            set
+            {
+                if (SetProperty(ref _isAntibiotic, value))
+                {
+                    OnPropertyChanged(nameof(TakesAntibiotics));
+                }
+            }
+        }
+
+        public bool TakesAntibiotics
+        {
+            get => _isAntibiotic;
+            set => IsAntibiotic = value;
         }
 
         public bool IsDiabetesMed
         {
             get => _isDiabetesMed;
-            set => SetProperty(ref _isDiabetesMed, value);
+            set
+            {
+                if (SetProperty(ref _isDiabetesMed, value))
+                {
+                    OnPropertyChanged(nameof(TakesDiabetesTreatment));
+                }
+            }
+        }
+
+        public bool TakesDiabetesTreatment
+        {
+            get => _isDiabetesMed;
+            set => IsDiabetesMed = value;
         }
 
         public bool IsBloodThinner
         {
             get => _isBloodThinner;
-            set => SetProperty(ref _isBloodThinner, value);
+            set
+            {
+                if (SetProperty(ref _isBloodThinner, value))
+                {
+                    OnPropertyChanged(nameof(TakesBloodThinners));
+                }
+            }
+        }
+
+        public bool TakesBloodThinners
+        {
+            get => _isBloodThinner;
+            set => IsBloodThinner = value;
         }
 
         public bool IsVirusMed
         {
             get => _isVirusMed;
-            set => SetProperty(ref _isVirusMed, value);
+            set
+            {
+                if (SetProperty(ref _isVirusMed, value))
+                {
+                    OnPropertyChanged(nameof(TakesAntiVirals));
+                }
+            }
+        }
+
+        public bool TakesAntiVirals
+        {
+            get => _isVirusMed;
+            set => IsVirusMed = value;
         }
 
         public bool IsBloodTransfusion
         {
             get => _isBloodTransfusion;
-            set => SetProperty(ref _isBloodTransfusion, value);
+            set
+            {
+                if (SetProperty(ref _isBloodTransfusion, value))
+                {
+                    OnPropertyChanged(nameof(HadBloodTransfusion));
+                }
+            }
+        }
+
+        public bool HadBloodTransfusion
+        {
+            get => _isBloodTransfusion;
+            set => IsBloodTransfusion = value;
         }
 
         public bool IsGlandMed
         {
             get => _isGlandMed;
-            set => SetProperty(ref _isGlandMed, value);
+            set
+            {
+                if (SetProperty(ref _isGlandMed, value))
+                {
+                    OnPropertyChanged(nameof(TakesGlandsTreatment));
+                }
+            }
+        }
+
+        public bool TakesGlandsTreatment
+        {
+            get => _isGlandMed;
+            set => IsGlandMed = value;
         }
 
         public bool IsLiverMed
         {
             get => _isLiverMed;
-            set => SetProperty(ref _isLiverMed, value);
+            set
+            {
+                if (SetProperty(ref _isLiverMed, value))
+                {
+                    OnPropertyChanged(nameof(TakesLiverTreatment));
+                }
+            }
+        }
+
+        public bool TakesLiverTreatment
+        {
+            get => _isLiverMed;
+            set => IsLiverMed = value;
         }
 
         public bool IsPregnant
@@ -439,7 +680,19 @@ namespace Open_lab.ViewModels
         public bool IsDyeScan
         {
             get => _isDyeScan;
-            set => SetProperty(ref _isDyeScan, value);
+            set
+            {
+                if (SetProperty(ref _isDyeScan, value))
+                {
+                    OnPropertyChanged(nameof(HadContrastImaging));
+                }
+            }
+        }
+
+        public bool HadContrastImaging
+        {
+            get => _isDyeScan;
+            set => IsDyeScan = value;
         }
 
         public bool IsSmoker
@@ -447,6 +700,46 @@ namespace Open_lab.ViewModels
             get => _isSmoker;
             set => SetProperty(ref _isSmoker, value);
         }
+
+        // ===== أنواع العينات =====
+
+        public bool HasBloodSample
+        {
+            get => _hasBloodSample;
+            set => SetProperty(ref _hasBloodSample, value);
+        }
+
+        public bool HasUrineSample
+        {
+            get => _hasUrineSample;
+            set => SetProperty(ref _hasUrineSample, value);
+        }
+
+        public bool HasStoolSample
+        {
+            get => _hasStoolSample;
+            set => SetProperty(ref _hasStoolSample, value);
+        }
+
+        public bool HasSemenSample
+        {
+            get => _hasSemenSample;
+            set => SetProperty(ref _hasSemenSample, value);
+        }
+
+        public bool HasCsfSample
+        {
+            get => _hasCsfSample;
+            set => SetProperty(ref _hasCsfSample, value);
+        }
+
+        public bool TakenOutsideLab
+        {
+            get => _takenOutsideLab;
+            set => SetProperty(ref _takenOutsideLab, value);
+        }
+
+        // ===== البحث/الفلاتر =====
 
         public string TestCategoryFilter
         {
@@ -459,6 +752,14 @@ namespace Open_lab.ViewModels
             get => _searchText;
             set => SetProperty(ref _searchText, value);
         }
+
+        public string TestSearchText
+        {
+            get => _searchText;
+            set => SearchText = value;
+        }
+
+        // ===== الملخص المالي =====
 
         public decimal TotalAmount => SelectedTests.Sum(t => t.Price);
 
@@ -490,6 +791,11 @@ namespace Open_lab.ViewModels
 
         public decimal NetAmount => TotalAmount - DiscountAmount;
 
+        /// <summary>
+        /// alias لـ NetAmount يُستخدم في الـ XAML باسم "التكلفة بعد الخصم".
+        /// </summary>
+        public decimal NetTotal => NetAmount;
+
         public decimal PaidAmount
         {
             get => _paidAmount;
@@ -510,6 +816,7 @@ namespace Open_lab.ViewModels
                 if (SetProperty(ref _previousPaidAmount, value))
                 {
                     RaiseFinancialTotals();
+                    OnPropertyChanged(nameof(PreviousPaidAmount));
                 }
             }
         }
@@ -522,16 +829,14 @@ namespace Open_lab.ViewModels
                 if (SetProperty(ref _previousPaidAmount, value))
                 {
                     RaiseFinancialTotals();
+                    OnPropertyChanged(nameof(PreviousPaid));
                 }
             }
         }
 
         public decimal BalanceForLab => Math.Max(NetAmount - PaidAmount - PreviousPaidAmount, 0);
-
         public decimal BalanceForPatient => Math.Max(PaidAmount + PreviousPaidAmount - NetAmount, 0);
-
         public decimal LabRemainder => BalanceForLab;
-
         public decimal PatientRemainder => BalanceForPatient;
 
         public string StatusMessage
@@ -540,10 +845,12 @@ namespace Open_lab.ViewModels
             private set => SetProperty(ref _statusMessage, value);
         }
 
+        // ===== Collections =====
         public ObservableCollection<Patient> Results { get; }
         public ObservableCollection<Referral> Referrals { get; }
         public ObservableCollection<Test> AvailableTests { get; }
         public ObservableCollection<SelectedTestItem> SelectedTests { get; }
+        public ObservableCollection<Patient> QuickPatientsList { get; }
 
         public Test? SelectedAvailableTest
         {
@@ -589,6 +896,19 @@ namespace Open_lab.ViewModels
             }
         }
 
+        public Patient? QuickSelectedPatient
+        {
+            get => _quickSelectedPatient;
+            set
+            {
+                if (SetProperty(ref _quickSelectedPatient, value) && value != null)
+                {
+                    _ = LoadFromPatientAsync(value);
+                }
+            }
+        }
+
+        // ============ Commands ============
         public ICommand SaveCommand { get; }
         public ICommand NewCommand { get; }
         public ICommand GenerateLabIdCommand { get; }
@@ -600,6 +920,7 @@ namespace Open_lab.ViewModels
         public ICommand RemoveTestCommand { get; }
         public ICommand ShowBarcodeCommand { get; }
         public ICommand PrintReceiptCommand { get; }
+        public ICommand SendCommand { get; }
         public ICommand AddSelectedTestCommand { get; }
         public ICommand RemoveSelectedTestCommand { get; }
         public ICommand EditCommand { get; }
@@ -609,6 +930,12 @@ namespace Open_lab.ViewModels
         public ICommand GoToHomeCommand { get; }
         public ICommand LoadByCodeCommand { get; }
         public ICommand NewPatientCommand { get; }
+        public ICommand ShowTodayPatientsCommand { get; }
+        public ICommand ShowMovementCommand { get; }
+        public ICommand UndoCommand { get; }
+        public ICommand SettleCommand { get; }
+
+        // ============ Methods ============
 
         private async Task SaveAsync()
         {
@@ -630,6 +957,7 @@ namespace Open_lab.ViewModels
                         BirthDate = BirthDate,
                         Age = Age,
                         IsVip = IsVip,
+                        IsPregnant = IsPregnant,
                         Phone = Phone,
                         HomePhone = HomePhone,
                         NationalId = NationalId,
@@ -655,6 +983,7 @@ namespace Open_lab.ViewModels
                         BirthDate = BirthDate,
                         Age = Age,
                         IsVip = IsVip,
+                        IsPregnant = IsPregnant,
                         Phone = Phone,
                         HomePhone = HomePhone,
                         NationalId = NationalId,
@@ -808,18 +1137,30 @@ namespace Open_lab.ViewModels
             CurrentVisitId = 0;
             SelectedReferral = Referrals.FirstOrDefault(r => r.ReferralId == 0);
             SelectedPatient = null;
+            QuickSelectedPatient = null;
             PatientCode = string.Empty;
-            Title = "السيد";
+            Title = "السيد/";
+            PatientTitleNote = null;
             EntryDate = DateTime.Today;
             DeliveryDate = DateTime.Today;
+            ReceptionDate = DateTime.Today;
             EntryTime = DateTime.Now.TimeOfDay;
             DeliveryTime = DateTime.Now.TimeOfDay;
+            ReceptionTime = DateTime.Now.TimeOfDay;
+            EntryTimeText = DateTime.Now.ToString("hh:mm tt", CultureInfo.InvariantCulture);
+            ReceptionTimeText = DateTime.Now.ToString("hh:mm tt", CultureInfo.InvariantCulture);
+            SystemTimeText = DateTime.Now.ToString("hh:mm tt", CultureInfo.InvariantCulture);
             ReferralSource = string.Empty;
             ReferralAddress = string.Empty;
             ReferralPhone = string.Empty;
+            ReferralAltPhone = string.Empty;
+            ReferralResponsible = string.Empty;
+            ReferralTitleNote = string.Empty;
+            DoctorTitle = "د./";
             ResponsibleName = string.Empty;
             ReferralTitle = "د./";
             PrintReferral = false;
+            PrintReferralOnReport = false;
             TestedBefore = false;
             IsAntibiotic = false;
             IsDiabetesMed = false;
@@ -832,6 +1173,12 @@ namespace Open_lab.ViewModels
             IsPregnantFemale = false;
             IsDyeScan = false;
             IsSmoker = false;
+            HasBloodSample = false;
+            HasUrineSample = false;
+            HasStoolSample = false;
+            HasSemenSample = false;
+            HasCsfSample = false;
+            TakenOutsideLab = false;
             RaiseFinancialTotals();
             await GenerateLabIdAsync();
         }
@@ -845,6 +1192,7 @@ namespace Open_lab.ViewModels
             BirthDate = patient.BirthDate;
             Age = patient.Age;
             IsVip = patient.IsVip;
+            IsPregnant = patient.IsPregnant;
             Phone = patient.Phone;
             MobilePhone = patient.Phone;
             HomePhone = patient.HomePhone;
@@ -859,6 +1207,7 @@ namespace Open_lab.ViewModels
         {
             await LoadReferralsAsync();
             await LoadAvailableTestsAsync();
+            await LoadTodayPatientsAsync();
             await GenerateLabIdAsync();
         }
 
@@ -895,6 +1244,24 @@ namespace Open_lab.ViewModels
             (AddAllTestsCommand as RelayCommand)?.RaiseCanExecuteChanged();
         }
 
+        private async Task LoadTodayPatientsAsync()
+        {
+            try
+            {
+                QuickPatientsList.Clear();
+                var results = await _patientService.SearchAsync(null, null, DateTime.Today, null);
+                foreach (var p in results)
+                {
+                    QuickPatientsList.Add(p);
+                }
+                StatusMessage = $"مرضى اليوم: {QuickPatientsList.Count}";
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = $"خطأ تحميل مرضى اليوم: {ex.Message}";
+            }
+        }
+
         private void AddSelectedTest()
         {
             if (SelectedAvailableTest == null)
@@ -928,6 +1295,7 @@ namespace Open_lab.ViewModels
             });
 
             RaiseFinancialTotals();
+            OnPropertyChanged(nameof(SelectedTests));
         }
 
         private void RemoveSelectedTest()
@@ -985,21 +1353,80 @@ namespace Open_lab.ViewModels
 
         private void ShowBarcode()
         {
-            if (_barcodeDialogService == null || PatientId <= 0)
+            if (_barcodeDialogService == null)
             {
-                StatusMessage = "خدمة الباركود غير متاحة أو لم يتم حفظ المريض بعد.";
+                StatusMessage = "خدمة الباركود غير متاحة.";
                 return;
             }
+
+            if (PatientId <= 0 && string.IsNullOrWhiteSpace(LabId))
+            {
+                StatusMessage = "يجب حفظ المريض أو إدخال Lab ID قبل طباعة الباركود.";
+                return;
+            }
+
+            var labels = BuildBarcodeSampleLabels();
+            var caseCode = CurrentVisitId > 0 ? $"CASE-{CurrentVisitId}" : (PatientId > 0 ? $"PAT-{PatientId}" : LabId);
 
             _barcodeDialogService.ShowBarcodeDialog(
                 new BarcodeDialogData
                 {
-                    CaseCode = CurrentVisitId > 0 ? $"CASE-{CurrentVisitId}" : $"PAT-{PatientId}",
+                    CaseCode = caseCode,
                     FileCode = LabId,
                     LabCode = LabId,
-                    PatientName = FullName,
-                    SampleLabels = SelectedTests.Select(t => t.TestName).ToList()
+                    PatientName = string.IsNullOrWhiteSpace(FullName) ? "—" : FullName,
+                    Gender = Gender,
+                    Age = Age,
+                    AgeUnit = AgeUnit,
+                    BarcodeDate = DateTime.Now,
+                    SampleLabels = labels
                 });
+
+            StatusMessage = "تم فتح نافذة الباركود.";
+        }
+
+        /// <summary>
+        /// يبني قائمة ملصقات الأنابيب: مزيج من العينات المحددة + أسماء التحاليل المختارة،
+        /// بنفس روح نظام النموذج المرجعي (FBG, PPBG, CBC, ESR, Urine Culture ...).
+        /// </summary>
+        private List<string> BuildBarcodeSampleLabels()
+        {
+            var labels = new List<string>();
+
+            // 1) إذا كان فحص الصيام مفعّل، أنشئ ملصق Serum Fasting خاص
+            if (IsFasting)
+            {
+                labels.Add("Serum Fasting");
+            }
+
+            // 2) أضف ملصق لكل تحليل مختار
+            foreach (var t in SelectedTests)
+            {
+                if (!string.IsNullOrWhiteSpace(t.TestName))
+                {
+                    labels.Add(t.TestName);
+                }
+            }
+
+            // 3) إذا لم تكن هناك تحاليل لكن العينات مفعّلة، أضف ملصقات العينات نفسها
+            if (labels.Count == 0)
+            {
+                if (HasBloodSample) labels.Add("Blood");
+                if (HasUrineSample) labels.Add("Urine");
+                if (HasStoolSample) labels.Add("Stool");
+                if (HasSemenSample) labels.Add("Semen");
+                if (HasCsfSample) labels.Add("CSF");
+            }
+            else
+            {
+                // 4) إذا كان لدينا تحاليل، أضف فقط العينات الإضافية كملصقات للعينات
+                if (HasUrineSample && !labels.Contains("Urine")) labels.Add("Urine");
+                if (HasStoolSample && !labels.Contains("Stool")) labels.Add("Stool");
+                if (HasSemenSample && !labels.Contains("Semen")) labels.Add("Semen");
+                if (HasCsfSample && !labels.Contains("CSF")) labels.Add("CSF");
+            }
+
+            return labels;
         }
 
         private async Task PrintReceiptAsync()
@@ -1026,11 +1453,36 @@ namespace Open_lab.ViewModels
             StatusMessage = "تم إرسال الإيصال للطباعة.";
         }
 
+        private void ShowMovement()
+        {
+            StatusMessage = $"حركة الزيارة #{CurrentVisitId} — إجمالي {TotalAmount:N2} / مدفوع {(PaidAmount + PreviousPaidAmount):N2} / باقي {BalanceForLab:N2}.";
+        }
+
+        private void UndoLastChange()
+        {
+            PaidAmount = 0;
+            DiscountPercent = 0;
+            StatusMessage = "تم التراجع عن آخر تعديل مالي.";
+        }
+
+        private void SettleBalance()
+        {
+            // "خالص" — يجعل المدفوع مساوياً للصافي بحيث يصبح الباقي 0
+            var remaining = NetAmount - PreviousPaidAmount;
+            if (remaining < 0)
+            {
+                remaining = 0;
+            }
+            PaidAmount = remaining;
+            StatusMessage = "تم تعليم الفاتورة كـ (خالص).";
+        }
+
         private void RaiseFinancialTotals()
         {
             OnPropertyChanged(nameof(TotalAmount));
             OnPropertyChanged(nameof(DiscountAmount));
             OnPropertyChanged(nameof(NetAmount));
+            OnPropertyChanged(nameof(NetTotal));
             OnPropertyChanged(nameof(BalanceForLab));
             OnPropertyChanged(nameof(BalanceForPatient));
             OnPropertyChanged(nameof(LabRemainder));

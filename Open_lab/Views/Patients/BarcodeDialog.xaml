@@ -1,22 +1,45 @@
 <Window x:Class="Open_lab.Views.Patients.BarcodeDialog"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="طباعة الباركود"
-        Width="720"
-        Height="620"
-        MinWidth="620"
-        MinHeight="520"
+        Title="Barcode Labels — التكويد العمودي للعينات"
+        Width="900"
+        Height="700"
+        MinWidth="720"
+        MinHeight="600"
         WindowStartupLocation="CenterOwner"
+        Background="#F5F6F8"
         FlowDirection="RightToLeft">
     <Window.Resources>
+        <!-- زر إجراء أخضر -->
         <Style x:Key="ActionButtonStyle" TargetType="Button">
-            <Setter Property="MinWidth" Value="120" />
+            <Setter Property="MinWidth" Value="130" />
             <Setter Property="Height" Value="34" />
             <Setter Property="Margin" Value="4" />
             <Setter Property="Background" Value="#6E9F16" />
             <Setter Property="Foreground" Value="White" />
             <Setter Property="BorderThickness" Value="0" />
             <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Cursor" Value="Hand" />
+        </Style>
+
+        <!-- ملصق الباركود الرئيسي (Case / File / Lab) -->
+        <Style x:Key="MainLabelBorder" TargetType="Border">
+            <Setter Property="BorderThickness" Value="1.5" />
+            <Setter Property="CornerRadius" Value="3" />
+            <Setter Property="Padding" Value="10" />
+            <Setter Property="Margin" Value="4" />
+            <Setter Property="Background" Value="White" />
+        </Style>
+
+        <!-- ملصق الأنبوب الصغير -->
+        <Style x:Key="TubeLabelBorder" TargetType="Border">
+            <Setter Property="BorderThickness" Value="1.2" />
+            <Setter Property="BorderBrush" Value="#9CA67C" />
+            <Setter Property="CornerRadius" Value="2" />
+            <Setter Property="Padding" Value="6" />
+            <Setter Property="Margin" Value="4" />
+            <Setter Property="Background" Value="#FBFBF3" />
+            <Setter Property="Width" Value="270" />
         </Style>
     </Window.Resources>
 
@@ -27,67 +50,150 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <StackPanel>
-            <TextBlock Text="{Binding PatientName}" FontSize="20" FontWeight="Bold" />
-            <TextBlock Text="اضبط موضع الطباعة ثم اطبع الأكواد المطلوبة." Foreground="#566" Margin="0,4,0,10" />
-        </StackPanel>
+        <!-- ============ رأس النافذة ============ -->
+        <Border Grid.Row="0" Background="#13314F" CornerRadius="3" Padding="14,10" Margin="0,0,0,8">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel>
+                    <TextBlock Text="Barcode Labels" Foreground="#F1C40F" FontWeight="Bold" FontSize="20" />
+                    <TextBlock Text="التكويد العمودي للعينات" Foreground="White" FontSize="12" Margin="0,2,0,0" />
+                </StackPanel>
+                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                    <TextBlock Text="{Binding PatientName}" Foreground="White" FontSize="16" FontWeight="Bold" HorizontalAlignment="Left" />
+                    <TextBlock Text="{Binding PatientHeaderText}" Foreground="#BDC3C7" FontSize="11" HorizontalAlignment="Left" />
+                </StackPanel>
+            </Grid>
+        </Border>
 
+        <!-- ============ المحتوى ============ -->
         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
             <StackPanel>
-                <GroupBox Header="كود الحالة" Margin="0,4">
-                    <StackPanel>
-                        <TextBlock Text="{Binding CaseCode}" FontWeight="SemiBold" />
-                        <Image Source="{Binding CaseBarcode}" Height="92" Stretch="Uniform" />
-                    </StackPanel>
-                </GroupBox>
-                <GroupBox Header="كود الملف" Margin="0,4">
-                    <StackPanel>
-                        <TextBlock Text="{Binding FileCode}" FontWeight="SemiBold" />
-                        <Image Source="{Binding FileBarcode}" Height="92" Stretch="Uniform" />
-                    </StackPanel>
-                </GroupBox>
-                <GroupBox Header="كود المعمل" Margin="0,4">
-                    <StackPanel>
-                        <TextBlock Text="{Binding LabCode}" FontWeight="SemiBold" />
-                        <Image Source="{Binding LabBarcode}" Height="92" Stretch="Uniform" />
-                    </StackPanel>
-                </GroupBox>
-                <GroupBox Header="ملصقات الأنابيب" Margin="0,4">
-                    <ItemsControl ItemsSource="{Binding TubeLabels}">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <Border BorderBrush="#D7E0D2" BorderThickness="1" Margin="3" Padding="6">
-                                    <StackPanel>
-                                        <TextBlock Text="{Binding Text}" />
-                                        <Image Source="{Binding Barcode}" Height="64" Stretch="Uniform" />
-                                    </StackPanel>
-                                </Border>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </GroupBox>
 
-                <GroupBox Header="ضبط موضع الطباعة" Margin="0,8">
-                    <UniformGrid Columns="2">
-                        <StackPanel Margin="4">
-                            <TextBlock Text="إزاحة أفقية" />
-                            <Slider Minimum="-100" Maximum="100" Value="{Binding OffsetX}" />
-                        </StackPanel>
-                        <StackPanel Margin="4">
-                            <TextBlock Text="إزاحة رأسية" />
-                            <Slider Minimum="-100" Maximum="100" Value="{Binding OffsetY}" />
-                        </StackPanel>
-                    </UniformGrid>
-                </GroupBox>
+                <!-- File Barcode (برتقالي) -->
+                <Border Style="{StaticResource MainLabelBorder}" BorderBrush="#E67E22">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <TextBlock Grid.Row="0" Text="File Barcode — يُلصق على ملف المريض"
+                                   FontWeight="Bold" Foreground="#E67E22" FontSize="14" />
+                        <TextBlock Grid.Row="1" Text="{Binding PatientHeaderText}" Margin="0,4,0,0" FontWeight="SemiBold" />
+                        <Image Grid.Row="2" Source="{Binding FileBarcode}" Height="92" Stretch="Uniform"
+                               HorizontalAlignment="Stretch" Margin="0,6,0,2" />
+                        <DockPanel Grid.Row="3" Margin="0,2,0,0">
+                            <TextBlock Text="{Binding FileCode}" FontWeight="SemiBold" />
+                            <TextBlock Text="{Binding BarcodeDateText}" Foreground="#666" HorizontalAlignment="Right" DockPanel.Dock="Right" />
+                        </DockPanel>
+                    </Grid>
+                </Border>
+
+                <!-- Lab ID Barcode (أحمر) -->
+                <Border Style="{StaticResource MainLabelBorder}" BorderBrush="#C0392B">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <TextBlock Grid.Row="0" Text="Lab ID Barcode — كود المعمل لمتابعة التاريخ المرضي"
+                                   FontWeight="Bold" Foreground="#C0392B" FontSize="14" />
+                        <TextBlock Grid.Row="1" Text="{Binding PatientHeaderText}" Margin="0,4,0,0" FontWeight="SemiBold" />
+                        <Image Grid.Row="2" Source="{Binding LabBarcode}" Height="92" Stretch="Uniform"
+                               HorizontalAlignment="Stretch" Margin="0,6,0,2" />
+                        <DockPanel Grid.Row="3" Margin="0,2,0,0">
+                            <TextBlock Text="{Binding LabCode}" FontWeight="SemiBold" />
+                            <TextBlock Text="{Binding BarcodeDateText}" Foreground="#666" HorizontalAlignment="Right" DockPanel.Dock="Right" />
+                        </DockPanel>
+                    </Grid>
+                </Border>
+
+                <!-- Case Barcode (أزرق) -->
+                <Border Style="{StaticResource MainLabelBorder}" BorderBrush="#2980B9">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <TextBlock Grid.Row="0" Text="Case Barcode — كود الحالة"
+                                   FontWeight="Bold" Foreground="#2980B9" FontSize="14" />
+                        <TextBlock Grid.Row="1" Text="{Binding PatientHeaderText}" Margin="0,4,0,0" FontWeight="SemiBold" />
+                        <Image Grid.Row="2" Source="{Binding CaseBarcode}" Height="92" Stretch="Uniform"
+                               HorizontalAlignment="Stretch" Margin="0,6,0,2" />
+                        <DockPanel Grid.Row="3" Margin="0,2,0,0">
+                            <TextBlock Text="{Binding CaseCode}" FontWeight="SemiBold" />
+                            <TextBlock Text="{Binding BarcodeDateText}" Foreground="#666" HorizontalAlignment="Right" DockPanel.Dock="Right" />
+                        </DockPanel>
+                    </Grid>
+                </Border>
+
+                <!-- ملصقات الأنابيب والعبوات والمسحات -->
+                <Border BorderBrush="#9CA67C" BorderThickness="1" CornerRadius="3" Padding="10" Margin="4">
+                    <StackPanel>
+                        <TextBlock Text="ملصقات الأنابيب والعبوات والمسحات"
+                                   FontWeight="Bold" Foreground="#13314F" FontSize="14" Margin="0,0,0,8" />
+                        <ItemsControl ItemsSource="{Binding TubeLabels}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel FlowDirection="LeftToRight" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Style="{StaticResource TubeLabelBorder}">
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding PatientHeader}" FontSize="10" Foreground="#333" />
+                                            <TextBlock Text="{Binding Text}" FontWeight="Bold" FontSize="12" Margin="0,2,0,2" />
+                                            <Image Source="{Binding Barcode}" Height="56" Stretch="Uniform" />
+                                            <TextBlock Text="{Binding Code}" FontSize="10" Foreground="#444" HorizontalAlignment="Center" />
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
+
+                <!-- ضبط موضع الطباعة -->
+                <Border BorderBrush="#BDC3C7" BorderThickness="1" CornerRadius="3" Padding="10" Margin="4">
+                    <StackPanel>
+                        <TextBlock Text="ضبط موضع الطباعة (مقياس الاستكرز 38 مم عرض × 25 مم طول)"
+                                   FontWeight="Bold" Foreground="#13314F" Margin="0,0,0,6" />
+                        <UniformGrid Columns="2">
+                            <StackPanel Margin="4">
+                                <TextBlock Text="إزاحة أفقية" />
+                                <Slider Minimum="-100" Maximum="100" Value="{Binding OffsetX}" />
+                                <TextBlock Text="{Binding OffsetX, StringFormat=N0}" HorizontalAlignment="Center" />
+                            </StackPanel>
+                            <StackPanel Margin="4">
+                                <TextBlock Text="إزاحة رأسية" />
+                                <Slider Minimum="-100" Maximum="100" Value="{Binding OffsetY}" />
+                                <TextBlock Text="{Binding OffsetY, StringFormat=N0}" HorizontalAlignment="Center" />
+                            </StackPanel>
+                        </UniformGrid>
+                    </StackPanel>
+                </Border>
             </StackPanel>
         </ScrollViewer>
 
-        <WrapPanel Grid.Row="2" HorizontalAlignment="Center" Margin="0,10,0,0">
-            <Button Content="طباعة كل الأكواد" Command="{Binding PrintAllCommand}" Style="{StaticResource ActionButtonStyle}" />
-            <Button Content="طباعة الحالة" Command="{Binding PrintCaseCommand}" Style="{StaticResource ActionButtonStyle}" />
-            <Button Content="طباعة الملف" Command="{Binding PrintFileCommand}" Style="{StaticResource ActionButtonStyle}" />
-            <Button Content="طباعة المعمل" Command="{Binding PrintLabCommand}" Style="{StaticResource ActionButtonStyle}" />
-            <Button Content="إغلاق" IsCancel="True" Style="{StaticResource ActionButtonStyle}" Background="#607D8B" />
-        </WrapPanel>
+        <!-- ============ أزرار الطباعة ============ -->
+        <Border Grid.Row="2" Background="#ECEFF1" CornerRadius="3" Padding="6" Margin="0,8,0,0">
+            <WrapPanel HorizontalAlignment="Center">
+                <Button Content="طباعة كل الأكواد" Command="{Binding PrintAllCommand}" Style="{StaticResource ActionButtonStyle}" />
+                <Button Content="طباعة ملصقات الأنابيب" Command="{Binding PrintTubesCommand}" Style="{StaticResource ActionButtonStyle}" Background="#9CA67C" />
+                <Button Content="طباعة الحالة" Command="{Binding PrintCaseCommand}" Style="{StaticResource ActionButtonStyle}" Background="#2980B9" />
+                <Button Content="طباعة الملف" Command="{Binding PrintFileCommand}" Style="{StaticResource ActionButtonStyle}" Background="#E67E22" />
+                <Button Content="طباعة المعمل" Command="{Binding PrintLabCommand}" Style="{StaticResource ActionButtonStyle}" Background="#C0392B" />
+                <Button Content="إغلاق" IsCancel="True" Style="{StaticResource ActionButtonStyle}" Background="#607D8B" />
+            </WrapPanel>
+        </Border>
     </Grid>
 </Window>
