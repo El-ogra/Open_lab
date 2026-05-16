@@ -1,4 +1,5 @@
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using Microsoft.Extensions.DependencyInjection;
 using Open_lab.Data;
@@ -19,6 +20,23 @@ namespace Open_lab
 
             _serviceProvider = ConfigureServices();
             ShowLoginWindow();
+
+#if DEBUG
+            // Seed dev data on a background thread after the UI is up — no blocking
+            Task.Run(async () =>
+            {
+                try
+                {
+                    using var scope = _serviceProvider!.CreateScope();
+                    var db = scope.ServiceProvider.GetRequiredService<OpenLabDbContext>();
+                    await Data.DevDataSeeder.SeedAsync(db);
+                }
+                catch
+                {
+                    // Silently ignore seeding failures in dev
+                }
+            });
+#endif
         }
 
         protected override void OnExit(ExitEventArgs e)
@@ -31,7 +49,7 @@ namespace Open_lab
         {
             var services = new ServiceCollection();
 
-            services.AddTransient<OpenLabDbContext>(_ => 
+            services.AddTransient<OpenLabDbContext>(_ =>
             {
                 var context = new OpenLabDbContextFactory().CreateDbContext(System.Array.Empty<string>());
                 if (AppSession.UserId > 0)
