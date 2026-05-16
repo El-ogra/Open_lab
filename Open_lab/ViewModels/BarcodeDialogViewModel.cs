@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
+using System.IO;
+using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -22,8 +24,16 @@ namespace Open_lab.ViewModels
     public class BarcodeDialogViewModel : BaseViewModel
     {
         private readonly IPrintService? _printService;
+
+        // Persistence path for OffsetX/OffsetY (FIX: previously kept only in static fields,
+        // values were lost when the application closed).
+        private static readonly string SettingsFilePath = Path.Combine(
+            AppDomain.CurrentDomain.BaseDirectory,
+            "barcode_settings.json");
+
         private static double _savedOffsetX;
         private static double _savedOffsetY;
+        private static bool _settingsLoaded;
         private double _offsetX;
         private double _offsetY;
 
@@ -32,6 +42,9 @@ namespace Open_lab.ViewModels
             if (barcodeService == null) throw new ArgumentNullException(nameof(barcodeService));
             data ??= new BarcodeDialogData();
             _printService = printService;
+
+            // Lazy-load persisted offsets the first time any ViewModel is created.
+            EnsureSettingsLoaded();
             _offsetX = _savedOffsetX;
             _offsetY = _savedOffsetY;
 
@@ -115,6 +128,7 @@ namespace Open_lab.ViewModels
                 if (SetProperty(ref _offsetX, value))
                 {
                     _savedOffsetX = value;
+                    PersistSettings();
                 }
             }
         }
@@ -127,7 +141,75 @@ namespace Open_lab.ViewModels
                 if (SetProperty(ref _offsetY, value))
                 {
                     _savedOffsetY = value;
+                    PersistSettings();
                 }
+            }
+        }
+
+        /// <summary>
+        /// تحميل OffsetX/OffsetY المحفوظتين من ملف JSON على القرص.
+        /// تُستدعى مرة واحدة فقط في عمر التطبيق (lazy load).
+        /// أي خطأ في القراءة يُتجاهل بصمت — تُستخدم القيم الافتراضية (0,0).
+        /// </summary>
+        private static void EnsureSettingsLoaded()
+        {
+            if (_settingsLoaded)
+            {
+                return;
+            }
+            _settingsLoaded = true;
+
+            try
+            {
+                if (!File.Exists(SettingsFilePath))
+                {
+                    return;
+                }
+
+                var json = File.ReadAllText(SettingsFilePath);
+                if (string.IsNullOrWhiteSpace(json))
+                {
+                    return;
+                }
+
+                var settings = JsonSerializer.Deserialize<BarcodeOffsetSettings>(json);
+                if (settings != null)
+                {
+                    _savedOffsetX = settings.OffsetX;
+                    _savedOffsetY = settings.OffsetY;
+                }
+            }
+            catch
+            {
+                // ملف تالف أو مرفوض الوصول — تجاهل بصمت واستخدم الافتراضي
+            }
+        }
+
+        /// <summary>
+        /// حفظ القيم الحالية لـ OffsetX/OffsetY في ملف JSON على القرص.
+        /// يُستدعى عند كل تغيير في إحدى الإزاحتين.
+        /// أي خطأ كتابة (صلاحيات، قرص ممتلئ...) يُتجاهل بصمت.
+        /// </summary>
+        private static void PersistSettings()
+        {
+            try
+            {
+                var settings = new BarcodeOffsetSettings
+                {
+                    OffsetX = _savedOffsetX,
+                    OffsetY = _savedOffsetY
+                };
+
+                var json = JsonSerializer.Serialize(settings, new JsonSerializerOptions
+                {
+                    WriteIndented = true
+                });
+
+                File.WriteAllText(SettingsFilePath, json);
+            }
+            catch
+            {
+                // فشل الكتابة — تجاهل (لا نعطّل واجهة الطباعة بسبب فشل في حفظ الإعدادات)
             }
         }
 
@@ -396,6 +478,15 @@ namespace Open_lab.ViewModels
                 TextAlignment = TextAlignment.Center,
                 Foreground = Brushes.Gray
             });
+        }
+
+        /// <summary>
+        /// نموذج تسلسل الإعدادات إلى/من JSON على القرص.
+        /// </summary>
+        private sealed class BarcodeOffsetSettings
+        {
+            public double OffsetX { get; set; }
+            public double OffsetY { get; set; }
         }
     }
 

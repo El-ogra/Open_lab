@@ -22,7 +22,7 @@ namespace Open_lab.ViewModels
         private string _medicalHistorySummary = string.Empty;
         private string _visitNotes = string.Empty;
         private bool _hasMedicalAlerts;
-        
+
         private int _todayPatientsCount;
         private string _patientQuickSearch = string.Empty;
         private VisitSummary? _selectedVisit;
@@ -78,7 +78,7 @@ namespace Open_lab.ViewModels
             FilterVipCommand = new RelayCommand(_ => { StatusMessage = "Filtering VIP..."; });
             FilterAllCommand = new RelayCommand(_ => { StatusMessage = "Filtering All..."; });
             FilterLabCommand = new RelayCommand(_ => { StatusMessage = "Filtering Lab To..."; });
-            
+
             ShowPreviousResultCommand = new RelayCommand(_ => { StatusMessage = "Showing Previous Results..."; });
             ShowNormalRangeCommand = new RelayCommand(_ => { StatusMessage = "Showing Normal Range..."; });
         }
@@ -187,18 +187,18 @@ namespace Open_lab.ViewModels
         public ICommand SaveResultsCommand { get; }
         public ICommand VerifyResultsCommand { get; }
         public ICommand ReopenResultsCommand { get; }
-        
+
         public ICommand MarkFinishedAllCommand { get; }
         public ICommand MarkVerifiedAllCommand { get; }
         public ICommand MarkPrintedAllCommand { get; }
-        
+
         public ICommand ShowMedicalHistoryCommand { get; }
         public ICommand PrintGroupReportCommand { get; }
         public ICommand PrintWorksheetCommand { get; }
         public ICommand PrintMethodsCommand { get; }
         public ICommand PrintBlankReportCommand { get; }
         public ICommand GoToPatientDataCommand { get; }
-        
+
         public ICommand FilterVipCommand { get; }
         public ICommand FilterAllCommand { get; }
         public ICommand FilterLabCommand { get; }
@@ -217,7 +217,7 @@ namespace Open_lab.ViewModels
             {
                 var visitTests = await _resultsService.GetVisitTestsByDateAsync(DateFrom, DateTo.AddDays(1).AddSeconds(-1));
                 if (visitTests == null) return;
-                
+
                 var uniqueVisits = visitTests
                     .Where(vt => vt.Visit != null)
                     .Select(vt => vt.Visit)
@@ -255,11 +255,11 @@ namespace Open_lab.ViewModels
         private async Task SelectPatientAsync()
         {
             if (SelectedVisit == null) return;
-            
+
             Visits.Clear();
             Visits.Add(SelectedVisit);
             SelectedVisitDetail = SelectedVisit;
-            
+
             await LoadMedicalHistoryAsync();
         }
 
@@ -270,8 +270,8 @@ namespace Open_lab.ViewModels
                 var results = await _resultsService.GetVisitTestsByDateAsync(DateFrom, DateTo.AddDays(1).AddSeconds(-1));
                 if (results == null) results = new System.Collections.Generic.List<Open_lab.Models.VisitTest>();
 
-                var visitTestsToLoad = SelectedVisitDetail == null 
-                    ? results 
+                var visitTestsToLoad = SelectedVisitDetail == null
+                    ? results
                     : results.Where(vt => vt.VisitId == SelectedVisitDetail.VisitId).ToList();
 
                 VisitTests.Clear();
@@ -293,7 +293,7 @@ namespace Open_lab.ViewModels
                         IsVerified = vt.Status == "Verified"
                     });
                 }
-                
+
                 StatusMessage = $"تم تحميل {VisitTests.Count} تحليل.";
                 (PrintWorksheetCommand as RelayCommand)?.RaiseCanExecuteChanged();
             }
@@ -379,7 +379,12 @@ namespace Open_lab.ViewModels
 
             try
             {
-                if (ResultItems.Count > 0 && !string.IsNullOrWhiteSpace(SelectedVisitTest.ResultValue))
+                // FIX (الفجوة الخامسة): سابقاً كان هذا السطر يكتب ResultValue (الاختصار) فوق
+                // المعامل الأول دائماً فيفقد المستخدم ما أدخله في Grid 2 لتحليل متعدد المعاملات.
+                // الحل: الاختصار يعمل فقط إذا كان التحليل معاملاً واحداً والخانة فارغة.
+                if (ResultItems.Count == 1 &&
+                    string.IsNullOrWhiteSpace(ResultItems[0].Value) &&
+                    !string.IsNullOrWhiteSpace(SelectedVisitTest.ResultValue))
                 {
                     ResultItems[0].Value = SelectedVisitTest.ResultValue;
                 }

@@ -197,7 +197,9 @@ namespace Open_lab.ViewModels
             ShowTodayPatientsCommand = new RelayCommand(async _ => await LoadTodayPatientsAsync(), _ => AppSession.HasPermission(PermissionCodes.PatientsView));
             ShowMovementCommand = new RelayCommand(_ => ShowMovement(), _ => CurrentVisitId > 0);
             UndoCommand = new RelayCommand(_ => UndoLastChange(), _ => true);
-            SettleCommand = new RelayCommand(async _ => await SettleBalanceAsync(), _ => true);
+            // FIX: CanExecute كان دائماً true فيُضلّل المستخدم — يضغط الزر قبل حفظ الزيارة
+            // ويرى "احفظ الزيارة لتثبيت الدفع". الآن الزر معطّل حتى تكون هناك زيارة محفوظة.
+            SettleCommand = new RelayCommand(async _ => await SettleBalanceAsync(), _ => CurrentVisitId > 0);
 
             // WorksheetCommand now sends the selected patient tests to the worksheet printer.
             WorksheetCommand = new RelayCommand(async _ => await PrintWorksheetAsync(), _ => true);
@@ -236,6 +238,10 @@ namespace Open_lab.ViewModels
                     (PrintReceiptCommand as RelayCommand)?.RaiseCanExecuteChanged();
                     (SendCommand as RelayCommand)?.RaiseCanExecuteChanged();
                     (ShowMovementCommand as RelayCommand)?.RaiseCanExecuteChanged();
+                    // FIX: SettleCommand يعتمد الآن على CurrentVisitId > 0 — حدّث حالته أيضاً
+                    // كي يصبح الزر فعّالاً تلقائياً بمجرد حفظ الزيارة (السطر 1349) ومُعطّلاً
+                    // بمجرد إعادة تهيئة النموذج (السطر 1144).
+                    (SettleCommand as RelayCommand)?.RaiseCanExecuteChanged();
                 }
             }
         }
