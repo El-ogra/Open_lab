@@ -11,6 +11,12 @@ namespace Open_lab.Services
         Task<List<Visit>> GetPatientVisitsAsync(int patientId);
         Task<List<VisitTest>> GetPatientVisitTestsAsync(int patientId);
         Task DeletePatientAsync(int patientId);
+        Task<List<Patient>> GetUnenteredResultsPatientsAsync(DateTime from, DateTime to);
+        Task<List<Patient>> GetUnreviewedResultsPatientsAsync(DateTime from, DateTime to);
+        Task<List<Patient>> GetUnprintedResultsPatientsAsync(DateTime from, DateTime to);
+        Task<List<Patient>> GetUndeliveredResultsPatientsAsync(DateTime from, DateTime to);
+        Task<List<Patient>> GetOpenAccountPatientsAsync(DateTime from, DateTime to);
+        Task<List<Patient>> GetGroupedResultsPatientsAsync(DateTime from, DateTime to);
     }
 
     public class PatientSearchCriteria

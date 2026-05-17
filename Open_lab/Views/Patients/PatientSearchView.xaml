@@ -208,15 +208,15 @@
         <Border Grid.Row="3" Background="{StaticResource AppOrange}" Padding="5" Margin="2">
             <WrapPanel HorizontalAlignment="Center">
                 <!-- Buttons are rendered from physical Left to Right. We want 'بيانات المريض' on far left, 'القائمة الرئيسية' on far right -->
-                <Button Content="بيانات المريض" Command="{Binding DataContext.NavigatePatientRegistrationCommand, RelativeSource={RelativeSource AncestorType=Window}}" Style="{StaticResource GreyActionButtonStyle}" FlowDirection="RightToLeft"/>
-                <Button Content="نتائج التحاليل" Command="{Binding DataContext.NavigateResultsEntryCommand, RelativeSource={RelativeSource AncestorType=Window}}" Style="{StaticResource GreyActionButtonStyle}" FlowDirection="RightToLeft"/>
+                <Button Content="بيانات المريض" Command="{Binding NavigatePatientRegistrationCommand}" Style="{StaticResource GreyActionButtonStyle}" FlowDirection="RightToLeft"/>
+                <Button Content="نتائج التحاليل" Command="{Binding NavigateResultsEntryCommand}" Style="{StaticResource GreyActionButtonStyle}" FlowDirection="RightToLeft"/>
                 <Button Content="حذف المريض" Command="{Binding DeletePatientCommand}" Style="{StaticResource OrangeActionButtonStyle}" FlowDirection="RightToLeft"/>
-                <Button Content="نتائج لم تدخل" IsEnabled="False" ToolTip="قيد التطوير" Style="{StaticResource YellowActionButtonStyle}" FlowDirection="RightToLeft"/>
-                <Button Content="نتائج لم تراجع" IsEnabled="False" ToolTip="قيد التطوير" Style="{StaticResource GreenActionButtonStyle}" FlowDirection="RightToLeft"/>
-                <Button Content="نتائج لم تطبع" IsEnabled="False" ToolTip="قيد التطوير" Style="{StaticResource GreenActionButtonStyle}" FlowDirection="RightToLeft"/>
-                <Button Content="نتائج لم تسلم" IsEnabled="False" ToolTip="قيد التطوير" Style="{StaticResource GreenActionButtonStyle}" FlowDirection="RightToLeft"/>
-                <Button Content="حساب مفتوح" IsEnabled="False" ToolTip="قيد التطوير" Style="{StaticResource GreenActionButtonStyle}" FlowDirection="RightToLeft"/>
-                <Button Content="نتائج مجمعة" IsEnabled="False" ToolTip="قيد التطوير" Style="{StaticResource BlueActionButtonStyle}" FlowDirection="RightToLeft"/>
+                <Button Content="نتائج لم تدخل" Command="{Binding UnenteredResultsCommand}" ToolTip="عرض المرضى الذين لديهم نتائج غير مدخلة" Style="{StaticResource YellowActionButtonStyle}" FlowDirection="RightToLeft"/>
+                <Button Content="نتائج لم تراجع" Command="{Binding UnreviewedResultsCommand}" ToolTip="عرض المرضى الذين لديهم نتائج لم تراجع" Style="{StaticResource GreenActionButtonStyle}" FlowDirection="RightToLeft"/>
+                <Button Content="نتائج لم تطبع" Command="{Binding UnprintedResultsCommand}" ToolTip="عرض المرضى الذين لديهم نتائج لم تطبع" Style="{StaticResource GreenActionButtonStyle}" FlowDirection="RightToLeft"/>
+                <Button Content="نتائج لم تسلم" Command="{Binding UndeliveredResultsCommand}" ToolTip="عرض المرضى الذين لديهم نتائج لم تسلم" Style="{StaticResource GreenActionButtonStyle}" FlowDirection="RightToLeft"/>
+                <Button Content="حساب مفتوح" Command="{Binding OpenAccountCommand}" ToolTip="عرض المرضى الذين لديهم حساب مفتوح" Style="{StaticResource GreenActionButtonStyle}" FlowDirection="RightToLeft"/>
+                <Button Content="نتائج مجمعة" Command="{Binding GroupedResultsCommand}" ToolTip="عرض المرضى الذين لديهم نتائج مجمعة" Style="{StaticResource BlueActionButtonStyle}" FlowDirection="RightToLeft"/>
                 <Button Content="القائمة الرئيسية" Command="{Binding DataContext.NavigateToPatientsCommand, RelativeSource={RelativeSource AncestorType=Window}}" Style="{StaticResource BlueActionButtonStyle}" FlowDirection="RightToLeft"/>
             </WrapPanel>
         </Border>

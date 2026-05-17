@@ -323,6 +323,21 @@ namespace Open_lab.Services
             return result;
         }
 
+        public async Task<VisitTest?> GetPreviousResultAsync(int patientId, int testId, int excludeVisitTestId)
+        {
+            return await _db.VisitTests
+                .AsNoTracking()
+                .Include(vt => vt.Visit)
+                .Include(vt => vt.ResultValues)
+                .ThenInclude(rv => rv.Parameter)
+                .Where(vt => vt.Visit.PatientId == patientId
+                    && vt.TestId == testId
+                    && vt.VisitTestId != excludeVisitTestId
+                    && vt.ResultValues.Any(rv => !string.IsNullOrWhiteSpace(rv.Value)))
+                .OrderByDescending(vt => vt.Visit.VisitDate)
+                .FirstOrDefaultAsync();
+        }
+
         private static string BuildResultSnapshot(ResultValue result)
         {
             return BuildResultSnapshot(result.Value, result.Flag, result.Comment);

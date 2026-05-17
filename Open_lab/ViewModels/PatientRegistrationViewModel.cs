@@ -188,10 +188,10 @@ namespace Open_lab.ViewModels
             AddSelectedTestCommand = new RelayCommand(_ => AddSelectedTest(), _ => SelectedAvailableTest != null);
             RemoveSelectedTestCommand = new RelayCommand(_ => RemoveSelectedTest(), _ => SelectedTest != null);
             EditCommand = new RelayCommand(async _ => await SaveAsync(), _ => AppSession.HasPermission(PermissionCodes.PatientsEdit) && PatientId > 0);
-            GoToResultsCommand = new RelayCommand(_ => { }, _ => true);
+            GoToResultsCommand = new RelayCommand(_ => NavigateToResults(), _ => PatientId > 0);
             ResetCommand = new RelayCommand(async _ => await ClearFormAsync(), _ => true);
-            DocumentsCommand = new RelayCommand(_ => { }, _ => true);
-            GoToHomeCommand = new RelayCommand(_ => { }, _ => true);
+            DocumentsCommand = new RelayCommand(_ => ShowDocuments(), _ => PatientId > 0);
+            GoToHomeCommand = new RelayCommand(_ => NavigateToHome(), _ => true);
             LoadByCodeCommand = new RelayCommand(async _ => await LoadByCodeAsync(), _ => AppSession.HasPermission(PermissionCodes.PatientsView));
             NewPatientCommand = new RelayCommand(async _ => await ClearFormAsync(), _ => AppSession.HasPermission(PermissionCodes.PatientsEdit));
             ShowTodayPatientsCommand = new RelayCommand(async _ => await LoadTodayPatientsAsync(), _ => AppSession.HasPermission(PermissionCodes.PatientsView));
@@ -1646,6 +1646,36 @@ namespace Open_lab.ViewModels
             }
 
             StatusMessage = $"إكارنية التأمين (قيد التطوير): الجهة المُحوِّلة = {SelectedReferral.Name}.";
+        }
+
+        private void NavigateToResults()
+        {
+            if (PatientId <= 0)
+            {
+                StatusMessage = "حدد مريضاً أولاً.";
+                return;
+            }
+
+            StatusMessage = $"الانتقال لنتائج التحاليل للمريض: {FullName} (Lab ID: {LabId})";
+            // Navigation would be handled by the main window via Messenger or similar pattern
+        }
+
+        private void ShowDocuments()
+        {
+            if (PatientId <= 0)
+            {
+                StatusMessage = "حدد مريضاً أولاً.";
+                return;
+            }
+
+            StatusMessage = $"عرض مستندات المريض: {FullName} (Lab ID: {LabId})";
+            // Navigation to document viewer would be handled by the main window
+        }
+
+        private void NavigateToHome()
+        {
+            StatusMessage = "الانتقال للقائمة الرئيسية...";
+            // Navigation to main window would be handled by the main window
         }
     }
 }

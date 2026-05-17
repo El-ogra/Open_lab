@@ -130,5 +130,142 @@ namespace Open_lab.Services
             _db.Patients.Remove(patient);
             await _db.SaveChangesAsync();
         }
+
+        public async Task<List<Patient>> GetUnenteredResultsPatientsAsync(DateTime from, DateTime to)
+        {
+            var visits = await _db.Visits
+                .AsNoTracking()
+                .Include(v => v.Patient)
+                .Include(v => v.VisitTests)
+                .Where(v => v.VisitDate >= from && v.VisitDate <= to)
+                .ToListAsync();
+
+            var patientIds = visits
+                .Where(v => v.VisitTests.Any(t => string.IsNullOrEmpty(t.Status) || t.Status == "InProgress"))
+                .Select(v => v.PatientId)
+                .Distinct()
+                .ToList();
+
+            return await _db.Patients
+                .AsNoTracking()
+                .Where(p => patientIds.Contains(p.PatientId))
+                .OrderBy(p => p.FullName)
+                .ToListAsync();
+        }
+
+        public async Task<List<Patient>> GetUnreviewedResultsPatientsAsync(DateTime from, DateTime to)
+        {
+            var visits = await _db.Visits
+                .AsNoTracking()
+                .Include(v => v.Patient)
+                .Include(v => v.VisitTests)
+                .Where(v => v.VisitDate >= from && v.VisitDate <= to)
+                .ToListAsync();
+
+            var patientIds = visits
+                .Where(v => v.VisitTests.Any(t => string.Equals(t.Status, "Completed", StringComparison.OrdinalIgnoreCase)))
+                .Select(v => v.PatientId)
+                .Distinct()
+                .ToList();
+
+            return await _db.Patients
+                .AsNoTracking()
+                .Where(p => patientIds.Contains(p.PatientId))
+                .OrderBy(p => p.FullName)
+                .ToListAsync();
+        }
+
+        public async Task<List<Patient>> GetUnprintedResultsPatientsAsync(DateTime from, DateTime to)
+        {
+            var visits = await _db.Visits
+                .AsNoTracking()
+                .Include(v => v.Patient)
+                .Include(v => v.VisitTests)
+                .Where(v => v.VisitDate >= from && v.VisitDate <= to)
+                .ToListAsync();
+
+            var patientIds = visits
+                .Where(v => v.VisitTests.Any(t =>
+                    (string.Equals(t.Status, "Verified", StringComparison.OrdinalIgnoreCase)) &&
+                    !string.Equals(t.Status, "Printed", StringComparison.OrdinalIgnoreCase)))
+                .Select(v => v.PatientId)
+                .Distinct()
+                .ToList();
+
+            return await _db.Patients
+                .AsNoTracking()
+                .Where(p => patientIds.Contains(p.PatientId))
+                .OrderBy(p => p.FullName)
+                .ToListAsync();
+        }
+
+        public async Task<List<Patient>> GetUndeliveredResultsPatientsAsync(DateTime from, DateTime to)
+        {
+            var visits = await _db.Visits
+                .AsNoTracking()
+                .Include(v => v.Patient)
+                .Include(v => v.VisitTests)
+                .Where(v => v.VisitDate >= from && v.VisitDate <= to)
+                .ToListAsync();
+
+            var patientIds = visits
+                .Where(v => v.VisitTests.Any(t =>
+                    !string.Equals(t.Status, "Delivered", StringComparison.OrdinalIgnoreCase) &&
+                    (string.Equals(t.Status, "Verified", StringComparison.OrdinalIgnoreCase) ||
+                     string.Equals(t.Status, "Printed", StringComparison.OrdinalIgnoreCase))))
+                .Select(v => v.PatientId)
+                .Distinct()
+                .ToList();
+
+            return await _db.Patients
+                .AsNoTracking()
+                .Where(p => patientIds.Contains(p.PatientId))
+                .OrderBy(p => p.FullName)
+                .ToListAsync();
+        }
+
+        public async Task<List<Patient>> GetOpenAccountPatientsAsync(DateTime from, DateTime to)
+        {
+            var visits = await _db.Visits
+                .AsNoTracking()
+                .Include(v => v.Patient)
+                .Include(v => v.Invoice)
+                .Where(v => v.VisitDate >= from && v.VisitDate <= to)
+                .ToListAsync();
+
+            var patientIds = visits
+                .Where(v => v.Invoice != null && v.Invoice.Balance > 0)
+                .Select(v => v.PatientId)
+                .Distinct()
+                .ToList();
+
+            return await _db.Patients
+                .AsNoTracking()
+                .Where(p => patientIds.Contains(p.PatientId))
+                .OrderBy(p => p.FullName)
+                .ToListAsync();
+        }
+
+        public async Task<List<Patient>> GetGroupedResultsPatientsAsync(DateTime from, DateTime to)
+        {
+            var visits = await _db.Visits
+                .AsNoTracking()
+                .Include(v => v.Patient)
+                .Include(v => v.VisitTests)
+                .Where(v => v.VisitDate >= from && v.VisitDate <= to)
+                .ToListAsync();
+
+            var patientIds = visits
+                .Where(v => v.VisitTests.Count > 3)
+                .Select(v => v.PatientId)
+                .Distinct()
+                .ToList();
+
+            return await _db.Patients
+                .AsNoTracking()
+                .Where(p => patientIds.Contains(p.PatientId))
+                .OrderBy(p => p.FullName)
+                .ToListAsync();
+        }
     }
 }

@@ -1025,14 +1025,12 @@
                 </Grid.ColumnDefinitions>
 
                 <Button Grid.Column="0" Content="القائمة الرئيسية"
-                        Command="{Binding DataContext.NavigateToPatientsCommand,
-                                          RelativeSource={RelativeSource AncestorType=Window}}"
+                        Command="{Binding GoToHomeCommand}"
                         Style="{StaticResource ActionButtonStyle}"
                         Background="#2E86C1" Foreground="White" MinWidth="115" />
 
                 <Button Grid.Column="1" Content="نتائج التحاليل"
-                        Command="{Binding DataContext.NavigateResultsEntryCommand,
-                                          RelativeSource={RelativeSource AncestorType=Window}}"
+                        Command="{Binding GoToResultsCommand}"
                         Style="{StaticResource ActionButtonStyle}"
                         Background="White" Foreground="Black" MinWidth="100" />
 

@@ -32,6 +32,16 @@ namespace Open_lab.ViewModels
             PatientTests = new ObservableCollection<string>();
             SearchCommand = new RelayCommand(async _ => await SearchAsync());
             DeletePatientCommand = new RelayCommand(async _ => await DeletePatientAsync(), _ => SelectedPatient != null);
+
+            UnenteredResultsCommand = new RelayCommand(async _ => await LoadUnenteredResultsAsync(), _ => AppSession.HasPermission(PermissionCodes.ResultsView));
+            UnreviewedResultsCommand = new RelayCommand(async _ => await LoadUnreviewedResultsAsync(), _ => AppSession.HasPermission(PermissionCodes.ResultsView));
+            UnprintedResultsCommand = new RelayCommand(async _ => await LoadUnprintedResultsAsync(), _ => AppSession.HasPermission(PermissionCodes.ResultsView));
+            UndeliveredResultsCommand = new RelayCommand(async _ => await LoadUndeliveredResultsAsync(), _ => AppSession.HasPermission(PermissionCodes.ResultsView));
+            OpenAccountCommand = new RelayCommand(async _ => await LoadOpenAccountAsync(), _ => AppSession.HasPermission(PermissionCodes.ResultsView));
+            GroupedResultsCommand = new RelayCommand(async _ => await LoadGroupedResultsAsync(), _ => AppSession.HasPermission(PermissionCodes.ResultsView));
+
+            NavigatePatientRegistrationCommand = new RelayCommand(_ => NavigateToPatientRegistration());
+            NavigateResultsEntryCommand = new RelayCommand(_ => NavigateToResultsEntry());
         }
 
         public string Name
@@ -107,6 +117,14 @@ namespace Open_lab.ViewModels
 
         public ICommand SearchCommand { get; }
         public ICommand DeletePatientCommand { get; }
+        public ICommand UnenteredResultsCommand { get; }
+        public ICommand UnreviewedResultsCommand { get; }
+        public ICommand UnprintedResultsCommand { get; }
+        public ICommand UndeliveredResultsCommand { get; }
+        public ICommand OpenAccountCommand { get; }
+        public ICommand GroupedResultsCommand { get; }
+        public ICommand NavigatePatientRegistrationCommand { get; }
+        public ICommand NavigateResultsEntryCommand { get; }
         public Func<string, string, bool> ConfirmAction { get; set; } =
             (message, title) => MessageBox.Show(message, title, MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes;
 
@@ -253,6 +271,172 @@ namespace Open_lab.ViewModels
         private static int? ParseNullableInt(string value)
         {
             return int.TryParse(value, out var parsed) ? parsed : null;
+        }
+
+        private DateTime GetEffectiveDateFrom()
+        {
+            return DateFrom ?? DateTime.Today.AddDays(-30);
+        }
+
+        private DateTime GetEffectiveDateTo()
+        {
+            return DateTo ?? DateTime.Today;
+        }
+
+        private async Task LoadUnenteredResultsAsync()
+        {
+            try
+            {
+                var patients = await _patientSearchService.GetUnenteredResultsPatientsAsync(
+                    GetEffectiveDateFrom().Date,
+                    GetEffectiveDateTo().Date.AddDays(1).AddSeconds(-1));
+
+                Patients.Clear();
+                foreach (var patient in patients)
+                {
+                    Patients.Add(patient);
+                }
+
+                StatusMessage = $"نتائج لم تدخل: تم العثور على {Patients.Count} مريض.";
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = $"خطأ: {ex.Message}";
+            }
+        }
+
+        private async Task LoadUnreviewedResultsAsync()
+        {
+            try
+            {
+                var patients = await _patientSearchService.GetUnreviewedResultsPatientsAsync(
+                    GetEffectiveDateFrom().Date,
+                    GetEffectiveDateTo().Date.AddDays(1).AddSeconds(-1));
+
+                Patients.Clear();
+                foreach (var patient in patients)
+                {
+                    Patients.Add(patient);
+                }
+
+                StatusMessage = $"نتائج لم تراجع: تم العثور على {Patients.Count} مريض.";
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = $"خطأ: {ex.Message}";
+            }
+        }
+
+        private async Task LoadUnprintedResultsAsync()
+        {
+            try
+            {
+                var patients = await _patientSearchService.GetUnprintedResultsPatientsAsync(
+                    GetEffectiveDateFrom().Date,
+                    GetEffectiveDateTo().Date.AddDays(1).AddSeconds(-1));
+
+                Patients.Clear();
+                foreach (var patient in patients)
+                {
+                    Patients.Add(patient);
+                }
+
+                StatusMessage = $"نتائج لم تطبع: تم العثور على {Patients.Count} مريض.";
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = $"خطأ: {ex.Message}";
+            }
+        }
+
+        private async Task LoadUndeliveredResultsAsync()
+        {
+            try
+            {
+                var patients = await _patientSearchService.GetUndeliveredResultsPatientsAsync(
+                    GetEffectiveDateFrom().Date,
+                    GetEffectiveDateTo().Date.AddDays(1).AddSeconds(-1));
+
+                Patients.Clear();
+                foreach (var patient in patients)
+                {
+                    Patients.Add(patient);
+                }
+
+                StatusMessage = $"نتائج لم تسلم: تم العثور على {Patients.Count} مريض.";
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = $"خطأ: {ex.Message}";
+            }
+        }
+
+        private async Task LoadOpenAccountAsync()
+        {
+            try
+            {
+                var patients = await _patientSearchService.GetOpenAccountPatientsAsync(
+                    GetEffectiveDateFrom().Date,
+                    GetEffectiveDateTo().Date.AddDays(1).AddSeconds(-1));
+
+                Patients.Clear();
+                foreach (var patient in patients)
+                {
+                    Patients.Add(patient);
+                }
+
+                StatusMessage = $"حساب مفتوح: تم العثور على {Patients.Count} مريض.";
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = $"خطأ: {ex.Message}";
+            }
+        }
+
+        private async Task LoadGroupedResultsAsync()
+        {
+            try
+            {
+                var patients = await _patientSearchService.GetGroupedResultsPatientsAsync(
+                    GetEffectiveDateFrom().Date,
+                    GetEffectiveDateTo().Date.AddDays(1).AddSeconds(-1));
+
+                Patients.Clear();
+                foreach (var patient in patients)
+                {
+                    Patients.Add(patient);
+                }
+
+                StatusMessage = $"نتائج مجمعة: تم العثور على {Patients.Count} مريض.";
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = $"خطأ: {ex.Message}";
+            }
+        }
+
+        private void NavigateToPatientRegistration()
+        {
+            if (SelectedPatient == null)
+            {
+                StatusMessage = "حدد مريضاً أولاً.";
+                return;
+            }
+
+            StatusMessage = $"الانتقال لبيانات المريض: {SelectedPatient.FullName}";
+            // Navigation would be handled by the main window via Messenger or similar pattern
+        }
+
+        private void NavigateToResultsEntry()
+        {
+            if (SelectedPatient == null)
+            {
+                StatusMessage = "حدد مريضاً أولاً.";
+                return;
+            }
+
+            StatusMessage = $"الانتقال لنتائج التحاليل للمريض: {SelectedPatient.FullName}";
+            // Navigation would be handled by the main window via Messenger or similar pattern
         }
     }
 }

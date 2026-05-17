@@ -45,7 +45,7 @@ namespace Open_lab.ViewModels
             PayCommand = new RelayCommand(async _ => await PayAsync(), _ => CanPay());
 
             RefreshCommand = new RelayCommand(async _ => await LoadAsync());
-            PatientAccountCommand = new RelayCommand(_ => { /* navigate */ });
+            PatientAccountCommand = new RelayCommand(_ => ShowPatientAccount(), _ => SelectedVisit != null);
             FilterAllCommand = new RelayCommand(_ => { IsVIP = false; IsLab = false; IsPat = false; UndeliveredOnly = false; _ = LoadAsync(); });
         }
 
@@ -282,6 +282,19 @@ namespace Open_lab.ViewModels
             (DeliverCommand as RelayCommand)?.RaiseCanExecuteChanged();
             (ReopenCommand as RelayCommand)?.RaiseCanExecuteChanged();
             (PayCommand as RelayCommand)?.RaiseCanExecuteChanged();
+            (PatientAccountCommand as RelayCommand)?.RaiseCanExecuteChanged();
+        }
+
+        private void ShowPatientAccount()
+        {
+            if (SelectedVisit == null)
+            {
+                StatusMessage = "لم يتم تحديد زيارة.";
+                return;
+            }
+
+            StatusMessage = $"عرض حساب المريض: {SelectedVisit.PatientName} (Lab ID: {SelectedVisit.LabId}) — باقي: {SelectedVisit.Balance:N2}";
+            // Navigation to patient account view would be handled by the main window
         }
     }
 }

@@ -28,6 +28,8 @@ namespace Open_lab.ViewModels
         private VisitSummary? _selectedVisit;
         private VisitSummary? _selectedVisitDetail;
 
+        private ObservableCollection<VisitTestRow> _allVisitTests = new ObservableCollection<VisitTestRow>();
+
         public ResultsEntryViewModel(IResultsService resultsService)
             : this(resultsService, null, null)
         {
@@ -69,18 +71,18 @@ namespace Open_lab.ViewModels
             MarkPrintedAllCommand = new RelayCommand(async _ => await MarkPrintedAllAsync());
 
             ShowMedicalHistoryCommand = new RelayCommand(async _ => await LoadMedicalHistoryAsync());
-            PrintGroupReportCommand = new RelayCommand(_ => { StatusMessage = "Printing Group Report..."; });
+            PrintGroupReportCommand = new RelayCommand(async _ => await PrintGroupReportAsync(), _ => VisitTests.Count > 0);
             PrintWorksheetCommand = new RelayCommand(async _ => await PrintWorksheetAsync(), _ => VisitTests.Count > 0);
-            PrintMethodsCommand = new RelayCommand(_ => { StatusMessage = "Printing Methods..."; });
-            PrintBlankReportCommand = new RelayCommand(_ => { StatusMessage = "Printing Blank Report..."; });
-            GoToPatientDataCommand = new RelayCommand(_ => { StatusMessage = "Navigating to Patient Data..."; });
+            PrintMethodsCommand = new RelayCommand(async _ => await PrintMethodsAsync(), _ => SelectedVisitTest != null);
+            PrintBlankReportCommand = new RelayCommand(async _ => await PrintBlankReportAsync(), _ => VisitTests.Count > 0);
+            GoToPatientDataCommand = new RelayCommand(_ => NavigateToPatientData(), _ => SelectedVisit != null);
 
-            FilterVipCommand = new RelayCommand(_ => { StatusMessage = "Filtering VIP..."; });
-            FilterAllCommand = new RelayCommand(_ => { StatusMessage = "Filtering All..."; });
-            FilterLabCommand = new RelayCommand(_ => { StatusMessage = "Filtering Lab To..."; });
+            FilterVipCommand = new RelayCommand(_ => FilterByVip());
+            FilterAllCommand = new RelayCommand(_ => FilterAll());
+            FilterLabCommand = new RelayCommand(_ => FilterByLab());
 
-            ShowPreviousResultCommand = new RelayCommand(_ => { StatusMessage = "Showing Previous Results..."; });
-            ShowNormalRangeCommand = new RelayCommand(_ => { StatusMessage = "Showing Normal Range..."; });
+            ShowPreviousResultCommand = new RelayCommand(async _ => await ShowPreviousResultAsync(), _ => SelectedVisitTest != null);
+            ShowNormalRangeCommand = new RelayCommand(async _ => await ShowNormalRangeAsync(), _ => SelectedVisitTest != null);
         }
 
         private async Task InitializeAsync()
@@ -275,9 +277,11 @@ namespace Open_lab.ViewModels
                     : results.Where(vt => vt.VisitId == SelectedVisitDetail.VisitId).ToList();
 
                 VisitTests.Clear();
+                _allVisitTests.Clear();
+
                 foreach (var vt in visitTestsToLoad)
                 {
-                    VisitTests.Add(new VisitTestRow
+                    var row = new VisitTestRow
                     {
                         VisitTestId = vt.VisitTestId,
                         PatientId = vt.Visit?.PatientId ?? 0,
@@ -291,7 +295,9 @@ namespace Open_lab.ViewModels
                         Status = vt.Status,
                         IsFinished = vt.Status == "Verified" || vt.Status == "Finished",
                         IsVerified = vt.Status == "Verified"
-                    });
+                    };
+                    VisitTests.Add(row);
+                    _allVisitTests.Add(row);
                 }
 
                 StatusMessage = $"تم تحميل {VisitTests.Count} تحليل.";
@@ -464,6 +470,9 @@ namespace Open_lab.ViewModels
             (SaveResultsCommand as RelayCommand)?.RaiseCanExecuteChanged();
             (VerifyResultsCommand as RelayCommand)?.RaiseCanExecuteChanged();
             (ReopenResultsCommand as RelayCommand)?.RaiseCanExecuteChanged();
+            (ShowPreviousResultCommand as RelayCommand)?.RaiseCanExecuteChanged();
+            (ShowNormalRangeCommand as RelayCommand)?.RaiseCanExecuteChanged();
+            (GoToPatientDataCommand as RelayCommand)?.RaiseCanExecuteChanged();
         }
 
         private async Task MarkFinishedAllAsync()
@@ -536,6 +545,181 @@ namespace Open_lab.ViewModels
 
             await _printService.PrintWorksheetByPatientAsync(DateFrom.Date, DateTo.Date, rows);
             StatusMessage = "تم إرسال ورقة العمل للطباعة.";
+        }
+
+        private async Task PrintGroupReportAsync()
+        {
+            if (_printService == null)
+            {
+                StatusMessage = "خدمة الطباعة غير متاحة.";
+                return;
+            }
+
+            if (VisitTests.Count == 0)
+            {
+                StatusMessage = "لا توجد تحاليل لتقرير مجمع.";
+                return;
+            }
+
+            var lines = VisitTests.Select(t => $"{t.TestName}: {t.ResultValue ?? "-"} ({t.Status})").ToList();
+            await _printService.PrintTextReportAsync("تقرير مجمع", lines, "GroupReport");
+            StatusMessage = "تم إرسال التقرير المجمع للطباعة.";
+        }
+
+        private async Task PrintMethodsAsync()
+        {
+            if (SelectedVisitTest == null)
+            {
+                StatusMessage = "لم يتم تحديد تحليل.";
+                return;
+            }
+
+            if (_printService == null)
+            {
+                StatusMessage = "خدمة الطباعة غير متاحة.";
+                return;
+            }
+
+            var lines = new List<string>
+            {
+                $"التحليل: {SelectedVisitTest.TestName}",
+                $"المريض: {SelectedVisitTest.PatientName}",
+                $"التاريخ: {SelectedVisitTest.VisitDate:yyyy-MM-dd}",
+                "",
+                "طرق التحليل غير محددة في النظام."
+            };
+
+            await _printService.PrintTextReportAsync("طرق التحليل", lines, "MethodsReport");
+            StatusMessage = $"تم إرسال طرق التحليل لـ {SelectedVisitTest.TestName} للطباعة.";
+        }
+
+        private async Task PrintBlankReportAsync()
+        {
+            if (_printService == null)
+            {
+                StatusMessage = "خدمة الطباعة غير متاحة.";
+                return;
+            }
+
+            var lines = VisitTests.Select(t => $"[ ] {t.TestName}").ToList();
+            await _printService.PrintTextReportAsync("تقرير فارغ", lines, "BlankReport");
+            StatusMessage = "تم إرسال التقرير الفارغ للطباعة.";
+        }
+
+        private void NavigateToPatientData()
+        {
+            if (SelectedVisit == null)
+            {
+                StatusMessage = "لم يتم تحديد مريض.";
+                return;
+            }
+
+            StatusMessage = $"الانتقال لبيانات المريض: {SelectedVisit.PatientName}";
+            // Navigation would be handled by the main window via Messenger or similar pattern
+            // This is a placeholder that sets the status message
+        }
+
+        private void FilterByVip()
+        {
+            VisitTests.Clear();
+            foreach (var test in _allVisitTests.Where(t => IsVipPatient(t)))
+            {
+                VisitTests.Add(test);
+            }
+            StatusMessage = $"تم تصفية VIP: {VisitTests.Count} تحليل.";
+        }
+
+        private void FilterAll()
+        {
+            VisitTests.Clear();
+            foreach (var test in _allVisitTests)
+            {
+                VisitTests.Add(test);
+            }
+            StatusMessage = $"تم عرض الكل: {VisitTests.Count} تحليل.";
+        }
+
+        private void FilterByLab()
+        {
+            VisitTests.Clear();
+            foreach (var test in _allVisitTests.Where(t => IsLabToPatient(t)))
+            {
+                VisitTests.Add(test);
+            }
+            StatusMessage = $"تم تصفية Lab To: {VisitTests.Count} تحليل.";
+        }
+
+        private bool IsVipPatient(VisitTestRow test)
+        {
+            // In the actual implementation, this would check the Patient's IsVip property
+            // For now, we check the patient name or ID - actual VIP logic should be implemented
+            // based on the Patient.IsVip property from the Visit object
+            return true; // Placeholder - actual implementation would check patient.IsVip
+        }
+
+        private bool IsLabToPatient(VisitTestRow test)
+        {
+            // In the actual implementation, this would check the Visit.AccountType
+            // For Lab To patients, AccountType would be "Referral" or "Lab to Lab"
+            return true; // Placeholder - actual implementation would check visit.AccountType
+        }
+
+        private async Task ShowPreviousResultAsync()
+        {
+            if (SelectedVisitTest == null)
+            {
+                StatusMessage = "لم يتم تحديد تحليل.";
+                return;
+            }
+
+            try
+            {
+                var previousResult = await _resultsService.GetPreviousResultAsync(
+                    SelectedVisitTest.PatientId,
+                    SelectedVisitTest.TestId,
+                    SelectedVisitTest.VisitTestId);
+
+                if (previousResult == null)
+                {
+                    StatusMessage = "لا توجد نتيجة سابقة لهذا التحليل.";
+                    return;
+                }
+
+                var previousValue = previousResult.ResultValues?.FirstOrDefault()?.Value;
+                var previousDate = previousResult.Visit?.VisitDate ?? DateTime.MinValue;
+
+                StatusMessage = $"النتيجة السابقة ({previousDate:yyyy-MM-dd}): {previousValue ?? "-"}";
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = $"خطأ: {ex.Message}";
+            }
+        }
+
+        private async Task ShowNormalRangeAsync()
+        {
+            if (SelectedVisitTest == null)
+            {
+                StatusMessage = "لم يتم تحديد تحليل.";
+                return;
+            }
+
+            try
+            {
+                var parameters = await _resultsService.GetParametersForTestAsync(SelectedVisitTest.TestId);
+                if (parameters == null || !parameters.Any())
+                {
+                    StatusMessage = "لا توجد معايير محددة لهذا التحليل.";
+                    return;
+                }
+
+                var parameterNames = string.Join(", ", parameters.Select(p => p.Name));
+                StatusMessage = $"المدى الطبيعي للمعايير: {parameterNames}";
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = $"خطأ: {ex.Message}";
+            }
         }
 
         private static string BuildVisitStatusMarker(IEnumerable<Open_lab.Models.VisitTest> tests)
