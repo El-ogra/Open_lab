@@ -846,7 +846,7 @@
                                          Text="{Binding LabId, UpdateSourceTrigger=PropertyChanged}"
                                          FontWeight="Bold" />
 
-                                <!-- ROW 1: اسم المريض + Sex -->
+                                <!-- ROW 1: اسم المريض + النوع -->
                                 <Border Grid.Row="1" Grid.Column="0" Style="{StaticResource FieldLabelStyle}">
                                     <TextBlock Text="اسم المريض" Style="{StaticResource FieldLabelText}" />
                                 </Border>
@@ -856,6 +856,7 @@
                                         <ColumnDefinition Width="*" />
                                         <ColumnDefinition Width="Auto" />
                                         <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="75" />
                                     </Grid.ColumnDefinitions>
                                     <ComboBox Grid.Column="0" Style="{StaticResource WhiteComboBoxStyle}"
                                               SelectedItem="{Binding Title, Mode=TwoWay}" IsEditable="True">
@@ -867,8 +868,7 @@
                                     <TextBox Grid.Column="1" Style="{StaticResource WhiteTextBoxStyle}"
                                              Text="{Binding FullName, UpdateSourceTrigger=PropertyChanged}" />
                                     <Border Grid.Column="2" Style="{StaticResource FieldLabelStyle}">
-                                        <TextBlock Text="Sex" Style="{StaticResource FieldLabelText}"
-                                                   FlowDirection="LeftToRight" />
+                                        <TextBlock Text="النوع" Style="{StaticResource FieldLabelText}" />
                                     </Border>
                                     <StackPanel Grid.Column="3" Orientation="Horizontal"
                                                 VerticalAlignment="Center">
