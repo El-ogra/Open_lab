@@ -310,11 +310,11 @@
                 <StackPanel DockPanel.Dock="Left" Orientation="Horizontal" Margin="6,0,2,0">
                     <Border Background="{StaticResource InfoBlue}" CornerRadius="1" Padding="6,2" Margin="1"
                             MinWidth="80">
-                        <TextBlock Text="Entry Date" Foreground="White" FontWeight="Bold" FontSize="11"
+                        <TextBlock Text="تاريخ الدخول" Foreground="White" FontWeight="Bold" FontSize="11"
                                    HorizontalAlignment="Center" VerticalAlignment="Center" />
                     </Border>
-                    <DatePicker Width="115" SelectedDate="{Binding EntryDate}" Margin="1"
-                                FlowDirection="LeftToRight" Language="en-US" />
+                    <TextBox Width="115" Text="{Binding EntryDate, StringFormat='{}{0:dd-MMM-yyyy}', UpdateSourceTrigger=PropertyChanged}" Margin="1"
+                             Style="{StaticResource WhiteTextBoxStyle}" FlowDirection="LeftToRight" Language="en-US" />
                     <TextBox Width="72" Style="{StaticResource WhiteTextBoxStyle}"
                              Text="{Binding EntryTimeText, UpdateSourceTrigger=PropertyChanged}"
                              FontWeight="Bold" FlowDirection="LeftToRight" Language="en-US" />
@@ -324,11 +324,11 @@
                 <StackPanel DockPanel.Dock="Left" Orientation="Horizontal" Margin="10,0">
                     <Border Background="{StaticResource InfoBlue}" CornerRadius="1" Padding="6,2" Margin="1"
                             MinWidth="90">
-                        <TextBlock Text="Reception Date" Foreground="White" FontWeight="Bold" FontSize="11"
+                        <TextBlock Text="تاريخ الاستلام" Foreground="White" FontWeight="Bold" FontSize="11"
                                    HorizontalAlignment="Center" VerticalAlignment="Center" />
                     </Border>
-                    <DatePicker Width="115" SelectedDate="{Binding ReceptionDate}" Margin="1"
-                                FlowDirection="LeftToRight" Language="en-US" />
+                    <TextBox Width="115" Text="{Binding ReceptionDate, StringFormat='{}{0:dd-MMM-yyyy}', UpdateSourceTrigger=PropertyChanged}" Margin="1"
+                             Style="{StaticResource WhiteTextBoxStyle}" FlowDirection="LeftToRight" Language="en-US" />
                     <TextBox Width="72" Style="{StaticResource WhiteTextBoxStyle}"
                              Text="{Binding ReceptionTimeText, UpdateSourceTrigger=PropertyChanged}"
                              FontWeight="Bold" FlowDirection="LeftToRight" Language="en-US" />
