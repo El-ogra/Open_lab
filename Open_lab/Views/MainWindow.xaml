@@ -197,7 +197,10 @@
             <ContentControl Content="{Binding CurrentView}" />
         </Border>
 
-        <Border Grid.Row="2" Background="{StaticResource TopToolbarBrush}" Padding="14,0">
+        <Border Grid.Row="2"
+                Background="{StaticResource TopToolbarBrush}"
+                Padding="14,0"
+                Visibility="{Binding IsStatusBarVisible, Converter={StaticResource BoolToVisibility}}">
             <DockPanel LastChildFill="False" VerticalAlignment="Center">
                 <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
                     <TextBlock Text="&#xE77B;" FontFamily="Segoe MDL2 Assets" Foreground="#DCECF6" Margin="0,0,0,0" />

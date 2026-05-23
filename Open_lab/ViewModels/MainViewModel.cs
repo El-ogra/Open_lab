@@ -26,6 +26,7 @@ namespace Open_lab.ViewModels
         private string _activeModule = string.Empty;
         private System.Action? _logoutRequested;
         private bool _isToolbarVisible = true;
+        private bool _isStatusBarVisible = true;
         private bool _isLoggedIn;
 
         public MainViewModel(
@@ -132,6 +133,12 @@ namespace Open_lab.ViewModels
             private set => SetProperty(ref _isToolbarVisible, value);
         }
 
+        public bool IsStatusBarVisible
+        {
+            get => _isStatusBarVisible;
+            private set => SetProperty(ref _isStatusBarVisible, value);
+        }
+
         public bool IsLoggedIn
         {
             get => _isLoggedIn;
@@ -203,6 +210,7 @@ namespace Open_lab.ViewModels
             ActiveModule = string.Empty;
             CurrentView = new WelcomeViewModel();
             IsToolbarVisible = true;
+            IsStatusBarVisible = true;
             _logoutRequested = onLogoutRequested;
             IsLoggedIn = true;
             _windowLayoutService.ApplyAppLayout();
@@ -231,6 +239,7 @@ namespace Open_lab.ViewModels
             _navigationService.Navigate(target);
             CurrentView = _navigationService.CurrentViewModel;
             IsToolbarVisible = !IsPatientDetailTarget(target);
+            IsStatusBarVisible = target != NavigationTarget.PatientRegistration;
             if (!IsToolbarVisible)
             {
                 ActiveModule = "المرضى";
@@ -249,6 +258,7 @@ namespace Open_lab.ViewModels
         {
             ActiveModule = moduleName;
             IsToolbarVisible = true;
+            IsStatusBarVisible = true;
             CurrentView = new WelcomeViewModel(moduleName);
         }
 
@@ -256,6 +266,7 @@ namespace Open_lab.ViewModels
         {
             ActiveModule = "المرضى";
             IsToolbarVisible = true;
+            IsStatusBarVisible = true;
             CurrentView = new PatientModuleViewModel(NavigateTo);
         }
 
@@ -263,6 +274,7 @@ namespace Open_lab.ViewModels
         {
             ActiveModule = "بيانات النظام";
             IsToolbarVisible = true;
+            IsStatusBarVisible = true;
             CurrentView = new SystemDataModuleViewModel(OpenPlaceholder);
         }
 
@@ -270,6 +282,7 @@ namespace Open_lab.ViewModels
         {
             ActiveModule = "حسابات";
             IsToolbarVisible = true;
+            IsStatusBarVisible = true;
             CurrentView = new AccountsModuleViewModel(OpenPlaceholder);
         }
 
@@ -277,6 +290,7 @@ namespace Open_lab.ViewModels
         {
             ActiveModule = "ورقة عمل";
             IsToolbarVisible = true;
+            IsStatusBarVisible = true;
             CurrentView = new WorksheetModuleViewModel(OpenPlaceholder);
         }
 
@@ -284,6 +298,7 @@ namespace Open_lab.ViewModels
         {
             ActiveModule = "احصاليات";
             IsToolbarVisible = true;
+            IsStatusBarVisible = true;
             CurrentView = new StatisticsModuleViewModel(OpenPlaceholder);
         }
 
@@ -291,6 +306,7 @@ namespace Open_lab.ViewModels
         {
             ActiveModule = "اعدادات";
             IsToolbarVisible = true;
+            IsStatusBarVisible = true;
             CurrentView = new SettingsModuleViewModel(OpenPlaceholder);
         }
 
@@ -298,6 +314,7 @@ namespace Open_lab.ViewModels
         {
             ActiveModule = "أدوات";
             IsToolbarVisible = true;
+            IsStatusBarVisible = true;
             CurrentView = new ToolsModuleViewModel(OpenPlaceholder);
         }
 
@@ -305,6 +322,7 @@ namespace Open_lab.ViewModels
         {
             ActiveModule = "المستخدمين";
             IsToolbarVisible = true;
+            IsStatusBarVisible = true;
             CurrentView = new UsersModuleViewModel(OpenPlaceholder);
         }
 
@@ -317,6 +335,7 @@ namespace Open_lab.ViewModels
         private void ReturnToActiveModule()
         {
             IsToolbarVisible = true;
+            IsStatusBarVisible = true;
 
             if (ActiveModule == "المرضى")
             {
@@ -383,6 +402,7 @@ namespace Open_lab.ViewModels
                 IsLoggedIn = false;
                 ActiveModule = string.Empty;
                 IsToolbarVisible = true;
+                IsStatusBarVisible = true;
                 CurrentView = new WelcomeViewModel();
                 _logoutRequested.Invoke();
                 return;
@@ -418,6 +438,7 @@ namespace Open_lab.ViewModels
             {
                 OnPropertyChanged(nameof(CurrentViewModel));
                 CurrentView = _navigationService.CurrentViewModel;
+                IsStatusBarVisible = _navigationService.CurrentViewModel is not PatientRegistrationViewModel;
             }
         }
 
