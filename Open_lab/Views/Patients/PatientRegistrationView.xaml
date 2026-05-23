@@ -801,6 +801,7 @@
                                     <ColumnDefinition Width="Auto" />
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
                                 <Grid.RowDefinitions>
@@ -812,28 +813,19 @@
                                     <RowDefinition Height="Auto" />
                                 </Grid.RowDefinitions>
 
-                                <!-- ROW 0: Lab ID + كود المريض -->
+                                <!-- ROW 0: كود المريض + VIP + Lab. ID -->
                                 <Border Grid.Row="0" Grid.Column="0"
-                                        Style="{StaticResource CyanLabelStyle}">
-                                    <TextBlock Text="Lab. ID" Foreground="White" FontWeight="Bold"
-                                               FontSize="11" HorizontalAlignment="Center"
-                                               VerticalAlignment="Center" FlowDirection="LeftToRight" />
-                                </Border>
-                                <TextBox Grid.Row="0" Grid.Column="1"
-                                         Style="{StaticResource WhiteTextBoxStyle}"
-                                         Text="{Binding LabId, UpdateSourceTrigger=PropertyChanged}"
-                                         FontWeight="Bold" />
-
-                                <Border Grid.Row="0" Grid.Column="2"
                                         Background="{StaticResource BrightOrange}"
                                         CornerRadius="1" Padding="6,2" Margin="1" MinWidth="80" Height="24">
                                     <TextBlock Text="كود المريض" Foreground="White" FontWeight="Bold"
                                                FontSize="11" HorizontalAlignment="Center"
                                                VerticalAlignment="Center" />
                                 </Border>
-                                <StackPanel Grid.Row="0" Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center">
-                                    <TextBox Style="{StaticResource WhiteTextBoxStyle}" Width="100"
-                                             Text="{Binding PatientCode, UpdateSourceTrigger=PropertyChanged}" />
+                                <TextBox Grid.Row="0" Grid.Column="1"
+                                         Style="{StaticResource WhiteTextBoxStyle}"
+                                         Text="{Binding PatientCode, UpdateSourceTrigger=PropertyChanged}" />
+
+                                <StackPanel Grid.Row="0" Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
                                     <Border Style="{StaticResource CyanLabelStyle}" MinWidth="40" Margin="3,1,1,1">
                                         <TextBlock Text="VIP" Foreground="White" FontWeight="Bold"
                                                    FontSize="11" HorizontalAlignment="Center"
@@ -843,39 +835,26 @@
                                               VerticalAlignment="Center" Margin="2,0" />
                                 </StackPanel>
 
-                                <!-- ROW 1: الجنس + نوع الحساب -->
+                                <Border Grid.Row="0" Grid.Column="3"
+                                        Style="{StaticResource CyanLabelStyle}">
+                                    <TextBlock Text="Lab. ID" Foreground="White" FontWeight="Bold"
+                                               FontSize="11" HorizontalAlignment="Center"
+                                               VerticalAlignment="Center" FlowDirection="LeftToRight" />
+                                </Border>
+                                <TextBox Grid.Row="0" Grid.Column="4"
+                                         Style="{StaticResource WhiteTextBoxStyle}"
+                                         Text="{Binding LabId, UpdateSourceTrigger=PropertyChanged}"
+                                         FontWeight="Bold" />
+
+                                <!-- ROW 1: اسم المريض + Sex -->
                                 <Border Grid.Row="1" Grid.Column="0" Style="{StaticResource FieldLabelStyle}">
-                                    <TextBlock Text="Sex" Style="{StaticResource FieldLabelText}"
-                                               FlowDirection="LeftToRight" />
-                                </Border>
-                                <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal"
-                                            VerticalAlignment="Center">
-                                    <RadioButton Content="Male"    Style="{StaticResource WhiteRadioStyle}"
-                                                 IsChecked="{Binding Gender, Converter={StaticResource StringEqualsConverter}, ConverterParameter=Male}" />
-                                    <RadioButton Content="Female"  Style="{StaticResource WhiteRadioStyle}"
-                                                 IsChecked="{Binding Gender, Converter={StaticResource StringEqualsConverter}, ConverterParameter=Female}" />
-                                    <RadioButton Content="Unknown" Style="{StaticResource WhiteRadioStyle}"
-                                                 IsChecked="{Binding Gender, Converter={StaticResource StringEqualsConverter}, ConverterParameter=Unknown}" />
-                                </StackPanel>
-
-                                <Border Grid.Row="1" Grid.Column="2" Style="{StaticResource FieldLabelStyle}">
-                                    <TextBlock Text="نوع الحساب" Style="{StaticResource FieldLabelText}" />
-                                </Border>
-                                <ComboBox Grid.Row="1" Grid.Column="3"
-                                          Style="{StaticResource WhiteComboBoxStyle}"
-                                          SelectedItem="{Binding AccountType, Mode=TwoWay}"
-                                          IsEditable="True">
-                                    <ComboBoxItem Content="Individual" />
-                                    <ComboBoxItem Content="Lab to Lab" />
-                                </ComboBox>
-
-                                <!-- ROW 2: اسم المريض -->
-                                <Border Grid.Row="2" Grid.Column="0" Style="{StaticResource FieldLabelStyle}">
                                     <TextBlock Text="اسم المريض" Style="{StaticResource FieldLabelText}" />
                                 </Border>
-                                <Grid Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="3">
+                                <Grid Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="4">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="75" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
                                         <ColumnDefinition Width="*" />
                                     </Grid.ColumnDefinitions>
                                     <ComboBox Grid.Column="0" Style="{StaticResource WhiteComboBoxStyle}"
@@ -887,64 +866,93 @@
                                     </ComboBox>
                                     <TextBox Grid.Column="1" Style="{StaticResource WhiteTextBoxStyle}"
                                              Text="{Binding FullName, UpdateSourceTrigger=PropertyChanged}" />
+                                    <Border Grid.Column="2" Style="{StaticResource FieldLabelStyle}">
+                                        <TextBlock Text="Sex" Style="{StaticResource FieldLabelText}"
+                                                   FlowDirection="LeftToRight" />
+                                    </Border>
+                                    <StackPanel Grid.Column="3" Orientation="Horizontal"
+                                                VerticalAlignment="Center">
+                                        <RadioButton Content="Male"    Style="{StaticResource WhiteRadioStyle}"
+                                                     IsChecked="{Binding Gender, Converter={StaticResource StringEqualsConverter}, ConverterParameter=Male}" />
+                                        <RadioButton Content="Female"  Style="{StaticResource WhiteRadioStyle}"
+                                                     IsChecked="{Binding Gender, Converter={StaticResource StringEqualsConverter}, ConverterParameter=Female}" />
+                                        <RadioButton Content="Unknown" Style="{StaticResource WhiteRadioStyle}"
+                                                     IsChecked="{Binding Gender, Converter={StaticResource StringEqualsConverter}, ConverterParameter=Unknown}" />
+                                    </StackPanel>
                                 </Grid>
 
-                                <!-- ROW 3: السن + عنوان المريض -->
+                                <!-- ROW 3: موبايل/تليفون + السن -->
                                 <Border Grid.Row="3" Grid.Column="0" Style="{StaticResource FieldLabelStyle}">
-                                    <TextBlock Text="السن" Style="{StaticResource FieldLabelText}" />
+                                    <TextBlock Text="موبايل/تليفون" Style="{StaticResource FieldLabelText}" />
                                 </Border>
-                                <Grid Grid.Row="3" Grid.Column="1">
+                                <Grid Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="4">
                                     <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
                                         <ColumnDefinition Width="*" />
                                         <ColumnDefinition Width="75" />
                                     </Grid.ColumnDefinitions>
                                     <TextBox Grid.Column="0" Style="{StaticResource WhiteTextBoxStyle}"
+                                             Text="{Binding HomePhone, UpdateSourceTrigger=PropertyChanged}" />
+                                    <TextBox Grid.Column="1" Style="{StaticResource WhiteTextBoxStyle}"
+                                             Text="{Binding MobilePhone, UpdateSourceTrigger=PropertyChanged}" />
+                                    <Border Grid.Column="2" Style="{StaticResource FieldLabelStyle}">
+                                        <TextBlock Text="السن" Style="{StaticResource FieldLabelText}" />
+                                    </Border>
+                                    <TextBox Grid.Column="3" Style="{StaticResource WhiteTextBoxStyle}"
                                              Text="{Binding Age, UpdateSourceTrigger=PropertyChanged, TargetNullValue=''}" />
-                                    <ComboBox Grid.Column="1" Style="{StaticResource WhiteComboBoxStyle}"
+                                    <ComboBox Grid.Column="4" Style="{StaticResource WhiteComboBoxStyle}"
                                               SelectedItem="{Binding AgeUnit, Mode=TwoWay}" IsEditable="True">
                                         <ComboBoxItem Content="Years" />
                                         <ComboBoxItem Content="Months" />
                                         <ComboBoxItem Content="Days" />
                                     </ComboBox>
                                 </Grid>
-                                <Border Grid.Row="3" Grid.Column="2" Style="{StaticResource FieldLabelStyle}">
+
+                                <!-- ROW 4: رقم البطاقة + نوع الحساب -->
+                                <Border Grid.Row="4" Grid.Column="0" Style="{StaticResource FieldLabelStyle}">
+                                    <TextBlock Text="رقم البطاقة" Style="{StaticResource FieldLabelText}" />
+                                </Border>
+                                <Grid Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="4">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBox Grid.Column="0" Style="{StaticResource WhiteTextBoxStyle}"
+                                             Text="{Binding NationalId, UpdateSourceTrigger=PropertyChanged}" />
+                                    <Border Grid.Column="1" Style="{StaticResource FieldLabelStyle}">
+                                        <TextBlock Text="نوع الحساب" Style="{StaticResource FieldLabelText}" />
+                                    </Border>
+                                    <ComboBox Grid.Column="2"
+                                              Style="{StaticResource WhiteComboBoxStyle}"
+                                              SelectedItem="{Binding AccountType, Mode=TwoWay}"
+                                              IsEditable="True">
+                                        <ComboBoxItem Content="Individual" />
+                                        <ComboBoxItem Content="Lab to Lab" />
+                                    </ComboBox>
+                                </Grid>
+
+                                <!-- ROW 5: عنوان المريض + البريد الإلكتروني -->
+                                <Border Grid.Row="5" Grid.Column="0" Style="{StaticResource FieldLabelStyle}">
                                     <TextBlock Text="عنوان المريض" Style="{StaticResource FieldLabelText}" />
                                 </Border>
-                                <TextBox Grid.Row="3" Grid.Column="3"
-                                         Style="{StaticResource WhiteTextBoxStyle}"
-                                         Text="{Binding Address, UpdateSourceTrigger=PropertyChanged}" />
-
-                                <!-- ROW 4: تليفون + محمول -->
-                                <Border Grid.Row="4" Grid.Column="0" Style="{StaticResource FieldLabelStyle}">
-                                    <TextBlock Text="تليفون" Style="{StaticResource FieldLabelText}" />
-                                </Border>
-                                <TextBox Grid.Row="4" Grid.Column="1"
-                                         Style="{StaticResource WhiteTextBoxStyle}"
-                                         Text="{Binding HomePhone, UpdateSourceTrigger=PropertyChanged}" />
-                                <Border Grid.Row="4" Grid.Column="2" Style="{StaticResource FieldLabelStyle}">
-                                    <TextBlock Text="محمول" Style="{StaticResource FieldLabelText}" />
-                                </Border>
-                                <TextBox Grid.Row="4" Grid.Column="3"
-                                         Style="{StaticResource WhiteTextBoxStyle}"
-                                         Text="{Binding MobilePhone, UpdateSourceTrigger=PropertyChanged}" />
-
-                                <!-- ROW 5: رقم قومي + بريد إلكتروني -->
-                                <Border Grid.Row="5" Grid.Column="0" Style="{StaticResource FieldLabelStyle}">
-                                    <TextBlock Text="رقم قومي" Style="{StaticResource FieldLabelText}" />
-                                </Border>
-                                <TextBox Grid.Row="5" Grid.Column="1"
-                                         Style="{StaticResource WhiteTextBoxStyle}"
-                                         Text="{Binding NationalId, UpdateSourceTrigger=PropertyChanged}" />
-                                <Border Grid.Row="5" Grid.Column="2" Style="{StaticResource FieldLabelStyle}">
-                                    <TextBlock Text="البريد الإلكتروني" Style="{StaticResource FieldLabelText}" />
-                                </Border>
-                                <TextBox Grid.Row="5" Grid.Column="3"
-                                         Style="{StaticResource WhiteTextBoxStyle}"
-                                         Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}" />
+                                <Grid Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="4">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBox Grid.Column="0" Style="{StaticResource WhiteTextBoxStyle}"
+                                             Text="{Binding Address, UpdateSourceTrigger=PropertyChanged}" />
+                                    <Border Grid.Column="1" Style="{StaticResource FieldLabelStyle}">
+                                        <TextBlock Text="البريد الإلكتروني" Style="{StaticResource FieldLabelText}" />
+                                    </Border>
+                                    <TextBox Grid.Column="2" Style="{StaticResource WhiteTextBoxStyle}"
+                                             Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}" />
+                                </Grid>
                             </Grid>
-                        </Border>
-                        <Border Style="{StaticResource GroupHeaderStyle}" VerticalAlignment="Top">
-                            <TextBlock Text="بيانات المريض" Style="{StaticResource GroupHeaderText}" />
                         </Border>
                     </Grid>
 
