@@ -382,16 +382,6 @@ VerticalAlignment="Center" />
             </Setter>
         </Style>
 
-        <!-- ========= ليبل اتصال ========= -->
-        <Style x:Key="CommLabelStyle" TargetType="Border">
-            <Setter Property="Background"      Value="{StaticResource InfoBlue}" />
-            <Setter Property="CornerRadius"    Value="1" />
-            <Setter Property="Padding"         Value="6,2" />
-            <Setter Property="Margin"          Value="1" />
-            <Setter Property="MinWidth"        Value="80" />
-            <Setter Property="Height"          Value="24" />
-        </Style>
-
     </UserControl.Resources>
 
     <!-- ===================================================================== -->
@@ -697,8 +687,6 @@ IsChecked="{Binding HasCsfSample}" />
 
                 <!-- ===================================================================== -->
                 <!-- *** الملخص المالي المُحسّن *** -->
-                <!-- ملاحظة: في RTL، العمود الأيسر (Column=0) يظهر بصرياً على اليمين    -->
-                <!-- والعمود الأيمن (Column=1) يظهر بصرياً على اليسار                   -->
                 <!-- ===================================================================== -->
                 <Border Grid.Row="1"
 Background="{StaticResource YellowPanel}"
@@ -707,9 +695,7 @@ BorderThickness="1" CornerRadius="2"
 Margin="2,2,2,0" Padding="3">
                     <Grid>
                         <Grid.ColumnDefinitions>
-                            <!-- Column=0: في RTL يظهر على اليمين - إجمالي التحاليل والخصومات -->
                             <ColumnDefinition Width="*" />
-                            <!-- Column=1: في RTL يظهر على اليسار - الباقي والمدين والأزرار -->
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
                         <Grid.RowDefinitions>
@@ -719,11 +705,6 @@ Margin="2,2,2,0" Padding="3">
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
-
-                        <!-- ================================================================= -->
-                        <!-- Column=0 (بصرياً على اليمين): إجمالي التحاليل / الخصم / قيمة    -->
-                        <!-- الخصم / التكلفة بعد الخصم / المدفوع سابقاً                    -->
-                        <!-- ================================================================= -->
 
                         <!-- إجمالي التحاليل -->
                         <Grid Grid.Row="0" Grid.Column="0" Margin="1">
@@ -809,11 +790,6 @@ Style="{StaticResource WhiteTextBoxStyle}" FontWeight="Bold"
 HorizontalContentAlignment="Center" />
                         </Grid>
 
-                        <!-- ================================================================= -->
-                        <!-- Column=1 (بصرياً على اليسار): الباقي للمعمل / الباقي للمريض    -->
-                        <!-- / المدفوع + الأزرار                                          -->
-                        <!-- ================================================================= -->
-
                         <!-- الباقي للمعمل -->
                         <Grid Grid.Row="0" Grid.Column="1" Margin="1">
                             <Grid.ColumnDefinitions>
@@ -871,7 +847,7 @@ Style="{StaticResource WhiteTextBoxStyle}" FontWeight="Bold"
 HorizontalContentAlignment="Center" />
                             </Grid>
 
-                            <!-- الأزرار: خالص | تراجع | موافق - على اليسار -->
+                            <!-- الأزرار: خالص | تراجع | موافق -->
                             <UniformGrid Grid.Row="1" Columns="3" Margin="0,4,0,0">
                                 <Button Content="خالص" Command="{Binding SettleCommand}"
 Style="{StaticResource ActionButtonStyle}"
@@ -1235,70 +1211,6 @@ VerticalAlignment="Center" />
                                 </StackPanel>
                             </Border>
                         </Grid>
-
-                        <!-- ========= شريط الاتصالات ========= -->
-                        <Border Margin="4,4,4,2" Padding="4"
-Background="{StaticResource DarkBlueHeader}"
-BorderBrush="{StaticResource PanelBorder}"
-BorderThickness="1" CornerRadius="2">
-                            <Grid>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
-                                </Grid.RowDefinitions>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="Auto" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-
-                                <Border Grid.Row="0" Grid.Column="0"
-Background="{StaticResource InfoBlue}"
-CornerRadius="1" Padding="6,2" Margin="1" MinWidth="95" Height="24">
-                                    <TextBlock Text="NATIGH.COM" Foreground="White" FontWeight="Bold" FontSize="11"
-HorizontalAlignment="Center" VerticalAlignment="Center"
-FlowDirection="LeftToRight" />
-                                </Border>
-                                <Border Grid.Row="0" Grid.Column="1"
-Background="{StaticResource SoftYellow}" Padding="6,2" Margin="1" Height="24"
-CornerRadius="1">
-                                    <StackPanel Orientation="Horizontal" FlowDirection="LeftToRight"
-VerticalAlignment="Center">
-                                        <TextBlock Text="Print Result Password" Foreground="#1A1A00"
-FontWeight="Bold" FontSize="11" VerticalAlignment="Center"
-Margin="0,0,6,0" />
-                                        <CheckBox VerticalAlignment="Center"
-IsChecked="{Binding ResultPasswordEnabled}" />
-                                    </StackPanel>
-                                </Border>
-                                <Border Grid.Row="0" Grid.Column="2" Style="{StaticResource CommLabelStyle}" MinWidth="80">
-                                    <TextBlock Text="Send SMS" Foreground="White" FontWeight="Bold" FontSize="11"
-HorizontalAlignment="Center" VerticalAlignment="Center"
-FlowDirection="LeftToRight" />
-                                </Border>
-                                <TextBox Grid.Row="0" Grid.Column="3"
-Style="{StaticResource WhiteTextBoxStyle}"
-Text="{Binding SmsRecipient, UpdateSourceTrigger=PropertyChanged}" />
-
-                                <Border Grid.Row="1" Grid.Column="0" Style="{StaticResource CommLabelStyle}" MinWidth="95">
-                                    <TextBlock Text="Send E-mail" Foreground="White" FontWeight="Bold" FontSize="11"
-HorizontalAlignment="Center" VerticalAlignment="Center"
-FlowDirection="LeftToRight" />
-                                </Border>
-                                <TextBox Grid.Row="1" Grid.Column="1"
-Style="{StaticResource WhiteTextBoxStyle}"
-Text="{Binding EmailRecipient, UpdateSourceTrigger=PropertyChanged}" />
-                                <Border Grid.Row="1" Grid.Column="2" Style="{StaticResource CommLabelStyle}" MinWidth="80">
-                                    <TextBlock Text="By Fax" Foreground="White" FontWeight="Bold" FontSize="11"
-HorizontalAlignment="Center" VerticalAlignment="Center"
-FlowDirection="LeftToRight" />
-                                </Border>
-                                <TextBox Grid.Row="1" Grid.Column="3"
-Style="{StaticResource WhiteTextBoxStyle}"
-Text="{Binding FaxNumber, UpdateSourceTrigger=PropertyChanged}" />
-                            </Grid>
-                        </Border>
 
                     </StackPanel>
                 </ScrollViewer>
