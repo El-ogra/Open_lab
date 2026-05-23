@@ -24,6 +24,7 @@ namespace Open_lab.ViewModels
         private bool _isSendOut;
         private decimal? _costPrice;
         private decimal? _patientPrice;
+        private string? _description;
         private TestGroup? _selectedGroup;
         private SampleType? _selectedSampleType;
         private Unit? _selectedUnit;
@@ -127,6 +128,12 @@ namespace Open_lab.ViewModels
             set => SetProperty(ref _costPrice, value);
         }
 
+        public string? Description
+        {
+            get => _description;
+            set => SetProperty(ref _description, value);
+        }
+
         public decimal? PatientPrice
         {
             get => _patientPrice;
@@ -226,6 +233,7 @@ namespace Open_lab.ViewModels
             IsSendOut = SelectedTest.IsSendOut;
             CostPrice = SelectedTest.CostPrice;
             PatientPrice = SelectedTest.PatientPrice;
+            Description = SelectedTest.Description;
 
             SelectedGroup = Groups.FirstOrDefault(g => g.GroupId == SelectedTest.GroupId);
             SelectedSampleType = SampleTypes.FirstOrDefault(s => s.SampleTypeId == SelectedTest.SampleTypeId);
@@ -251,6 +259,7 @@ namespace Open_lab.ViewModels
                         IsSendOut = IsSendOut,
                         CostPrice = CostPrice,
                         PatientPrice = PatientPrice,
+                        Description = Description,
                         GroupId = SelectedGroup?.GroupId,
                         SampleTypeId = SelectedSampleType?.SampleTypeId,
                         UnitId = SelectedUnit?.UnitId
@@ -272,6 +281,7 @@ namespace Open_lab.ViewModels
                     SelectedTest.IsSendOut = IsSendOut;
                     SelectedTest.CostPrice = CostPrice;
                     SelectedTest.PatientPrice = PatientPrice;
+                    SelectedTest.Description = Description;
                     SelectedTest.GroupId = SelectedGroup?.GroupId;
                     SelectedTest.SampleTypeId = SelectedSampleType?.SampleTypeId;
                     SelectedTest.UnitId = SelectedUnit?.UnitId;
@@ -339,6 +349,7 @@ namespace Open_lab.ViewModels
             IsSendOut = false;
             CostPrice = null;
             PatientPrice = null;
+            Description = null;
             SelectedGroup = null;
             SelectedSampleType = null;
             SelectedUnit = null;

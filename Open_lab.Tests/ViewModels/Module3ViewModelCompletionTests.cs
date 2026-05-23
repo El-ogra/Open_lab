@@ -90,8 +90,8 @@ namespace Open_lab.Tests.ViewModels
             // Act
             var vm = new ReferenceRangesViewModel(_catalogMock.Object);
             vm.SelectedTest = new Test { TestId = 1 };
-            vm.AgeFrom = 50;
-            vm.AgeTo = 10; // Invalid range
+            vm.AgeFromValue = 50;
+            vm.AgeToValue = 10; // Invalid range
 
             _catalogMock.Setup(x => x.CreateReferenceRangeAsync(It.IsAny<TestReferenceRange>()))
                 .ThrowsAsync(new ArgumentException("age range invalid"));

@@ -20,6 +20,8 @@ namespace Open_lab.Services
         Task MarkVisitTestsPrintedAsync(IEnumerable<int> visitTestIds, int userId);
         Task LogVisitReportPrintedAsync(int visitId, int userId);
         Task<ReferenceRangeResult> ValidateResultAsync(int testId, string value, string gender, int age);
+        Task<ReferenceRangeResult> ValidateResultAsync(int testId, int? parameterId, string value, string gender, int age);
+        Task<ReferenceRangeResult> ValidateResultAsync(int testId, int? parameterId, string value, string gender, int age, string? ageUnit);
         Task<VisitTest?> GetPreviousResultAsync(int patientId, int testId, int excludeVisitTestId);
     }
 }

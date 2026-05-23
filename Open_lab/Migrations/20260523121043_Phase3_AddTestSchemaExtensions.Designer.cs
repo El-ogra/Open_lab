@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Open_lab.Data;
 
@@ -11,9 +12,11 @@ using Open_lab.Data;
 namespace Open_lab.Migrations
 {
     [DbContext(typeof(OpenLabDbContext))]
-    partial class OpenLabDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260523121043_Phase3_AddTestSchemaExtensions")]
+    partial class Phase3_AddTestSchemaExtensions
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -46,6 +49,35 @@ namespace Open_lab.Migrations
                     b.HasIndex("InvoiceId");
 
                     b.ToTable("AdditionalCharges");
+                });
+
+            modelBuilder.Entity("Open_lab.Models.AgeGroup", b =>
+                {
+                    b.Property<int>("AgeGroupId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AgeGroupId"));
+
+                    b.Property<int>("AgeFromMonths")
+                        .HasColumnType("int");
+
+                    b.Property<int>("AgeToMonths")
+                        .HasColumnType("int");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("AgeGroupId");
+
+                    b.HasIndex("DisplayOrder");
+
+                    b.ToTable("AgeGroups");
                 });
 
             modelBuilder.Entity("Open_lab.Models.Antibiotic", b =>
@@ -612,10 +644,6 @@ namespace Open_lab.Migrations
 
                     b.Property<int?>("Age")
                         .HasColumnType("int");
-
-                    b.Property<string>("AgeUnit")
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
 
                     b.Property<DateTime?>("BirthDate")
                         .HasColumnType("datetime2");
@@ -1311,24 +1339,13 @@ namespace Open_lab.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("RangeId"));
 
-                    b.Property<int?>("AgeFromDays")
+                    b.Property<int?>("AgeFrom")
                         .HasColumnType("int");
 
-                    b.Property<string>("AgeFromUnit")
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
-
-                    b.Property<int?>("AgeFromValue")
+                    b.Property<int?>("AgeGroupId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("AgeToDays")
-                        .HasColumnType("int");
-
-                    b.Property<string>("AgeToUnit")
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
-
-                    b.Property<int?>("AgeToValue")
+                    b.Property<int?>("AgeTo")
                         .HasColumnType("int");
 
                     b.Property<string>("Gender")
@@ -1353,9 +1370,7 @@ namespace Open_lab.Migrations
 
                     b.HasKey("RangeId");
 
-                    b.HasIndex("AgeFromDays");
-
-                    b.HasIndex("AgeToDays");
+                    b.HasIndex("AgeGroupId");
 
                     b.HasIndex("ParameterId");
 
@@ -1949,6 +1964,11 @@ namespace Open_lab.Migrations
 
             modelBuilder.Entity("Open_lab.Models.TestReferenceRange", b =>
                 {
+                    b.HasOne("Open_lab.Models.AgeGroup", "AgeGroup")
+                        .WithMany("ReferenceRanges")
+                        .HasForeignKey("AgeGroupId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("Open_lab.Models.TestParameter", "Parameter")
                         .WithMany()
                         .HasForeignKey("ParameterId")
@@ -1959,6 +1979,8 @@ namespace Open_lab.Migrations
                         .HasForeignKey("TestId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("AgeGroup");
 
                     b.Navigation("Parameter");
 
@@ -2030,6 +2052,11 @@ namespace Open_lab.Migrations
                     b.Navigation("Test");
 
                     b.Navigation("Visit");
+                });
+
+            modelBuilder.Entity("Open_lab.Models.AgeGroup", b =>
+                {
+                    b.Navigation("ReferenceRanges");
                 });
 
             modelBuilder.Entity("Open_lab.Models.Antibiotic", b =>

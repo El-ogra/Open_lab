@@ -417,8 +417,12 @@ namespace Open_lab.Tests.Services
             var refRange = new TestReferenceRange
             {
                 TestId = test.TestId,
-                AgeFrom = 0,
-                AgeTo = 120,
+                AgeFromValue = 0,
+                AgeFromUnit = AgeConverter.UnitYear,
+                AgeFromDays = 0,
+                AgeToValue = 120,
+                AgeToUnit = AgeConverter.UnitYear,
+                AgeToDays = 120 * AgeConverter.DaysPerYear,
                 LowValue = 70m,
                 HighValue = 100m,
                 Gender = "All"

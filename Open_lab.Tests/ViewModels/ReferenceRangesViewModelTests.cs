@@ -33,8 +33,8 @@ namespace Open_lab.Tests.ViewModels
             var test = new Test { TestId = 1, Code = "T1" };
             _viewModel.SelectedTest = test;
             _viewModel.Gender = "Male";
-            _viewModel.AgeFrom = 20;
-            _viewModel.AgeTo = 40;
+            _viewModel.AgeFromValue = 20;
+            _viewModel.AgeToValue = 40;
             _viewModel.LowValue = 10;
             _viewModel.HighValue = 20;
 
@@ -48,8 +48,8 @@ namespace Open_lab.Tests.ViewModels
             _testCatalogServiceMock.Verify(x => x.CreateReferenceRangeAsync(It.Is<TestReferenceRange>(r =>
                 r.TestId == 1 &&
                 r.Gender == "Male" &&
-                r.AgeFrom == 20 &&
-                r.AgeTo == 40 &&
+                r.AgeFromValue == 20 &&
+                r.AgeToValue == 40 &&
                 r.LowValue == 10 &&
                 r.HighValue == 20
             )), Times.Once);
@@ -66,8 +66,12 @@ namespace Open_lab.Tests.ViewModels
             {
                 RangeId = 1,
                 Gender = "Female",
-                AgeFrom = 1,
-                AgeTo = 12,
+                AgeFromValue = 1,
+                AgeFromUnit = AgeConverter.UnitYear,
+                AgeFromDays = 1 * AgeConverter.DaysPerYear,
+                AgeToValue = 12,
+                AgeToUnit = AgeConverter.UnitYear,
+                AgeToDays = 12 * AgeConverter.DaysPerYear,
                 LowValue = 5,
                 HighValue = 8,
                 NormalText = "Normal"
@@ -78,8 +82,8 @@ namespace Open_lab.Tests.ViewModels
 
             // Assert
             _viewModel.Gender.Should().Be("Female");
-            _viewModel.AgeFrom.Should().Be(1);
-            _viewModel.AgeTo.Should().Be(12);
+            _viewModel.AgeFromValue.Should().Be(1);
+            _viewModel.AgeToValue.Should().Be(12);
             _viewModel.LowValue.Should().Be(5);
             _viewModel.HighValue.Should().Be(8);
             _viewModel.NormalText.Should().Be("Normal");

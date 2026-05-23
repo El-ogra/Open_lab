@@ -236,8 +236,12 @@ namespace Open_lab.Tests.Services
             var range = new TestReferenceRange
             {
                 TestId = test.TestId,
-                AgeFrom = 50,
-                AgeTo = 10,
+                AgeFromValue = 50,
+                AgeFromUnit = AgeConverter.UnitYear,
+                AgeFromDays = 50 * AgeConverter.DaysPerYear,
+                AgeToValue = 10,
+                AgeToUnit = AgeConverter.UnitYear,
+                AgeToDays = 10 * AgeConverter.DaysPerYear,
                 LowValue = 1,
                 HighValue = 2
             };
@@ -308,8 +312,12 @@ namespace Open_lab.Tests.Services
             var range = new TestReferenceRange
             {
                 TestId = test.TestId,
-                AgeFrom = 0,
-                AgeTo = 100,
+                AgeFromValue = 0,
+                AgeFromUnit = AgeConverter.UnitYear,
+                AgeFromDays = 0,
+                AgeToValue = 100,
+                AgeToUnit = AgeConverter.UnitYear,
+                AgeToDays = 100 * AgeConverter.DaysPerYear,
                 LowValue = 3.0m,
                 HighValue = 6.0m
             };

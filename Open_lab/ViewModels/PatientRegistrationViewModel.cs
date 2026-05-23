@@ -48,7 +48,7 @@ namespace Open_lab.ViewModels
         private string? _homePhone;
         private string? _nationalId;
         private string? _email;
-        private string _ageUnit = "Years";
+        private string _ageUnit = "Year";
         private int? _age;
         private bool _isVip;
         private bool _isFasting;
@@ -106,6 +106,14 @@ namespace Open_lab.ViewModels
         private bool _isDyeScan;
         private bool _isSmoker;
 
+        // Phase 3 - Medical condition flags wired from PatientRegistrationView (G1.2-G1.6)
+        private bool _hasAnemia;
+        private bool _hasJointInflammation;
+        private bool _hasHypertension;
+        private bool _hasKidneyFailure;
+        private bool _hasChronicDisease;
+        private bool _hasPregnancyComplication;
+
         // ===== أنواع العينات =====
         private bool _hasBloodSample;
         private bool _hasUrineSample;
@@ -115,12 +123,17 @@ namespace Open_lab.ViewModels
         private bool _takenOutsideLab;
 
         // ===== التحاليل/البحث =====
-        private string _testCategoryFilter = "Routine Tests";
+        private string _testCategoryFilter = "TM";
         private string _searchText = string.Empty;
         private decimal _discountValue;
 
         // ===== مرضى اليوم =====
         private Patient? _quickSelectedPatient;
+        private bool _isQuickPatientsListVisible;
+
+        // G5.1: Edit-mode flag — true means form fields are writable; false locks them.
+        // Default true so a fresh registration screen is immediately editable.
+        private bool _isEditMode = true;
 
         // ============ Constructors ============
         public PatientRegistrationViewModel(IPatientService patientService)
@@ -177,7 +190,7 @@ namespace Open_lab.ViewModels
             SelectedTests = new ObservableCollection<SelectedTestItem>();
             QuickPatientsList = new ObservableCollection<Patient>();
 
-            SaveCommand = new RelayCommand(async _ => await SaveAsync(), _ => AppSession.HasPermission(PermissionCodes.PatientsEdit));
+            SaveCommand = new RelayCommand(async _ => await SaveAsync(), _ => AppSession.HasPermission(PermissionCodes.PatientsEdit) && (IsEditMode || PatientId == 0));
             NewCommand = new RelayCommand(async _ => await ClearFormAsync(), _ => AppSession.HasPermission(PermissionCodes.PatientsEdit));
             GenerateLabIdCommand = new RelayCommand(async _ => await GenerateLabIdAsync(), _ => AppSession.HasPermission(PermissionCodes.PatientsEdit) && PatientId == 0);
             LoadByLabIdCommand = new RelayCommand(async _ => await LoadByLabIdAsync(), _ => AppSession.HasPermission(PermissionCodes.PatientsView));
@@ -191,7 +204,7 @@ namespace Open_lab.ViewModels
             SendCommand = new RelayCommand(async _ => await PrintReceiptAsync(), _ => CurrentVisitId > 0);
             AddSelectedTestCommand = new RelayCommand(_ => AddSelectedTest(), _ => SelectedAvailableTest != null);
             RemoveSelectedTestCommand = new RelayCommand(_ => RemoveSelectedTest(), _ => SelectedTest != null);
-            EditCommand = new RelayCommand(async _ => await SaveAsync(), _ => AppSession.HasPermission(PermissionCodes.PatientsEdit) && PatientId > 0);
+            EditCommand = new RelayCommand(_ => EnterEditMode(), _ => AppSession.HasPermission(PermissionCodes.PatientsEdit) && PatientId > 0 && !IsEditMode);
             GoToResultsCommand = new RelayCommand(_ => NavigateToResults(), _ => true);
             ResetCommand = new RelayCommand(async _ => await ClearFormAsync(), _ => true);
             DocumentsCommand = new RelayCommand(_ => ShowDocuments(), _ => PatientId > 0);
@@ -208,6 +221,7 @@ namespace Open_lab.ViewModels
             // WorksheetCommand now sends the selected patient tests to the worksheet printer.
             WorksheetCommand = new RelayCommand(async _ => await PrintWorksheetAsync(), _ => true);
             InsuranceCommand = new RelayCommand(_ => ShowInsuranceInfo(), _ => true);
+            StartCommand = new RelayCommand(async _ => await ApplyTestFilterAsync(), _ => true);
 
             if (initialize)
             {
@@ -228,6 +242,7 @@ namespace Open_lab.ViewModels
                     (GenerateLabIdCommand as RelayCommand)?.RaiseCanExecuteChanged();
                     (ShowBarcodeCommand as RelayCommand)?.RaiseCanExecuteChanged();
                     (EditCommand as RelayCommand)?.RaiseCanExecuteChanged();
+                    (SaveCommand as RelayCommand)?.RaiseCanExecuteChanged();
                 }
             }
         }
@@ -715,6 +730,42 @@ namespace Open_lab.ViewModels
             set => SetProperty(ref _isSmoker, value);
         }
 
+        public bool HasAnemia
+        {
+            get => _hasAnemia;
+            set => SetProperty(ref _hasAnemia, value);
+        }
+
+        public bool HasJointInflammation
+        {
+            get => _hasJointInflammation;
+            set => SetProperty(ref _hasJointInflammation, value);
+        }
+
+        public bool HasHypertension
+        {
+            get => _hasHypertension;
+            set => SetProperty(ref _hasHypertension, value);
+        }
+
+        public bool HasKidneyFailure
+        {
+            get => _hasKidneyFailure;
+            set => SetProperty(ref _hasKidneyFailure, value);
+        }
+
+        public bool HasChronicDisease
+        {
+            get => _hasChronicDisease;
+            set => SetProperty(ref _hasChronicDisease, value);
+        }
+
+        public bool HasPregnancyComplication
+        {
+            get => _hasPregnancyComplication;
+            set => SetProperty(ref _hasPregnancyComplication, value);
+        }
+
         // ===== أنواع العينات =====
 
         public bool HasBloodSample
@@ -758,7 +809,13 @@ namespace Open_lab.ViewModels
         public string TestCategoryFilter
         {
             get => _testCategoryFilter;
-            set => SetProperty(ref _testCategoryFilter, value);
+            set
+            {
+                if (SetProperty(ref _testCategoryFilter, value))
+                {
+                    _ = ApplyTestFilterAsync();
+                }
+            }
         }
 
         public string SearchText
@@ -801,7 +858,12 @@ namespace Open_lab.ViewModels
             }
         }
 
-        public decimal DiscountAmount => Math.Round(TotalAmount * DiscountPercent / 100m, 2);
+        // G4.2: DiscountValue (absolute amount) overrides DiscountPercent. When the
+        // user enters a positive value it is used directly (capped at TotalAmount so
+        // we never produce a negative net). Otherwise the percent path applies.
+        public decimal DiscountAmount => DiscountValue > 0
+            ? Math.Min(DiscountValue, TotalAmount)
+            : Math.Round(TotalAmount * DiscountPercent / 100m, 2);
 
         public decimal NetAmount => TotalAmount - DiscountAmount;
 
@@ -924,6 +986,26 @@ namespace Open_lab.ViewModels
                 if (SetProperty(ref _quickSelectedPatient, value) && value != null)
                 {
                     _ = LoadFromPatientAsync(value);
+                    IsQuickPatientsListVisible = false;
+                }
+            }
+        }
+
+        public bool IsQuickPatientsListVisible
+        {
+            get => _isQuickPatientsListVisible;
+            set => SetProperty(ref _isQuickPatientsListVisible, value);
+        }
+
+        public bool IsEditMode
+        {
+            get => _isEditMode;
+            set
+            {
+                if (SetProperty(ref _isEditMode, value))
+                {
+                    (EditCommand as RelayCommand)?.RaiseCanExecuteChanged();
+                    (SaveCommand as RelayCommand)?.RaiseCanExecuteChanged();
                 }
             }
         }
@@ -957,6 +1039,7 @@ namespace Open_lab.ViewModels
         // CRITICAL FIX Phase 0: Added missing WorksheetCommand and InsuranceCommand (C-01)
         public ICommand WorksheetCommand { get; }
         public ICommand InsuranceCommand { get; }
+        public ICommand StartCommand { get; }
 
         // ============ Methods ============
 
@@ -979,6 +1062,7 @@ namespace Open_lab.ViewModels
                         Gender = Gender,
                         BirthDate = BirthDate,
                         Age = Age,
+                        AgeUnit = AgeUnit,
                         IsVip = IsVip,
                         IsPregnant = IsPregnant,
                         Phone = Phone,
@@ -1005,6 +1089,7 @@ namespace Open_lab.ViewModels
                         Gender = Gender,
                         BirthDate = BirthDate,
                         Age = Age,
+                        AgeUnit = AgeUnit,
                         IsVip = IsVip,
                         IsPregnant = IsPregnant,
                         Phone = Phone,
@@ -1019,11 +1104,25 @@ namespace Open_lab.ViewModels
                     await SaveVisitAndInvoiceAsync();
                     StatusMessage = "تم تحديث بيانات المريض.";
                 }
+
+                // G5.1: after a successful save, return to view-only mode.
+                IsEditMode = false;
             }
             catch (Exception ex)
             {
                 StatusMessage = $"خطأ: {ex.Message}";
             }
+        }
+
+        // G5.1: explicit transition into edit mode for a loaded patient.
+        private void EnterEditMode()
+        {
+            if (PatientId <= 0)
+            {
+                return;
+            }
+            IsEditMode = true;
+            StatusMessage = "وضع التعديل مفعّل.";
         }
 
         private async Task GenerateLabIdAsync()
@@ -1135,6 +1234,8 @@ namespace Open_lab.ViewModels
         private async Task ClearFormAsync()
         {
             PatientId = 0;
+            // G5.1: a fresh form is editable from the start.
+            IsEditMode = true;
             FullName = string.Empty;
             Gender = string.Empty;
             BirthDate = null;
@@ -1210,10 +1311,13 @@ namespace Open_lab.ViewModels
         {
             PatientId = patient.PatientId;
             LabId = patient.LabId;
+            // G5.1: loading a saved patient starts in view-only mode.
+            IsEditMode = false;
             FullName = patient.FullName;
             Gender = patient.Gender;
             BirthDate = patient.BirthDate;
             Age = patient.Age;
+            AgeUnit = string.IsNullOrWhiteSpace(patient.AgeUnit) ? "Year" : patient.AgeUnit;
             IsVip = patient.IsVip;
             IsPregnant = patient.IsPregnant;
             Phone = patient.Phone;
@@ -1267,6 +1371,47 @@ namespace Open_lab.ViewModels
             (AddAllTestsCommand as RelayCommand)?.RaiseCanExecuteChanged();
         }
 
+        private async Task ApplyTestFilterAsync()
+        {
+            if (_testCatalogService == null)
+            {
+                return;
+            }
+
+            var tests = await _testCatalogService.GetAllTestsAsync();
+            IEnumerable<Test> filtered = tests;
+
+            // Category filter: TM = routine tests, CC = send-out tests, TG = all groups (no narrowing).
+            switch (TestCategoryFilter)
+            {
+                case "TM":
+                    filtered = filtered.Where(t => t.IsRoutine);
+                    break;
+                case "CC":
+                    filtered = filtered.Where(t => t.IsSendOut);
+                    break;
+                // "TG" or anything else: keep all
+            }
+
+            if (!string.IsNullOrWhiteSpace(TestSearchText))
+            {
+                var term = TestSearchText.Trim();
+                filtered = filtered.Where(t =>
+                    (!string.IsNullOrEmpty(t.NameReport) && t.NameReport.Contains(term, StringComparison.OrdinalIgnoreCase)) ||
+                    (!string.IsNullOrEmpty(t.NameReceipt) && t.NameReceipt.Contains(term, StringComparison.OrdinalIgnoreCase)) ||
+                    (!string.IsNullOrEmpty(t.Code) && t.Code.Contains(term, StringComparison.OrdinalIgnoreCase)));
+            }
+
+            AvailableTests.Clear();
+            foreach (var test in filtered.OrderBy(t => t.NameReport))
+            {
+                AvailableTests.Add(test);
+            }
+
+            (AddAllTestsCommand as RelayCommand)?.RaiseCanExecuteChanged();
+            StatusMessage = $"تم تطبيق الفلتر — عدد التحاليل: {AvailableTests.Count}";
+        }
+
         private async Task LoadTodayPatientsAsync()
         {
             try
@@ -1278,6 +1423,7 @@ namespace Open_lab.ViewModels
                     QuickPatientsList.Add(p);
                 }
                 StatusMessage = $"مرضى اليوم: {QuickPatientsList.Count}";
+                IsQuickPatientsListVisible = QuickPatientsList.Count > 0;
             }
             catch (Exception ex)
             {
@@ -1321,11 +1467,26 @@ namespace Open_lab.ViewModels
             OnPropertyChanged(nameof(SelectedTests));
         }
 
-        private void RemoveSelectedTest()
+        private async void RemoveSelectedTest()
         {
             if (SelectedTest == null)
             {
                 return;
+            }
+
+            // G4.3: if the test was already persisted in the visit, delete it from DB.
+            // VisitTestId == 0 means the row is only in-memory and a plain Remove is enough.
+            if (SelectedTest.VisitTestId > 0 && _visitService != null)
+            {
+                try
+                {
+                    await _visitService.RemoveVisitTestAsync(SelectedTest.VisitTestId);
+                }
+                catch (Exception ex)
+                {
+                    StatusMessage = $"تعذّر حذف التحليل من قاعدة البيانات: {ex.Message}";
+                    return;
+                }
             }
 
             SelectedTests.Remove(SelectedTest);
@@ -1335,8 +1496,16 @@ namespace Open_lab.ViewModels
 
         private async Task SaveVisitAndInvoiceAsync()
         {
-            if (_visitService == null || _invoiceService == null || PatientId <= 0 || SelectedTests.Count == 0)
+            if (_visitService == null || _invoiceService == null || PatientId <= 0)
             {
+                return;
+            }
+
+            // G4.5: Be explicit that no visit/invoice is created when no tests are selected,
+            // otherwise the user assumes "Save" persisted everything.
+            if (SelectedTests.Count == 0)
+            {
+                StatusMessage = "تم حفظ بيانات المريض. لم يتم إنشاء زيارة أو فاتورة (لا توجد تحاليل مختارة).";
                 return;
             }
 
@@ -1479,50 +1648,97 @@ namespace Open_lab.ViewModels
                 return;
             }
 
-            var visitTests = SelectedTests.Select(t => new VisitTest
+            // G4.4: build receipt from persisted DB state when available so the printout
+            // matches what actually got saved (handles edits/deletes since last refresh).
+            ReceiptData receipt;
+            if (_visitService != null)
             {
-                VisitId = CurrentVisitId,
-                TestId = t.TestId,
-                Price = t.Price,
-                Status = "Open",
-                Test = new Test
+                try
                 {
-                    TestId = t.TestId,
-                    NameReport = t.TestName,
-                    NameReceipt = t.TestName,
-                    Price = t.Price
-                }
-            }).ToList();
+                    var visit = await _visitService.GetByIdAsync(CurrentVisitId);
+                    if (visit == null)
+                    {
+                        StatusMessage = "لم يتم العثور على الزيارة في قاعدة البيانات.";
+                        return;
+                    }
 
-            var receipt = new ReceiptData
-            {
-                Visit = new Visit
-                {
-                    VisitId = CurrentVisitId,
-                    PatientId = PatientId,
-                    VisitDate = EntryDate,
-                    Status = "Open"
-                },
-                Patient = new Patient
-                {
-                    PatientId = PatientId,
-                    LabId = LabId,
-                    FullName = FullName,
-                    Gender = Gender,
-                    Age = Age
-                },
-                VisitTests = visitTests,
-                Invoice = new Invoice
-                {
-                    VisitId = CurrentVisitId,
-                    Total = TotalAmount,
-                    Discount = DiscountAmount,
-                    NetTotal = NetAmount,
-                    Paid = PaidAmount + PreviousPaidAmount,
-                    Balance = BalanceForLab,
-                    Status = BalanceForLab <= 0 ? "Closed" : "Open"
+                    var dbVisitTests = await _visitService.GetVisitTestsAsync(CurrentVisitId);
+                    var invoice = _invoiceService != null
+                        ? await _invoiceService.GetByVisitIdAsync(CurrentVisitId)
+                        : null;
+                    var patient = await _patientService.GetByIdAsync(PatientId);
+
+                    receipt = new ReceiptData
+                    {
+                        Visit = visit,
+                        Patient = patient ?? new Patient { PatientId = PatientId, LabId = LabId, FullName = FullName, Gender = Gender, Age = Age },
+                        VisitTests = dbVisitTests,
+                        Invoice = invoice ?? new Invoice
+                        {
+                            VisitId = CurrentVisitId,
+                            Total = dbVisitTests.Sum(vt => vt.Price),
+                            Discount = 0,
+                            NetTotal = dbVisitTests.Sum(vt => vt.Price),
+                            Paid = 0,
+                            Balance = dbVisitTests.Sum(vt => vt.Price),
+                            Status = "Open"
+                        }
+                    };
                 }
-            };
+                catch (Exception ex)
+                {
+                    StatusMessage = $"تعذّر تحميل بيانات الزيارة للطباعة: {ex.Message}";
+                    return;
+                }
+            }
+            else
+            {
+                // Fallback path for unit tests / DI configurations without IVisitService.
+                var visitTests = SelectedTests.Select(t => new VisitTest
+                {
+                    VisitId = CurrentVisitId,
+                    TestId = t.TestId,
+                    Price = t.Price,
+                    Status = "Open",
+                    Test = new Test
+                    {
+                        TestId = t.TestId,
+                        NameReport = t.TestName,
+                        NameReceipt = t.TestName,
+                        Price = t.Price
+                    }
+                }).ToList();
+
+                receipt = new ReceiptData
+                {
+                    Visit = new Visit
+                    {
+                        VisitId = CurrentVisitId,
+                        PatientId = PatientId,
+                        VisitDate = EntryDate,
+                        Status = "Open"
+                    },
+                    Patient = new Patient
+                    {
+                        PatientId = PatientId,
+                        LabId = LabId,
+                        FullName = FullName,
+                        Gender = Gender,
+                        Age = Age
+                    },
+                    VisitTests = visitTests,
+                    Invoice = new Invoice
+                    {
+                        VisitId = CurrentVisitId,
+                        Total = TotalAmount,
+                        Discount = DiscountAmount,
+                        NetTotal = NetAmount,
+                        Paid = PaidAmount + PreviousPaidAmount,
+                        Balance = BalanceForLab,
+                        Status = BalanceForLab <= 0 ? "Closed" : "Open"
+                    }
+                };
+            }
 
             await _printService.PrintReceiptAsync(receipt, LabId);
             StatusMessage = "تم إرسال الإيصال للطباعة.";
@@ -1598,6 +1814,13 @@ namespace Open_lab.ViewModels
             Allergies = history?.Allergies;
             Medications = history?.Medications;
             MedicalNotes = history?.Notes;
+
+            HasAnemia = history?.HasAnemia ?? false;
+            HasJointInflammation = history?.HasJointInflammation ?? false;
+            HasHypertension = history?.HasHypertension ?? false;
+            HasKidneyFailure = history?.HasKidneyFailure ?? false;
+            HasChronicDisease = history?.HasChronicDisease ?? false;
+            HasPregnancyComplication = history?.HasPregnancyComplication ?? false;
         }
 
         private async Task SaveMedicalHistoryAsync()
@@ -1612,21 +1835,48 @@ namespace Open_lab.ViewModels
                 ChronicDiseases = ChronicDiseases,
                 Allergies = Allergies,
                 Medications = Medications,
-                Notes = MedicalNotes
+                Notes = MedicalNotes,
+                HasAnemia = HasAnemia,
+                HasJointInflammation = HasJointInflammation,
+                HasHypertension = HasHypertension,
+                HasKidneyFailure = HasKidneyFailure,
+                HasChronicDisease = HasChronicDisease,
+                HasPregnancyComplication = HasPregnancyComplication
             });
         }
 
         private async Task PrintWorksheetAsync()
         {
-            if (SelectedTests.Count == 0)
-            {
-                StatusMessage = "لا توجد تحاليل مختارة لطباعة ورقة العمل.";
-                return;
-            }
-
             if (_printService == null)
             {
                 StatusMessage = "خدمة الطباعة غير متاحة.";
+                return;
+            }
+
+            // G4.4: when a saved visit exists, take the test count from DB so a print
+            // right after deleting/adding tests reflects what was actually persisted.
+            int testsCount;
+            if (CurrentVisitId > 0 && _visitService != null)
+            {
+                try
+                {
+                    var dbVisitTests = await _visitService.GetVisitTestsAsync(CurrentVisitId);
+                    testsCount = dbVisitTests.Count;
+                }
+                catch (Exception ex)
+                {
+                    StatusMessage = $"تعذّر تحميل تحاليل الزيارة: {ex.Message}";
+                    return;
+                }
+            }
+            else
+            {
+                testsCount = SelectedTests.Count;
+            }
+
+            if (testsCount == 0)
+            {
+                StatusMessage = "لا توجد تحاليل مختارة لطباعة ورقة العمل.";
                 return;
             }
 
@@ -1637,7 +1887,7 @@ namespace Open_lab.ViewModels
                     VisitId = CurrentVisitId,
                     PatientName = FullName,
                     VisitDate = EntryDate,
-                    TestsCount = SelectedTests.Count
+                    TestsCount = testsCount
                 }
             };
 

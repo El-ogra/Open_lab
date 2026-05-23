@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Open_lab.Data;
 
@@ -11,9 +12,11 @@ using Open_lab.Data;
 namespace Open_lab.Migrations
 {
     [DbContext(typeof(OpenLabDbContext))]
-    partial class OpenLabDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260523115405_Phase3_AddMedicalHistoryFields")]
+    partial class Phase3_AddMedicalHistoryFields
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -613,10 +616,6 @@ namespace Open_lab.Migrations
                     b.Property<int?>("Age")
                         .HasColumnType("int");
 
-                    b.Property<string>("AgeUnit")
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
-
                     b.Property<DateTime?>("BirthDate")
                         .HasColumnType("datetime2");
 
@@ -1139,9 +1138,6 @@ namespace Open_lab.Migrations
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<int?>("GroupId")
                         .HasColumnType("int");
 
@@ -1214,15 +1210,10 @@ namespace Open_lab.Migrations
                     b.Property<string>("LowComment")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("ParameterId")
-                        .HasColumnType("int");
-
                     b.Property<int>("TestId")
                         .HasColumnType("int");
 
                     b.HasKey("CommentId");
-
-                    b.HasIndex("ParameterId");
 
                     b.HasIndex("TestId");
 
@@ -1311,24 +1302,10 @@ namespace Open_lab.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("RangeId"));
 
-                    b.Property<int?>("AgeFromDays")
+                    b.Property<int?>("AgeFrom")
                         .HasColumnType("int");
 
-                    b.Property<string>("AgeFromUnit")
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
-
-                    b.Property<int?>("AgeFromValue")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("AgeToDays")
-                        .HasColumnType("int");
-
-                    b.Property<string>("AgeToUnit")
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
-
-                    b.Property<int?>("AgeToValue")
+                    b.Property<int?>("AgeTo")
                         .HasColumnType("int");
 
                     b.Property<string>("Gender")
@@ -1345,19 +1322,10 @@ namespace Open_lab.Migrations
                     b.Property<string>("NormalText")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("ParameterId")
-                        .HasColumnType("int");
-
                     b.Property<int>("TestId")
                         .HasColumnType("int");
 
                     b.HasKey("RangeId");
-
-                    b.HasIndex("AgeFromDays");
-
-                    b.HasIndex("AgeToDays");
-
-                    b.HasIndex("ParameterId");
 
                     b.HasIndex("TestId");
 
@@ -1895,18 +1863,11 @@ namespace Open_lab.Migrations
 
             modelBuilder.Entity("Open_lab.Models.TestComment", b =>
                 {
-                    b.HasOne("Open_lab.Models.TestParameter", "Parameter")
-                        .WithMany()
-                        .HasForeignKey("ParameterId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
                     b.HasOne("Open_lab.Models.Test", "Test")
                         .WithMany("Comments")
                         .HasForeignKey("TestId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Parameter");
 
                     b.Navigation("Test");
                 });
@@ -1949,18 +1910,11 @@ namespace Open_lab.Migrations
 
             modelBuilder.Entity("Open_lab.Models.TestReferenceRange", b =>
                 {
-                    b.HasOne("Open_lab.Models.TestParameter", "Parameter")
-                        .WithMany()
-                        .HasForeignKey("ParameterId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
                     b.HasOne("Open_lab.Models.Test", "Test")
                         .WithMany("ReferenceRanges")
                         .HasForeignKey("TestId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Parameter");
 
                     b.Navigation("Test");
                 });

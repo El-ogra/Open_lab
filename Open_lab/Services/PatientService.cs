@@ -79,6 +79,13 @@ namespace Open_lab.Services
             current.Medications = string.IsNullOrWhiteSpace(history.Medications) ? null : history.Medications.Trim();
             current.Notes = string.IsNullOrWhiteSpace(history.Notes) ? null : history.Notes.Trim();
 
+            current.HasAnemia = history.HasAnemia;
+            current.HasJointInflammation = history.HasJointInflammation;
+            current.HasHypertension = history.HasHypertension;
+            current.HasKidneyFailure = history.HasKidneyFailure;
+            current.HasChronicDisease = history.HasChronicDisease;
+            current.HasPregnancyComplication = history.HasPregnancyComplication;
+
             await _db.SaveChangesAsync();
         }
 
@@ -258,6 +265,7 @@ namespace Open_lab.Services
             // CRITICAL FIX Phase 0: These 6 fields were silently dropped during patient updates
             // (C-02: Silent Data Loss Bug - Fixed in Phase 0)
             current.Age = patient.Age;
+            current.AgeUnit = patient.AgeUnit;
             current.IsVip = patient.IsVip;
             current.IsPregnant = patient.IsPregnant;
             current.HomePhone = patient.HomePhone;
@@ -389,6 +397,9 @@ namespace Open_lab.Services
             patient.Gender = patient.Gender?.Trim() ?? string.Empty;
             patient.Phone = string.IsNullOrWhiteSpace(patient.Phone) ? null : patient.Phone.Trim();
             patient.Address = string.IsNullOrWhiteSpace(patient.Address) ? null : patient.Address.Trim();
+            // Phase 4: canonicalize AgeUnit so DB always stores "Day"/"Month"/"Year".
+            // When patient has no Age, leave AgeUnit null instead of forcing "Year".
+            patient.AgeUnit = patient.Age.HasValue ? AgeConverter.NormalizeUnit(patient.AgeUnit) : null;
             if (patient.ReferralId <= 0)
             {
                 patient.ReferralId = null;
@@ -436,6 +447,7 @@ namespace Open_lab.Services
                 $"ReferralId={patient.ReferralId?.ToString() ?? "null"}",
                 // CRITICAL FIX Phase 0: Audit snapshot now includes all patient fields (C-02)
                 $"Age={patient.Age}",
+                $"AgeUnit={patient.AgeUnit}",
                 $"IsVip={patient.IsVip}",
                 $"IsPregnant={patient.IsPregnant}",
                 $"HomePhone={patient.HomePhone}",

@@ -103,6 +103,7 @@ namespace Open_lab.Models
         public string Gender { get; set; } = string.Empty;
         public DateTime? BirthDate { get; set; }
         public int? Age { get; set; }
+        public string? AgeUnit { get; set; }
         public bool IsPregnant { get; set; }
         public bool IsVip { get; set; }
         public string? Phone { get; set; }
@@ -178,6 +179,10 @@ namespace Open_lab.Models
         public string NameReceipt { get; set; } = string.Empty;
         public int? GroupId { get; set; }
         public int? SampleTypeId { get; set; }
+
+        // NOTE: UnitId here applies to single-component tests only. For multi-component
+        // (profile) tests, the per-component unit lives on TestParameter.UnitId and this
+        // field is ignored. See G2.5 in the audit plan.
         public int? UnitId { get; set; }
         public decimal Price { get; set; }
         public decimal? CostPrice { get; set; }
@@ -185,6 +190,8 @@ namespace Open_lab.Models
         public int TurnaroundHours { get; set; }
         public bool IsRoutine { get; set; }
         public bool IsSendOut { get; set; }
+
+        public string? Description { get; set; }
 
         /// <summary>
         /// This field defines the order of the test in the final printed report.
@@ -232,20 +239,42 @@ namespace Open_lab.Models
     {
         public int RangeId { get; set; }
         public int TestId { get; set; }
+
+        // Nullable to keep backward compatibility with existing simple-test ranges. For
+        // multi-component (profile) tests, ranges MUST reference a specific parameter so
+        // CBC's Hemoglobin doesn't share thresholds with its WBC. See G2.1.
+        public int? ParameterId { get; set; }
+
         public string? Gender { get; set; }
-        public int? AgeFrom { get; set; }
-        public int? AgeTo { get; set; }
+
+        // Age range — Phase 4 redesign:
+        // - AgeFromValue / AgeFromUnit: user-entered display values ("3 Day", "2 Month", ...)
+        // - AgeFromDays: same range projected to days for fast comparison/indexing.
+        // Day is the internal source of truth; Value+Unit are kept only for redisplay.
+        public int? AgeFromValue { get; set; }
+        public string? AgeFromUnit { get; set; }
+        public int? AgeFromDays { get; set; }
+        public int? AgeToValue { get; set; }
+        public string? AgeToUnit { get; set; }
+        public int? AgeToDays { get; set; }
+
         public decimal? LowValue { get; set; }
         public decimal? HighValue { get; set; }
         public string? NormalText { get; set; }
 
         public Test Test { get; set; } = null!;
+        public TestParameter? Parameter { get; set; }
     }
 
     public class TestComment
     {
         public int CommentId { get; set; }
         public int TestId { get; set; }
+
+        // Nullable for backward compatibility. For multi-component tests, comments can
+        // be scoped to a specific parameter (e.g. "High Hemoglobin" vs "Low WBC"). G2.2.
+        public int? ParameterId { get; set; }
+
         public string CommentText { get; set; } = string.Empty;
         public bool IsDefault { get; set; }
 
@@ -260,6 +289,7 @@ namespace Open_lab.Models
         public string? HighComment { get; set; }
 
         public Test Test { get; set; } = null!;
+        public TestParameter? Parameter { get; set; }
     }
 
     public class VisitTest
@@ -448,6 +478,13 @@ namespace Open_lab.Models
         public string? Allergies { get; set; }
         public string? Medications { get; set; }
         public string? Notes { get; set; }
+
+        public bool HasAnemia { get; set; }
+        public bool HasJointInflammation { get; set; }
+        public bool HasHypertension { get; set; }
+        public bool HasKidneyFailure { get; set; }
+        public bool HasChronicDisease { get; set; }
+        public bool HasPregnancyComplication { get; set; }
 
         public Patient Patient { get; set; } = null!;
     }

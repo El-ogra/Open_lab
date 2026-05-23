@@ -84,7 +84,7 @@ namespace Open_lab.Tests.Services
         {
             // Function: 3.3 — Set Reference Values
             // Arrange
-            var range = new TestReferenceRange { TestId = 1, AgeFrom = 10, AgeTo = 5, LowValue = 1, HighValue = 2 };
+            var range = new TestReferenceRange { TestId = 1, AgeFromValue = 10, AgeFromUnit = AgeConverter.UnitYear, AgeFromDays = 10 * AgeConverter.DaysPerYear, AgeToValue = 5, AgeToUnit = AgeConverter.UnitYear, AgeToDays = 5 * AgeConverter.DaysPerYear, LowValue = 1, HighValue = 2 };
 
             // Act
             Func<Task> act = async () => await _service.CreateReferenceRangeAsync(range);
@@ -358,8 +358,12 @@ namespace Open_lab.Tests.Services
             var validRange = new TestReferenceRange
             {
                 TestId = test.TestId,
-                AgeFrom = 0,
-                AgeTo = 100,
+                AgeFromValue = 0,
+                AgeFromUnit = AgeConverter.UnitYear,
+                AgeFromDays = 0,
+                AgeToValue = 100,
+                AgeToUnit = AgeConverter.UnitYear,
+                AgeToDays = 100 * AgeConverter.DaysPerYear,
                 LowValue = 3.5m,
                 HighValue = 5.5m,
                 Gender = "All"
@@ -374,8 +378,8 @@ namespace Open_lab.Tests.Services
             saved.Should().NotBeNull();
             saved!.LowValue.Should().Be(3.5m);
             saved.HighValue.Should().Be(5.5m);
-            saved.AgeFrom.Should().Be(0);
-            saved.AgeTo.Should().Be(100);
+            saved.AgeFromValue.Should().Be(0);
+            saved.AgeToValue.Should().Be(100);
             saved.Gender.Should().Be("All");
         }
 
@@ -392,8 +396,12 @@ namespace Open_lab.Tests.Services
             var equalRange = new TestReferenceRange
             {
                 TestId = test.TestId,
-                AgeFrom = 18,
-                AgeTo = 65,
+                AgeFromValue = 18,
+                AgeFromUnit = AgeConverter.UnitYear,
+                AgeFromDays = 18 * AgeConverter.DaysPerYear,
+                AgeToValue = 65,
+                AgeToUnit = AgeConverter.UnitYear,
+                AgeToDays = 65 * AgeConverter.DaysPerYear,
                 LowValue = 7.0m,
                 HighValue = 7.0m,
                 Gender = "All"

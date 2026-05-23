@@ -137,8 +137,12 @@ namespace Open_lab.Tests
             {
                 TestId = 10,
                 Gender = "Male",
-                AgeFrom = 18,
-                AgeTo = 60,
+                AgeFromValue = 18,
+                AgeFromUnit = AgeConverter.UnitYear,
+                AgeFromDays = 18 * AgeConverter.DaysPerYear,
+                AgeToValue = 60,
+                AgeToUnit = AgeConverter.UnitYear,
+                AgeToDays = 60 * AgeConverter.DaysPerYear,
                 LowValue = 13.5m,
                 HighValue = 17.5m
             };

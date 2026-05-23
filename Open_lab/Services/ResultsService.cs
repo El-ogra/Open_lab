@@ -270,18 +270,37 @@ namespace Open_lab.Services
 
         public async Task<ReferenceRangeResult> ValidateResultAsync(int testId, string value, string gender, int age)
         {
+            return await ValidateResultAsync(testId, null, value, gender, age, AgeConverter.UnitYear);
+        }
+
+        public async Task<ReferenceRangeResult> ValidateResultAsync(int testId, int? parameterId, string value, string gender, int age)
+        {
+            return await ValidateResultAsync(testId, parameterId, value, gender, age, AgeConverter.UnitYear);
+        }
+
+        public async Task<ReferenceRangeResult> ValidateResultAsync(int testId, int? parameterId, string value, string gender, int age, string? ageUnit)
+        {
             var result = new ReferenceRangeResult { OriginalValue = value };
+
+            // Phase 4: comparisons happen in days. The legacy 4-arg overload above keeps
+            // existing call sites working by treating their age as Years.
+            var ageInDays = AgeConverter.ToDays(age, ageUnit);
 
             if (decimal.TryParse(value, out decimal numericValue))
             {
                 result.NumericValue = numericValue;
 
-                // 4.1 Automated Range Comparison
+                // G2.1 / Phase 4: prefer parameter-scoped ranges so multi-component tests
+                // (CBC etc.) match per-component thresholds. Ranges with ParameterId == null
+                // still match all components for backward compat.
                 var range = await _db.TestReferenceRanges
                     .Where(r => r.TestId == testId)
+                    .Where(r => !parameterId.HasValue || r.ParameterId == null || r.ParameterId == parameterId.Value)
                     .Where(r => r.Gender == null || r.Gender == gender)
-                    .Where(r => (r.AgeFrom == null || age >= r.AgeFrom) && (r.AgeTo == null || age <= r.AgeTo))
-                    .OrderByDescending(r => r.Gender != null) // Prefer specific gender over null
+                    .Where(r => (r.AgeFromDays == null || ageInDays >= r.AgeFromDays)
+                             && (r.AgeToDays == null || ageInDays <= r.AgeToDays))
+                    .OrderByDescending(r => r.ParameterId != null) // Prefer parameter-specific range
+                    .ThenByDescending(r => r.Gender != null)       // Then prefer specific gender
                     .FirstOrDefaultAsync();
 
                 if (range != null)
@@ -307,10 +326,13 @@ namespace Open_lab.Services
                 }
             }
 
-            // 4.1 Automated Comments (High/Low)
+            // 4.1 Automated Comments (High/Low). G2.2: when parameterId is provided,
+            // prefer parameter-scoped comments; fall back to test-wide defaults.
             var comment = await _db.TestComments
                 .Where(c => c.TestId == testId)
-                .OrderByDescending(c => c.IsDefault)
+                .Where(c => !parameterId.HasValue || c.ParameterId == null || c.ParameterId == parameterId.Value)
+                .OrderByDescending(c => c.ParameterId != null)
+                .ThenByDescending(c => c.IsDefault)
                 .FirstOrDefaultAsync();
 
             if (comment != null)

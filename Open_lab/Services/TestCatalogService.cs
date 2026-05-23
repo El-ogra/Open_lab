@@ -784,9 +784,33 @@ namespace Open_lab.Services
                 throw new ArgumentException("TestId is required.", nameof(range));
             }
 
-            if (range.AgeFrom.HasValue && range.AgeTo.HasValue && range.AgeFrom > range.AgeTo)
+            // Phase 4: validate unit strings up front and normalize them so the rest of
+            // the pipeline always sees canonical "Day" / "Month" / "Year".
+            if (range.AgeFromValue.HasValue)
             {
-                throw new ArgumentException("AgeFrom cannot be greater than AgeTo.", nameof(range));
+                if (range.AgeFromUnit != null && !AgeConverter.IsValidUnit(range.AgeFromUnit))
+                {
+                    throw new ArgumentException($"Invalid AgeFromUnit: '{range.AgeFromUnit}'. Use Day/Month/Year.", nameof(range));
+                }
+                range.AgeFromUnit = AgeConverter.NormalizeUnit(range.AgeFromUnit);
+            }
+
+            if (range.AgeToValue.HasValue)
+            {
+                if (range.AgeToUnit != null && !AgeConverter.IsValidUnit(range.AgeToUnit))
+                {
+                    throw new ArgumentException($"Invalid AgeToUnit: '{range.AgeToUnit}'. Use Day/Month/Year.", nameof(range));
+                }
+                range.AgeToUnit = AgeConverter.NormalizeUnit(range.AgeToUnit);
+            }
+
+            // Project the user-facing value+unit pair to days; this is what queries match against.
+            range.AgeFromDays = AgeConverter.ToDays(range.AgeFromValue, range.AgeFromUnit);
+            range.AgeToDays = AgeConverter.ToDays(range.AgeToValue, range.AgeToUnit);
+
+            if (range.AgeFromDays.HasValue && range.AgeToDays.HasValue && range.AgeFromDays > range.AgeToDays)
+            {
+                throw new ArgumentException("AgeFrom cannot be greater than AgeTo (after unit normalization).", nameof(range));
             }
 
             if (range.LowValue.HasValue && range.HighValue.HasValue && range.LowValue > range.HighValue)

@@ -140,6 +140,7 @@ namespace Open_lab.Data
                 entity.Property(e => e.HomePhone).HasMaxLength(50);
                 entity.Property(e => e.NationalId).HasMaxLength(50);
                 entity.Property(e => e.Email).HasMaxLength(255);
+                entity.Property(e => e.AgeUnit).HasMaxLength(10);
                 entity.HasOne(e => e.Referral)
                     .WithMany(e => e.Patients)
                     .HasForeignKey(e => e.ReferralId)
@@ -224,9 +225,18 @@ namespace Open_lab.Data
                 entity.HasKey(e => e.RangeId);
                 entity.Property(e => e.LowValue).HasPrecision(18, 2);
                 entity.Property(e => e.HighValue).HasPrecision(18, 2);
+                entity.Property(e => e.AgeFromUnit).HasMaxLength(10);
+                entity.Property(e => e.AgeToUnit).HasMaxLength(10);
                 entity.HasOne(e => e.Test)
                     .WithMany(e => e.ReferenceRanges)
                     .HasForeignKey(e => e.TestId);
+                entity.HasOne(e => e.Parameter)
+                    .WithMany()
+                    .HasForeignKey(e => e.ParameterId)
+                    .OnDelete(DeleteBehavior.Restrict);
+                entity.HasIndex(e => e.ParameterId);
+                entity.HasIndex(e => e.AgeFromDays);
+                entity.HasIndex(e => e.AgeToDays);
             });
 
             modelBuilder.Entity<TestComment>(entity =>
@@ -236,6 +246,11 @@ namespace Open_lab.Data
                 entity.HasOne(e => e.Test)
                     .WithMany(e => e.Comments)
                     .HasForeignKey(e => e.TestId);
+                entity.HasOne(e => e.Parameter)
+                    .WithMany()
+                    .HasForeignKey(e => e.ParameterId)
+                    .OnDelete(DeleteBehavior.Restrict);
+                entity.HasIndex(e => e.ParameterId);
             });
 
             modelBuilder.Entity<VisitTest>(entity =>

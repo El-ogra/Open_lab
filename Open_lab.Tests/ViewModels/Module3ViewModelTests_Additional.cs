@@ -373,8 +373,8 @@ namespace Open_lab.Tests.ViewModels
 
                 var ranges = new List<TestReferenceRange>
                 {
-                    new TestReferenceRange { RangeId = 1, TestId = 1, Gender = "Male", AgeFrom = 18, AgeTo = 60, LowValue = 70, HighValue = 100 },
-                    new TestReferenceRange { RangeId = 2, TestId = 1, Gender = "Female", AgeFrom = 18, AgeTo = 60, LowValue = 65, HighValue = 95 }
+                    new TestReferenceRange { RangeId = 1, TestId = 1, Gender = "Male", AgeFromValue = 18, AgeFromUnit = AgeConverter.UnitYear, AgeFromDays = 18 * AgeConverter.DaysPerYear, AgeToValue = 60, AgeToUnit = AgeConverter.UnitYear, AgeToDays = 60 * AgeConverter.DaysPerYear, LowValue = 70, HighValue = 100 },
+                    new TestReferenceRange { RangeId = 2, TestId = 1, Gender = "Female", AgeFromValue = 18, AgeFromUnit = AgeConverter.UnitYear, AgeFromDays = 18 * AgeConverter.DaysPerYear, AgeToValue = 60, AgeToUnit = AgeConverter.UnitYear, AgeToDays = 60 * AgeConverter.DaysPerYear, LowValue = 65, HighValue = 95 }
                 };
 
                 _testCatalogServiceMock.Setup(x => x.GetReferenceRangesAsync(1)).ReturnsAsync(ranges);
@@ -414,16 +414,20 @@ namespace Open_lab.Tests.ViewModels
                     RangeId = 10,
                     TestId = 5,
                     Gender = "Both",
-                    AgeFrom = 20,
-                    AgeTo = 70,
+                    AgeFromValue = 20,
+                    AgeFromUnit = AgeConverter.UnitYear,
+                    AgeFromDays = 20 * AgeConverter.DaysPerYear,
+                    AgeToValue = 70,
+                    AgeToUnit = AgeConverter.UnitYear,
+                    AgeToDays = 70 * AgeConverter.DaysPerYear,
                     LowValue = 0,
                     HighValue = 200
                 };
                 _viewModel.SelectedRange = existingRange;
 
                 _viewModel.Gender = "Both";
-                _viewModel.AgeFrom = 20;
-                _viewModel.AgeTo = 70;
+                _viewModel.AgeFromValue = 20;
+                _viewModel.AgeToValue = 70;
                 _viewModel.LowValue = 0;
                 _viewModel.HighValue = 200;
                 _viewModel.NormalText = "Desirable < 200 mg/dL";
@@ -509,8 +513,12 @@ namespace Open_lab.Tests.ViewModels
                 {
                     RangeId = 5,
                     Gender = "Female",
-                    AgeFrom = 18,
-                    AgeTo = 50,
+                    AgeFromValue = 18,
+                    AgeFromUnit = AgeConverter.UnitYear,
+                    AgeFromDays = 18 * AgeConverter.DaysPerYear,
+                    AgeToValue = 50,
+                    AgeToUnit = AgeConverter.UnitYear,
+                    AgeToDays = 50 * AgeConverter.DaysPerYear,
                     LowValue = 3.5m,
                     HighValue = 5.0m,
                     NormalText = "Normal thyroid function"
@@ -521,8 +529,8 @@ namespace Open_lab.Tests.ViewModels
 
                 // Assert
                 _viewModel.Gender.Should().Be("Female");
-                _viewModel.AgeFrom.Should().Be(18);
-                _viewModel.AgeTo.Should().Be(50);
+                _viewModel.AgeFromValue.Should().Be(18);
+                _viewModel.AgeToValue.Should().Be(50);
                 _viewModel.LowValue.Should().Be(3.5m);
                 _viewModel.HighValue.Should().Be(5.0m);
                 _viewModel.NormalText.Should().Be("Normal thyroid function");

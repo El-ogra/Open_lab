@@ -200,17 +200,19 @@
                              Text="{Binding TestSearchText, UpdateSourceTrigger=PropertyChanged}" />
                     <RadioButton Grid.Column="2"
                                  Content="TM"
-                                 IsChecked="True"
+                                 IsChecked="{Binding TestCategoryFilter, Converter={StaticResource StringEqualsConverter}, ConverterParameter=TM}"
                                  VerticalAlignment="Center"
                                  FontWeight="Bold"
                                  Foreground="#FFF200" />
                     <RadioButton Grid.Column="3"
                                  Content="TG"
+                                 IsChecked="{Binding TestCategoryFilter, Converter={StaticResource StringEqualsConverter}, ConverterParameter=TG}"
                                  VerticalAlignment="Center"
                                  FontWeight="Bold"
                                  Foreground="#FFF200" />
                     <RadioButton Grid.Column="4"
                                  Content="CC"
+                                 IsChecked="{Binding TestCategoryFilter, Converter={StaticResource StringEqualsConverter}, ConverterParameter=CC}"
                                  VerticalAlignment="Center"
                                  FontWeight="Bold"
                                  Foreground="#FFF200" />
@@ -233,8 +235,10 @@
                               Style="{StaticResource ListGrid}"
                               ItemsSource="{Binding AvailableTests}"
                               SelectedItem="{Binding SelectedAvailableTest}"
-                              MouseDoubleClick="AvailableTestsList_MouseDoubleClick"
                               FlowDirection="LeftToRight">
+                        <DataGrid.InputBindings>
+                            <MouseBinding MouseAction="LeftDoubleClick" Command="{Binding AddSelectedTestCommand}" />
+                        </DataGrid.InputBindings>
                         <DataGrid.Columns>
                             <DataGridTextColumn Binding="{Binding NameReport}" Width="*" />
                         </DataGrid.Columns>
@@ -319,7 +323,7 @@
             </Grid>
         </Border>
 
-            <Grid Grid.Column="1" Grid.Row="0" FlowDirection="RightToLeft">
+            <Grid Grid.Column="1" Grid.Row="0" FlowDirection="RightToLeft" IsEnabled="{Binding IsEditMode}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="61" />
                 <RowDefinition Height="118" />
@@ -345,12 +349,12 @@
                     <Border Grid.Row="0" Grid.Column="0" Background="{StaticResource Yellow}" Margin="1">
                         <TextBlock Text="تاريخ الدخول" Foreground="#12900E" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" />
                     </Border>
-                    <TextBox Grid.Row="0" Grid.Column="1" Style="{StaticResource Box}" Text="{Binding EntryDate, StringFormat='{}{0:dd-MMM-yyyy}', UpdateSourceTrigger=PropertyChanged}" />
+                    <DatePicker Grid.Row="0" Grid.Column="1" SelectedDate="{Binding EntryDate}" />
                     <TextBox Grid.Row="0" Grid.Column="2" Style="{StaticResource Box}" Text="{Binding EntryTimeText, UpdateSourceTrigger=PropertyChanged}" Foreground="#12900E" HorizontalContentAlignment="Center" />
                     <Border Grid.Row="0" Grid.Column="3" Background="{StaticResource Yellow}" Margin="1">
                         <TextBlock Text="تاريخ الاستلام" Foreground="#12900E" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" />
                     </Border>
-                    <TextBox Grid.Row="0" Grid.Column="4" Style="{StaticResource Box}" Text="{Binding ReceptionDate, StringFormat='{}{0:dd-MMM-yyyy}', UpdateSourceTrigger=PropertyChanged}" />
+                    <DatePicker Grid.Row="0" Grid.Column="4" SelectedDate="{Binding ReceptionDate}" />
                     <TextBox Grid.Row="0" Grid.Column="5" Style="{StaticResource Box}" Text="{Binding ReceptionTimeText, UpdateSourceTrigger=PropertyChanged}" Foreground="#12900E" HorizontalContentAlignment="Center" />
 
                     <Border Grid.Row="1" Grid.Column="0" Style="{StaticResource BlueLabel}">
@@ -422,9 +426,9 @@
                         </Grid.ColumnDefinitions>
                         <TextBox Grid.Column="0" Style="{StaticResource Box}" Text="{Binding Age, UpdateSourceTrigger=PropertyChanged, TargetNullValue=''}" HorizontalContentAlignment="Center" />
                         <ComboBox Grid.Column="1" Style="{StaticResource Combo}" SelectedItem="{Binding AgeUnit, Mode=TwoWay}" IsEditable="True">
-                            <ComboBoxItem Content="Years" />
-                            <ComboBoxItem Content="Months" />
-                            <ComboBoxItem Content="Days" />
+                            <ComboBoxItem Content="Year" />
+                            <ComboBoxItem Content="Month" />
+                            <ComboBoxItem Content="Day" />
                         </ComboBox>
                         </Grid>
                     </Grid>
@@ -507,7 +511,6 @@
                               IsEditable="True"
                               IsTextSearchEnabled="True"
                               StaysOpenOnEdit="True" />
-                    <Button Grid.Row="1" Grid.Column="3" Content="معلومات اضافية" Style="{StaticResource FlatButton}" Background="#0ECA41" Foreground="White" />
                 </Grid>
             </Border>
 
@@ -534,7 +537,7 @@
                     <TextBox Grid.Row="0" Grid.Column="2" Style="{StaticResource Box}" Text="{Binding FastingHours, UpdateSourceTrigger=PropertyChanged}" HorizontalContentAlignment="Center" />
                     <CheckBox Grid.Row="0" Grid.Column="3" Content="صائم" Background="{StaticResource Orange}" Style="{StaticResource MedicalCheck}" IsChecked="{Binding IsFasting}" />
 
-                    <CheckBox Grid.Row="1" Grid.Column="0" Content="هل يأخذ علاج للغدة" Background="{StaticResource TealGreen}" Style="{StaticResource MedicalCheck}" IsChecked="{Binding TakesAntiVirals}" />
+                    <CheckBox Grid.Row="1" Grid.Column="0" Content="هل يأخذ علاج للغدة" Background="{StaticResource TealGreen}" Style="{StaticResource MedicalCheck}" IsChecked="{Binding TakesGlandsTreatment}" />
                     <CheckBox Grid.Row="1" Grid.Column="1" Content="مريض بالتهاب المفاصل" Background="{StaticResource Yellow}" Foreground="#790000" Style="{StaticResource MedicalCheck}" IsChecked="{Binding HasJointInflammation}" />
                     <Border Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="2" Background="{StaticResource Yellow}" Margin="1">
                         <TextBlock Text="عدد ساعات الصيام" Foreground="#AC0000" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" />
@@ -549,7 +552,8 @@
                     <CheckBox Grid.Row="3" Grid.Column="2" Grid.ColumnSpan="2" Content="هل يأخذ علاج للفيروسات" Background="{StaticResource TealGreen}" Style="{StaticResource MedicalCheck}" IsChecked="{Binding TakesAntiVirals}" />
 
                     <CheckBox Grid.Row="4" Grid.Column="0" Content="للسيدات هل يوجد حمل" Background="{StaticResource TealGreen}" Style="{StaticResource MedicalCheck}" IsChecked="{Binding IsPregnant}" />
-                    <CheckBox Grid.Row="4" Grid.Column="1" Content="مريض بالإصابة بمرض مزمن" Background="{StaticResource Yellow}" Foreground="#790000" Style="{StaticResource MedicalCheck}" IsChecked="{Binding HasPregnancyComplication}" />
+                    <CheckBox Grid.Row="4" Grid.Column="1" Content="مريض بالإصابة بمرض مزمن" Background="{StaticResource Yellow}" Foreground="#790000" Style="{StaticResource MedicalCheck}" IsChecked="{Binding HasChronicDisease}" />
+                    <CheckBox Grid.Row="4" Grid.Column="2" Grid.ColumnSpan="2" Content="مضاعفات الحمل" Background="{StaticResource Yellow}" Foreground="#790000" Style="{StaticResource MedicalCheck}" IsChecked="{Binding HasPregnancyComplication}" />
                     <CheckBox Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="4" Content="هل تم عمل اشعة بالصبغة او بالموجات الصوتيه خلال يومين" Background="{StaticResource TealGreen}" Style="{StaticResource MedicalCheck}" IsChecked="{Binding HadContrastImaging}" />
 
                     <TextBox Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="3" Style="{StaticResource Box}" Height="30" Text="{Binding MedicalNotes, UpdateSourceTrigger=PropertyChanged}" />
@@ -651,9 +655,29 @@
                     <UniformGrid Columns="3" Rows="1">
                         <Button Content="القائمة الرئيسية" Command="{Binding GoToHomeCommand}" Style="{StaticResource MainActionButton}" Background="#2E4E9D" Foreground="White" />
                         <Button Content="نتائج التحاليل" Command="{Binding GoToResultsCommand}" Style="{StaticResource MainActionButton}" Background="#F2F1D8" />
-                        <Button Content="قائمة المرضى" Command="{Binding ShowTodayPatientsCommand}" Style="{StaticResource MainActionButton}" Background="#00B1E8" Foreground="White" />
+                        <Button Content="قائمة المرضى" x:Name="QuickPatientsListButton" Command="{Binding ShowTodayPatientsCommand}" Style="{StaticResource MainActionButton}" Background="#00B1E8" Foreground="White" />
                     </UniformGrid>
                 </Border>
+
+                <Popup PlacementTarget="{Binding ElementName=QuickPatientsListButton}"
+                       Placement="Top"
+                       StaysOpen="False"
+                       AllowsTransparency="True"
+                       IsOpen="{Binding IsQuickPatientsListVisible, Mode=TwoWay}">
+                    <Border Background="White" BorderBrush="#00B1E8" BorderThickness="2" Padding="4" MinWidth="320" MaxHeight="360">
+                        <DataGrid ItemsSource="{Binding QuickPatientsList}"
+                                  SelectedItem="{Binding QuickSelectedPatient}"
+                                  AutoGenerateColumns="False"
+                                  IsReadOnly="True"
+                                  HeadersVisibility="Column"
+                                  FlowDirection="LeftToRight">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="LabId" Binding="{Binding LabId}" Width="100" />
+                                <DataGridTextColumn Header="الاسم" Binding="{Binding FullName}" Width="*" />
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Border>
+                </Popup>
             </Grid>
         </Border>
     </Grid>
