@@ -31,6 +31,7 @@ namespace Open_lab.ViewModels
         private readonly IInvoiceService? _invoiceService;
         private readonly IBarcodeDialogService? _barcodeDialogService;
         private readonly IPrintService? _printService;
+        private readonly INavigationService? _navigationService;
 
         // ===== بيانات المريض الأساسية =====
         private string _labId = string.Empty;
@@ -146,6 +147,7 @@ namespace Open_lab.ViewModels
                   invoiceService,
                   barcodeService == null ? null : new BarcodeDialogService(barcodeService, printService),
                   printService,
+                  null,
                   true)
         {
         }
@@ -158,6 +160,7 @@ namespace Open_lab.ViewModels
             IInvoiceService? invoiceService,
             IBarcodeDialogService? barcodeDialogService,
             IPrintService? printService,
+            INavigationService? navigationService = null,
             bool initialize = true)
         {
             _patientService = patientService;
@@ -166,6 +169,7 @@ namespace Open_lab.ViewModels
             _invoiceService = invoiceService;
             _barcodeDialogService = barcodeDialogService;
             _printService = printService;
+            _navigationService = navigationService;
 
             Results = new ObservableCollection<Patient>();
             Referrals = new ObservableCollection<Referral>();
@@ -188,7 +192,7 @@ namespace Open_lab.ViewModels
             AddSelectedTestCommand = new RelayCommand(_ => AddSelectedTest(), _ => SelectedAvailableTest != null);
             RemoveSelectedTestCommand = new RelayCommand(_ => RemoveSelectedTest(), _ => SelectedTest != null);
             EditCommand = new RelayCommand(async _ => await SaveAsync(), _ => AppSession.HasPermission(PermissionCodes.PatientsEdit) && PatientId > 0);
-            GoToResultsCommand = new RelayCommand(_ => NavigateToResults(), _ => PatientId > 0);
+            GoToResultsCommand = new RelayCommand(_ => NavigateToResults(), _ => true);
             ResetCommand = new RelayCommand(async _ => await ClearFormAsync(), _ => true);
             DocumentsCommand = new RelayCommand(_ => ShowDocuments(), _ => PatientId > 0);
             GoToHomeCommand = new RelayCommand(_ => NavigateToHome(), _ => true);
@@ -891,7 +895,13 @@ namespace Open_lab.ViewModels
         public Referral? SelectedReferral
         {
             get => _selectedReferral;
-            set => SetProperty(ref _selectedReferral, value);
+            set
+            {
+                if (SetProperty(ref _selectedReferral, value) && value != null)
+                {
+                    ReferralSource = value.Name;
+                }
+            }
         }
 
         public Patient? SelectedPatient
@@ -1650,14 +1660,13 @@ namespace Open_lab.ViewModels
 
         private void NavigateToResults()
         {
-            if (PatientId <= 0)
+            if (_navigationService == null)
             {
-                StatusMessage = "حدد مريضاً أولاً.";
+                StatusMessage = "خدمة التنقل غير متاحة.";
                 return;
             }
 
-            StatusMessage = $"الانتقال لنتائج التحاليل للمريض: {FullName} (Lab ID: {LabId})";
-            // Navigation would be handled by the main window via Messenger or similar pattern
+            _navigationService.Navigate(NavigationTarget.ResultsEntry);
         }
 
         private void ShowDocuments()
@@ -1674,8 +1683,13 @@ namespace Open_lab.ViewModels
 
         private void NavigateToHome()
         {
-            StatusMessage = "الانتقال للقائمة الرئيسية...";
-            // Navigation to main window would be handled by the main window
+            if (_navigationService == null)
+            {
+                StatusMessage = "خدمة التنقل غير متاحة.";
+                return;
+            }
+
+            _navigationService.Navigate(NavigationTarget.Home);
         }
     }
 }

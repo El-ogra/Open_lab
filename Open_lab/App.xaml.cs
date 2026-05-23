@@ -43,8 +43,8 @@ namespace Open_lab
 
             RegisterServicesByConvention(services);
 
-            services.AddTransient<IViewModelFactory, ViewModelFactory>();
-            services.AddTransient<INavigationService, NavigationService>();
+            services.AddSingleton<IViewModelFactory, ViewModelFactory>();
+            services.AddSingleton<INavigationService, NavigationService>();
             services.AddTransient<WelcomeViewModel>();
             services.AddTransient<MainViewModel>();
 
