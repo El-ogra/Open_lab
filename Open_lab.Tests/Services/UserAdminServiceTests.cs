@@ -49,7 +49,9 @@ namespace Open_lab.Tests.Services
             created.Username.Should().Be("newuser");
             created.PasswordHash.Should().NotBeNullOrWhiteSpace();
             created.Salt.Should().NotBeNullOrWhiteSpace();
-            PasswordSecurity.Verify("SecurePass123", created.Salt, created.PasswordHash).Should().BeTrue();
+            created.HashVersion.Should().Be(PasswordSecurity.Pbkdf2Version);
+            PasswordSecurity.Verify("SecurePass123", created.Salt, created.PasswordHash, created.HashVersion)
+                .Should().BeTrue();
         }
 
         [Fact]
@@ -335,7 +337,9 @@ namespace Open_lab.Tests.Services
             var updated = await _db.Users.FindAsync(user.UserId);
             updated!.FullName.Should().Be("New Name");
             updated.Username.Should().Be("new_user");
-            PasswordSecurity.Verify("newSecurePass", updated.Salt, updated.PasswordHash).Should().BeTrue();
+            updated.HashVersion.Should().Be(PasswordSecurity.Pbkdf2Version);
+            PasswordSecurity.Verify("newSecurePass", updated.Salt, updated.PasswordHash, updated.HashVersion)
+                .Should().BeTrue();
         }
 
         [Fact]

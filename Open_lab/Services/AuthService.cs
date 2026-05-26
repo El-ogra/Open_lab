@@ -33,8 +33,16 @@ namespace Open_lab.Services
                 return null;
             }
 
-            if (PasswordSecurity.Verify(password, user.Salt, user.PasswordHash))
+            if (PasswordSecurity.Verify(password, user.Salt, user.PasswordHash, user.HashVersion))
             {
+                if (user.HashVersion == PasswordSecurity.LegacySha256Version)
+                {
+                    user.Salt = PasswordSecurity.GenerateSecureSalt();
+                    user.PasswordHash = PasswordSecurity.ComputePbkdf2(password, user.Salt);
+                    user.HashVersion = PasswordSecurity.Pbkdf2Version;
+                    await _db.SaveChangesAsync();
+                }
+
                 return user;
             }
 

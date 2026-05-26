@@ -32,6 +32,29 @@ namespace Open_lab.Tests.Services
         }
 
         [Fact]
+        public void GenerateSecureSalt_Should_Return_ThirtyTwo_Byte_Hex_String()
+        {
+            var salt = PasswordSecurity.GenerateSecureSalt();
+
+            salt.Should().NotBeNullOrWhiteSpace();
+            Convert.FromHexString(salt).Length.Should().Be(32);
+        }
+
+        [Fact]
+        public void ComputePbkdf2_With_Same_Input_And_Salt_Should_Return_Same_Hash()
+        {
+            const string password = "mysecret";
+            var salt = PasswordSecurity.GenerateSecureSalt();
+
+            var hash1 = PasswordSecurity.ComputePbkdf2(password, salt);
+            var hash2 = PasswordSecurity.ComputePbkdf2(password, salt);
+
+            hash1.Should().Be(hash2);
+            hash1.Should().NotBeNullOrWhiteSpace();
+            hash1.Length.Should().Be(64);
+        }
+
+        [Fact]
         public void ComputeSha256_With_Same_Input_And_Salt_Should_Return_Same_Hash()
         {
             // Function: 13.8 — Set System Password
@@ -95,6 +118,30 @@ namespace Open_lab.Tests.Services
 
             // Assert
             result.Should().BeTrue();
+        }
+
+        [Fact]
+        public void Verify_With_Pbkdf2_Version_Should_Return_True()
+        {
+            const string password = "correctpassword";
+            var salt = PasswordSecurity.GenerateSecureSalt();
+            var hash = PasswordSecurity.ComputePbkdf2(password, salt);
+
+            var result = PasswordSecurity.Verify(password, salt, hash, PasswordSecurity.Pbkdf2Version);
+
+            result.Should().BeTrue();
+        }
+
+        [Fact]
+        public void Verify_With_Unknown_Version_Should_Return_False()
+        {
+            const string password = "correctpassword";
+            var salt = PasswordSecurity.GenerateSecureSalt();
+            var hash = PasswordSecurity.ComputePbkdf2(password, salt);
+
+            var result = PasswordSecurity.Verify(password, salt, hash, 99);
+
+            result.Should().BeFalse();
         }
 
         [Fact]

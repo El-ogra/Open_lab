@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Security.Cryptography;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Open_lab.Data;
@@ -35,6 +34,7 @@ namespace Open_lab.Services
         private const string DefaultAccountTypeKey = "Invoice.DefaultAccountType";
         private const string MasterPasswordHashKey = "Security.MasterPasswordHash";
         private const string MasterPasswordSaltKey = "Security.MasterPasswordSalt";
+        private const string MasterPasswordHashVersionKey = "Security.MasterPasswordHashVersion";
 
 
         private readonly OpenLabDbContext _db;
@@ -159,10 +159,11 @@ namespace Open_lab.Services
 
             if (!string.IsNullOrEmpty(profile.MasterPasswordHash))
             {
-                var newSalt = GenerateSecureSalt();
-                var newHash = PasswordSecurity.ComputeSha256(profile.MasterPasswordHash, newSalt);
+                var newSalt = PasswordSecurity.GenerateSecureSalt();
+                var newHash = PasswordSecurity.ComputePbkdf2(profile.MasterPasswordHash, newSalt);
                 await SaveSettingAsync(MasterPasswordSaltKey, newSalt);
                 await SaveSettingAsync(MasterPasswordHashKey, newHash);
+                await SaveSettingAsync(MasterPasswordHashVersionKey, PasswordSecurity.Pbkdf2Version.ToString(CultureInfo.InvariantCulture));
             }
         }
 
@@ -170,6 +171,7 @@ namespace Open_lab.Services
         {
             var hash = await _db.Settings.Where(s => s.Key == MasterPasswordHashKey).Select(s => s.Value).FirstOrDefaultAsync();
             var salt = await _db.Settings.Where(s => s.Key == MasterPasswordSaltKey).Select(s => s.Value).FirstOrDefaultAsync();
+            var rawVersion = await _db.Settings.Where(s => s.Key == MasterPasswordHashVersionKey).Select(s => s.Value).FirstOrDefaultAsync();
 
             if (string.IsNullOrEmpty(hash))
             {
@@ -181,7 +183,23 @@ namespace Open_lab.Services
                 return false;
             }
 
-            return PasswordSecurity.Verify(password, salt, hash);
+            var hashVersion = ParseInt(rawVersion ?? PasswordSecurity.LegacySha256Version.ToString(CultureInfo.InvariantCulture), PasswordSecurity.LegacySha256Version);
+            var verified = PasswordSecurity.Verify(password, salt, hash, hashVersion);
+            if (!verified)
+            {
+                return false;
+            }
+
+            if (hashVersion == PasswordSecurity.LegacySha256Version)
+            {
+                var newSalt = PasswordSecurity.GenerateSecureSalt();
+                var newHash = PasswordSecurity.ComputePbkdf2(password, newSalt);
+                await SaveSettingAsync(MasterPasswordSaltKey, newSalt);
+                await SaveSettingAsync(MasterPasswordHashKey, newHash);
+                await SaveSettingAsync(MasterPasswordHashVersionKey, PasswordSecurity.Pbkdf2Version.ToString(CultureInfo.InvariantCulture));
+            }
+
+            return true;
         }
 
         /// <summary>
@@ -194,13 +212,12 @@ namespace Open_lab.Services
             if (string.IsNullOrEmpty(newPassword))
                 return false;
 
-            // Generate a new secure salt for this password
-            var newSalt = GenerateSecureSalt();
-            var newHash = PasswordSecurity.ComputeSha256(newPassword, newSalt);
+            var newSalt = PasswordSecurity.GenerateSecureSalt();
+            var newHash = PasswordSecurity.ComputePbkdf2(newPassword, newSalt);
 
-            // Save both salt and hash
             await SaveSettingAsync(MasterPasswordSaltKey, newSalt);
             await SaveSettingAsync(MasterPasswordHashKey, newHash);
+            await SaveSettingAsync(MasterPasswordHashVersionKey, PasswordSecurity.Pbkdf2Version.ToString(CultureInfo.InvariantCulture));
 
             return true;
         }
@@ -218,19 +235,6 @@ namespace Open_lab.Services
         private static string NormalizeCurrency(string? value)
         {
             return string.IsNullOrWhiteSpace(value) ? "EGP" : value.Trim().ToUpperInvariant();
-        }
-
-        /// <summary>
-        /// Generates a cryptographically secure random salt string.
-        /// </summary>
-        /// <returns>Base64 encoded random salt (32 bytes)</returns>
-        private static string GenerateSecureSalt()
-        {
-            const int saltLength = 32;
-            var salt = new byte[saltLength];
-            using var rng = RandomNumberGenerator.Create();
-            rng.GetBytes(salt);
-            return Convert.ToBase64String(salt);
         }
 
         private static double ParseDouble(string raw, double fallback)

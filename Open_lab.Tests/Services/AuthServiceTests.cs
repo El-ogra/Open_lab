@@ -56,6 +56,36 @@ namespace Open_lab.Tests.Services
         }
 
         [Fact]
+        public async Task ValidateCredentials_WithLegacySha256_ShouldUpgradeToPbkdf2()
+        {
+            // Function: 10.8 — Logout (security: legacy SHA-256 is upgraded after successful login)
+            // Arrange
+            var salt = PasswordSecurity.GenerateSalt();
+            var hash = PasswordSecurity.ComputeSha256("p@ss", salt);
+            _db.Users.Add(new User
+            {
+                Username = "legacy_sha_user",
+                PasswordHash = hash,
+                Salt = salt,
+                HashVersion = PasswordSecurity.LegacySha256Version,
+                IsActive = true
+            });
+            await _db.SaveChangesAsync();
+
+            // Act
+            var user = await _service.ValidateCredentialsAsync("legacy_sha_user", "p@ss");
+
+            // Assert
+            user.Should().NotBeNull();
+            var refreshed = await _db.Users.SingleAsync(u => u.Username == "legacy_sha_user");
+            refreshed.HashVersion.Should().Be(PasswordSecurity.Pbkdf2Version);
+            refreshed.Salt.Should().NotBe(salt);
+            refreshed.PasswordHash.Should().NotBe(hash);
+            PasswordSecurity.Verify("p@ss", refreshed.Salt, refreshed.PasswordHash, refreshed.HashVersion)
+                .Should().BeTrue();
+        }
+
+        [Fact]
         public async Task ValidateCredentials_WhenUserNotFound_ShouldReturnNull()
         {
             // Function: 10.8 — Logout (failure: invalid credentials)

@@ -61,10 +61,13 @@ namespace Open_lab.Tests.Services
 
             var hash = await _db.Settings.FirstOrDefaultAsync(s => s.Key == "Security.MasterPasswordHash");
             var salt = await _db.Settings.FirstOrDefaultAsync(s => s.Key == "Security.MasterPasswordSalt");
+            var version = await _db.Settings.FirstOrDefaultAsync(s => s.Key == "Security.MasterPasswordHashVersion");
             hash.Should().NotBeNull();
             salt.Should().NotBeNull();
+            version.Should().NotBeNull();
             hash!.Value.Should().NotBeNullOrWhiteSpace();
             salt!.Value.Should().NotBeNullOrWhiteSpace();
+            version!.Value.Should().Be(PasswordSecurity.Pbkdf2Version.ToString());
         }
 
         [Fact]
@@ -151,11 +154,42 @@ namespace Open_lab.Tests.Services
             // Assert
             var hash = await _db.Settings.FirstOrDefaultAsync(s => s.Key == "Security.MasterPasswordHash");
             var salt = await _db.Settings.FirstOrDefaultAsync(s => s.Key == "Security.MasterPasswordSalt");
+            var version = await _db.Settings.FirstOrDefaultAsync(s => s.Key == "Security.MasterPasswordHashVersion");
             hash.Should().NotBeNull();
             salt.Should().NotBeNull();
+            version.Should().NotBeNull();
             hash!.Value.Should().NotBe("hash-value");
             salt!.Value.Should().NotBeNullOrWhiteSpace();
-            PasswordSecurity.Verify("hash-value", salt.Value!, hash.Value!)
+            version!.Value.Should().Be(PasswordSecurity.Pbkdf2Version.ToString());
+            PasswordSecurity.Verify("hash-value", salt.Value!, hash.Value!, int.Parse(version.Value!))
+                .Should().BeTrue();
+        }
+
+        [Fact]
+        public async Task VerifyMasterPasswordAsync_WithLegacySha256_ShouldUpgradeToPbkdf2()
+        {
+            // Function: 13.8 — Set System Password (security: legacy SHA-256 is upgraded after successful verification)
+            // Arrange
+            var salt = PasswordSecurity.GenerateSalt();
+            var hash = PasswordSecurity.ComputeSha256("LegacyMaster#1", salt);
+            _db.Settings.AddRange(
+                new Setting { Key = "Security.MasterPasswordSalt", Value = salt },
+                new Setting { Key = "Security.MasterPasswordHash", Value = hash },
+                new Setting { Key = "Security.MasterPasswordHashVersion", Value = PasswordSecurity.LegacySha256Version.ToString() });
+            await _db.SaveChangesAsync();
+
+            // Act
+            var ok = await _service.VerifyMasterPasswordAsync("LegacyMaster#1");
+
+            // Assert
+            ok.Should().BeTrue();
+            var upgradedHash = await _db.Settings.SingleAsync(s => s.Key == "Security.MasterPasswordHash");
+            var upgradedSalt = await _db.Settings.SingleAsync(s => s.Key == "Security.MasterPasswordSalt");
+            var upgradedVersion = await _db.Settings.SingleAsync(s => s.Key == "Security.MasterPasswordHashVersion");
+            upgradedVersion.Value.Should().Be(PasswordSecurity.Pbkdf2Version.ToString());
+            upgradedSalt.Value.Should().NotBe(salt);
+            upgradedHash.Value.Should().NotBe(hash);
+            PasswordSecurity.Verify("LegacyMaster#1", upgradedSalt.Value!, upgradedHash.Value!, PasswordSecurity.Pbkdf2Version)
                 .Should().BeTrue();
         }
         [Fact]

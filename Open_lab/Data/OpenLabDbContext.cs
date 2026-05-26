@@ -114,6 +114,7 @@ namespace Open_lab.Data
                 entity.Property(e => e.Username).IsRequired();
                 entity.Property(e => e.PasswordHash).IsRequired();
                 entity.Property(e => e.Salt).IsRequired();
+                entity.Property(e => e.HashVersion).HasDefaultValue(1);
             });
 
             modelBuilder.Entity<Role>(entity =>

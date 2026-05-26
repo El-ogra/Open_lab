@@ -286,9 +286,10 @@ namespace Open_lab.Services
                 throw new ArgumentException("Password is required.");
             }
 
-            var salt = PasswordSecurity.GenerateSalt();
+            var salt = PasswordSecurity.GenerateSecureSalt();
             user.Salt = salt;
-            user.PasswordHash = PasswordSecurity.ComputeSha256(plainPassword, salt);
+            user.PasswordHash = PasswordSecurity.ComputePbkdf2(plainPassword, salt);
+            user.HashVersion = PasswordSecurity.Pbkdf2Version;
         }
     }
 }

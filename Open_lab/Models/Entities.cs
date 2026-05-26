@@ -9,6 +9,7 @@ namespace Open_lab.Models
         public string Username { get; set; } = string.Empty;
         public string PasswordHash { get; set; } = string.Empty;
         public string Salt { get; set; } = string.Empty;
+        public int HashVersion { get; set; } = 1;
         public string? FullName { get; set; }
         public bool IsActive { get; set; }
 
