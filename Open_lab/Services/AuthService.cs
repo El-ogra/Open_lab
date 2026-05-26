@@ -28,20 +28,9 @@ namespace Open_lab.Services
                 return null;
             }
 
-            // Backward-compatible path: legacy plain-text passwords are migrated on successful login.
-            var hasSalt = !string.IsNullOrWhiteSpace(user.Salt);
-            if (!hasSalt)
+            if (string.IsNullOrWhiteSpace(user.Salt) || string.IsNullOrWhiteSpace(user.PasswordHash))
             {
-                if (!string.Equals(user.PasswordHash, password, StringComparison.Ordinal))
-                {
-                    return null;
-                }
-
-                var salt = PasswordSecurity.GenerateSalt();
-                user.Salt = salt;
-                user.PasswordHash = PasswordSecurity.ComputeSha256(password, salt);
-                await _db.SaveChangesAsync();
-                return user;
+                return null;
             }
 
             if (PasswordSecurity.Verify(password, user.Salt, user.PasswordHash))

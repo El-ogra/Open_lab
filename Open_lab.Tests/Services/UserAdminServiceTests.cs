@@ -96,19 +96,19 @@ namespace Open_lab.Tests.Services
         }
 
         [Fact]
-        public async Task CreateUser_WithNullPassword_ShouldCreateUserWithEmptyHash()
+        public async Task CreateUser_WithNullPassword_ShouldThrowArgumentException()
         {
-            // Function: 10.1 — Create User (edge: no password)
+            // Function: 10.1 — Create User (security: blank password rejected)
             // Arrange
             var user = new User { Username = "nopass_user", IsActive = true };
 
             // Act
-            var created = await _service.CreateUserAsync(user, null);
+            Func<Task> act = async () => await _service.CreateUserAsync(user, null);
 
             // Assert
-            created.UserId.Should().BeGreaterThan(0);
-            created.PasswordHash.Should().Be(string.Empty);
-            created.Salt.Should().Be(string.Empty);
+            await act.Should().ThrowAsync<ArgumentException>()
+                .WithMessage("Password is required when creating a user.");
+            (await _db.Users.AnyAsync(u => u.Username == "nopass_user")).Should().BeFalse();
         }
 
         // ──────────────────────────────────────────────────────────────────

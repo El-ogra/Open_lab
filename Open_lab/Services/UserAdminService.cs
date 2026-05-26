@@ -60,6 +60,11 @@ namespace Open_lab.Services
                 throw new InvalidOperationException("اسم المستخدم موجود بالفعل.");
             }
 
+            if (string.IsNullOrWhiteSpace(plainPassword))
+            {
+                throw new ArgumentException("Password is required when creating a user.");
+            }
+
             user.Username = normalizedUsername;
             ApplyPassword(user, plainPassword);
             _db.Users.Add(user);
@@ -105,7 +110,14 @@ namespace Open_lab.Services
             current.FullName = user.FullName;
             current.IsActive = user.IsActive || string.Equals(current.Username, AdminUsername, StringComparison.OrdinalIgnoreCase);
 
-            if (!string.IsNullOrWhiteSpace(plainPassword))
+            if (string.IsNullOrWhiteSpace(plainPassword))
+            {
+                if (string.IsNullOrWhiteSpace(current.Salt) || string.IsNullOrWhiteSpace(current.PasswordHash))
+                {
+                    throw new InvalidOperationException("A valid password is required because the existing user credentials are incomplete.");
+                }
+            }
+            else
             {
                 ApplyPassword(current, plainPassword);
             }
@@ -271,9 +283,7 @@ namespace Open_lab.Services
         {
             if (string.IsNullOrWhiteSpace(plainPassword))
             {
-                user.PasswordHash = string.Empty;
-                user.Salt = string.Empty;
-                return;
+                throw new ArgumentException("Password is required.");
             }
 
             var salt = PasswordSecurity.GenerateSalt();

@@ -645,7 +645,7 @@ namespace Open_lab.Tests.Services
         }
 
         [Fact]
-        public async Task AuthService_ValidateCredentialsAsync_With_LegacyPassword_Should_MigrateSaltAndHash_EdgeGuard()
+        public async Task AuthService_ValidateCredentialsAsync_With_LegacyPassword_Should_ReturnNullAndNotMutateUser_EdgeGuard()
         {
             // Function: 13.1 — Set Report Margins
             // Arrange
@@ -665,9 +665,9 @@ namespace Open_lab.Tests.Services
             var persisted = await _db.Users.FirstAsync(u => u.UserId == user.UserId);
 
             // Assert
-            result.Should().NotBeNull();
-            persisted.Salt.Should().NotBeNullOrWhiteSpace();
-            persisted.PasswordHash.Should().NotBe("legacy-pass");
+            result.Should().BeNull();
+            persisted.Salt.Should().Be(string.Empty);
+            persisted.PasswordHash.Should().Be("legacy-pass");
         }
 
         private Test SeedTest(string code)

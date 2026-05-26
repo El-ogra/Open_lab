@@ -68,9 +68,9 @@ namespace Open_lab.Tests.Services
         }
 
         [Fact]
-        public async Task ValidateCredentials_WithLegacyPlainText_ShouldMigrateToHash()
+        public async Task ValidateCredentials_WithLegacyPlainText_ShouldReturnNullAndNotMutateUser()
         {
-            // Function: 10.8 — Logout (edge: legacy plain-text password migration)
+            // Function: 10.8 — Logout (security: legacy plain-text password path is rejected)
             // Arrange
             var legacy = new User
             {
@@ -86,12 +86,10 @@ namespace Open_lab.Tests.Services
             var user = await _service.ValidateCredentialsAsync("legacy_user", "plain_password");
 
             // Assert
-            user.Should().NotBeNull();
+            user.Should().BeNull();
             var refreshed = await _db.Users.SingleAsync(u => u.Username == "legacy_user");
-            refreshed.Salt.Should().NotBeNullOrWhiteSpace();
-            refreshed.PasswordHash.Should().NotBe("plain_password");
-            PasswordSecurity.Verify("plain_password", refreshed.Salt, refreshed.PasswordHash)
-                .Should().BeTrue();
+            refreshed.Salt.Should().Be(string.Empty);
+            refreshed.PasswordHash.Should().Be("plain_password");
         }
 
         [Fact]
