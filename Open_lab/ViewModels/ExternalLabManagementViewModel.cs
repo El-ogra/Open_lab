@@ -169,7 +169,7 @@ namespace Open_lab.ViewModels
 
         private async Task LoadReferralsAsync()
         {
-            if (AppSession.UserId <= 0)
+            if (SessionContext.Current.UserId <= 0)
             {
                 StatusMessage = "يجب تسجيل الدخول أولًا.";
                 return;
@@ -193,7 +193,7 @@ namespace Open_lab.ViewModels
 
         private async Task LoadQueueAsync()
         {
-            if (AppSession.UserId <= 0)
+            if (SessionContext.Current.UserId <= 0)
             {
                 StatusMessage = "يجب تسجيل الدخول أولًا.";
                 return;
@@ -228,7 +228,7 @@ namespace Open_lab.ViewModels
 
         private async Task LoadManifestsAsync()
         {
-            if (AppSession.UserId <= 0)
+            if (SessionContext.Current.UserId <= 0)
             {
                 StatusMessage = "يجب تسجيل الدخول أولًا.";
                 return;
@@ -251,7 +251,7 @@ namespace Open_lab.ViewModels
 
         private async Task CreateManifestAsync()
         {
-            if (AppSession.UserId <= 0)
+            if (SessionContext.Current.UserId <= 0)
             {
                 StatusMessage = "يجب تسجيل الدخول أولًا.";
                 return;
@@ -277,7 +277,7 @@ namespace Open_lab.ViewModels
 
         private async Task UpdateStatusAsync()
         {
-            if (AppSession.UserId <= 0)
+            if (SessionContext.Current.UserId <= 0)
             {
                 StatusMessage = "يجب تسجيل الدخول أولًا.";
                 return;
@@ -311,7 +311,7 @@ namespace Open_lab.ViewModels
 
         private async Task LoadSettlementAsync()
         {
-            if (AppSession.UserId <= 0)
+            if (SessionContext.Current.UserId <= 0)
             {
                 StatusMessage = "يجب تسجيل الدخول أولًا.";
                 return;
@@ -343,7 +343,7 @@ namespace Open_lab.ViewModels
 
         private async Task CreateSettlementAsync()
         {
-            if (AppSession.UserId <= 0)
+            if (SessionContext.Current.UserId <= 0)
             {
                 StatusMessage = "يجب تسجيل الدخول أولًا.";
                 return;
@@ -368,7 +368,7 @@ namespace Open_lab.ViewModels
 
         private async Task EnterExternalResultAsync()
         {
-            if (AppSession.UserId <= 0)
+            if (SessionContext.Current.UserId <= 0)
             {
                 StatusMessage = "يجب تسجيل الدخول أولًا.";
                 return;
@@ -400,7 +400,7 @@ namespace Open_lab.ViewModels
 
         private async Task PrintExternalReportAsync()
         {
-            if (AppSession.UserId <= 0)
+            if (SessionContext.Current.UserId <= 0)
             {
                 StatusMessage = "يجب تسجيل الدخول أولًا.";
                 return;

@@ -2,7 +2,6 @@ using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Open_lab.Data;
 using Open_lab.Models;
-using Open_lab.ViewModels;
 
 namespace Open_lab.IntegrationTests.Infrastructure;
 
@@ -14,10 +13,7 @@ public abstract class SqliteIntegrationTestBase : IAsyncLifetime
 
     public async Task InitializeAsync()
     {
-        AppSession.Clear();
-        AppSession.IsAdmin = true;
-        AppSession.UserId = 1;
-        AppSession.Username = "integration-admin";
+        SessionContext.Current.BeginSession(1, "integration-admin", new[] { PermissionCodes.FullAccess });
 
         _connection = new SqliteConnection("Data Source=:memory:");
         await _connection.OpenAsync();
@@ -37,7 +33,7 @@ public abstract class SqliteIntegrationTestBase : IAsyncLifetime
 
     public async Task DisposeAsync()
     {
-        AppSession.Clear();
+        SessionContext.Current.EndSession();
         await Db.DisposeAsync();
         if (_connection != null)
         {

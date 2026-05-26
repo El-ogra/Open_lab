@@ -20,10 +20,10 @@ namespace Open_lab.ViewModels
             _constantsService = constantsService;
             Items = new ObservableCollection<Setting>();
 
-            SeedDefaultsCommand = new RelayCommand(async _ => await SeedDefaultsAsync(), _ => AppSession.HasPermission(PermissionCodes.ConstantsEdit));
-            ReloadCommand = new RelayCommand(async _ => await LoadAsync(), _ => AppSession.HasPermission(PermissionCodes.ConstantsView));
-            SaveCommand = new RelayCommand(async _ => await SaveAsync(), _ => AppSession.HasPermission(PermissionCodes.ConstantsEdit));
-            DeleteCommand = new RelayCommand(async _ => await DeleteAsync(), _ => AppSession.HasPermission(PermissionCodes.ConstantsEdit) && Selected != null);
+            SeedDefaultsCommand = new RelayCommand(async _ => await SeedDefaultsAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.ConstantsEdit));
+            ReloadCommand = new RelayCommand(async _ => await LoadAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.ConstantsView));
+            SaveCommand = new RelayCommand(async _ => await SaveAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.ConstantsEdit));
+            DeleteCommand = new RelayCommand(async _ => await DeleteAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.ConstantsEdit) && Selected != null);
 
             _ = LoadAsync();
         }

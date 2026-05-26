@@ -25,12 +25,12 @@ namespace Open_lab.ViewModels
         {
             _backupRestoreService = backupRestoreService;
             BackupFiles = new ObservableCollection<string>();
-            BackupCommand = new RelayCommand(async _ => await BackupAsync(), _ => AppSession.HasPermission(PermissionCodes.BackupRestore));
-            RestoreCommand = new RelayCommand(async _ => await RestoreAsync(), _ => AppSession.HasPermission(PermissionCodes.BackupRestore));
-            LoadBackupsCommand = new RelayCommand(async _ => await LoadBackupsAsync(), _ => AppSession.HasPermission(PermissionCodes.BackupRestore));
-            ConfigureScheduleCommand = new RelayCommand(async _ => await ConfigureScheduleAsync(), _ => AppSession.HasPermission(PermissionCodes.BackupRestore));
-            DisableScheduleCommand = new RelayCommand(async _ => await DisableScheduleAsync(), _ => AppSession.HasPermission(PermissionCodes.BackupRestore));
-            RefreshScheduleCommand = new RelayCommand(async _ => await RefreshScheduleAsync(), _ => AppSession.HasPermission(PermissionCodes.BackupRestore));
+            BackupCommand = new RelayCommand(async _ => await BackupAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.BackupRestore));
+            RestoreCommand = new RelayCommand(async _ => await RestoreAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.BackupRestore));
+            LoadBackupsCommand = new RelayCommand(async _ => await LoadBackupsAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.BackupRestore));
+            ConfigureScheduleCommand = new RelayCommand(async _ => await ConfigureScheduleAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.BackupRestore));
+            DisableScheduleCommand = new RelayCommand(async _ => await DisableScheduleAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.BackupRestore));
+            RefreshScheduleCommand = new RelayCommand(async _ => await RefreshScheduleAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.BackupRestore));
             _ = RefreshScheduleAsync();
         }
 

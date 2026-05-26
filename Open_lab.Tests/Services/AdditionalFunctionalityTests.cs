@@ -606,21 +606,17 @@ namespace Open_lab.Tests.Services
         {
             // Function: 10.8 — Logout
             // Arrange
-            Open_lab.ViewModels.AppSession.UserId = 123;
-            Open_lab.ViewModels.AppSession.Username = "testuser";
-            Open_lab.ViewModels.AppSession.IsAdmin = true;
-            Open_lab.ViewModels.AppSession.AttendanceLogId = 456;
-            Open_lab.ViewModels.AppSession.SetPermissions(new[] { "PERM1", "PERM2" });
+            Open_lab.Services.SessionContext.Current.BeginSession(123, "testuser", new[] { "PERM1", "PERM2" }, 456);
 
             // Act
-            Open_lab.ViewModels.AppSession.Clear();
+            Open_lab.Services.SessionContext.Current.EndSession();
 
             // Assert
-            Open_lab.ViewModels.AppSession.UserId.Should().Be(0);
-            Open_lab.ViewModels.AppSession.Username.Should().BeEmpty();
-            Open_lab.ViewModels.AppSession.IsAdmin.Should().BeFalse();
-            Open_lab.ViewModels.AppSession.AttendanceLogId.Should().Be(0);
-            Open_lab.ViewModels.AppSession.HasPermission("PERM1").Should().BeFalse();
+            Open_lab.Services.SessionContext.Current.UserId.Should().Be(0);
+            Open_lab.Services.SessionContext.Current.Username.Should().BeEmpty();
+            Open_lab.Services.SessionContext.Current.IsAdmin.Should().BeFalse();
+            Open_lab.Services.SessionContext.Current.AttendanceLogId.Should().Be(0);
+            Open_lab.Services.SessionContext.Current.HasPermission("PERM1").Should().BeFalse();
         }
 
         [Fact]
@@ -628,13 +624,13 @@ namespace Open_lab.Tests.Services
         {
             // Function: 10.8 — Logout
             // Arrange
-            Open_lab.ViewModels.AppSession.SetPermissions(new[] { "ADMIN_ACCESS", "USER_ACCESS" });
-            Open_lab.ViewModels.AppSession.Clear();
+            Open_lab.Services.SessionContext.Current.BeginSession(0, string.Empty, new[] { "ADMIN_ACCESS", "USER_ACCESS" });
+            Open_lab.Services.SessionContext.Current.EndSession();
 
             // Act & Assert
             // Assert
-            Open_lab.ViewModels.AppSession.HasPermission("ADMIN_ACCESS").Should().BeFalse();
-            Open_lab.ViewModels.AppSession.HasPermission("USER_ACCESS").Should().BeFalse();
+            Open_lab.Services.SessionContext.Current.HasPermission("ADMIN_ACCESS").Should().BeFalse();
+            Open_lab.Services.SessionContext.Current.HasPermission("USER_ACCESS").Should().BeFalse();
         }
 
         [Fact]
@@ -642,16 +638,15 @@ namespace Open_lab.Tests.Services
         {
             // Function: 10.8 — Logout
             // Arrange
-            Open_lab.ViewModels.AppSession.IsAdmin = true;
-            Open_lab.ViewModels.AppSession.SetPermissions(new[] { "SOME_PERM" });
+            Open_lab.Services.SessionContext.Current.BeginSession(0, string.Empty, new[] { "SOME_PERM" });
 
             // Act
-            Open_lab.ViewModels.AppSession.Clear();
+            Open_lab.Services.SessionContext.Current.EndSession();
 
             // Assert
-            Open_lab.ViewModels.AppSession.IsAdmin.Should().BeFalse();
+            Open_lab.Services.SessionContext.Current.IsAdmin.Should().BeFalse();
             // Even with IsAdmin false, permissions should be cleared
-            Open_lab.ViewModels.AppSession.HasPermission("SOME_PERM").Should().BeFalse();
+            Open_lab.Services.SessionContext.Current.HasPermission("SOME_PERM").Should().BeFalse();
         }
 
         // Stage 2 Additional Tests - Cross-Service Logic Validation

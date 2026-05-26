@@ -112,7 +112,7 @@ namespace Open_lab.ViewModels
 
         private async Task LoadGroupsAsync()
         {
-            if (AppSession.UserId <= 0)
+            if (SessionContext.Current.UserId <= 0)
             {
                 StatusMessage = "يجب تسجيل الدخول أولًا.";
                 return;
@@ -144,7 +144,7 @@ namespace Open_lab.ViewModels
 
         private async Task LoadWorksheetAsync()
         {
-            if (AppSession.UserId <= 0)
+            if (SessionContext.Current.UserId <= 0)
             {
                 StatusMessage = "يجب تسجيل الدخول أولًا.";
                 return;
@@ -188,7 +188,7 @@ namespace Open_lab.ViewModels
 
         private async Task PrintAsync()
         {
-            if (AppSession.UserId <= 0)
+            if (SessionContext.Current.UserId <= 0)
             {
                 StatusMessage = "يجب تسجيل الدخول أولًا.";
                 return;

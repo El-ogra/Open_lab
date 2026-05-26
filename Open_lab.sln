@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Open_lab.Tests", "Open_lab.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Open_lab.IntegrationTests", "Open_lab.IntegrationTests\Open_lab.IntegrationTests.csproj", "{40D1C4EC-FBD3-4C8E-BDF1-7A759419179A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Open_lab.AdminCli", "Open_lab.AdminCli\Open_lab.AdminCli.csproj", "{A8D7E530-6E41-4B13-93A5-6BB454198B8A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -55,6 +57,18 @@ Global
 		{40D1C4EC-FBD3-4C8E-BDF1-7A759419179A}.Release|x64.Build.0 = Release|Any CPU
 		{40D1C4EC-FBD3-4C8E-BDF1-7A759419179A}.Release|x86.ActiveCfg = Release|Any CPU
 		{40D1C4EC-FBD3-4C8E-BDF1-7A759419179A}.Release|x86.Build.0 = Release|Any CPU
+		{A8D7E530-6E41-4B13-93A5-6BB454198B8A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A8D7E530-6E41-4B13-93A5-6BB454198B8A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A8D7E530-6E41-4B13-93A5-6BB454198B8A}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{A8D7E530-6E41-4B13-93A5-6BB454198B8A}.Debug|x64.Build.0 = Debug|Any CPU
+		{A8D7E530-6E41-4B13-93A5-6BB454198B8A}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{A8D7E530-6E41-4B13-93A5-6BB454198B8A}.Debug|x86.Build.0 = Debug|Any CPU
+		{A8D7E530-6E41-4B13-93A5-6BB454198B8A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A8D7E530-6E41-4B13-93A5-6BB454198B8A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A8D7E530-6E41-4B13-93A5-6BB454198B8A}.Release|x64.ActiveCfg = Release|Any CPU
+		{A8D7E530-6E41-4B13-93A5-6BB454198B8A}.Release|x64.Build.0 = Release|Any CPU
+		{A8D7E530-6E41-4B13-93A5-6BB454198B8A}.Release|x86.ActiveCfg = Release|Any CPU
+		{A8D7E530-6E41-4B13-93A5-6BB454198B8A}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

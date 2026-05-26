@@ -61,10 +61,10 @@ namespace Open_lab.ViewModels
             RefreshCommand = new RelayCommand(async _ => await RefreshAsync());
             SearchByDateCommand = new RelayCommand(async _ => await SearchByDateAsync());
             SelectPatientCommand = new RelayCommand(async _ => await SelectPatientAsync());
-            LoadVisitTestsCommand = new RelayCommand(async _ => await LoadVisitTestsAsync(), _ => AppSession.HasPermission(PermissionCodes.ResultsView));
-            SaveResultsCommand = new RelayCommand(async _ => await SaveResultsAsync(), _ => AppSession.HasPermission(PermissionCodes.ResultsEdit) && SelectedVisitTest != null && !IsSelectedVerified());
-            VerifyResultsCommand = new RelayCommand(async _ => await VerifyResultsAsync(), _ => AppSession.HasPermission(PermissionCodes.ResultsEdit) && SelectedVisitTest != null);
-            ReopenResultsCommand = new RelayCommand(async _ => await ReopenResultsAsync(), _ => AppSession.HasPermission(PermissionCodes.ResultsEdit) && SelectedVisitTest != null && IsSelectedVerified());
+            LoadVisitTestsCommand = new RelayCommand(async _ => await LoadVisitTestsAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.ResultsView));
+            SaveResultsCommand = new RelayCommand(async _ => await SaveResultsAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.ResultsEdit) && SelectedVisitTest != null && !IsSelectedVerified());
+            VerifyResultsCommand = new RelayCommand(async _ => await VerifyResultsAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.ResultsEdit) && SelectedVisitTest != null);
+            ReopenResultsCommand = new RelayCommand(async _ => await ReopenResultsAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.ResultsEdit) && SelectedVisitTest != null && IsSelectedVerified());
 
             MarkFinishedAllCommand = new RelayCommand(async _ => await MarkFinishedAllAsync());
             MarkVerifiedAllCommand = new RelayCommand(async _ => await MarkVerifiedAllAsync());
@@ -403,7 +403,7 @@ namespace Open_lab.ViewModels
                         item.Value,
                         item.Flag,
                         item.Comment,
-                        AppSession.UserId > 0 ? AppSession.UserId : 1);
+                        SessionContext.Current.UserId > 0 ? SessionContext.Current.UserId : 1);
                 }
 
                 SelectedVisitTest.Status = ResultItems.Any(i => !string.IsNullOrWhiteSpace(i.Value)) ? "Completed" : "InProgress";
@@ -426,7 +426,7 @@ namespace Open_lab.ViewModels
 
             try
             {
-                await _resultsService.VerifyVisitTestAsync(SelectedVisitTest.VisitTestId, AppSession.UserId > 0 ? AppSession.UserId : 1);
+                await _resultsService.VerifyVisitTestAsync(SelectedVisitTest.VisitTestId, SessionContext.Current.UserId > 0 ? SessionContext.Current.UserId : 1);
                 SelectedVisitTest.Status = "Verified";
                 RaiseCommandStates();
                 await LoadVisitTestsAsync();
@@ -494,7 +494,7 @@ namespace Open_lab.ViewModels
 
         private async Task MarkVerifiedAllAsync()
         {
-            var userId = AppSession.UserId > 0 ? AppSession.UserId : 1;
+            var userId = SessionContext.Current.UserId > 0 ? SessionContext.Current.UserId : 1;
             await _resultsService.MarkVisitTestsVerifiedAsync(VisitTests.Select(t => t.VisitTestId), userId);
 
             foreach (var test in VisitTests)
@@ -508,7 +508,7 @@ namespace Open_lab.ViewModels
 
         private async Task MarkPrintedAllAsync()
         {
-            var userId = AppSession.UserId > 0 ? AppSession.UserId : 1;
+            var userId = SessionContext.Current.UserId > 0 ? SessionContext.Current.UserId : 1;
             await _resultsService.MarkVisitTestsPrintedAsync(VisitTests.Select(t => t.VisitTestId), userId);
 
             foreach (var test in VisitTests)

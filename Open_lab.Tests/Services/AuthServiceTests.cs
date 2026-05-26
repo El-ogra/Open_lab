@@ -118,9 +118,9 @@ namespace Open_lab.Tests.Services
         }
 
         [Fact]
-        public async Task ValidateCredentials_AdminDevelopmentFallback_ShouldResetHashAndReturnUser()
+        public async Task ValidateCredentials_AdminDevelopmentFallback_ShouldReturnNullAndNotMutateUser()
         {
-            // Function: 10.8 — Logout (edge: admin dev fallback always valid)
+            // Function: 10.8 — Logout (security: hardcoded admin fallback is rejected)
             // Arrange
             var salt = PasswordSecurity.GenerateSalt();
             var wrongHash = PasswordSecurity.ComputeSha256("wrong_pass", salt);
@@ -137,11 +137,11 @@ namespace Open_lab.Tests.Services
             var user = await _service.ValidateCredentialsAsync("admin", "admin123");
 
             // Assert
-            user.Should().NotBeNull();
+            user.Should().BeNull();
             var refreshed = await _db.Users.SingleAsync(u => u.Username == "admin");
-            refreshed.IsActive.Should().BeTrue();
-            PasswordSecurity.Verify("admin123", refreshed.Salt, refreshed.PasswordHash)
-                .Should().BeTrue();
+            refreshed.IsActive.Should().BeFalse();
+            refreshed.Salt.Should().Be(salt);
+            refreshed.PasswordHash.Should().Be(wrongHash);
         }
 
         [Fact]

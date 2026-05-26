@@ -39,7 +39,7 @@ namespace Open_lab.ViewModels
             _invoiceService = invoiceService;
             Visits = new ObservableCollection<DeliveryVisitRow>();
 
-            SearchCommand = new RelayCommand(async _ => await LoadAsync(), _ => AppSession.HasPermission(PermissionCodes.DeliveryView));
+            SearchCommand = new RelayCommand(async _ => await LoadAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.DeliveryView));
             DeliverCommand = new RelayCommand(async _ => await DeliverAsync(), _ => CanDeliver());
             ReopenCommand = new RelayCommand(async _ => await ReopenAsync(), _ => CanReopen());
             PayCommand = new RelayCommand(async _ => await PayAsync(), _ => CanPay());
@@ -191,7 +191,7 @@ namespace Open_lab.ViewModels
 
             try
             {
-                await _deliveryService.DeliverAsync(SelectedVisit.VisitId, AppSession.UserId > 0 ? AppSession.UserId : 1);
+                await _deliveryService.DeliverAsync(SelectedVisit.VisitId, SessionContext.Current.UserId > 0 ? SessionContext.Current.UserId : 1);
                 await LoadAsync();
                 StatusMessage = "تم تسليم الزيارة بنجاح.";
             }
@@ -241,7 +241,7 @@ namespace Open_lab.ViewModels
                     invoice.InvoiceId,
                     PaymentAmount,
                     "Cash",
-                    AppSession.UserId > 0 ? AppSession.UserId : 1);
+                    SessionContext.Current.UserId > 0 ? SessionContext.Current.UserId : 1);
 
                 PaymentAmount = 0;
                 await LoadAsync();
@@ -255,7 +255,7 @@ namespace Open_lab.ViewModels
 
         private bool CanDeliver()
         {
-            return AppSession.HasPermission(PermissionCodes.DeliveryEdit)
+            return SessionContext.Current.HasPermission(PermissionCodes.DeliveryEdit)
                 && SelectedVisit != null
                 && SelectedVisit.IsReadyForDelivery
                 && !SelectedVisit.IsDelivered;
@@ -263,14 +263,14 @@ namespace Open_lab.ViewModels
 
         private bool CanReopen()
         {
-            return AppSession.HasPermission(PermissionCodes.DeliveryEdit)
+            return SessionContext.Current.HasPermission(PermissionCodes.DeliveryEdit)
                 && SelectedVisit != null
                 && SelectedVisit.IsDelivered;
         }
 
         private bool CanPay()
         {
-            return AppSession.HasPermission(PermissionCodes.DeliveryEdit)
+            return SessionContext.Current.HasPermission(PermissionCodes.DeliveryEdit)
                 && _invoiceService != null
                 && SelectedVisit != null
                 && PaymentAmount > 0;

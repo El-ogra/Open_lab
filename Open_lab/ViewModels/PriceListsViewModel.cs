@@ -29,13 +29,13 @@ namespace Open_lab.ViewModels
             Tests = new ObservableCollection<Test>();
             Referrals = new ObservableCollection<Referral>();
 
-            LoadCommand = new RelayCommand(async _ => await LoadAsync(), _ => AppSession.HasPermission(PermissionCodes.TestsView));
-            SaveListCommand = new RelayCommand(async _ => await SaveListAsync(), _ => AppSession.HasPermission(PermissionCodes.TestsEdit));
-            UpdateListCommand = new RelayCommand(async _ => await UpdateListAsync(), _ => AppSession.HasPermission(PermissionCodes.TestsEdit) && SelectedPriceList != null);
-            AddItemCommand = new RelayCommand(async _ => await AddItemAsync(), _ => AppSession.HasPermission(PermissionCodes.TestsEdit) && SelectedPriceList != null && SelectedTest != null);
-            UpdateItemCommand = new RelayCommand(async _ => await UpdateItemAsync(), _ => AppSession.HasPermission(PermissionCodes.TestsEdit) && SelectedItem != null);
-            DeleteItemCommand = new RelayCommand(async _ => await DeleteItemAsync(), _ => AppSession.HasPermission(PermissionCodes.TestsEdit) && SelectedItem != null);
-            PrintListCommand = new RelayCommand(async _ => await PrintListAsync(), _ => AppSession.HasPermission(PermissionCodes.TestsView) && SelectedPriceList != null && Items.Count > 0);
+            LoadCommand = new RelayCommand(async _ => await LoadAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.TestsView));
+            SaveListCommand = new RelayCommand(async _ => await SaveListAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.TestsEdit));
+            UpdateListCommand = new RelayCommand(async _ => await UpdateListAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.TestsEdit) && SelectedPriceList != null);
+            AddItemCommand = new RelayCommand(async _ => await AddItemAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.TestsEdit) && SelectedPriceList != null && SelectedTest != null);
+            UpdateItemCommand = new RelayCommand(async _ => await UpdateItemAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.TestsEdit) && SelectedItem != null);
+            DeleteItemCommand = new RelayCommand(async _ => await DeleteItemAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.TestsEdit) && SelectedItem != null);
+            PrintListCommand = new RelayCommand(async _ => await PrintListAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.TestsView) && SelectedPriceList != null && Items.Count > 0);
 
             _ = LoadAsync();
         }

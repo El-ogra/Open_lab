@@ -24,8 +24,8 @@ namespace Open_lab.ViewModels
             _testCatalogService = testCatalogService;
             Referrals = new ObservableCollection<Referral>();
 
-            SaveCommand = new RelayCommand(async _ => await SaveAsync(), _ => AppSession.HasPermission(PermissionCodes.TestsEdit));
-            DeleteCommand = new RelayCommand(async _ => await DeleteAsync(), _ => AppSession.HasPermission(PermissionCodes.TestsEdit) && SelectedReferral != null);
+            SaveCommand = new RelayCommand(async _ => await SaveAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.TestsEdit));
+            DeleteCommand = new RelayCommand(async _ => await DeleteAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.TestsEdit) && SelectedReferral != null);
 
             _ = LoadAsync();
         }

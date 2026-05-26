@@ -33,14 +33,14 @@ namespace Open_lab.Tests.ViewModels
                 windowLayoutServiceMock.Object);
 
             await viewModel.InvokePrivateAsync("OnLoginSuccessAsync");
-            AppSession.UserId = 99;
-            AppSession.AttendanceLogId = 42;
+            SessionContext.Current.UserId = 99;
+            SessionContext.Current.AttendanceLogId = 42;
             await viewModel.InvokePrivateAsync("LogoutAsync");
 
             attendanceServiceMock.Verify(x => x.CloseAsync(42), Times.Once);
             // Assert
-            AppSession.AttendanceLogId.Should().Be(0);
-            AppSession.UserId.Should().Be(0);
+            SessionContext.Current.AttendanceLogId.Should().Be(0);
+            SessionContext.Current.UserId.Should().Be(0);
             viewModel.IsLoggedIn.Should().BeFalse();
             navigationServiceMock.Verify(x => x.Navigate(NavigationTarget.Login, It.IsAny<System.Action?>()), Times.Exactly(2));
             windowLayoutServiceMock.Verify(x => x.ApplyLoginLayout(), Times.Exactly(2));
@@ -67,14 +67,14 @@ namespace Open_lab.Tests.ViewModels
                 windowLayoutServiceMock.Object);
 
             await viewModel.InvokePrivateAsync("OnLoginSuccessAsync");
-            AppSession.AttendanceLogId = 0;
+            SessionContext.Current.AttendanceLogId = 0;
 
             // Act
             await viewModel.InvokePrivateAsync("LogoutAsync");
 
             // Assert
             attendanceServiceMock.Verify(x => x.CloseAsync(It.IsAny<int>()), Times.Never);
-            AppSession.AttendanceLogId.Should().Be(0);
+            SessionContext.Current.AttendanceLogId.Should().Be(0);
             viewModel.IsLoggedIn.Should().BeFalse();
         }
 
@@ -102,13 +102,13 @@ namespace Open_lab.Tests.ViewModels
                 windowLayoutServiceMock.Object);
 
             await viewModel.InvokePrivateAsync("OnLoginSuccessAsync");
-            AppSession.AttendanceLogId = 77;
+            SessionContext.Current.AttendanceLogId = 77;
 
             // Act
             await viewModel.InvokePrivateAsync("LogoutAsync");
 
             // Assert
-            AppSession.AttendanceLogId.Should().Be(0);
+            SessionContext.Current.AttendanceLogId.Should().Be(0);
             viewModel.IsLoggedIn.Should().BeFalse();
         }
     }

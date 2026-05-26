@@ -108,7 +108,7 @@ namespace Open_lab.Tests.Services
         }
 
         [Fact]
-        public async Task VerifyMasterPasswordAsync_When_No_Hash_Should_Allow_Default_Admin123_Edge()
+        public async Task VerifyMasterPasswordAsync_When_No_Hash_Should_Reject_All_Passwords_Edge()
         {
             // Function: 13.3 — `Configure Header/Footer`
             // Arrange
@@ -117,7 +117,7 @@ namespace Open_lab.Tests.Services
             var bad = await _service.VerifyMasterPasswordAsync("wrong");
 
             // Assert
-            ok.Should().BeTrue();
+            ok.Should().BeFalse();
             bad.Should().BeFalse();
         }
 
@@ -153,8 +153,10 @@ namespace Open_lab.Tests.Services
             var salt = await _db.Settings.FirstOrDefaultAsync(s => s.Key == "Security.MasterPasswordSalt");
             hash.Should().NotBeNull();
             salt.Should().NotBeNull();
-            hash!.Value.Should().Be("hash-value");
+            hash!.Value.Should().NotBe("hash-value");
             salt!.Value.Should().NotBeNullOrWhiteSpace();
+            PasswordSecurity.Verify("hash-value", salt.Value!, hash.Value!)
+                .Should().BeTrue();
         }
         [Fact]
         public async Task SetDefaultAccountType_When_Exception_Should_Throw_FailureGuard()

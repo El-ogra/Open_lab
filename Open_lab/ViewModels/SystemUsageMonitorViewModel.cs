@@ -15,7 +15,7 @@ namespace Open_lab.ViewModels
         {
             _systemMonitorService = systemMonitorService;
             Sessions = new ObservableCollection<ActiveSessionRow>();
-            RefreshCommand = new RelayCommand(async _ => await RefreshAsync(), _ => AppSession.HasPermission(PermissionCodes.UsersView));
+            RefreshCommand = new RelayCommand(async _ => await RefreshAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.UsersView));
             _ = RefreshAsync();
         }
 

@@ -190,12 +190,12 @@ namespace Open_lab.ViewModels
             SelectedTests = new ObservableCollection<SelectedTestItem>();
             QuickPatientsList = new ObservableCollection<Patient>();
 
-            SaveCommand = new RelayCommand(async _ => await SaveAsync(), _ => AppSession.HasPermission(PermissionCodes.PatientsEdit) && (IsEditMode || PatientId == 0));
-            NewCommand = new RelayCommand(async _ => await ClearFormAsync(), _ => AppSession.HasPermission(PermissionCodes.PatientsEdit));
-            GenerateLabIdCommand = new RelayCommand(async _ => await GenerateLabIdAsync(), _ => AppSession.HasPermission(PermissionCodes.PatientsEdit) && PatientId == 0);
-            LoadByLabIdCommand = new RelayCommand(async _ => await LoadByLabIdAsync(), _ => AppSession.HasPermission(PermissionCodes.PatientsView));
-            SearchCommand = new RelayCommand(async _ => await SearchAsync(), _ => AppSession.HasPermission(PermissionCodes.PatientsView));
-            DeleteCommand = new RelayCommand(async _ => await DeleteAsync(), _ => AppSession.HasPermission(PermissionCodes.PatientsEdit) && PatientId > 0);
+            SaveCommand = new RelayCommand(async _ => await SaveAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.PatientsEdit) && (IsEditMode || PatientId == 0));
+            NewCommand = new RelayCommand(async _ => await ClearFormAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.PatientsEdit));
+            GenerateLabIdCommand = new RelayCommand(async _ => await GenerateLabIdAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.PatientsEdit) && PatientId == 0);
+            LoadByLabIdCommand = new RelayCommand(async _ => await LoadByLabIdAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.PatientsView));
+            SearchCommand = new RelayCommand(async _ => await SearchAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.PatientsView));
+            DeleteCommand = new RelayCommand(async _ => await DeleteAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.PatientsEdit) && PatientId > 0);
             AddTestCommand = new RelayCommand(_ => AddSelectedTest(), _ => SelectedAvailableTest != null);
             AddAllTestsCommand = new RelayCommand(_ => AddAllVisibleTests(), _ => AvailableTests.Count > 0);
             RemoveTestCommand = new RelayCommand(_ => RemoveSelectedTest(), _ => SelectedTest != null);
@@ -204,14 +204,14 @@ namespace Open_lab.ViewModels
             SendCommand = new RelayCommand(async _ => await PrintReceiptAsync(), _ => CurrentVisitId > 0);
             AddSelectedTestCommand = new RelayCommand(_ => AddSelectedTest(), _ => SelectedAvailableTest != null);
             RemoveSelectedTestCommand = new RelayCommand(_ => RemoveSelectedTest(), _ => SelectedTest != null);
-            EditCommand = new RelayCommand(_ => EnterEditMode(), _ => AppSession.HasPermission(PermissionCodes.PatientsEdit) && PatientId > 0 && !IsEditMode);
+            EditCommand = new RelayCommand(_ => EnterEditMode(), _ => SessionContext.Current.HasPermission(PermissionCodes.PatientsEdit) && PatientId > 0 && !IsEditMode);
             GoToResultsCommand = new RelayCommand(_ => NavigateToResults(), _ => true);
             ResetCommand = new RelayCommand(async _ => await ClearFormAsync(), _ => true);
             DocumentsCommand = new RelayCommand(_ => ShowDocuments(), _ => PatientId > 0);
             GoToHomeCommand = new RelayCommand(_ => NavigateToHome(), _ => true);
-            LoadByCodeCommand = new RelayCommand(async _ => await LoadByCodeAsync(), _ => AppSession.HasPermission(PermissionCodes.PatientsView));
-            NewPatientCommand = new RelayCommand(async _ => await ClearFormAsync(), _ => AppSession.HasPermission(PermissionCodes.PatientsEdit));
-            ShowTodayPatientsCommand = new RelayCommand(async _ => await LoadTodayPatientsAsync(), _ => AppSession.HasPermission(PermissionCodes.PatientsView));
+            LoadByCodeCommand = new RelayCommand(async _ => await LoadByCodeAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.PatientsView));
+            NewPatientCommand = new RelayCommand(async _ => await ClearFormAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.PatientsEdit));
+            ShowTodayPatientsCommand = new RelayCommand(async _ => await LoadTodayPatientsAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.PatientsView));
             ShowMovementCommand = new RelayCommand(_ => ShowMovement(), _ => CurrentVisitId > 0);
             UndoCommand = new RelayCommand(_ => UndoLastChange(), _ => true);
             // FIX: CanExecute كان دائماً true فيُضلّل المستخدم — يضغط الزر قبل حفظ الزيارة
@@ -1098,7 +1098,7 @@ namespace Open_lab.ViewModels
                         Email = Email,
                         Address = Address,
                         ReferralId = NormalizeReferralId(SelectedReferral)
-                    }, AppSession.UserId > 0 ? AppSession.UserId : 1);
+                    }, SessionContext.Current.UserId > 0 ? SessionContext.Current.UserId : 1);
 
                     await SaveMedicalHistoryAsync();
                     await SaveVisitAndInvoiceAsync();

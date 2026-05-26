@@ -131,14 +131,15 @@ namespace Open_lab.Tests.ViewModels
         {
             // Function: 10.4 — Record Attendance (BR-SEC-004: login creates attendance record)
             // Arrange
+            var password = Guid.NewGuid().ToString("N");
             _viewModel.Username = "admin";
-            _viewModel.Password = "admin123";
+            _viewModel.Password = password;
             var user = new User { UserId = 1, Username = "admin", IsActive = true };
             var permissions = new[] { PermissionCodes.FullAccess };
             var attendance = new AttendanceLog { AttendanceLogId = 100 };
 
             _authServiceMock
-                .Setup(x => x.ValidateCredentialsAsync("admin", "admin123"))
+                .Setup(x => x.ValidateCredentialsAsync("admin", password))
                 .ReturnsAsync(user);
             _adminSetupServiceMock
                 .Setup(x => x.EnsureAdminAccessAsync(1))
@@ -154,10 +155,10 @@ namespace Open_lab.Tests.ViewModels
             await _viewModel.InvokePrivateAsync("LoginAsync");
 
             // Assert
-            AppSession.UserId.Should().Be(1);
-            AppSession.Username.Should().Be("admin");
-            AppSession.IsAdmin.Should().BeTrue();
-            AppSession.AttendanceLogId.Should().Be(100);
+            SessionContext.Current.UserId.Should().Be(1);
+            SessionContext.Current.Username.Should().Be("admin");
+            SessionContext.Current.IsAdmin.Should().BeTrue();
+            SessionContext.Current.AttendanceLogId.Should().Be(100);
             _attendanceServiceMock.Verify(
                 x => x.CreateLoginAsync(1, It.IsAny<string>()), Times.Once);
             _onLoginSuccessMock.Verify(x => x(), Times.Once);
@@ -264,12 +265,13 @@ namespace Open_lab.Tests.ViewModels
         {
             // Function: 10.4 — Record Attendance (failure: admin setup error)
             // Arrange
+            var password = Guid.NewGuid().ToString("N");
             _viewModel.Username = "admin";
-            _viewModel.Password = "admin123";
+            _viewModel.Password = password;
             var user = new User { UserId = 1, Username = "admin", IsActive = true };
 
             _authServiceMock
-                .Setup(x => x.ValidateCredentialsAsync("admin", "admin123"))
+                .Setup(x => x.ValidateCredentialsAsync("admin", password))
                 .ReturnsAsync(user);
             _adminSetupServiceMock
                 .Setup(x => x.EnsureAdminAccessAsync(1))

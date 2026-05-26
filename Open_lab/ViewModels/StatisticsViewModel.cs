@@ -38,8 +38,8 @@ namespace Open_lab.ViewModels
             YearlySamples = new ObservableCollection<YearlySampleRow>();
             UserProductivity = new ObservableCollection<UserPerformanceRow>();
 
-            LoadCommand = new RelayCommand(async _ => await LoadAsync(), _ => AppSession.HasPermission(PermissionCodes.StatisticsView));
-            PrintCommand = new RelayCommand(async _ => await PrintAsync(), _ => AppSession.HasPermission(PermissionCodes.StatisticsView));
+            LoadCommand = new RelayCommand(async _ => await LoadAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.StatisticsView));
+            PrintCommand = new RelayCommand(async _ => await PrintAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.StatisticsView));
 
             _ = InitializeAsync();
         }

@@ -5,6 +5,7 @@ using Open_lab.Data;
 using Open_lab.Services;
 using Open_lab.ViewModels;
 using Open_lab.Views;
+using Open_lab.Views.Bootstrap;
 
 namespace Open_lab
 {
@@ -18,7 +19,7 @@ namespace Open_lab
             base.OnStartup(e);
 
             _serviceProvider = ConfigureServices();
-            ShowLoginWindow();
+            ShowStartupWindow();
         }
 
         protected override void OnExit(ExitEventArgs e)
@@ -34,21 +35,72 @@ namespace Open_lab
             services.AddTransient<OpenLabDbContext>(_ => 
             {
                 var context = new OpenLabDbContextFactory().CreateDbContext(System.Array.Empty<string>());
-                if (AppSession.UserId > 0)
+                if (SessionContext.Current.UserId > 0)
                 {
-                    context.CurrentUserId = AppSession.UserId;
+                    context.CurrentUserId = SessionContext.Current.UserId;
                 }
                 return context;
             });
 
             RegisterServicesByConvention(services);
 
+            services.AddSingleton<ISessionContext>(SessionContext.Current);
+            services.AddSingleton<IMutableSessionContext>(SessionContext.Current);
             services.AddSingleton<IViewModelFactory, ViewModelFactory>();
             services.AddSingleton<INavigationService, NavigationService>();
             services.AddTransient<WelcomeViewModel>();
             services.AddTransient<MainViewModel>();
+            services.AddTransient<BootstrapViewModel>();
 
             return services.BuildServiceProvider();
+        }
+
+        private async void ShowStartupWindow()
+        {
+            if (_serviceProvider == null)
+            {
+                return;
+            }
+
+            var adminSetupService = _serviceProvider.GetRequiredService<IAdminSetupService>();
+            if (await adminSetupService.IsBootstrapRequiredAsync())
+            {
+                ShowBootstrapWindow();
+                return;
+            }
+
+            ShowLoginWindow();
+        }
+
+        private void ShowBootstrapWindow()
+        {
+            if (_serviceProvider == null)
+            {
+                return;
+            }
+
+            var bootstrapView = new BootstrapView();
+            var bootstrapWindow = new Window
+            {
+                Title = "إعداد المشرف الأول",
+                Content = bootstrapView,
+                Width = 440,
+                Height = 620,
+                ResizeMode = ResizeMode.NoResize,
+                WindowStartupLocation = WindowStartupLocation.CenterScreen,
+                FlowDirection = FlowDirection.RightToLeft
+            };
+
+            bootstrapView.DataContext = ActivatorUtilities.CreateInstance<BootstrapViewModel>(
+                _serviceProvider,
+                new System.Action(() =>
+                {
+                    ShowLoginWindow();
+                    bootstrapWindow.Close();
+                }));
+
+            MainWindow = bootstrapWindow;
+            bootstrapWindow.Show();
         }
 
         private void ShowLoginWindow()
@@ -94,7 +146,7 @@ namespace Open_lab
 
             MainWindow = mainWindow;
             mainViewModel.InitializeAfterLogin(
-                AppSession.Username,
+                SessionContext.Current.Username,
                 System.DateTime.Now.ToString("yyyy/MM/dd HH:mm"),
                 () => ReturnToLogin(mainWindow));
 

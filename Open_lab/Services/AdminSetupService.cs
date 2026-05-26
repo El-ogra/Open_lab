@@ -8,6 +8,8 @@ namespace Open_lab.Services
 {
     public class AdminSetupService : IAdminSetupService
     {
+        public const string BootstrapAdminCreatedAtKey = "Bootstrap.AdminCreatedAt";
+        private const string AdministratorRoleName = "Administrator";
         private readonly OpenLabDbContext _db;
 
         public AdminSetupService(OpenLabDbContext db)
@@ -15,12 +17,45 @@ namespace Open_lab.Services
             _db = db;
         }
 
+        public async Task<bool> IsBootstrapRequiredAsync()
+        {
+            var markerExists = await _db.Settings.AnyAsync(s => s.Key == BootstrapAdminCreatedAtKey);
+            if (markerExists)
+            {
+                return false;
+            }
+
+            var hasAdministrator = await _db.UserRoles
+                .AnyAsync(ur => ur.Role.RoleName == AdministratorRoleName);
+
+            return !hasAdministrator;
+        }
+
+        public async Task MarkBootstrapCompleteAsync()
+        {
+            var marker = await _db.Settings.FirstOrDefaultAsync(s => s.Key == BootstrapAdminCreatedAtKey);
+            if (marker == null)
+            {
+                _db.Settings.Add(new Setting
+                {
+                    Key = BootstrapAdminCreatedAtKey,
+                    Value = DateTimeOffset.UtcNow.ToString("O")
+                });
+            }
+            else if (string.IsNullOrWhiteSpace(marker.Value))
+            {
+                marker.Value = DateTimeOffset.UtcNow.ToString("O");
+            }
+
+            await _db.SaveChangesAsync();
+        }
+
         public async Task EnsureAdminAccessAsync(int userId)
         {
-            var role = await _db.Roles.FirstOrDefaultAsync(r => r.RoleName == "Administrator");
+            var role = await _db.Roles.FirstOrDefaultAsync(r => r.RoleName == AdministratorRoleName);
             if (role == null)
             {
-                role = new Role { RoleName = "Administrator" };
+                role = new Role { RoleName = AdministratorRoleName };
                 _db.Roles.Add(role);
                 await _db.SaveChangesAsync();
             }

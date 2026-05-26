@@ -29,14 +29,14 @@ namespace Open_lab.ViewModels
             Payments = new ObservableCollection<InvoicePaymentRow>();
             AdditionalCharges = new ObservableCollection<AdditionalChargeRow>();
 
-            LoadVisitCommand = new RelayCommand(async _ => await LoadVisitAsync(), _ => AppSession.HasPermission(PermissionCodes.AccountsView));
-            SaveInvoiceCommand = new RelayCommand(async _ => await SaveInvoiceAsync(), _ => AppSession.HasPermission(PermissionCodes.AccountsEdit));
-            AddPaymentCommand = new RelayCommand(async _ => await AddPaymentAsync(), _ => AppSession.HasPermission(PermissionCodes.AccountsEdit) && VisitId > 0);
-            EditPaymentCommand = new RelayCommand(async _ => await EditPaymentAsync(), _ => AppSession.HasPermission(PermissionCodes.AccountsEdit) && SelectedPayment != null && EditPaymentAmount > 0);
-            DeletePaymentCommand = new RelayCommand(async _ => await DeletePaymentAsync(), _ => AppSession.HasPermission(PermissionCodes.AccountsEdit) && SelectedPayment != null);
-            AddChargeCommand = new RelayCommand(async _ => await AddChargeAsync(), _ => AppSession.HasPermission(PermissionCodes.AccountsEdit) && VisitId > 0 && NewChargeAmount > 0 && !string.IsNullOrWhiteSpace(NewChargeDescription));
-            SettleAccountCommand = new RelayCommand(async _ => await SettleAccountAsync(), _ => AppSession.HasPermission(PermissionCodes.AccountsEdit) && VisitId > 0);
-            PrintInvoiceCommand = new RelayCommand(async _ => await PrintInvoiceAsync(), _ => AppSession.HasPermission(PermissionCodes.AccountsView) && VisitId > 0);
+            LoadVisitCommand = new RelayCommand(async _ => await LoadVisitAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.AccountsView));
+            SaveInvoiceCommand = new RelayCommand(async _ => await SaveInvoiceAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.AccountsEdit));
+            AddPaymentCommand = new RelayCommand(async _ => await AddPaymentAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.AccountsEdit) && VisitId > 0);
+            EditPaymentCommand = new RelayCommand(async _ => await EditPaymentAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.AccountsEdit) && SelectedPayment != null && EditPaymentAmount > 0);
+            DeletePaymentCommand = new RelayCommand(async _ => await DeletePaymentAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.AccountsEdit) && SelectedPayment != null);
+            AddChargeCommand = new RelayCommand(async _ => await AddChargeAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.AccountsEdit) && VisitId > 0 && NewChargeAmount > 0 && !string.IsNullOrWhiteSpace(NewChargeDescription));
+            SettleAccountCommand = new RelayCommand(async _ => await SettleAccountAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.AccountsEdit) && VisitId > 0);
+            PrintInvoiceCommand = new RelayCommand(async _ => await PrintInvoiceAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.AccountsView) && VisitId > 0);
         }
 
         public int VisitId
@@ -247,7 +247,7 @@ namespace Open_lab.ViewModels
                     invoice.InvoiceId,
                     Paid,
                     PaymentMethod,
-                    AppSession.UserId > 0 ? AppSession.UserId : 1);
+                    SessionContext.Current.UserId > 0 ? SessionContext.Current.UserId : 1);
                 Paid = 0;
                 await LoadVisitAsync();
                 StatusMessage = "تم تسجيل الدفعة.";
@@ -270,7 +270,7 @@ namespace Open_lab.ViewModels
             {
                 await _invoiceService.DeletePaymentAsync(
                     SelectedPayment.PaymentId,
-                    AppSession.UserId > 0 ? AppSession.UserId : 1,
+                    SessionContext.Current.UserId > 0 ? SessionContext.Current.UserId : 1,
                     Reason);
                 await LoadVisitAsync();
                 StatusMessage = "تم حذف الدفعة.";
@@ -299,7 +299,7 @@ namespace Open_lab.ViewModels
                 await _invoiceService.EditPaymentAsync(
                     SelectedPayment.PaymentId,
                     EditPaymentAmount,
-                    AppSession.UserId > 0 ? AppSession.UserId : 1,
+                    SessionContext.Current.UserId > 0 ? SessionContext.Current.UserId : 1,
                     Reason);
                 await LoadVisitAsync();
                 StatusMessage = "تم تعديل الدفعة.";
@@ -396,7 +396,7 @@ namespace Open_lab.ViewModels
                 var invoice = await _invoiceService.GetByVisitIdAsync(VisitId);
                 if (invoice != null)
                 {
-                    await _invoiceService.LogInvoicePrintedAsync(invoice.InvoiceId, AppSession.UserId > 0 ? AppSession.UserId : 1);
+                    await _invoiceService.LogInvoicePrintedAsync(invoice.InvoiceId, SessionContext.Current.UserId > 0 ? SessionContext.Current.UserId : 1);
                     StatusMessage = "تم تسجيل عملية الطباعة برمجياً.";
                 }
                 else

@@ -33,12 +33,12 @@ namespace Open_lab.ViewModels
             SearchCommand = new RelayCommand(async _ => await SearchAsync());
             DeletePatientCommand = new RelayCommand(async _ => await DeletePatientAsync(), _ => SelectedPatient != null);
 
-            UnenteredResultsCommand = new RelayCommand(async _ => await LoadUnenteredResultsAsync(), _ => AppSession.HasPermission(PermissionCodes.ResultsView));
-            UnreviewedResultsCommand = new RelayCommand(async _ => await LoadUnreviewedResultsAsync(), _ => AppSession.HasPermission(PermissionCodes.ResultsView));
-            UnprintedResultsCommand = new RelayCommand(async _ => await LoadUnprintedResultsAsync(), _ => AppSession.HasPermission(PermissionCodes.ResultsView));
-            UndeliveredResultsCommand = new RelayCommand(async _ => await LoadUndeliveredResultsAsync(), _ => AppSession.HasPermission(PermissionCodes.ResultsView));
-            OpenAccountCommand = new RelayCommand(async _ => await LoadOpenAccountAsync(), _ => AppSession.HasPermission(PermissionCodes.ResultsView));
-            GroupedResultsCommand = new RelayCommand(async _ => await LoadGroupedResultsAsync(), _ => AppSession.HasPermission(PermissionCodes.ResultsView));
+            UnenteredResultsCommand = new RelayCommand(async _ => await LoadUnenteredResultsAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.ResultsView));
+            UnreviewedResultsCommand = new RelayCommand(async _ => await LoadUnreviewedResultsAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.ResultsView));
+            UnprintedResultsCommand = new RelayCommand(async _ => await LoadUnprintedResultsAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.ResultsView));
+            UndeliveredResultsCommand = new RelayCommand(async _ => await LoadUndeliveredResultsAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.ResultsView));
+            OpenAccountCommand = new RelayCommand(async _ => await LoadOpenAccountAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.ResultsView));
+            GroupedResultsCommand = new RelayCommand(async _ => await LoadGroupedResultsAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.ResultsView));
 
             NavigatePatientRegistrationCommand = new RelayCommand(_ => NavigateToPatientRegistration());
             NavigateResultsEntryCommand = new RelayCommand(_ => NavigateToResultsEntry());

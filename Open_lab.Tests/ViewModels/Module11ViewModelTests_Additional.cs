@@ -75,8 +75,8 @@ namespace Open_lab.Tests.ViewModels
         {
             // Function: 11.1 — Clock In
             // Arrange
-            AppSession.UserId = 7;
-            AppSession.AttendanceLogId = 0;
+            SessionContext.Current.UserId = 7;
+            SessionContext.Current.AttendanceLogId = 0;
             _attendanceServiceMock
                 .Setup(x => x.ClockInAsync(7, It.IsAny<DateTime?>(), It.IsAny<int?>(), It.IsAny<string?>()))
                 .ReturnsAsync(new AttendanceLog { AttendanceLogId = 42, UserId = 7, LoginAt = DateTime.Now });
@@ -97,7 +97,7 @@ namespace Open_lab.Tests.ViewModels
             await Task.Delay(100);
 
             // Assert
-            AppSession.AttendanceLogId.Should().Be(42);
+            SessionContext.Current.AttendanceLogId.Should().Be(42);
             statusMessages.Should().Contain(m => m.Contains("تم تسجيل الحضور"));
             statusMessages.Should().Contain(m => m.Contains("42"));
             _attendanceServiceMock.Verify(
@@ -110,7 +110,7 @@ namespace Open_lab.Tests.ViewModels
         {
             // Function: 11.1 — Clock In (فشل الخدمة)
             // Arrange
-            AppSession.UserId = 8;
+            SessionContext.Current.UserId = 8;
             _attendanceServiceMock
                 .Setup(x => x.ClockInAsync(8, It.IsAny<DateTime?>(), It.IsAny<int?>(), It.IsAny<string?>()))
                 .ThrowsAsync(new InvalidOperationException("clockin-failed"));
@@ -131,7 +131,7 @@ namespace Open_lab.Tests.ViewModels
         {
             // Function: 11.1 — Clock In (الحالة الحدية: لا يوجد مستخدم مسجل دخول)
             // Arrange
-            AppSession.Clear(); // UserId = 0 → CanExecute should be false
+            SessionContext.Current.EndSession(); // UserId = 0 → CanExecute should be false
             var vm = CreateLogViewModel();
 
             // Act
@@ -149,7 +149,7 @@ namespace Open_lab.Tests.ViewModels
         {
             // Function: 11.1 — Clock In (السجل موجود مسبقاً، الخدمة ترجعه دون إنشاء جديد)
             // Arrange
-            AppSession.UserId = 9;
+            SessionContext.Current.UserId = 9;
             _attendanceServiceMock
                 .Setup(x => x.ClockInAsync(9, It.IsAny<DateTime?>(), It.IsAny<int?>(), It.IsAny<string?>()))
                 .ReturnsAsync(new AttendanceLog { AttendanceLogId = 100, UserId = 9, LoginAt = DateTime.Today.AddHours(8) });
@@ -170,7 +170,7 @@ namespace Open_lab.Tests.ViewModels
             await Task.Delay(100);
 
             // Assert
-            AppSession.AttendanceLogId.Should().Be(100);
+            SessionContext.Current.AttendanceLogId.Should().Be(100);
             statusMessages.Should().Contain(m => m.Contains("100"));
         }
 
@@ -183,8 +183,8 @@ namespace Open_lab.Tests.ViewModels
         {
             // Function: 11.2 — Clock Out
             // Arrange
-            AppSession.UserId = 11;
-            AppSession.AttendanceLogId = 55;
+            SessionContext.Current.UserId = 11;
+            SessionContext.Current.AttendanceLogId = 55;
             _attendanceServiceMock
                 .Setup(x => x.ClockOutAsync(11, It.IsAny<DateTime?>()))
                 .ReturnsAsync(new AttendanceLog { AttendanceLogId = 55, UserId = 11, LogoutAt = DateTime.Now });
@@ -205,7 +205,7 @@ namespace Open_lab.Tests.ViewModels
             await Task.Delay(100);
 
             // Assert
-            AppSession.AttendanceLogId.Should().Be(0);
+            SessionContext.Current.AttendanceLogId.Should().Be(0);
             statusMessages.Should().Contain(m => m.Contains("تم تسجيل الانصراف"));
             statusMessages.Should().Contain(m => m.Contains("55"));
             _attendanceServiceMock.Verify(x => x.ClockOutAsync(11, It.IsAny<DateTime?>()), Times.Once);
@@ -216,7 +216,7 @@ namespace Open_lab.Tests.ViewModels
         {
             // Function: 11.2 — Clock Out (لا يوجد سجل لإغلاقه)
             // Arrange
-            AppSession.UserId = 12;
+            SessionContext.Current.UserId = 12;
             _attendanceServiceMock
                 .Setup(x => x.ClockOutAsync(12, It.IsAny<DateTime?>()))
                 .ReturnsAsync((AttendanceLog?)null);
@@ -236,7 +236,7 @@ namespace Open_lab.Tests.ViewModels
         {
             // Function: 11.2 — Clock Out (الخدمة ترمي استثناء)
             // Arrange
-            AppSession.UserId = 13;
+            SessionContext.Current.UserId = 13;
             _attendanceServiceMock
                 .Setup(x => x.ClockOutAsync(13, It.IsAny<DateTime?>()))
                 .ThrowsAsync(new InvalidOperationException("clockout-failed"));
@@ -256,7 +256,7 @@ namespace Open_lab.Tests.ViewModels
         {
             // Function: 11.2 — Clock Out (الحالة الحدية: لا يوجد مستخدم)
             // Arrange
-            AppSession.Clear();
+            SessionContext.Current.EndSession();
             var vm = CreateLogViewModel();
 
             // Act
@@ -275,7 +275,7 @@ namespace Open_lab.Tests.ViewModels
         {
             // Function: 11.3 — Calculate Working Hours
             // Arrange
-            AppSession.UserId = 21;
+            SessionContext.Current.UserId = 21;
             _attendanceServiceMock
                 .Setup(x => x.GetDailyWorkingSummaryAsync(21, It.IsAny<DateTime>(), It.IsAny<DateTime?>()))
                 .ReturnsAsync(new DailyWorkingSummary
@@ -306,7 +306,7 @@ namespace Open_lab.Tests.ViewModels
         {
             // Function: 11.3 — Calculate Working Hours (فشل الخدمة)
             // Arrange
-            AppSession.UserId = 22;
+            SessionContext.Current.UserId = 22;
             _attendanceServiceMock
                 .Setup(x => x.GetDailyWorkingSummaryAsync(22, It.IsAny<DateTime>(), It.IsAny<DateTime?>()))
                 .ThrowsAsync(new InvalidOperationException("hours-failed"));
@@ -326,7 +326,7 @@ namespace Open_lab.Tests.ViewModels
         {
             // Function: 11.3 — Calculate Working Hours (الحدية: لا توجد دقائق عمل)
             // Arrange
-            AppSession.UserId = 23;
+            SessionContext.Current.UserId = 23;
             _attendanceServiceMock
                 .Setup(x => x.GetDailyWorkingSummaryAsync(23, It.IsAny<DateTime>(), It.IsAny<DateTime?>()))
                 .ReturnsAsync(new DailyWorkingSummary

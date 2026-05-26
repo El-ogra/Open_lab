@@ -19,8 +19,8 @@ namespace Open_lab.ViewModels
             _testClassificationService = testClassificationService;
             _printService = printService;
             Items = new ObservableCollection<ReagentConsumptionReport>();
-            LoadCommand = new RelayCommand(async _ => await LoadAsync(), _ => AppSession.HasPermission(PermissionCodes.TestsView));
-            PrintCommand = new RelayCommand(async _ => await PrintAsync(), _ => AppSession.HasPermission(PermissionCodes.TestsView));
+            LoadCommand = new RelayCommand(async _ => await LoadAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.TestsView));
+            PrintCommand = new RelayCommand(async _ => await PrintAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.TestsView));
             _ = LoadAsync();
         }
 

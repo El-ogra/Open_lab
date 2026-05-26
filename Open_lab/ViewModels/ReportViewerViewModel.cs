@@ -132,7 +132,7 @@ namespace Open_lab.ViewModels
             try
             {
                 await _printService.PrintVisitReportAsync(Report, isReprint);
-                await _resultsService.LogVisitReportPrintedAsync(Report.Visit.VisitId, AppSession.UserId > 0 ? AppSession.UserId : 1);
+                await _resultsService.LogVisitReportPrintedAsync(Report.Visit.VisitId, SessionContext.Current.UserId > 0 ? SessionContext.Current.UserId : 1);
                 
                 StatusMessage = isReprint
                     ? "تم إرسال إعادة الطباعة إلى Microsoft Print to PDF وتوثيقها."

@@ -218,7 +218,7 @@ namespace Open_lab.ViewModels
 
         private void ShowLogin()
         {
-            AppSession.Clear();
+            SessionContext.Current.EndSession();
             IsLoggedIn = false;
             _windowLayoutService.ApplyLoginLayout();
 
@@ -390,7 +390,7 @@ namespace Open_lab.ViewModels
 
         private bool CanNavigate(string permissionCode)
         {
-            return IsLoggedIn && AppSession.HasPermission(permissionCode);
+            return IsLoggedIn && SessionContext.Current.HasPermission(permissionCode);
         }
 
         private async Task LogoutAsync()
@@ -398,7 +398,7 @@ namespace Open_lab.ViewModels
             await CloseAttendanceAsync();
             if (_logoutRequested != null)
             {
-                AppSession.Clear();
+                SessionContext.Current.EndSession();
                 IsLoggedIn = false;
                 ActiveModule = string.Empty;
                 IsToolbarVisible = true;
@@ -413,22 +413,22 @@ namespace Open_lab.ViewModels
 
         private async Task CloseAttendanceAsync()
         {
-            if (AppSession.AttendanceLogId <= 0)
+            if (SessionContext.Current.AttendanceLogId <= 0)
             {
                 return;
             }
 
             try
             {
-                await _attendanceService.CloseAsync(AppSession.AttendanceLogId);
+                await _attendanceService.CloseAsync(SessionContext.Current.AttendanceLogId);
             }
             catch (System.Exception ex)
             {
-                Debug.WriteLine($"Failed to close attendance log {AppSession.AttendanceLogId}: {ex}");
+                Debug.WriteLine($"Failed to close attendance log {SessionContext.Current.AttendanceLogId}: {ex}");
             }
             finally
             {
-                AppSession.AttendanceLogId = 0;
+                SessionContext.Current.AttendanceLogId = 0;
             }
         }
 

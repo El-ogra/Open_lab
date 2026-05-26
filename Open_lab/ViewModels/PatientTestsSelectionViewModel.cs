@@ -44,12 +44,12 @@ namespace Open_lab.ViewModels
             AccountTypes = new ObservableCollection<string> { "Cash", "Referral" };
             CustomGroups = new ObservableCollection<CustomGroup>();
 
-            LoadPatientCommand = new RelayCommand(async _ => await LoadPatientAsync(), _ => AppSession.HasPermission(PermissionCodes.PatientsView));
-            CreateVisitCommand = new RelayCommand(async _ => await CreateVisitAsync(), _ => AppSession.HasPermission(PermissionCodes.VisitsEdit) && PatientId > 0);
-            AddTestCommand = new RelayCommand(async _ => await AddTestAsync(), _ => AppSession.HasPermission(PermissionCodes.VisitsEdit) && VisitId > 0 && SelectedAvailableTest != null);
-            AddCustomGroupCommand = new RelayCommand(async _ => await AddCustomGroupAsync(), _ => AppSession.HasPermission(PermissionCodes.VisitsEdit) && VisitId > 0 && SelectedCustomGroup != null);
-            RemoveTestCommand = new RelayCommand(async _ => await RemoveTestAsync(), _ => AppSession.HasPermission(PermissionCodes.VisitsEdit) && SelectedVisitTest != null);
-            RefreshTestsCommand = new RelayCommand(async _ => await LoadAvailableTestsAsync(), _ => AppSession.HasPermission(PermissionCodes.TestsView));
+            LoadPatientCommand = new RelayCommand(async _ => await LoadPatientAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.PatientsView));
+            CreateVisitCommand = new RelayCommand(async _ => await CreateVisitAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.VisitsEdit) && PatientId > 0);
+            AddTestCommand = new RelayCommand(async _ => await AddTestAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.VisitsEdit) && VisitId > 0 && SelectedAvailableTest != null);
+            AddCustomGroupCommand = new RelayCommand(async _ => await AddCustomGroupAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.VisitsEdit) && VisitId > 0 && SelectedCustomGroup != null);
+            RemoveTestCommand = new RelayCommand(async _ => await RemoveTestAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.VisitsEdit) && SelectedVisitTest != null);
+            RefreshTestsCommand = new RelayCommand(async _ => await LoadAvailableTestsAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.TestsView));
 
             _ = InitializeAsync();
         }

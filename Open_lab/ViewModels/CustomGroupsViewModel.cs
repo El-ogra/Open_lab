@@ -24,9 +24,9 @@ namespace Open_lab.ViewModels
             GroupItems = new ObservableCollection<CustomGroupItem>();
             Tests = new ObservableCollection<Test>();
 
-            SaveGroupCommand = new RelayCommand(async _ => await SaveGroupAsync(), _ => AppSession.HasPermission(PermissionCodes.TestsEdit));
-            AddItemCommand = new RelayCommand(async _ => await AddItemAsync(), _ => AppSession.HasPermission(PermissionCodes.TestsEdit) && SelectedGroup != null && SelectedTest != null);
-            DeleteItemCommand = new RelayCommand(async _ => await DeleteItemAsync(), _ => AppSession.HasPermission(PermissionCodes.TestsEdit) && SelectedItem != null);
+            SaveGroupCommand = new RelayCommand(async _ => await SaveGroupAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.TestsEdit));
+            AddItemCommand = new RelayCommand(async _ => await AddItemAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.TestsEdit) && SelectedGroup != null && SelectedTest != null);
+            DeleteItemCommand = new RelayCommand(async _ => await DeleteItemAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.TestsEdit) && SelectedItem != null);
 
             _ = LoadAsync();
         }

@@ -89,9 +89,9 @@ namespace Open_lab.Tests.ViewModels
         {
             // Function: 10.5 — Record Departure
             // Arrange
-            AppSession.UserId = 11;
+            SessionContext.Current.UserId = 11;
             _attendanceServiceMock
-                .Setup(x => x.ClockOutAsync(AppSession.UserId, It.IsAny<DateTime?>()))
+                .Setup(x => x.ClockOutAsync(SessionContext.Current.UserId, It.IsAny<DateTime?>()))
                 .ReturnsAsync((AttendanceLog?)null);
 
             // Act
@@ -107,19 +107,19 @@ namespace Open_lab.Tests.ViewModels
             // Function: 10.5 — Record Departure
             // Arrange
             // Act
-            AppSession.UserId = 11;
-            AppSession.AttendanceLogId = 55;
+            SessionContext.Current.UserId = 11;
+            SessionContext.Current.AttendanceLogId = 55;
             _attendanceServiceMock
-                .Setup(x => x.ClockOutAsync(AppSession.UserId, It.IsAny<DateTime?>()))
+                .Setup(x => x.ClockOutAsync(SessionContext.Current.UserId, It.IsAny<DateTime?>()))
                 .ReturnsAsync(new AttendanceLog { AttendanceLogId = 55, UserId = 11, LogoutAt = DateTime.Now });
-            _attendanceServiceMock.Setup(x => x.GetOpenLogAsync(AppSession.UserId)).ReturnsAsync((AttendanceLog?)null);
+            _attendanceServiceMock.Setup(x => x.GetOpenLogAsync(SessionContext.Current.UserId)).ReturnsAsync((AttendanceLog?)null);
 
             _viewModel.ClockOutCommand.Execute(null);
             await Task.Delay(50);
 
             // Assert
-            AppSession.AttendanceLogId.Should().Be(0);
-            _attendanceServiceMock.Verify(x => x.ClockOutAsync(AppSession.UserId, It.IsAny<DateTime?>()), Times.Once);
+            SessionContext.Current.AttendanceLogId.Should().Be(0);
+            _attendanceServiceMock.Verify(x => x.ClockOutAsync(SessionContext.Current.UserId, It.IsAny<DateTime?>()), Times.Once);
             _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
@@ -128,10 +128,10 @@ namespace Open_lab.Tests.ViewModels
         {
             // Function: 10.5 — Record Departure
             // Arrange
-            AppSession.UserId = 12;
-            AppSession.AttendanceLogId = 77;
+            SessionContext.Current.UserId = 12;
+            SessionContext.Current.AttendanceLogId = 77;
             _attendanceServiceMock
-                .Setup(x => x.ClockOutAsync(AppSession.UserId, It.IsAny<DateTime?>()))
+                .Setup(x => x.ClockOutAsync(SessionContext.Current.UserId, It.IsAny<DateTime?>()))
                 .ThrowsAsync(new InvalidOperationException("clock-out-failed"));
 
             // Act
@@ -141,7 +141,7 @@ namespace Open_lab.Tests.ViewModels
             // Assert
             _viewModel.StatusMessage.Should().Contain("خطأ:");
             _viewModel.StatusMessage.Should().Contain("clock-out-failed");
-            AppSession.AttendanceLogId.Should().Be(77);
+            SessionContext.Current.AttendanceLogId.Should().Be(77);
         }
 
         [Fact]
@@ -149,18 +149,18 @@ namespace Open_lab.Tests.ViewModels
         {
             // Function: 10.4 — Record Attendance
             // Arrange
-            AppSession.UserId = 7;
-            _attendanceServiceMock.Setup(x => x.ClockInAsync(AppSession.UserId, It.IsAny<DateTime?>(), It.IsAny<int?>(), It.IsAny<string?>()))
+            SessionContext.Current.UserId = 7;
+            _attendanceServiceMock.Setup(x => x.ClockInAsync(SessionContext.Current.UserId, It.IsAny<DateTime?>(), It.IsAny<int?>(), It.IsAny<string?>()))
                 .ReturnsAsync(new AttendanceLog { AttendanceLogId = 11, UserId = 7, LoginAt = DateTime.Now });
-            _attendanceServiceMock.Setup(x => x.GetOpenLogAsync(AppSession.UserId)).ReturnsAsync((AttendanceLog?)null);
+            _attendanceServiceMock.Setup(x => x.GetOpenLogAsync(SessionContext.Current.UserId)).ReturnsAsync((AttendanceLog?)null);
 
             // Act
             _viewModel.ClockInCommand.Execute(null);
             await Task.Delay(50);
 
             // Assert
-            AppSession.AttendanceLogId.Should().Be(11);
-            _attendanceServiceMock.Verify(x => x.ClockInAsync(AppSession.UserId, It.IsAny<DateTime?>(), It.IsAny<int?>(), It.IsAny<string?>()), Times.Once);
+            SessionContext.Current.AttendanceLogId.Should().Be(11);
+            _attendanceServiceMock.Verify(x => x.ClockInAsync(SessionContext.Current.UserId, It.IsAny<DateTime?>(), It.IsAny<int?>(), It.IsAny<string?>()), Times.Once);
             _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
@@ -169,8 +169,8 @@ namespace Open_lab.Tests.ViewModels
         {
             // Function: 10.4 — Record Attendance
             // Arrange
-            AppSession.UserId = 22;
-            _attendanceServiceMock.Setup(x => x.StartBreakAsync(AppSession.UserId, It.IsAny<string>(), It.IsAny<DateTime?>(), It.IsAny<string?>()))
+            SessionContext.Current.UserId = 22;
+            _attendanceServiceMock.Setup(x => x.StartBreakAsync(SessionContext.Current.UserId, It.IsAny<string>(), It.IsAny<DateTime?>(), It.IsAny<string?>()))
                 .ReturnsAsync((AttendanceBreak?)null);
 
             // Act
@@ -187,16 +187,16 @@ namespace Open_lab.Tests.ViewModels
             // Function: 10.4 — Record Attendance
             // Arrange
             // Act
-            AppSession.UserId = 22;
+            SessionContext.Current.UserId = 22;
             _viewModel.BreakNote = "break note";
-            _attendanceServiceMock.Setup(x => x.StartBreakAsync(AppSession.UserId, It.IsAny<string>(), It.IsAny<DateTime?>(), It.IsAny<string?>()))
+            _attendanceServiceMock.Setup(x => x.StartBreakAsync(SessionContext.Current.UserId, It.IsAny<string>(), It.IsAny<DateTime?>(), It.IsAny<string?>()))
                 .ReturnsAsync(new AttendanceBreak { BreakId = 3, AttendanceLogId = 1, StartAt = DateTime.Now });
-            _attendanceServiceMock.Setup(x => x.GetOpenLogAsync(AppSession.UserId)).ReturnsAsync((AttendanceLog?)null);
+            _attendanceServiceMock.Setup(x => x.GetOpenLogAsync(SessionContext.Current.UserId)).ReturnsAsync((AttendanceLog?)null);
 
             _viewModel.StartBreakCommand.Execute(null);
             await Task.Delay(50);
 
-            _attendanceServiceMock.Verify(x => x.StartBreakAsync(AppSession.UserId, It.IsAny<string>(), It.IsAny<DateTime?>(), It.IsAny<string?>()), Times.Once);
+            _attendanceServiceMock.Verify(x => x.StartBreakAsync(SessionContext.Current.UserId, It.IsAny<string>(), It.IsAny<DateTime?>(), It.IsAny<string?>()), Times.Once);
             // Assert
             _viewModel.BreakNote.Should().BeEmpty();
             _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
@@ -207,17 +207,17 @@ namespace Open_lab.Tests.ViewModels
         {
             // Function: 10.4 — Record Attendance
             // Arrange
-            AppSession.UserId = 30;
-            _attendanceServiceMock.Setup(x => x.EndBreakAsync(AppSession.UserId, It.IsAny<DateTime?>()))
+            SessionContext.Current.UserId = 30;
+            _attendanceServiceMock.Setup(x => x.EndBreakAsync(SessionContext.Current.UserId, It.IsAny<DateTime?>()))
                 .ReturnsAsync(new AttendanceBreak { BreakId = 5, AttendanceLogId = 10, StartAt = DateTime.Now.AddMinutes(-10), EndAt = DateTime.Now });
-            _attendanceServiceMock.Setup(x => x.GetOpenLogAsync(AppSession.UserId)).ReturnsAsync((AttendanceLog?)null);
+            _attendanceServiceMock.Setup(x => x.GetOpenLogAsync(SessionContext.Current.UserId)).ReturnsAsync((AttendanceLog?)null);
 
             // Act
             _viewModel.EndBreakCommand.Execute(null);
             await Task.Delay(50);
 
             // Assert
-            _attendanceServiceMock.Verify(x => x.EndBreakAsync(AppSession.UserId, It.IsAny<DateTime?>()), Times.Once);
+            _attendanceServiceMock.Verify(x => x.EndBreakAsync(SessionContext.Current.UserId, It.IsAny<DateTime?>()), Times.Once);
             _viewModel.StatusMessage.Should().NotBeNullOrEmpty();
         }
 
@@ -227,8 +227,8 @@ namespace Open_lab.Tests.ViewModels
             // Function: 10.4 — Record Attendance
             // Arrange
             // Act
-            AppSession.UserId = 30;
-            _attendanceServiceMock.Setup(x => x.EndBreakAsync(AppSession.UserId, It.IsAny<DateTime?>()))
+            SessionContext.Current.UserId = 30;
+            _attendanceServiceMock.Setup(x => x.EndBreakAsync(SessionContext.Current.UserId, It.IsAny<DateTime?>()))
                 .ReturnsAsync((AttendanceBreak?)null);
 
             _viewModel.EndBreakCommand.Execute(null);
@@ -243,9 +243,9 @@ namespace Open_lab.Tests.ViewModels
         {
             // Function: 10.4 — Record Attendance
             // Arrange
-            AppSession.UserId = 41;
+            SessionContext.Current.UserId = 41;
             _attendanceServiceMock
-                .Setup(x => x.GetDailyWorkingSummaryAsync(AppSession.UserId, It.IsAny<DateTime>(), It.IsAny<DateTime?>()))
+                .Setup(x => x.GetDailyWorkingSummaryAsync(SessionContext.Current.UserId, It.IsAny<DateTime>(), It.IsAny<DateTime?>()))
                 .ThrowsAsync(new InvalidOperationException("summary-failed"));
 
             // Act
@@ -262,9 +262,9 @@ namespace Open_lab.Tests.ViewModels
             // Function: 10.4 — Record Attendance
             // Arrange
             // Act
-            AppSession.UserId = 41;
+            SessionContext.Current.UserId = 41;
             _attendanceServiceMock
-                .Setup(x => x.GetDailyWorkingSummaryAsync(AppSession.UserId, It.IsAny<DateTime>(), It.IsAny<DateTime?>()))
+                .Setup(x => x.GetDailyWorkingSummaryAsync(SessionContext.Current.UserId, It.IsAny<DateTime>(), It.IsAny<DateTime?>()))
                 .ReturnsAsync(new DailyWorkingSummary { UserId = 41, GrossMinutes = 480, BreakMinutes = 30, NetMinutes = 450 });
 
             _viewModel.LoadDailySummaryCommand.Execute(null);
@@ -281,8 +281,8 @@ namespace Open_lab.Tests.ViewModels
         {
             // Function: 10.4 — Record Attendance
             // Arrange
-            AppSession.UserId = 52;
-            _attendanceServiceMock.Setup(x => x.GetOpenLogAsync(AppSession.UserId))
+            SessionContext.Current.UserId = 52;
+            _attendanceServiceMock.Setup(x => x.GetOpenLogAsync(SessionContext.Current.UserId))
                 .ReturnsAsync(new AttendanceLog
                 {
                     AttendanceLogId = 3,
@@ -309,8 +309,8 @@ namespace Open_lab.Tests.ViewModels
             // Function: 10.4 — Record Attendance
             // Arrange
             // Act
-            AppSession.UserId = 52;
-            _attendanceServiceMock.Setup(x => x.GetOpenLogAsync(AppSession.UserId))
+            SessionContext.Current.UserId = 52;
+            _attendanceServiceMock.Setup(x => x.GetOpenLogAsync(SessionContext.Current.UserId))
                 .ThrowsAsync(new InvalidOperationException("refresh-open-failed"));
 
             _viewModel.RefreshOpenLogCommand.Execute(null);

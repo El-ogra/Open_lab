@@ -159,10 +159,10 @@ namespace Open_lab.Services
 
             if (!string.IsNullOrEmpty(profile.MasterPasswordHash))
             {
-                // Generate a new salt for the master password
                 var newSalt = GenerateSecureSalt();
+                var newHash = PasswordSecurity.ComputeSha256(profile.MasterPasswordHash, newSalt);
                 await SaveSettingAsync(MasterPasswordSaltKey, newSalt);
-                await SaveSettingAsync(MasterPasswordHashKey, profile.MasterPasswordHash);
+                await SaveSettingAsync(MasterPasswordHashKey, newHash);
             }
         }
 
@@ -171,14 +171,15 @@ namespace Open_lab.Services
             var hash = await _db.Settings.Where(s => s.Key == MasterPasswordHashKey).Select(s => s.Value).FirstOrDefaultAsync();
             var salt = await _db.Settings.Where(s => s.Key == MasterPasswordSaltKey).Select(s => s.Value).FirstOrDefaultAsync();
 
-            // Default if none exists (admin123)
             if (string.IsNullOrEmpty(hash))
             {
-                if (password == "admin123") return true; 
                 return false;
             }
 
-            if (string.IsNullOrEmpty(salt)) salt = GenerateSecureSalt(); // Generate secure random salt
+            if (string.IsNullOrEmpty(salt))
+            {
+                return false;
+            }
 
             return PasswordSecurity.Verify(password, salt, hash);
         }

@@ -27,14 +27,14 @@ namespace Open_lab.ViewModels
             Roles = new ObservableCollection<Role>();
             Permissions = new ObservableCollection<PermissionToggle>();
 
-            SaveUserCommand = new RelayCommand(async _ => await SaveUserAsync(), _ => AppSession.HasPermission(PermissionCodes.UsersEdit));
-            DeleteUserCommand = new RelayCommand(async _ => await DeleteUserAsync(), _ => AppSession.HasPermission(PermissionCodes.UsersEdit) && SelectedUser != null);
-            SaveRoleCommand = new RelayCommand(async _ => await SaveRoleAsync(), _ => AppSession.HasPermission(PermissionCodes.UsersEdit));
-            DeleteRoleCommand = new RelayCommand(async _ => await DeleteRoleAsync(), _ => AppSession.HasPermission(PermissionCodes.UsersEdit) && SelectedRole != null);
-            SaveRolePermissionsCommand = new RelayCommand(async _ => await SaveRolePermissionsAsync(), _ => AppSession.HasPermission(PermissionCodes.UsersEdit));
-            AssignRoleCommand = new RelayCommand(async _ => await AssignRoleAsync(), _ => AppSession.HasPermission(PermissionCodes.UsersEdit) && SelectedUser != null && SelectedRole != null);
-            UnassignRoleCommand = new RelayCommand(async _ => await UnassignRoleAsync(), _ => AppSession.HasPermission(PermissionCodes.UsersEdit) && SelectedUser != null && SelectedRole != null);
-            ReloadCommand = new RelayCommand(async _ => await LoadAsync(), _ => AppSession.HasPermission(PermissionCodes.UsersView));
+            SaveUserCommand = new RelayCommand(async _ => await SaveUserAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.UsersEdit));
+            DeleteUserCommand = new RelayCommand(async _ => await DeleteUserAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.UsersEdit) && SelectedUser != null);
+            SaveRoleCommand = new RelayCommand(async _ => await SaveRoleAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.UsersEdit));
+            DeleteRoleCommand = new RelayCommand(async _ => await DeleteRoleAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.UsersEdit) && SelectedRole != null);
+            SaveRolePermissionsCommand = new RelayCommand(async _ => await SaveRolePermissionsAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.UsersEdit));
+            AssignRoleCommand = new RelayCommand(async _ => await AssignRoleAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.UsersEdit) && SelectedUser != null && SelectedRole != null);
+            UnassignRoleCommand = new RelayCommand(async _ => await UnassignRoleAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.UsersEdit) && SelectedUser != null && SelectedRole != null);
+            ReloadCommand = new RelayCommand(async _ => await LoadAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.UsersView));
 
             _ = LoadAsync();
         }

@@ -713,16 +713,16 @@ namespace Open_lab.Tests.Services
         }
 
         [Fact]
-        public async Task SetSystemPassword_VerifyMasterPassword_WhenNoPasswordEverSet_ShouldAllowDefaultAdmin123_EdgeGuard()
+        public async Task SetSystemPassword_VerifyMasterPassword_WhenNoPasswordEverSet_ShouldRejectEveryPassword_EdgeGuard()
         {
             // Function: 13.8 — Set System Password
             // Arrange
             // Act
             var defaultOk = await _systemSettingsService.VerifyMasterPasswordAsync("admin123");
-            var anythingElse = await _systemSettingsService.VerifyMasterPasswordAsync("not-admin123");
+            var anythingElse = await _systemSettingsService.VerifyMasterPasswordAsync("anythingElse#2026");
 
             // Assert
-            defaultOk.Should().BeTrue();
+            defaultOk.Should().BeFalse();
             anythingElse.Should().BeFalse();
         }
 

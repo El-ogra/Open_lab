@@ -44,11 +44,11 @@ namespace Open_lab.ViewModels
             _settingsService = settingsService;
             Settings = new ObservableCollection<Setting>();
 
-            SaveProfileCommand = new RelayCommand(async _ => await SaveProfileAsync(), _ => AppSession.HasPermission(PermissionCodes.SettingsEdit));
-            ReloadCommand = new RelayCommand(async _ => await LoadAsync(), _ => AppSession.HasPermission(PermissionCodes.SettingsView));
-            SaveRawSettingCommand = new RelayCommand(async _ => await SaveRawSettingAsync(), _ => AppSession.HasPermission(PermissionCodes.SettingsEdit));
-            DeleteRawSettingCommand = new RelayCommand(async _ => await DeleteRawSettingAsync(), _ => AppSession.HasPermission(PermissionCodes.SettingsEdit) && SelectedSetting != null);
-            ChangeMasterPasswordCommand = new RelayCommand(async _ => await ChangeMasterPasswordAsync(), _ => AppSession.HasPermission(PermissionCodes.SettingsEdit));
+            SaveProfileCommand = new RelayCommand(async _ => await SaveProfileAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.SettingsEdit));
+            ReloadCommand = new RelayCommand(async _ => await LoadAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.SettingsView));
+            SaveRawSettingCommand = new RelayCommand(async _ => await SaveRawSettingAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.SettingsEdit));
+            DeleteRawSettingCommand = new RelayCommand(async _ => await DeleteRawSettingAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.SettingsEdit) && SelectedSetting != null);
+            ChangeMasterPasswordCommand = new RelayCommand(async _ => await ChangeMasterPasswordAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.SettingsEdit));
 
             _ = LoadAsync();
         }

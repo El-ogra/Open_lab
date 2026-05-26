@@ -22,7 +22,7 @@ namespace Open_lab.ViewModels
             _attendanceService = attendanceService;
             Logs = new ObservableCollection<AttendanceLogRow>();
             Breaks = new ObservableCollection<BreakRow>();
-            LoadLogsCommand = new RelayCommand(async _ => await LoadLogsAsync(), _ => AppSession.HasPermission(PermissionCodes.UsersView));
+            LoadLogsCommand = new RelayCommand(async _ => await LoadLogsAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.UsersView));
 
             ClockInCommand = new RelayCommand(async _ => await ClockInAsync(), _ => CanExecuteAttendanceAction());
             ClockOutCommand = new RelayCommand(async _ => await ClockOutAsync(), _ => CanExecuteAttendanceAction());
@@ -96,7 +96,7 @@ namespace Open_lab.ViewModels
 
         private bool CanExecuteAttendanceAction()
         {
-            return !IsBusy && AppSession.UserId > 0;
+            return !IsBusy && SessionContext.Current.UserId > 0;
         }
 
         private void RaiseCommandsCanExecuteChanged()
@@ -117,7 +117,7 @@ namespace Open_lab.ViewModels
                 IsBusy = true;
                 Breaks.Clear();
 
-                var openLog = await _attendanceService.GetOpenLogAsync(AppSession.UserId);
+                var openLog = await _attendanceService.GetOpenLogAsync(SessionContext.Current.UserId);
                 if (openLog == null)
                 {
                     StatusMessage = "لا يوجد سجل حضور مفتوح.";
@@ -157,8 +157,8 @@ namespace Open_lab.ViewModels
             try
             {
                 IsBusy = true;
-                var log = await _attendanceService.ClockInAsync(AppSession.UserId, note: "Clock In");
-                AppSession.AttendanceLogId = log.AttendanceLogId;
+                var log = await _attendanceService.ClockInAsync(SessionContext.Current.UserId, note: "Clock In");
+                SessionContext.Current.AttendanceLogId = log.AttendanceLogId;
                 StatusMessage = $"تم تسجيل الحضور. رقم السجل: {log.AttendanceLogId}";
                 await RefreshOpenLogAsync();
             }
@@ -177,7 +177,7 @@ namespace Open_lab.ViewModels
             try
             {
                 IsBusy = true;
-                var log = await _attendanceService.ClockOutAsync(AppSession.UserId);
+                var log = await _attendanceService.ClockOutAsync(SessionContext.Current.UserId);
                 if (log == null)
                 {
                     StatusMessage = "لا يوجد سجل حضور مفتوح لإغلاقه.";
@@ -185,7 +185,7 @@ namespace Open_lab.ViewModels
                 }
 
                 StatusMessage = $"تم تسجيل الانصراف. رقم السجل: {log.AttendanceLogId}";
-                AppSession.AttendanceLogId = 0;
+                SessionContext.Current.AttendanceLogId = 0;
                 await RefreshOpenLogAsync();
             }
             catch (Exception ex)
@@ -203,7 +203,7 @@ namespace Open_lab.ViewModels
             try
             {
                 IsBusy = true;
-                var br = await _attendanceService.StartBreakAsync(AppSession.UserId, BreakType, note: string.IsNullOrWhiteSpace(BreakNote) ? null : BreakNote);
+                var br = await _attendanceService.StartBreakAsync(SessionContext.Current.UserId, BreakType, note: string.IsNullOrWhiteSpace(BreakNote) ? null : BreakNote);
                 if (br == null)
                 {
                     StatusMessage = "لا يمكن بدء راحة بدون سجل حضور مفتوح.";
@@ -229,7 +229,7 @@ namespace Open_lab.ViewModels
             try
             {
                 IsBusy = true;
-                var br = await _attendanceService.EndBreakAsync(AppSession.UserId);
+                var br = await _attendanceService.EndBreakAsync(SessionContext.Current.UserId);
                 if (br == null)
                 {
                     StatusMessage = "لا توجد راحة مفتوحة لإنهائها.";
@@ -254,7 +254,7 @@ namespace Open_lab.ViewModels
             try
             {
                 IsBusy = true;
-                DailySummary = await _attendanceService.GetDailyWorkingSummaryAsync(AppSession.UserId, DateTime.Today);
+                DailySummary = await _attendanceService.GetDailyWorkingSummaryAsync(SessionContext.Current.UserId, DateTime.Today);
                 StatusMessage = $"ملخص اليوم: صافي {DailySummary.NetMinutes} دقيقة | راحة {DailySummary.BreakMinutes} دقيقة";
             }
             catch (Exception ex)

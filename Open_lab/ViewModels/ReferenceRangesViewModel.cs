@@ -40,9 +40,9 @@ namespace Open_lab.ViewModels
             Parameters = new ObservableCollection<TestParameter>();
             AgeUnits = new ObservableCollection<string>(AgeUnitsSource);
 
-            LoadCommand = new RelayCommand(async _ => await LoadRangesAsync(), _ => AppSession.HasPermission(PermissionCodes.TestsView));
-            SaveCommand = new RelayCommand(async _ => await SaveAsync(), _ => AppSession.HasPermission(PermissionCodes.TestsEdit));
-            DeleteCommand = new RelayCommand(async _ => await DeleteAsync(), _ => AppSession.HasPermission(PermissionCodes.TestsEdit) && SelectedRange != null);
+            LoadCommand = new RelayCommand(async _ => await LoadRangesAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.TestsView));
+            SaveCommand = new RelayCommand(async _ => await SaveAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.TestsEdit));
+            DeleteCommand = new RelayCommand(async _ => await DeleteAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.TestsEdit) && SelectedRange != null);
 
             _ = LoadTestsAsync();
         }

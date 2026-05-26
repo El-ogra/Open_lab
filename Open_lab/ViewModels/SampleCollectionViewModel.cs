@@ -25,11 +25,11 @@ namespace Open_lab.ViewModels
             _sampleCollectionService = sampleCollectionService;
             _sampleTrackingService = sampleTrackingService;
             Items = new ObservableCollection<SampleCollectionRow>();
-            LoadCommand = new RelayCommand(async _ => await LoadAsync(), _ => AppSession.HasPermission(PermissionCodes.TestsView));
-            MarkCollectedCommand = new RelayCommand(async _ => await MarkCollectedAsync(), _ => AppSession.HasPermission(PermissionCodes.TestsEdit) && SelectedRow != null);
-            MarkExternalCollectedCommand = new RelayCommand(async _ => await MarkExternalCollectedAsync(), _ => AppSession.HasPermission(PermissionCodes.TestsEdit) && SelectedRow != null);
-            MarkSeparatedCommand = new RelayCommand(async _ => await MarkSeparatedAsync(), _ => AppSession.HasPermission(PermissionCodes.TestsEdit) && SelectedRow != null);
-            MarkNotCollectedCommand = new RelayCommand(async _ => await MarkNotCollectedAsync(), _ => AppSession.HasPermission(PermissionCodes.TestsEdit) && SelectedRow != null);
+            LoadCommand = new RelayCommand(async _ => await LoadAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.TestsView));
+            MarkCollectedCommand = new RelayCommand(async _ => await MarkCollectedAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.TestsEdit) && SelectedRow != null);
+            MarkExternalCollectedCommand = new RelayCommand(async _ => await MarkExternalCollectedAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.TestsEdit) && SelectedRow != null);
+            MarkSeparatedCommand = new RelayCommand(async _ => await MarkSeparatedAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.TestsEdit) && SelectedRow != null);
+            MarkNotCollectedCommand = new RelayCommand(async _ => await MarkNotCollectedAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.TestsEdit) && SelectedRow != null);
             RefreshSampleStatusCommand = new RelayCommand(async _ => await RefreshSampleStatusAsync(), _ => SelectedRow != null && _sampleTrackingService != null);
         }
 
@@ -163,7 +163,7 @@ namespace Open_lab.ViewModels
                 return;
             }
 
-            if (AppSession.UserId <= 0)
+            if (SessionContext.Current.UserId <= 0)
             {
                 StatusMessage = "يجب تسجيل الدخول.";
                 return;
@@ -172,7 +172,7 @@ namespace Open_lab.ViewModels
             IsLoading = true;
             try
             {
-                await _sampleCollectionService.MarkCollectedAsync(SelectedRow.VisitTestId, AppSession.UserId);
+                await _sampleCollectionService.MarkCollectedAsync(SelectedRow.VisitTestId, SessionContext.Current.UserId);
                 await LoadAsync();
                 StatusMessage = "تم تحديث حالة العينة.";
             }
@@ -194,7 +194,7 @@ namespace Open_lab.ViewModels
                 return;
             }
 
-            if (AppSession.UserId <= 0)
+            if (SessionContext.Current.UserId <= 0)
             {
                 StatusMessage = "يجب تسجيل الدخول.";
                 return;
@@ -203,7 +203,7 @@ namespace Open_lab.ViewModels
             IsLoading = true;
             try
             {
-                await _sampleCollectionService.MarkCollectedAsync(SelectedRow.VisitTestId, AppSession.UserId, true, AppSession.UserId);
+                await _sampleCollectionService.MarkCollectedAsync(SelectedRow.VisitTestId, SessionContext.Current.UserId, true, SessionContext.Current.UserId);
                 await LoadAsync();
                 StatusMessage = "تم تعليم العينة كخارجية.";
             }

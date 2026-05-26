@@ -42,16 +42,16 @@ namespace Open_lab.ViewModels
             ResultRows = new ObservableCollection<CultureSensitivityRow>();
             AllowedSensitivities = new ObservableCollection<string>(SensitivityOptions);
 
-            LoadCommand = new RelayCommand(async _ => await LoadAsync(), _ => AppSession.HasPermission(PermissionCodes.TestsView));
-            AddCultureCommand = new RelayCommand(async _ => await AddCultureAsync(), _ => AppSession.HasPermission(PermissionCodes.TestsEdit));
-            DeleteCultureCommand = new RelayCommand(async _ => await DeleteCultureAsync(), _ => AppSession.HasPermission(PermissionCodes.TestsEdit) && SelectedCulture != null);
-            AddAntibioticCommand = new RelayCommand(async _ => await AddAntibioticAsync(), _ => AppSession.HasPermission(PermissionCodes.TestsEdit));
-            DeleteAntibioticCommand = new RelayCommand(async _ => await DeleteAntibioticAsync(), _ => AppSession.HasPermission(PermissionCodes.TestsEdit) && SelectedAntibiotic != null);
-            LinkCommand = new RelayCommand(async _ => await LinkAsync(), _ => AppSession.HasPermission(PermissionCodes.TestsEdit) && SelectedCulture != null && SelectedAntibiotic != null);
-            UnlinkCommand = new RelayCommand(async _ => await UnlinkAsync(), _ => AppSession.HasPermission(PermissionCodes.TestsEdit) && SelectedLink != null);
+            LoadCommand = new RelayCommand(async _ => await LoadAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.TestsView));
+            AddCultureCommand = new RelayCommand(async _ => await AddCultureAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.TestsEdit));
+            DeleteCultureCommand = new RelayCommand(async _ => await DeleteCultureAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.TestsEdit) && SelectedCulture != null);
+            AddAntibioticCommand = new RelayCommand(async _ => await AddAntibioticAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.TestsEdit));
+            DeleteAntibioticCommand = new RelayCommand(async _ => await DeleteAntibioticAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.TestsEdit) && SelectedAntibiotic != null);
+            LinkCommand = new RelayCommand(async _ => await LinkAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.TestsEdit) && SelectedCulture != null && SelectedAntibiotic != null);
+            UnlinkCommand = new RelayCommand(async _ => await UnlinkAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.TestsEdit) && SelectedLink != null);
 
-            LoadVisitTestsCommand = new RelayCommand(async _ => await LoadVisitTestsAsync(), _ => AppSession.HasPermission(PermissionCodes.ResultsView));
-            SaveResultCommand = new RelayCommand(async _ => await SaveResultAsync(), _ => AppSession.HasPermission(PermissionCodes.ResultsEdit) && SelectedVisitTest != null && SelectedCulture != null);
+            LoadVisitTestsCommand = new RelayCommand(async _ => await LoadVisitTestsAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.ResultsView));
+            SaveResultCommand = new RelayCommand(async _ => await SaveResultAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.ResultsEdit) && SelectedVisitTest != null && SelectedCulture != null);
             PrintCultureReportCommand = new RelayCommand(async _ => await PrintCultureReportAsync(), _ => _printService != null && SelectedVisitTest != null && SelectedCulture != null);
 
             _ = LoadAsync();

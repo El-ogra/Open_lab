@@ -16,7 +16,7 @@ namespace Open_lab.ViewModels
         {
             _userActivityService = userActivityService;
             Items = new ObservableCollection<UserActivityRow>();
-            LoadCommand = new RelayCommand(async _ => await LoadAsync(), _ => AppSession.HasPermission(PermissionCodes.UsersView));
+            LoadCommand = new RelayCommand(async _ => await LoadAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.UsersView));
             _ = LoadAsync();
         }
 

@@ -118,10 +118,7 @@ namespace Open_lab.ViewModels
 
                 var permissionCodes = await _authorizationService.GetPermissionCodesAsync(user.UserId);
 
-                AppSession.UserId = user.UserId;
-                AppSession.Username = user.Username;
-                AppSession.SetPermissions(permissionCodes);
-                AppSession.IsAdmin = permissionCodes.Contains(PermissionCodes.FullAccess, StringComparer.OrdinalIgnoreCase);
+                SessionContext.Current.BeginSession(user.UserId, user.Username, permissionCodes);
 
                 if (RememberMe)
                 {
@@ -133,7 +130,7 @@ namespace Open_lab.ViewModels
                 }
 
                 var attendance = await _attendanceService.CreateLoginAsync(user.UserId, "تسجيل دخول");
-                AppSession.AttendanceLogId = attendance.AttendanceLogId;
+                SessionContext.Current.UpdateAttendanceLog(attendance.AttendanceLogId);
 
                 StatusMessage = "تم تسجيل الدخول بنجاح.";
                 _onLoginSuccess();

@@ -40,10 +40,10 @@ namespace Open_lab.ViewModels
             SampleTypes = new ObservableCollection<SampleType>();
             Units = new ObservableCollection<Unit>();
 
-            SaveCommand = new RelayCommand(async _ => await SaveAsync(), _ => AppSession.HasPermission(PermissionCodes.TestsEdit));
-            NewCommand = new RelayCommand(_ => ClearForm(), _ => AppSession.HasPermission(PermissionCodes.TestsEdit));
-            DeleteCommand = new RelayCommand(async _ => await DeleteAsync(), _ => AppSession.HasPermission(PermissionCodes.TestsEdit) && SelectedTest != null);
-            ReloadCommand = new RelayCommand(async _ => await LoadAsync(), _ => AppSession.HasPermission(PermissionCodes.TestsView));
+            SaveCommand = new RelayCommand(async _ => await SaveAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.TestsEdit));
+            NewCommand = new RelayCommand(_ => ClearForm(), _ => SessionContext.Current.HasPermission(PermissionCodes.TestsEdit));
+            DeleteCommand = new RelayCommand(async _ => await DeleteAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.TestsEdit) && SelectedTest != null);
+            ReloadCommand = new RelayCommand(async _ => await LoadAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.TestsView));
             GenerateBarcodeCommand = new RelayCommand(_ => GenerateBarcode(), _ => !string.IsNullOrWhiteSpace(Code));
 
             _ = LoadAsync();

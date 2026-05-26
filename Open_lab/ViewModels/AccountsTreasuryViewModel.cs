@@ -32,11 +32,11 @@ namespace Open_lab.ViewModels
             ByReferral = new ObservableCollection<TreasuryByReferralRow>();
             ByBranch = new ObservableCollection<TreasuryByBranchRow>();
             ByDoctor = new ObservableCollection<TreasuryByDoctorRow>();
-            LoadCommand = new RelayCommand(async _ => await LoadAsync(), _ => AppSession.HasPermission(PermissionCodes.AccountsView));
-            DailyCommand = new RelayCommand(async _ => await LoadDailyAsync(), _ => AppSession.HasPermission(PermissionCodes.AccountsView));
-            WeeklyCommand = new RelayCommand(async _ => await LoadWeeklyAsync(), _ => AppSession.HasPermission(PermissionCodes.AccountsView));
-            MonthlyCommand = new RelayCommand(async _ => await LoadMonthlyAsync(), _ => AppSession.HasPermission(PermissionCodes.AccountsView));
-            PrintCommand = new RelayCommand(async _ => await PrintAsync(), _ => AppSession.HasPermission(PermissionCodes.AccountsView));
+            LoadCommand = new RelayCommand(async _ => await LoadAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.AccountsView));
+            DailyCommand = new RelayCommand(async _ => await LoadDailyAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.AccountsView));
+            WeeklyCommand = new RelayCommand(async _ => await LoadWeeklyAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.AccountsView));
+            MonthlyCommand = new RelayCommand(async _ => await LoadMonthlyAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.AccountsView));
+            PrintCommand = new RelayCommand(async _ => await PrintAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.AccountsView));
             _ = LoadAsync();
         }
 
