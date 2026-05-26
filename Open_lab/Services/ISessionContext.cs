@@ -7,6 +7,7 @@ namespace Open_lab.Services
         int UserId { get; }
         string Username { get; }
         bool IsAdmin { get; }
+        bool IsSystemOperation { get; }
         int AttendanceLogId { get; }
         bool HasPermission(string permissionCode);
     }

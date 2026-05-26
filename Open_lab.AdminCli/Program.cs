@@ -46,38 +46,46 @@ static async Task<int> RunAsync(string[] args)
     await db.Database.OpenConnectionAsync();
     await using var transaction = await db.Database.BeginTransactionAsync();
 
-    var userAdminService = new UserAdminService(db);
+    var userAdminService = new UserAdminService(db, SessionContext.Current);
     var adminSetupService = new AdminSetupService(db);
-    var admin = await db.Users.FirstOrDefaultAsync(u => u.Username == AdminUsername);
-
-    if (admin == null)
+    SessionContext.Current.IsSystemOperation = true;
+    try
     {
-        admin = await userAdminService.CreateUserAsync(new User
+        var admin = await db.Users.FirstOrDefaultAsync(u => u.Username == AdminUsername);
+
+        if (admin == null)
         {
-            Username = AdminUsername,
-            FullName = "System Administrator",
-            IsActive = true
-        }, newPassword);
-    }
-    else
-    {
-        admin.FullName ??= "System Administrator";
-        admin.IsActive = true;
-        await userAdminService.UpdateUserAsync(admin, newPassword);
-    }
+            admin = await userAdminService.CreateUserAsync(new User
+            {
+                Username = AdminUsername,
+                FullName = "System Administrator",
+                IsActive = true
+            }, newPassword);
+        }
+        else
+        {
+            admin.FullName ??= "System Administrator";
+            admin.IsActive = true;
+            await userAdminService.UpdateUserAsync(admin, newPassword);
+        }
 
-    await adminSetupService.EnsureAdminAccessAsync(admin.UserId);
-    await adminSetupService.MarkBootstrapCompleteAsync();
-    db.AuditLogs.Add(new AuditLog
+        await adminSetupService.EnsureAdminAccessAsync(admin.UserId);
+        await adminSetupService.MarkBootstrapCompleteAsync();
+        db.AuditLogs.Add(new AuditLog
+        {
+            UserId = admin.UserId,
+            Action = "AdminPasswordReset",
+            TableName = nameof(User),
+            RecordId = admin.UserId.ToString(),
+            Timestamp = DateTime.UtcNow
+        });
+        await db.SaveChangesAsync();
+        await transaction.CommitAsync();
+    }
+    finally
     {
-        UserId = admin.UserId,
-        Action = "AdminPasswordReset",
-        TableName = nameof(User),
-        RecordId = admin.UserId.ToString(),
-        Timestamp = DateTime.UtcNow
-    });
-    await db.SaveChangesAsync();
-    await transaction.CommitAsync();
+        SessionContext.Current.IsSystemOperation = false;
+    }
 
     Console.WriteLine("Admin password reset completed.");
     return 0;

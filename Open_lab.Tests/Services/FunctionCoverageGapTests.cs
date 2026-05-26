@@ -20,10 +20,12 @@ namespace Open_lab.Tests.Services
         public FunctionCoverageGapTests()
         {
             _db = InMemoryDbContextFactory.Create(_dbName);
+            AppSessionTestHelper.ResetToAdmin();
         }
 
         public void Dispose()
         {
+            AppSessionTestHelper.Reset();
             _db.Database.EnsureDeleted();
             _db.Dispose();
         }
@@ -350,7 +352,7 @@ namespace Open_lab.Tests.Services
             // Function: 10.1 — , 10.2, 10.3, 10.4, 10.5, 11.1, 11.2, 11.4
             // Arrange
             // Act
-            var userAdmin = new UserAdminService(_db);
+            var userAdmin = new UserAdminService(_db, SessionContext.Current);
             var attendance = new AttendanceService(_db);
             var tardiness = new TardinessService(_db);
 

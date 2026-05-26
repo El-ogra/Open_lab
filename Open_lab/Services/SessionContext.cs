@@ -12,12 +12,14 @@ namespace Open_lab.Services
         public int UserId { get; set; }
         public string Username { get; set; } = string.Empty;
         public bool IsAdmin => HasPermission(PermissionCodes.FullAccess);
+        public bool IsSystemOperation { get; set; }
         public int AttendanceLogId { get; set; }
 
         public void BeginSession(int userId, string username, IReadOnlyCollection<string> permissionCodes, int attendanceLogId = 0)
         {
             UserId = userId;
             Username = username;
+            IsSystemOperation = false;
             AttendanceLogId = attendanceLogId;
             _grantedPermissions.Clear();
 
@@ -42,6 +44,7 @@ namespace Open_lab.Services
         {
             UserId = 0;
             Username = string.Empty;
+            IsSystemOperation = false;
             AttendanceLogId = 0;
             _grantedPermissions.Clear();
         }

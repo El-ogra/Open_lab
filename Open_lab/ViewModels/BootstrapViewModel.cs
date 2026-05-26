@@ -102,15 +102,23 @@ namespace Open_lab.ViewModels
                     return;
                 }
 
-                var user = await _userAdminService.CreateUserAsync(new User
+                SessionContext.Current.IsSystemOperation = true;
+                try
                 {
-                    Username = Username.Trim(),
-                    FullName = string.IsNullOrWhiteSpace(FullName) ? null : FullName.Trim(),
-                    IsActive = true
-                }, Password);
+                    var user = await _userAdminService.CreateUserAsync(new User
+                    {
+                        Username = Username.Trim(),
+                        FullName = string.IsNullOrWhiteSpace(FullName) ? null : FullName.Trim(),
+                        IsActive = true
+                    }, Password);
 
-                await _adminSetupService.EnsureAdminAccessAsync(user.UserId);
-                await _adminSetupService.MarkBootstrapCompleteAsync();
+                    await _adminSetupService.EnsureAdminAccessAsync(user.UserId);
+                    await _adminSetupService.MarkBootstrapCompleteAsync();
+                }
+                finally
+                {
+                    SessionContext.Current.IsSystemOperation = false;
+                }
 
                 StatusMessage = "تم إنشاء حساب المشرف بنجاح.";
                 _onSetupComplete();

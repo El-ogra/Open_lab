@@ -19,11 +19,13 @@ namespace Open_lab.Tests.Services
         public UserAdminServiceTests()
         {
             _db = InMemoryDbContextFactory.Create(_dbName);
-            _service = new UserAdminService(_db);
+            AppSessionTestHelper.ResetToAdmin();
+            _service = new UserAdminService(_db, SessionContext.Current);
         }
 
         public void Dispose()
         {
+            AppSessionTestHelper.Reset();
             _db.Database.EnsureDeleted();
             _db.Dispose();
         }

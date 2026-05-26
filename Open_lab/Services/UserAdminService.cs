@@ -13,10 +13,12 @@ namespace Open_lab.Services
         private const string AdminUsername = "admin";
         private const string AdministratorRoleName = "Administrator";
         private readonly OpenLabDbContext _db;
+        private readonly ISessionContext _sessionContext;
 
-        public UserAdminService(OpenLabDbContext db)
+        public UserAdminService(OpenLabDbContext db, ISessionContext sessionContext)
         {
             _db = db;
+            _sessionContext = sessionContext;
         }
 
         public Task<List<User>> GetUsersAsync()
@@ -39,6 +41,8 @@ namespace Open_lab.Services
 
         public async Task<User> CreateUserAsync(User user, string? plainPassword)
         {
+            EnsureUsersEditPermission();
+
             if (user == null)
             {
                 throw new ArgumentNullException(nameof(user));
@@ -65,6 +69,8 @@ namespace Open_lab.Services
 
         public async Task UpdateUserAsync(User user, string? plainPassword)
         {
+            EnsureUsersEditPermission();
+
             if (user == null)
             {
                 throw new ArgumentNullException(nameof(user));
@@ -109,6 +115,8 @@ namespace Open_lab.Services
 
         public async Task DeleteUserAsync(int userId)
         {
+            EnsureUsersEditPermission();
+
             var user = await _db.Users.FirstOrDefaultAsync(u => u.UserId == userId);
             if (user == null)
             {
@@ -143,6 +151,8 @@ namespace Open_lab.Services
 
         public async Task<Role> CreateRoleAsync(string roleName)
         {
+            EnsureUsersEditPermission();
+
             if (string.IsNullOrWhiteSpace(roleName))
             {
                 throw new ArgumentException("Role name is required.", nameof(roleName));
@@ -163,6 +173,8 @@ namespace Open_lab.Services
 
         public async Task DeleteRoleAsync(int roleId)
         {
+            EnsureUsersEditPermission();
+
             var role = await _db.Roles.FirstOrDefaultAsync(r => r.RoleId == roleId);
             if (role == null)
             {
@@ -192,6 +204,8 @@ namespace Open_lab.Services
 
         public async Task AssignSingleRoleAsync(int userId, int roleId)
         {
+            EnsureUsersEditPermission();
+
             var userExists = await _db.Users.AnyAsync(u => u.UserId == userId);
             var roleExists = await _db.Roles.AnyAsync(r => r.RoleId == roleId);
             if (!userExists || !roleExists)
@@ -207,6 +221,8 @@ namespace Open_lab.Services
 
         public async Task RemoveUserRoleAsync(int userId, int roleId)
         {
+            EnsureUsersEditPermission();
+
             var link = await _db.UserRoles.FirstOrDefaultAsync(ur => ur.UserId == userId && ur.RoleId == roleId);
             if (link == null)
             {
@@ -225,6 +241,8 @@ namespace Open_lab.Services
 
         public async Task SaveRolePermissionsAsync(int roleId, IEnumerable<string> permissionCodes)
         {
+            EnsureUsersEditPermission();
+
             var existing = await _db.RolePermissions.Where(rp => rp.RoleId == roleId).ToListAsync();
             _db.RolePermissions.RemoveRange(existing);
 
@@ -234,6 +252,19 @@ namespace Open_lab.Services
             }
 
             await _db.SaveChangesAsync();
+        }
+
+        private void EnsureUsersEditPermission()
+        {
+            if (_sessionContext.IsSystemOperation)
+            {
+                return;
+            }
+
+            if (!_sessionContext.HasPermission(PermissionCodes.UsersEdit))
+            {
+                throw new UnauthorizedAccessException("UsersEdit permission is required to manage users and roles.");
+            }
         }
 
         private static void ApplyPassword(User user, string? plainPassword)
