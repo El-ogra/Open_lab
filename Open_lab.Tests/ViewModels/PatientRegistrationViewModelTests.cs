@@ -792,11 +792,20 @@ namespace Open_lab.Tests.ViewModels
                     visit.VisitId = 20;
                     return visit;
                 });
-            visitMock.Setup(x => x.GetVisitTestsAsync(20)).ReturnsAsync(new List<VisitTest>());
+            visitMock.Setup(x => x.GetByIdAsync(20))
+                .ReturnsAsync(new Visit { VisitId = 20, PatientId = 10, Status = "Open" });
+            visitMock.Setup(x => x.GetVisitTestsAsync(20)).ReturnsAsync(new List<VisitTest>
+            {
+                new VisitTest { VisitTestId = 30, VisitId = 20, TestId = 1, Price = 120m }
+            });
             visitMock.Setup(x => x.AddTestToVisitAsync(20, 1, 120m))
                 .ReturnsAsync(new VisitTest { VisitTestId = 30, VisitId = 20, TestId = 1, Price = 120m });
             invoiceMock.Setup(x => x.CreateOrUpdateInvoiceAsync(20, 12m, 50m))
                 .ReturnsAsync(new Invoice { InvoiceId = 40, VisitId = 20, Discount = 12m, Paid = 50m });
+            invoiceMock.Setup(x => x.GetByVisitIdAsync(20))
+                .ReturnsAsync(new Invoice { InvoiceId = 40, VisitId = 20, Discount = 12m, Paid = 50m });
+            _patientServiceMock.Setup(x => x.GetByIdAsync(10))
+                .ReturnsAsync(new Patient { PatientId = 10, FullName = "Receipt Patient", LabId = "LAB-20" });
 
             vm.SaveCommand.Execute(null);
             await Task.Delay(150);
