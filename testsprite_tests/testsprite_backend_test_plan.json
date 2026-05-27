@@ -1,0 +1,559 @@
+[
+  {
+    "id": "TC001",
+    "workflow": "1. Add new patient (validation, LabId generation, save)",
+    "title": "PatientService.CreateAsync — happy path with blank LabId auto-generates and persists",
+    "category": "functional",
+    "priority": "P0",
+    "preconditions": "OpenLabDbContext is initialized and empty of patients for today (yyyyMMdd prefix).",
+    "input": {
+      "FullName": "Test Patient",
+      "Gender": "Male",
+      "BirthDate": "1990-01-01",
+      "LabId": null,
+      "ReferralId": null,
+      "Phone": "0501234567"
+    },
+    "steps": [
+      "Call PatientService.GenerateNextLabIdAsync(today) and capture the candidate.",
+      "Call PatientService.CreateAsync with the patient above and LabId left blank.",
+      "Reload the patient via PatientService.GetByLabIdAsync(returnedLabId)."
+    ],
+    "expected": "Returned Patient.PatientId > 0; LabId matches pattern '^[0-9]{8}[0-9]{3}$' and starts with today's yyyyMMdd; GetByLabIdAsync returns a patient with the same FullName (trimmed) and normalized AgeUnit."
+  },
+  {
+    "id": "TC002",
+    "workflow": "1. Add new patient",
+    "title": "PatientService.CreateAsync — rejects missing FullName with ArgumentException",
+    "category": "negative / validation",
+    "priority": "P0",
+    "input": { "FullName": "  ", "Gender": "Male", "LabId": "20260527001" },
+    "expected": "ArgumentException with message containing 'FullName' is thrown; no row inserted in Patients."
+  },
+  {
+    "id": "TC003",
+    "workflow": "1. Add new patient",
+    "title": "PatientService.CreateAsync — rejects invalid Gender value",
+    "category": "negative / validation",
+    "priority": "P0",
+    "input": { "FullName": "X", "Gender": "Other", "LabId": "20260527002" },
+    "expected": "ArgumentException ('Gender value is invalid'); allowed set is {Male, Female, ذكر, أنثى}."
+  },
+  {
+    "id": "TC004",
+    "workflow": "1. Add new patient",
+    "title": "PatientService.CreateAsync — rejects future BirthDate",
+    "category": "negative / validation",
+    "priority": "P1",
+    "input": { "FullName": "X", "Gender": "Male", "BirthDate": "TODAY+1" },
+    "expected": "ArgumentException ('BirthDate cannot be in the future')."
+  },
+  {
+    "id": "TC005",
+    "workflow": "1. Add new patient",
+    "title": "PatientService.CreateAsync — rejects unknown ReferralId",
+    "category": "negative / referential integrity",
+    "priority": "P1",
+    "input": { "FullName": "X", "Gender": "Male", "ReferralId": 999999 },
+    "expected": "InvalidOperationException ('Referral contract not found')."
+  },
+  {
+    "id": "TC006",
+    "workflow": "1. Add new patient",
+    "title": "PatientService.CreateAsync — duplicate LabId rejected",
+    "category": "negative / uniqueness",
+    "priority": "P0",
+    "steps": [
+      "Insert a patient with LabId '20260527010'.",
+      "Attempt to insert another patient with the same LabId."
+    ],
+    "expected": "Second insert throws InvalidOperationException ('LabId already exists'); only the first row persists."
+  },
+  {
+    "id": "TC007",
+    "workflow": "1. Add new patient",
+    "title": "PatientService.GenerateNextLabIdAsync — sequence resets per day and skips taken IDs",
+    "category": "functional",
+    "priority": "P0",
+    "steps": [
+      "Seed three patients with LabIds 20260527001, 20260527002, 20260527003.",
+      "Call GenerateNextLabIdAsync(2026-05-27).",
+      "Manually insert 20260527004, then call again."
+    ],
+    "expected": "First call returns 20260527004; second call returns 20260527005; LabId is unique on save."
+  },
+  {
+    "id": "TC008",
+    "workflow": "1. Add new patient",
+    "title": "PatientService.UpdateAsync — writes EDIT_PATIENT audit row when fields change",
+    "category": "functional / audit",
+    "priority": "P1",
+    "steps": [
+      "Create a patient and capture PatientId.",
+      "Call UpdateAsync(patient, userId=42) changing Age, IsVip, HomePhone, Email.",
+      "Read AuditLogs filtered by Action='EDIT_PATIENT' and RecordId=PatientId."
+    ],
+    "expected": "Exactly one new AuditLog row with OldValues != NewValues; the snapshot includes Age, AgeUnit, IsVip, IsPregnant, HomePhone, NationalId, Email (Phase 0 fix C-02)."
+  },
+  {
+    "id": "TC009",
+    "workflow": "1. Add new patient (atomic registration)",
+    "title": "PatientService.SaveRegistrationAsync — atomic Patient+Visit+VisitTests+Invoice commits together",
+    "category": "transactional",
+    "priority": "P0",
+    "steps": [
+      "Construct a new Patient (PatientId=0), a Visit, two VisitTests, and one Invoice.",
+      "Call SaveRegistrationAsync.",
+      "Read back rows from each table."
+    ],
+    "expected": "Returns visitId > 0; all four rows present and linked by the same PatientId/VisitId; LabId auto-generated if blank."
+  },
+  {
+    "id": "TC010",
+    "workflow": "1. Add new patient (atomic registration)",
+    "title": "PatientService.SaveRegistrationAsync — rollback when invoice fails",
+    "category": "transactional / negative",
+    "priority": "P0",
+    "steps": [
+      "Pass a Visit referencing a non-existent ReferralId so VisitService.CreateAsync (or the implicit FK) would throw; alternatively pass null for invoice via reflection on a test helper.",
+      "Catch the exception."
+    ],
+    "expected": "Patients/Visits/VisitTests/Invoices tables are unchanged after the call (full rollback via EF Core BeginTransactionAsync)."
+  },
+  {
+    "id": "TC011",
+    "workflow": "1. Add new patient",
+    "title": "PatientService.DeleteAsync — refuses to delete a patient with visits",
+    "category": "negative / referential integrity",
+    "priority": "P1",
+    "expected": "InvalidOperationException ('Cannot delete patient with visits'); row persists."
+  },
+  {
+    "id": "TC012",
+    "workflow": "2. Assign lab tests to patient visit",
+    "title": "VisitService.CreateAsync — creates Open visit and inherits ReferralId from patient",
+    "category": "functional",
+    "priority": "P0",
+    "steps": [
+      "Seed a patient with ReferralId=R1.",
+      "Call VisitService.CreateAsync(new Visit { PatientId=P, AccountType=null })."
+    ],
+    "expected": "Visit persisted; AccountType set to 'Referral'; ReferralId inherited from patient; Status='Open'."
+  },
+  {
+    "id": "TC013",
+    "workflow": "2. Assign lab tests to patient visit",
+    "title": "VisitService.AddTestToVisitAsync — resolves price from referral price list",
+    "category": "functional",
+    "priority": "P0",
+    "steps": [
+      "Seed a referral price list with Test T at price 75.",
+      "Create a visit linked to that referral.",
+      "Call AddTestToVisitAsync(visitId, testId=T) with no overridePrice."
+    ],
+    "expected": "VisitTest persisted with Price=75 and Status='Pending'."
+  },
+  {
+    "id": "TC014",
+    "workflow": "2. Assign lab tests to patient visit",
+    "title": "VisitService.AddTestToVisitAsync — rejects duplicate tests on same visit",
+    "category": "negative / uniqueness",
+    "priority": "P1",
+    "expected": "Second call with the same (VisitId, TestId) throws InvalidOperationException ('Test already exists in this visit')."
+  },
+  {
+    "id": "TC015",
+    "workflow": "2. Assign lab tests to patient visit",
+    "title": "VisitService.AddTestToVisitAsync — rejects when visit is Closed",
+    "category": "negative / state machine",
+    "priority": "P1",
+    "expected": "InvalidOperationException ('Closed visits cannot accept new tests')."
+  },
+  {
+    "id": "TC016",
+    "workflow": "2. Assign lab tests to patient visit",
+    "title": "VisitService.AddTestToVisitAsync — send-out test enqueues on ExternalLabQueues",
+    "category": "functional / side-effect",
+    "priority": "P1",
+    "steps": [
+      "Create a test with IsSendOut=true.",
+      "AddTestToVisitAsync.",
+      "Query ExternalLabQueues for the new VisitTestId."
+    ],
+    "expected": "Exactly one ExternalLabQueue row with Status='Pending', ReferralId matching the visit, DateQueued ~ now."
+  },
+  {
+    "id": "TC017",
+    "workflow": "2. Assign lab tests to patient visit",
+    "title": "VisitService.RemoveVisitTestAsync — refuses removal once a result is entered",
+    "category": "negative / state machine",
+    "priority": "P0",
+    "steps": [
+      "Add a test to a visit.",
+      "Save a ResultValue with non-empty Value.",
+      "Call RemoveVisitTestAsync."
+    ],
+    "expected": "InvalidOperationException ('Tests cannot be removed after result entry'); VisitTest stays."
+  },
+  {
+    "id": "TC018",
+    "workflow": "2. Assign lab tests to patient visit",
+    "title": "VisitService.AddCustomGroupToVisitAsync — adds all group tests and skips duplicates",
+    "category": "functional",
+    "priority": "P2",
+    "steps": [
+      "Seed a CustomGroup with tests {A,B,C}.",
+      "Pre-add B to the visit.",
+      "Call AddCustomGroupToVisitAsync(visitId, groupId)."
+    ],
+    "expected": "Returned list contains exactly {A, C}; final VisitTests = {A,B,C}."
+  },
+  {
+    "id": "TC019",
+    "workflow": "3. Barcode generation for patient",
+    "title": "PatientRegistrationViewModel.ShowBarcode — refuses when both PatientId and LabId are missing",
+    "category": "negative / state",
+    "priority": "P1",
+    "expected": "StatusMessage = 'يجب حفظ المريض أو إدخال Lab ID قبل طباعة الباركود.'; barcodeDialogService.ShowBarcodeDialog NOT called."
+  },
+  {
+    "id": "TC020",
+    "workflow": "3. Barcode generation for patient",
+    "title": "ShowBarcode — fasting flag adds 'Serum Fasting' label as first entry",
+    "category": "functional",
+    "priority": "P1",
+    "steps": [
+      "PatientId=10, LabId='20260527001', IsFasting=true, SelectedTests=[FBG, CBC]."
+    ],
+    "expected": "BarcodeDialogData.SampleLabels = ['Serum Fasting', 'FBG', 'CBC']."
+  },
+  {
+    "id": "TC021",
+    "workflow": "3. Barcode generation for patient",
+    "title": "ShowBarcode — falls back to sample-type labels when no tests are selected",
+    "category": "functional",
+    "priority": "P1",
+    "steps": [
+      "SelectedTests=empty; HasBloodSample=true; HasUrineSample=true; HasStoolSample=false."
+    ],
+    "expected": "SampleLabels = ['Blood', 'Urine']."
+  },
+  {
+    "id": "TC022",
+    "workflow": "3. Barcode generation for patient",
+    "title": "ShowBarcode — CaseCode prefers CASE-{VisitId} over PAT-{PatientId} over LabId",
+    "category": "functional",
+    "priority": "P2",
+    "steps": [
+      "Case A: PatientId=0, LabId='20260527007', CurrentVisitId=0 → expect CaseCode='20260527007'.",
+      "Case B: PatientId=5, LabId='20260527007', CurrentVisitId=0 → expect CaseCode='PAT-5'.",
+      "Case C: PatientId=5, LabId='20260527007', CurrentVisitId=12 → expect CaseCode='CASE-12'."
+    ],
+    "expected": "Each case produces the listed CaseCode in the BarcodeDialogData passed to the dialog service."
+  },
+  {
+    "id": "TC023",
+    "workflow": "3. Barcode generation for patient",
+    "title": "PrintService.PrintBarcodeImageAsync — rejects blank title",
+    "category": "negative / validation",
+    "priority": "P2",
+    "expected": "ArgumentException ('العنوان مطلوب.')."
+  },
+  {
+    "id": "TC024",
+    "workflow": "4. Receipt printing",
+    "title": "PatientRegistrationViewModel.PrintReceiptAsync — refuses when no visit is saved",
+    "category": "negative / state",
+    "priority": "P0",
+    "expected": "StatusMessage = 'لا توجد زيارة محفوظة أو خدمة الطباعة غير متاحة.'; IPrintService.PrintReceiptAsync NOT called."
+  },
+  {
+    "id": "TC025",
+    "workflow": "4. Receipt printing",
+    "title": "PrintReceiptAsync — rebuilds ReceiptData from DB after a save",
+    "category": "functional / integration",
+    "priority": "P0",
+    "steps": [
+      "Create a patient, visit, two visit tests, and an invoice via services.",
+      "Bind CurrentVisitId / PatientId on the VM.",
+      "Call PrintReceiptAsync."
+    ],
+    "expected": "IPrintService.PrintReceiptAsync invoked once with ReceiptData whose Visit.VisitId == saved visit, VisitTests count == 2, Invoice.Total/Discount/NetTotal/Paid/Balance match DB values, and barcodeText == LabId."
+  },
+  {
+    "id": "TC026",
+    "workflow": "4. Receipt printing",
+    "title": "PrintReceiptAsync — falls back to in-memory state when IVisitService is null",
+    "category": "functional / fallback",
+    "priority": "P1",
+    "steps": [
+      "Instantiate VM with visitService=null but printService non-null.",
+      "Populate SelectedTests + financial totals.",
+      "Set CurrentVisitId=99.",
+      "Call PrintReceiptAsync."
+    ],
+    "expected": "PrintReceiptAsync invoked once; ReceiptData.VisitTests built from SelectedTests; Invoice.Total == TotalAmount, Discount == DiscountAmount, Balance == BalanceForLab, Status=='Closed' when BalanceForLab<=0 else 'Open'."
+  },
+  {
+    "id": "TC027",
+    "workflow": "4. Receipt printing",
+    "title": "PrintService.PrintReceiptAsync — null data throws ArgumentNullException",
+    "category": "negative / validation",
+    "priority": "P2",
+    "expected": "ArgumentNullException('data')."
+  },
+  {
+    "id": "TC028",
+    "workflow": "5. Work sheet printing",
+    "title": "PatientRegistrationViewModel.PrintWorksheetAsync — refuses when no tests are selected",
+    "category": "negative / state",
+    "priority": "P0",
+    "preconditions": "SelectedTests is empty, CurrentVisitId=0.",
+    "expected": "StatusMessage = 'لا توجد تحاليل مختارة لطباعة ورقة العمل.'; IPrintService.PrintWorksheetByPatientAsync NOT called."
+  },
+  {
+    "id": "TC029",
+    "workflow": "5. Work sheet printing",
+    "title": "PrintWorksheetAsync — uses DB count when a visit is saved",
+    "category": "functional",
+    "priority": "P0",
+    "steps": [
+      "Create a visit with 3 visit tests in DB.",
+      "Set CurrentVisitId on the VM.",
+      "Clear SelectedTests in-memory.",
+      "Call PrintWorksheetAsync."
+    ],
+    "expected": "PrintWorksheetByPatientAsync invoked with rows[0].TestsCount == 3 (DB) even though SelectedTests.Count == 0 (G4.4)."
+  },
+  {
+    "id": "TC030",
+    "workflow": "5. Work sheet printing",
+    "title": "PrintService.PrintWorksheetByPatientAsync — empty rows renders 'no data' line",
+    "category": "functional / formatting",
+    "priority": "P2",
+    "expected": "Underlying FlowDocument contains a paragraph with text 'لا توجد بيانات.'; print job name is 'WorksheetByPatient'."
+  },
+  {
+    "id": "TC031",
+    "workflow": "5. Work sheet printing",
+    "title": "PrintWorksheetByTestAsync — rows sorted by Count desc then TestName asc",
+    "category": "functional",
+    "priority": "P2",
+    "input": "rows=[{CBC,5},{FBG,5},{HbA1c,7}]",
+    "expected": "Output order: HbA1c(7), CBC(5), FBG(5)."
+  },
+  {
+    "id": "TC032",
+    "workflow": "6. Enter test results (single + multi-component)",
+    "title": "ResultsService.SaveResultAsync — single-component test transitions VisitTest to Completed",
+    "category": "functional / state machine",
+    "priority": "P0",
+    "steps": [
+      "Create a test with zero TestParameters and add it to a visit (VisitTest status='Pending').",
+      "Call SaveResultAsync(visitTestId, parameterId=0, value='6.5', flag=null, comment=null)."
+    ],
+    "expected": "ResultValue row inserted; VisitTest.Status='Completed' (any value is enough when no parameters exist)."
+  },
+  {
+    "id": "TC033",
+    "workflow": "6. Enter test results (multi-component)",
+    "title": "SaveResultAsync — multi-component test stays InProgress until every parameter has a value",
+    "category": "functional / state machine",
+    "priority": "P0",
+    "steps": [
+      "Create a CBC test with 3 parameters {WBC, RBC, HGB}.",
+      "Add it to a visit.",
+      "Save WBC=7.5 → assert status InProgress.",
+      "Save RBC=4.5 → still InProgress.",
+      "Save HGB=14 → now Completed."
+    ],
+    "expected": "Status transitions Pending → InProgress → InProgress → Completed; three ResultValue rows persisted; each has Value set and VerifiedBy/VerifiedAt null."
+  },
+  {
+    "id": "TC034",
+    "workflow": "6. Enter test results",
+    "title": "SaveResultAsync — refuses to write to a Verified VisitTest",
+    "category": "negative / state machine",
+    "priority": "P0",
+    "steps": [
+      "Set VisitTest.Status='Verified'.",
+      "Call SaveResultAsync."
+    ],
+    "expected": "InvalidOperationException ('Verified results are locked. Reopen first.')."
+  },
+  {
+    "id": "TC035",
+    "workflow": "6. Enter test results",
+    "title": "SaveResultAsync — writes EDIT_RESULT audit when an existing value changes",
+    "category": "functional / audit",
+    "priority": "P1",
+    "steps": [
+      "Save initial value 7.5 with userId=10.",
+      "Save again with value 8.0 and userId=10.",
+      "Query AuditLogs Action='EDIT_RESULT', RecordId='visitTestId-parameterId'."
+    ],
+    "expected": "Exactly one EDIT_RESULT row; OldValues contains 'Value=7.5'; NewValues contains 'Value=8.0'."
+  },
+  {
+    "id": "TC036",
+    "workflow": "6. Enter test results",
+    "title": "ResultsService.VerifyVisitTestAsync — requires every parameter to have a value",
+    "category": "negative / state machine",
+    "priority": "P0",
+    "steps": [
+      "CBC test with 3 parameters; save values for only 2.",
+      "Call VerifyVisitTestAsync."
+    ],
+    "expected": "InvalidOperationException ('All parameters must have values before verification.'); VisitTest.Status unchanged."
+  },
+  {
+    "id": "TC037",
+    "workflow": "6. Enter test results",
+    "title": "VerifyVisitTestAsync — sets VerifiedBy/VerifiedAt and flips status to Verified",
+    "category": "functional",
+    "priority": "P0",
+    "expected": "All ResultValues have VerifiedBy=userId and VerifiedAt~now (within 5s); VisitTest.Status='Verified'."
+  },
+  {
+    "id": "TC038",
+    "workflow": "6. Enter test results",
+    "title": "ResultsService.ReopenVisitTestAsync — clears verification metadata and resets status to InProgress",
+    "category": "functional",
+    "priority": "P1",
+    "expected": "All ResultValues for the test have VerifiedBy=null and VerifiedAt=null; VisitTest.Status='InProgress'."
+  },
+  {
+    "id": "TC039",
+    "workflow": "6. Enter test results",
+    "title": "ResultsService.ValidateResultAsync — picks parameter-scoped range over test-wide range",
+    "category": "functional / reference range",
+    "priority": "P0",
+    "steps": [
+      "Seed test T with two ranges: one with ParameterId=null Low=0 High=20, and one with ParameterId=P Low=4 High=10.",
+      "Call ValidateResultAsync(testId=T, parameterId=P, value='15', gender='Male', age=30, ageUnit='Year')."
+    ],
+    "expected": "Flag='H'; HighThreshold=10 (param-specific range wins); LowThreshold=4."
+  },
+  {
+    "id": "TC040",
+    "workflow": "6. Enter test results",
+    "title": "ValidateResultAsync — matches gender-specific and age-bracketed range",
+    "category": "functional / reference range",
+    "priority": "P1",
+    "steps": [
+      "Seed ranges for testId=T: (Gender=null,Low=4,High=10) and (Gender='Female', AgeFromDays=0, AgeToDays=18*365, Low=3.5, High=6).",
+      "Call ValidateResultAsync(testId=T, value='4', gender='Female', age=10, ageUnit='Year')."
+    ],
+    "expected": "Flag=null (in-range); HighThreshold=6 (gender-specific range wins via OrderByDescending(r=>r.Gender!=null))."
+  },
+  {
+    "id": "TC041",
+    "workflow": "6. Enter test results",
+    "title": "ValidateResultAsync — non-numeric value returns no thresholds",
+    "category": "functional / parsing",
+    "priority": "P2",
+    "input": "value='Positive', range exists with Low/High numerical",
+    "expected": "Result.NumericValue is null/0; Flag is null; HighThreshold/LowThreshold left at default; DefaultComment still populated if a TestComment exists."
+  },
+  {
+    "id": "TC042",
+    "workflow": "6. Enter test results",
+    "title": "GetPreviousResultAsync — returns most recent prior visit-test with a value",
+    "category": "functional",
+    "priority": "P2",
+    "steps": [
+      "Patient P has three visits with the same Test T: visit1 has values, visit2 has empty results, visit3 has values.",
+      "Call GetPreviousResultAsync(P, T, excludeVisitTestId=visit3.VisitTestId)."
+    ],
+    "expected": "Returns visit1's VisitTest (most recent prior with a non-empty ResultValue)."
+  },
+  {
+    "id": "TC043",
+    "workflow": "7. Search for patient",
+    "title": "PatientService.SearchAsync — partial name match (case-sensitive Contains)",
+    "category": "functional / search",
+    "priority": "P0",
+    "steps": [
+      "Seed patients: 'Ahmed Said', 'Mahmoud Ali', 'Ahmad Saad'.",
+      "Call SearchAsync(name='Ahm', phone=null)."
+    ],
+    "expected": "Returns ['Ahmed Said', 'Ahmad Saad'] ordered by FullName."
+  },
+  {
+    "id": "TC044",
+    "workflow": "7. Search for patient",
+    "title": "SearchAsync — phone substring match",
+    "category": "functional / search",
+    "priority": "P1",
+    "input": { "name": null, "phone": "1234" },
+    "expected": "Returns only patients whose Phone contains '1234'; null-phone rows excluded."
+  },
+  {
+    "id": "TC045",
+    "workflow": "7. Search for patient",
+    "title": "SearchAsync — date filter returns only patients with a visit on that day",
+    "category": "functional / search",
+    "priority": "P0",
+    "steps": [
+      "Patient P1 has a visit on 2026-05-27; P2 has a visit on 2026-05-26; P3 has no visits.",
+      "Call SearchAsync(name=null, phone=null, date=2026-05-27)."
+    ],
+    "expected": "Returns only [P1]."
+  },
+  {
+    "id": "TC046",
+    "workflow": "7. Search for patient",
+    "title": "SearchAsync — combined name + phone + labId narrows progressively",
+    "category": "functional / search",
+    "priority": "P1",
+    "steps": [
+      "Patients: A(name='Sara',phone='050...111',labId='20260527001'), B(name='Sara',phone='050...222',labId='20260527002').",
+      "Call SearchAsync(name='Sara', phone='111', labId='20260527001')."
+    ],
+    "expected": "Returns only [A]."
+  },
+  {
+    "id": "TC047",
+    "workflow": "7. Search for patient",
+    "title": "PatientService.GetByLabIdAsync — trims input and is exact match",
+    "category": "functional / search",
+    "priority": "P1",
+    "steps": [
+      "Patient with LabId='20260527015' seeded.",
+      "Call GetByLabIdAsync('  20260527015  ')."
+    ],
+    "expected": "Returns the patient; calling with '202605270' (prefix) returns null (StartsWith is not used here, only equality after Trim)."
+  },
+  {
+    "id": "TC048",
+    "workflow": "7. Search for patient",
+    "title": "GetByLabIdAsync — empty/whitespace labId throws ArgumentException",
+    "category": "negative / validation",
+    "priority": "P2",
+    "expected": "ArgumentException with paramName='labId'."
+  },
+  {
+    "id": "TC049",
+    "workflow": "7. Search for patient",
+    "title": "PatientRegistrationViewModel.LoadTodayPatientsAsync — populates QuickPatientsList from today's visits",
+    "category": "functional / UI orchestration",
+    "priority": "P1",
+    "steps": [
+      "Seed three patients with visits today and one with a visit yesterday.",
+      "Call LoadTodayPatientsAsync."
+    ],
+    "expected": "QuickPatientsList.Count == 3; IsQuickPatientsListVisible == true; StatusMessage contains 'مرضى اليوم: 3'."
+  },
+  {
+    "id": "TC050",
+    "workflow": "Cross-cutting — concurrency & atomicity sanity",
+    "title": "Concurrent SaveRegistrationAsync calls do not produce duplicate LabIds",
+    "category": "concurrency",
+    "priority": "P2",
+    "steps": [
+      "Run 10 SaveRegistrationAsync tasks in parallel each with LabId=null for today.",
+      "Await all tasks and read back Patients."
+    ],
+    "expected": "Exactly 10 patients persisted with 10 distinct LabIds matching today's yyyyMMdd prefix; no row left orphaned in Visits/VisitTests/Invoices on any failure."
+  }
+]

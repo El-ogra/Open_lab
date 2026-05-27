@@ -1509,55 +1509,57 @@ namespace Open_lab.ViewModels
                 return;
             }
 
-            // CRITICAL FIX Phase 0: Wrap in TransactionScope for atomicity (C-09)
-            // Previously patient + visit + invoice could be partially saved
-            using var transaction = new System.Transactions.TransactionScope(
-                System.Transactions.TransactionScopeOption.Required,
-                new System.Transactions.TransactionOptions { Timeout = TimeSpan.FromSeconds(30) });
-
+            // Fix #1 (ambient-TX/SQLite mismatch): use IPatientService.RunInTransactionAsync,
+            // which wraps the work in an EF Core BeginTransactionAsync. The previous
+            // System.Transactions.TransactionScope path threw "ambient transaction not
+            // supported" against the SQLite provider, so atomicity was effectively absent
+            // on SQLite-backed deployments. Same all-or-nothing semantics, no ambient
+            // enlistment, all providers.
+            Visit? committedVisit = null;
+            Invoice? committedInvoice = null;
             try
             {
-                var visit = CurrentVisitId > 0
-                    ? await _visitService.GetByIdAsync(CurrentVisitId)
-                    : null;
-
-                if (visit == null)
+                await _patientService.RunInTransactionAsync(async () =>
                 {
-                    visit = await _visitService.CreateAsync(new Visit
-                    {
-                        PatientId = PatientId,
-                        VisitDate = DateTime.Now,
-                        AccountType = string.Equals(AccountType, "Lab to Lab", StringComparison.OrdinalIgnoreCase) ? "Referral" : "Cash",
-                        ReferralId = NormalizeReferralId(SelectedReferral),
-                        Status = "Open"
-                    });
-                    CurrentVisitId = visit.VisitId;
-                }
+                    var visit = CurrentVisitId > 0
+                        ? await _visitService.GetByIdAsync(CurrentVisitId)
+                        : null;
 
-                var existingTests = await _visitService.GetVisitTestsAsync(visit.VisitId);
-                foreach (var selected in SelectedTests)
-                {
-                    if (existingTests.Any(t => t.TestId == selected.TestId))
+                    if (visit == null)
                     {
-                        continue;
+                        visit = await _visitService.CreateAsync(new Visit
+                        {
+                            PatientId = PatientId,
+                            VisitDate = DateTime.Now,
+                            AccountType = string.Equals(AccountType, "Lab to Lab", StringComparison.OrdinalIgnoreCase) ? "Referral" : "Cash",
+                            ReferralId = NormalizeReferralId(SelectedReferral),
+                            Status = "Open"
+                        });
+                        CurrentVisitId = visit.VisitId;
                     }
 
-                    var added = await _visitService.AddTestToVisitAsync(visit.VisitId, selected.TestId, selected.Price);
-                    selected.VisitTestId = added.VisitTestId;
-                }
+                    var existingTests = await _visitService.GetVisitTestsAsync(visit.VisitId);
+                    foreach (var selected in SelectedTests)
+                    {
+                        if (existingTests.Any(t => t.TestId == selected.TestId))
+                        {
+                            continue;
+                        }
 
-                var discount = DiscountAmount;
-                var invoice = await _invoiceService.CreateOrUpdateInvoiceAsync(visit.VisitId, discount, PaidAmount + PreviousPaidAmount);
+                        var added = await _visitService.AddTestToVisitAsync(visit.VisitId, selected.TestId, selected.Price);
+                        selected.VisitTestId = added.VisitTestId;
+                    }
 
-                // CRITICAL FIX: Commit transaction only after all operations succeed
-                transaction.Complete();
+                    var discount = DiscountAmount;
+                    committedInvoice = await _invoiceService.CreateOrUpdateInvoiceAsync(visit.VisitId, discount, PaidAmount + PreviousPaidAmount);
+                    committedVisit = visit;
+                });
 
-                StatusMessage = $"تم حفظ الزيارة #{visit.VisitId} والفاتورة #{invoice.InvoiceId}.";
+                StatusMessage = $"تم حفظ الزيارة #{committedVisit!.VisitId} والفاتورة #{committedInvoice!.InvoiceId}.";
             }
             catch (Exception ex)
             {
                 StatusMessage = $"خطأ في حفظ البيانات: {ex.Message}";
-                // Transaction is automatically rolled back when disposed
                 throw;
             }
         }

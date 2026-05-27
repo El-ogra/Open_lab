@@ -18,5 +18,11 @@ namespace Open_lab.Services
         Task UpdateAsync(Patient patient, int userId);
         Task AssignReferralAsync(int patientId, int? referralId, int userId);
         Task DeleteAsync(int patientId);
+
+        // Fix #1 (ambient-TX/SQLite mismatch): callers that need to bundle
+        // multi-service writes (Visit + VisitTests + Invoice) into a single
+        // commit must use this helper instead of System.Transactions.TransactionScope,
+        // which the SQLite EF Core provider does not support.
+        Task RunInTransactionAsync(Func<Task> action);
     }
 }

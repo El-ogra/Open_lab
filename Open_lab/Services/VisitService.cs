@@ -151,7 +151,13 @@ namespace Open_lab.Services
                 throw new InvalidOperationException("Test not found.");
             }
 
-            var price = overridePrice ?? await ResolveTestPriceAsync(visit, test);
+            // Fix #4 (override-price audit gap): always resolve the contract price
+            // so we can compare it to any override the caller supplied. If they
+            // diverge, persist the override but record the deviation in AuditLogs
+            // so revenue/contract leakage is reviewable.
+            var contractPrice = await ResolveTestPriceAsync(visit, test);
+            var price = overridePrice ?? contractPrice;
+
             var visitTest = new VisitTest
             {
                 VisitId = visitId,
@@ -162,6 +168,26 @@ namespace Open_lab.Services
 
             _db.VisitTests.Add(visitTest);
             await _db.SaveChangesAsync();
+
+            if (overridePrice.HasValue && overridePrice.Value != contractPrice)
+            {
+                // UserId resolution matches the AuditInterceptor convention
+                // (Data/AuditInterceptor.cs:43): fall back to the seeded admin
+                // user (1) when no operator is bound to the request, so the
+                // audit row always satisfies the AuditLogs.UserId FK.
+                var userId = _db.CurrentUserId ?? 1;
+                _db.AuditLogs.Add(new AuditLog
+                {
+                    UserId = userId,
+                    Action = "OVERRIDE_TEST_PRICE",
+                    TableName = "VisitTests",
+                    RecordId = visitTest.VisitTestId.ToString(),
+                    OldValues = $"ContractPrice={contractPrice}",
+                    NewValues = $"OverridePrice={overridePrice.Value}",
+                    Timestamp = DateTime.UtcNow
+                });
+                await _db.SaveChangesAsync();
+            }
 
             if (test.IsSendOut)
             {

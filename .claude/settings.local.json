@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//Users/dev/**)",
+      "Read(//Users/dev/workspace-25ea7c9c/**)",
+      "mcp__TestSprite__testsprite_bootstrap",
+      "mcp__TestSprite__testsprite_generate_code_summary",
+      "mcp__TestSprite__testsprite_generate_backend_test_plan",
+      "mcp__TestSprite__testsprite_generate_standardized_prd"
+    ]
+  },
+  "enabledMcpjsonServers": [
+    "TestSprite"
+  ]
+}

@@ -386,8 +386,43 @@ namespace Open_lab.Services
                 throw new InvalidOperationException("Cannot delete patient with visits.");
             }
 
+            // Fix #3 (orphaned MedicalHistory): remove the related medical-history
+            // row in the same transaction so we do not leave a dangling row when
+            // the FK is non-cascading (the historical default in OnModelCreating).
+            var history = await _db.MedicalHistories.FirstOrDefaultAsync(m => m.PatientId == patientId);
+            if (history != null)
+            {
+                _db.MedicalHistories.Remove(history);
+            }
+
             _db.Patients.Remove(patient);
             await _db.SaveChangesAsync();
+        }
+
+        // Fix #1 (ambient-TX/SQLite mismatch): run a caller-supplied action inside
+        // an EF Core transaction obtained via BeginTransactionAsync. The
+        // System.Transactions.TransactionScope used previously in
+        // PatientRegistrationViewModel.SaveVisitAndInvoiceAsync threw "ambient
+        // transaction not supported" against the SQLite provider; this helper
+        // gives us the same all-or-nothing semantics without ambient enlistment.
+        public async Task RunInTransactionAsync(Func<Task> action)
+        {
+            if (action == null)
+            {
+                throw new ArgumentNullException(nameof(action));
+            }
+
+            await using var transaction = await _db.Database.BeginTransactionAsync();
+            try
+            {
+                await action();
+                await transaction.CommitAsync();
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
         }
 
         private static void Normalize(Patient patient)

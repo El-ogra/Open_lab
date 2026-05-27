@@ -471,7 +471,13 @@ namespace Open_lab.Data
                 entity.HasKey(e => e.MedicalHistoryId);
                 entity.HasOne(e => e.Patient)
                     .WithOne(e => e.MedicalHistory)
-                    .HasForeignKey<MedicalHistory>(e => e.PatientId);
+                    .HasForeignKey<MedicalHistory>(e => e.PatientId)
+                    // Fix #3 (orphaned MedicalHistory): cascade-delete the medical
+                    // history when the patient is removed. Belt-and-suspenders with
+                    // the explicit MedicalHistories.Remove call in
+                    // PatientService.DeleteAsync — covers both ORM-tracked deletes
+                    // and any direct DELETE issued against Patients.
+                    .OnDelete(DeleteBehavior.Cascade);
                 entity.HasIndex(e => e.PatientId).IsUnique();
             });
 

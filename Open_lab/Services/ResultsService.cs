@@ -100,11 +100,22 @@ namespace Open_lab.Services
             {
                 var oldValues = BuildResultSnapshot(existing);
                 var newValues = BuildResultSnapshot(value, flag, comment);
-                if (userId.HasValue && userId.Value > 0 && !string.Equals(oldValues, newValues, StringComparison.Ordinal))
+                if (!string.Equals(oldValues, newValues, StringComparison.Ordinal))
                 {
+                    // Fix #5 (userId audit gap on result edits): always log the
+                    // edit. UserId resolution cascades: explicit param > the
+                    // DbContext's CurrentUserId > 1 (the seeded admin/system
+                    // user, matching the AuditInterceptor sentinel at
+                    // Data/AuditInterceptor.cs:43). Previously this row was
+                    // silently dropped whenever the legacy 5-arg overload ran
+                    // without CurrentUserId — a compliance hole for result edits.
+                    var effectiveUserId = (userId.HasValue && userId.Value > 0)
+                        ? userId.Value
+                        : (_db.CurrentUserId ?? 1);
+
                     _db.AuditLogs.Add(new AuditLog
                     {
-                        UserId = userId.Value,
+                        UserId = effectiveUserId,
                         Action = "EDIT_RESULT",
                         TableName = "ResultValues",
                         RecordId = $"{visitTestId}-{parameterId}",

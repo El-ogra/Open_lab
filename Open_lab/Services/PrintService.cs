@@ -20,7 +20,7 @@ namespace Open_lab.Services
             _settingsService = settingsService ?? throw new ArgumentNullException(nameof(settingsService));
         }
 
-        public Task PrintReceiptAsync(ReceiptData data, string? barcodeText = null)
+        public async Task PrintReceiptAsync(ReceiptData data, string? barcodeText = null)
         {
             if (data == null)
             {
@@ -48,11 +48,10 @@ namespace Open_lab.Services
                 document.Blocks.Add(new Paragraph(new Run($"المدفوع: {data.Invoice.Paid:N2} | المتبقي: {data.Invoice.Balance:N2} | الحالة: {data.Invoice.Status}")));
             }
 
-            PrintDocument(document, $"Receipt_{data.Visit.VisitId}");
-            return Task.CompletedTask;
+            await PrintDocumentAsync(document, $"Receipt_{data.Visit.VisitId}", DocumentTypes.Receipt);
         }
 
-        public Task PrintVisitReportAsync(VisitReportData report, bool isReprint = false)
+        public async Task PrintVisitReportAsync(VisitReportData report, bool isReprint = false)
         {
             if (report == null)
             {
@@ -88,11 +87,10 @@ namespace Open_lab.Services
                 }
             }
 
-            PrintDocument(document, $"VisitReport_{report.Visit.VisitId}");
-            return Task.CompletedTask;
+            await PrintDocumentAsync(document, $"VisitReport_{report.Visit.VisitId}", DocumentTypes.Report);
         }
 
-        public Task PrintPatientHistoryAsync(PatientHistoryReportData history)
+        public async Task PrintPatientHistoryAsync(PatientHistoryReportData history)
         {
             if (history == null)
             {
@@ -119,11 +117,10 @@ namespace Open_lab.Services
                 }
             }
 
-            PrintDocument(document, $"PatientHistory_{history.Patient.LabId}");
-            return Task.CompletedTask;
+            await PrintDocumentAsync(document, $"PatientHistory_{history.Patient.LabId}", DocumentTypes.Report);
         }
 
-        public Task PrintWorksheetByPatientAsync(DateTime from, DateTime to, IReadOnlyCollection<WorkSheetPatientRow> rows)
+        public async Task PrintWorksheetByPatientAsync(DateTime from, DateTime to, IReadOnlyCollection<WorkSheetPatientRow> rows)
         {
             var document = CreateDocument("Work Sheet By Patient", 12);
             document.Blocks.Add(CreateHeader("ورقة العمل - حسب المرضى"));
@@ -141,11 +138,10 @@ namespace Open_lab.Services
                 }
             }
 
-            PrintDocument(document, "WorksheetByPatient");
-            return Task.CompletedTask;
+            await PrintDocumentAsync(document, "WorksheetByPatient", DocumentTypes.Default);
         }
 
-        public Task PrintWorksheetByTestAsync(DateTime from, DateTime to, IReadOnlyCollection<WorkSheetTestRow> rows)
+        public async Task PrintWorksheetByTestAsync(DateTime from, DateTime to, IReadOnlyCollection<WorkSheetTestRow> rows)
         {
             var document = CreateDocument("Work Sheet By Test", 12);
             document.Blocks.Add(CreateHeader("ورقة العمل - حسب التحاليل"));
@@ -163,11 +159,10 @@ namespace Open_lab.Services
                 }
             }
 
-            PrintDocument(document, "WorksheetByTest");
-            return Task.CompletedTask;
+            await PrintDocumentAsync(document, "WorksheetByTest", DocumentTypes.Default);
         }
 
-        public Task PrintTextReportAsync(string title, IReadOnlyCollection<string> lines, string? jobName = null)
+        public async Task PrintTextReportAsync(string title, IReadOnlyCollection<string> lines, string? jobName = null)
         {
             if (string.IsNullOrWhiteSpace(title))
             {
@@ -189,11 +184,10 @@ namespace Open_lab.Services
                 }
             }
 
-            PrintDocument(document, jobName ?? title);
-            return Task.CompletedTask;
+            await PrintDocumentAsync(document, jobName ?? title, DocumentTypes.Default);
         }
 
-        public Task PrintCultureReportAsync(CultureReportData data)
+        public async Task PrintCultureReportAsync(CultureReportData data)
         {
             if (data == null) throw new ArgumentNullException(nameof(data));
 
@@ -228,13 +222,12 @@ namespace Open_lab.Services
             table.RowGroups.Add(bodyRowGroup);
             document.Blocks.Add(table);
 
-            PrintDocument(document, $"CultureReport_{data.LabId}");
-            return Task.CompletedTask;
+            await PrintDocumentAsync(document, $"CultureReport_{data.LabId}", DocumentTypes.Report);
         }
 
         // CRITICAL FIX Phase 0: Implement actual barcode image printing (C-04)
         // Previously only printed text, now prints actual barcode images
-        public Task PrintBarcodeImageAsync(string title, System.Windows.Media.ImageSource? barcodeImage, string barcodeText, string? additionalInfo = null)
+        public async Task PrintBarcodeImageAsync(string title, System.Windows.Media.ImageSource? barcodeImage, string barcodeText, string? additionalInfo = null)
         {
             if (string.IsNullOrWhiteSpace(title))
             {
@@ -285,8 +278,7 @@ namespace Open_lab.Services
                 });
             }
 
-            PrintDocument(document, $"Barcode_{barcodeText}");
-            return Task.CompletedTask;
+            await PrintDocumentAsync(document, $"Barcode_{barcodeText}", DocumentTypes.Default);
         }
 
         private static FlowDocument CreateDocument(string title, double fontSize, double leftMarginCm = 0, double rightMarginCm = 0)
@@ -317,9 +309,21 @@ namespace Open_lab.Services
             };
         }
 
-        private static void PrintDocument(FlowDocument document, string jobName)
+        // Fix #2 (unused async printer resolver): the previous PrintDocument helper
+        // ignored ISettingsService entirely and always routed through "Microsoft
+        // Print to PDF" via the now-deleted ResolvePrintQueue(). Every public
+        // Print*Async method now passes the correct document type so the printer
+        // configured in settings.json (receipt/report/default) is actually used.
+        private static class DocumentTypes
         {
-            var queue = ResolvePrintQueue();
+            public const string Receipt = "receipt";
+            public const string Report = "report";
+            public const string Default = "default";
+        }
+
+        private async Task PrintDocumentAsync(FlowDocument document, string jobName, string documentType)
+        {
+            var queue = await ResolvePrintQueueAsync(documentType);
             var writer = PrintQueue.CreateXpsDocumentWriter(queue);
             var paginator = ((IDocumentPaginatorSource)document).DocumentPaginator;
             writer.Write(paginator);
@@ -363,17 +367,5 @@ namespace Open_lab.Services
             return pdfQueue ?? LocalPrintServer.GetDefaultPrintQueue();
         }
 
-        private static PrintQueue ResolvePrintQueue()
-        {
-            var server = new LocalPrintServer();
-            var queues = server.GetPrintQueues(new[]
-            {
-                EnumeratedPrintQueueTypes.Local,
-                EnumeratedPrintQueueTypes.Connections
-            });
-
-            var pdfQueue = queues.FirstOrDefault(q => q.Name.Equals(PdfPrinterName, StringComparison.OrdinalIgnoreCase));
-            return pdfQueue ?? LocalPrintServer.GetDefaultPrintQueue();
-        }
     }
 }
