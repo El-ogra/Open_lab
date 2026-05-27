@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Open_lab.AdminCli.Commands;
 using Open_lab.Data;
 using Open_lab.Models;
 using Open_lab.Services;
@@ -15,13 +16,28 @@ static async Task<int> RunAsync(string[] args)
         return args.Length == 0 ? 1 : 0;
     }
 
-    if (!HasArg(args, "--reset-admin"))
+    if (HasArg(args, "--reset-admin"))
     {
-        Console.Error.WriteLine("Missing required option: --reset-admin");
-        PrintUsage();
-        return 1;
+        return await ResetAdminAsync(args);
     }
 
+    if (HasArg(args, "--seed-tests"))
+    {
+        return await SeedTestsCommand.ExecuteAsync();
+    }
+
+    if (HasArg(args, "--clean-tests"))
+    {
+        return await CleanTestsCommand.ExecuteAsync();
+    }
+
+    Console.Error.WriteLine("Missing required option: --reset-admin, --seed-tests, or --clean-tests");
+    PrintUsage();
+    return 1;
+}
+
+static async Task<int> ResetAdminAsync(string[] args)
+{
     var newPassword = GetArgValue(args, "--new-password");
     if (string.IsNullOrWhiteSpace(newPassword))
     {
@@ -143,4 +159,6 @@ static void PrintUsage()
 {
     Console.WriteLine("Usage:");
     Console.WriteLine("  Open_lab.AdminCli --reset-admin --new-password <strong-password>");
+    Console.WriteLine("  Open_lab.AdminCli --seed-tests");
+    Console.WriteLine("  Open_lab.AdminCli --clean-tests");
 }
