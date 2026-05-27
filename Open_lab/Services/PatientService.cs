@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Data;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Open_lab.Data;
@@ -123,13 +124,66 @@ namespace Open_lab.Services
         public async Task<string> GenerateNextLabIdAsync(DateTime? forDate = null)
         {
             var date = (forDate ?? DateTime.Today).Date;
+            if (_db.Database.CurrentTransaction != null || !_db.Database.IsRelational())
+            {
+                return await AllocateNextLabIdAsync(date);
+            }
+
+            await using var transaction = await _db.Database.BeginTransactionAsync(IsolationLevel.Serializable);
+            try
+            {
+                var labId = await AllocateNextLabIdAsync(date);
+                await transaction.CommitAsync();
+                return labId;
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+        }
+
+        private async Task<string> AllocateNextLabIdAsync(DateTime date)
+        {
             var prefix = date.ToString("yyyyMMdd", CultureInfo.InvariantCulture);
+            var now = DateTime.UtcNow;
+            var sequence = await _db.LabIdSequences.FirstOrDefaultAsync(s => s.SequenceDate == date);
+
+            if (sequence == null)
+            {
+                sequence = new LabIdSequence
+                {
+                    SequenceDate = date,
+                    LastSequence = await GetMaxExistingLabSequenceAsync(prefix),
+                    CreatedAt = now,
+                    UpdatedAt = now
+                };
+
+                _db.LabIdSequences.Add(sequence);
+                await _db.SaveChangesAsync();
+            }
+
+            string candidate;
+            do
+            {
+                sequence.LastSequence++;
+                candidate = $"{prefix}{sequence.LastSequence:D3}";
+            }
+            while (await _db.Patients.AnyAsync(p => p.LabId == candidate));
+
+            sequence.UpdatedAt = now;
+            await _db.SaveChangesAsync();
+
+            return candidate;
+        }
+
+        private async Task<int> GetMaxExistingLabSequenceAsync(string prefix)
+        {
             var latestForDay = await _db.Patients
                 .AsNoTracking()
                 .Where(p => p.LabId.StartsWith(prefix))
                 .Select(p => p.LabId)
                 .ToListAsync();
-
             var maxSequence = 0;
             foreach (var labId in latestForDay)
             {
@@ -145,15 +199,7 @@ namespace Open_lab.Services
                 }
             }
 
-            var next = maxSequence + 1;
-            var candidate = $"{prefix}{next:D3}";
-            while (await _db.Patients.AnyAsync(p => p.LabId == candidate))
-            {
-                next++;
-                candidate = $"{prefix}{next:D3}";
-            }
-
-            return candidate;
+            return maxSequence;
         }
 
         public async Task<Patient> CreateAsync(Patient patient)
@@ -163,6 +209,27 @@ namespace Open_lab.Services
                 throw new ArgumentNullException(nameof(patient));
             }
 
+            if (_db.Database.CurrentTransaction != null || !_db.Database.IsRelational())
+            {
+                return await CreateCoreAsync(patient);
+            }
+
+            await using var transaction = await _db.Database.BeginTransactionAsync(IsolationLevel.Serializable);
+            try
+            {
+                var created = await CreateCoreAsync(patient);
+                await transaction.CommitAsync();
+                return created;
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+        }
+
+        private async Task<Patient> CreateCoreAsync(Patient patient)
+        {
             Normalize(patient);
             await ValidateReferralAsync(patient.ReferralId);
             if (string.IsNullOrWhiteSpace(patient.LabId))
@@ -313,63 +380,78 @@ namespace Open_lab.Services
                 throw new ArgumentNullException(nameof(invoice));
             }
 
-            var visitTestList = visitTests?.ToList() ?? new List<VisitTest>();
+            if (_db.Database.CurrentTransaction != null || !_db.Database.IsRelational())
+            {
+                return await SaveRegistrationCoreAsync(patient, visit, visitTests, invoice);
+            }
 
-            await using var transaction = await _db.Database.BeginTransactionAsync();
+            await using var transaction = await _db.Database.BeginTransactionAsync(IsolationLevel.Serializable);
             try
             {
-                // 1) Patient: create new or use existing PatientId.
-                if (patient.PatientId == 0)
-                {
-                    Normalize(patient);
-                    await ValidateReferralAsync(patient.ReferralId);
-                    if (string.IsNullOrWhiteSpace(patient.LabId))
-                    {
-                        patient.LabId = await GenerateNextLabIdAsync(DateTime.Today);
-                    }
-
-                    ValidateBusinessRules(patient);
-
-                    var labIdInUse = await _db.Patients.AnyAsync(p => p.LabId == patient.LabId);
-                    if (labIdInUse)
-                    {
-                        throw new InvalidOperationException("LabId already exists.");
-                    }
-
-                    _db.Patients.Add(patient);
-                    await _db.SaveChangesAsync();
-                }
-
-                // 2) Visit linked to the patient.
-                visit.PatientId = patient.PatientId;
-                _db.Visits.Add(visit);
-                await _db.SaveChangesAsync();
-
-                // 3) Visit tests linked to the visit.
-                foreach (var visitTest in visitTestList)
-                {
-                    visitTest.VisitId = visit.VisitId;
-                    _db.VisitTests.Add(visitTest);
-                }
-
-                if (visitTestList.Count > 0)
-                {
-                    await _db.SaveChangesAsync();
-                }
-
-                // 4) Invoice linked to the visit.
-                invoice.VisitId = visit.VisitId;
-                _db.Invoices.Add(invoice);
-                await _db.SaveChangesAsync();
-
+                var visitId = await SaveRegistrationCoreAsync(patient, visit, visitTests, invoice);
                 await transaction.CommitAsync();
-                return visit.VisitId;
+                return visitId;
             }
             catch
             {
                 await transaction.RollbackAsync();
                 throw;
             }
+        }
+
+        private async Task<int> SaveRegistrationCoreAsync(
+            Patient patient,
+            Visit visit,
+            IEnumerable<VisitTest>? visitTests,
+            Invoice invoice)
+        {
+            var visitTestList = visitTests?.ToList() ?? new List<VisitTest>();
+
+            // 1) Patient: create new or use existing PatientId.
+            if (patient.PatientId == 0)
+            {
+                Normalize(patient);
+                await ValidateReferralAsync(patient.ReferralId);
+                if (string.IsNullOrWhiteSpace(patient.LabId))
+                {
+                    patient.LabId = await GenerateNextLabIdAsync(DateTime.Today);
+                }
+
+                ValidateBusinessRules(patient);
+
+                var labIdInUse = await _db.Patients.AnyAsync(p => p.LabId == patient.LabId);
+                if (labIdInUse)
+                {
+                    throw new InvalidOperationException("LabId already exists.");
+                }
+
+                _db.Patients.Add(patient);
+                await _db.SaveChangesAsync();
+            }
+
+            // 2) Visit linked to the patient.
+            visit.PatientId = patient.PatientId;
+            _db.Visits.Add(visit);
+            await _db.SaveChangesAsync();
+
+            // 3) Visit tests linked to the visit.
+            foreach (var visitTest in visitTestList)
+            {
+                visitTest.VisitId = visit.VisitId;
+                _db.VisitTests.Add(visitTest);
+            }
+
+            if (visitTestList.Count > 0)
+            {
+                await _db.SaveChangesAsync();
+            }
+
+            // 4) Invoice linked to the visit.
+            invoice.VisitId = visit.VisitId;
+            _db.Invoices.Add(invoice);
+            await _db.SaveChangesAsync();
+
+            return visit.VisitId;
         }
 
         public async Task DeleteAsync(int patientId)
@@ -412,7 +494,13 @@ namespace Open_lab.Services
                 throw new ArgumentNullException(nameof(action));
             }
 
-            await using var transaction = await _db.Database.BeginTransactionAsync();
+            if (_db.Database.CurrentTransaction != null || !_db.Database.IsRelational())
+            {
+                await action();
+                return;
+            }
+
+            await using var transaction = await _db.Database.BeginTransactionAsync(IsolationLevel.Serializable);
             try
             {
                 await action();

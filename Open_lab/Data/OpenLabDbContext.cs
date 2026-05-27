@@ -67,6 +67,7 @@ namespace Open_lab.Data
         public DbSet<TestConsumption> TestConsumptions { get; set; } = null!;
         public DbSet<Physician> Physicians { get; set; } = null!;
         public DbSet<SystemSetting> SystemSettings { get; set; } = null!;
+        public DbSet<LabIdSequence> LabIdSequences => Set<LabIdSequence>();
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -161,6 +162,16 @@ namespace Open_lab.Data
                     .WithMany(e => e.Patients)
                     .HasForeignKey(e => e.ReferralId)
                     .OnDelete(DeleteBehavior.SetNull);
+            });
+
+            modelBuilder.Entity<LabIdSequence>(entity =>
+            {
+                entity.HasKey(e => e.SequenceDate);
+                entity.Property(e => e.SequenceDate).HasColumnType("date");
+                entity.Property(e => e.LastSequence).IsRequired();
+                entity.Property(e => e.CreatedAt).IsRequired();
+                entity.Property(e => e.UpdatedAt).IsRequired();
+                entity.Property(e => e.RowVersion).IsRowVersion();
             });
 
             modelBuilder.Entity<Visit>(entity =>

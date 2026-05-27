@@ -85,6 +85,76 @@ namespace Open_lab.Tests.Services
         }
 
         [Fact]
+        public async Task GenerateNextLabIdAsync_WhenSequenceRowExists_ShouldIncrementSequence()
+        {
+            // Arrange
+            var today = DateTime.Today;
+            var prefix = today.ToString("yyyyMMdd");
+            _db.LabIdSequences.Add(new LabIdSequence
+            {
+                SequenceDate = today,
+                LastSequence = 7,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            });
+            await _db.SaveChangesAsync();
+
+            // Act
+            var next = await _service.GenerateNextLabIdAsync(today);
+
+            // Assert
+            next.Should().Be(prefix + "008");
+            var sequence = await _db.LabIdSequences.FindAsync(today);
+            sequence!.LastSequence.Should().Be(8);
+        }
+
+        [Fact]
+        public async Task GenerateNextLabIdAsync_WhenSequenceRowMissing_ShouldSeedFromExistingPatients()
+        {
+            // Arrange
+            var today = DateTime.Today;
+            var prefix = today.ToString("yyyyMMdd");
+            _db.Patients.AddRange(
+                new Patient { LabId = prefix + "001", FullName = "A", Gender = "Male" },
+                new Patient { LabId = prefix + "010", FullName = "B", Gender = "Female" },
+                new Patient { LabId = "LAB-MANUAL", FullName = "Manual", Gender = "Male" });
+            await _db.SaveChangesAsync();
+
+            // Act
+            var next = await _service.GenerateNextLabIdAsync(today);
+
+            // Assert
+            next.Should().Be(prefix + "011");
+            var sequence = await _db.LabIdSequences.FindAsync(today);
+            sequence!.LastSequence.Should().Be(11);
+        }
+
+        [Fact]
+        public async Task GenerateNextLabIdAsync_WhenNextSequenceAlreadyExists_ShouldSkipCollision()
+        {
+            // Arrange
+            var today = DateTime.Today;
+            var prefix = today.ToString("yyyyMMdd");
+            _db.LabIdSequences.Add(new LabIdSequence
+            {
+                SequenceDate = today,
+                LastSequence = 7,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            });
+            _db.Patients.Add(new Patient { LabId = prefix + "008", FullName = "Manual", Gender = "Male" });
+            await _db.SaveChangesAsync();
+
+            // Act
+            var next = await _service.GenerateNextLabIdAsync(today);
+
+            // Assert
+            next.Should().Be(prefix + "009");
+            var sequence = await _db.LabIdSequences.FindAsync(today);
+            sequence!.LastSequence.Should().Be(9);
+        }
+
+        [Fact]
         public async Task AddNewPatient_WithMissingFullName_ShouldThrowArgumentException()
         {
             // Function: 1.1 — Add New Patient

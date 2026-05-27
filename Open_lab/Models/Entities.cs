@@ -119,6 +119,15 @@ namespace Open_lab.Models
         public ICollection<Visit> Visits { get; set; } = new HashSet<Visit>();
     }
 
+    public class LabIdSequence
+    {
+        public DateTime SequenceDate { get; set; }
+        public int LastSequence { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
+        public byte[] RowVersion { get; set; } = Array.Empty<byte>();
+    }
+
     public class Visit
     {
         public int VisitId { get; set; }
