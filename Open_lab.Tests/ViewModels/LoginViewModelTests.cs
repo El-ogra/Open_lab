@@ -21,6 +21,7 @@ namespace Open_lab.Tests.ViewModels
         private readonly Mock<IAdminSetupService> _adminSetupServiceMock;
         private readonly Mock<IAttendanceService> _attendanceServiceMock;
         private readonly Mock<IUserPreferenceService> _userPreferenceServiceMock;
+        private readonly Mock<IDialogService> _dialogServiceMock;
         private readonly Mock<Action> _onLoginSuccessMock;
         private readonly LoginViewModel _viewModel;
 
@@ -32,6 +33,7 @@ namespace Open_lab.Tests.ViewModels
             _adminSetupServiceMock = new Mock<IAdminSetupService>();
             _attendanceServiceMock = new Mock<IAttendanceService>();
             _userPreferenceServiceMock = new Mock<IUserPreferenceService>();
+            _dialogServiceMock = new Mock<IDialogService>();
             _onLoginSuccessMock = new Mock<Action>();
 
             _userPreferenceServiceMock
@@ -44,6 +46,7 @@ namespace Open_lab.Tests.ViewModels
                 _adminSetupServiceMock.Object,
                 _attendanceServiceMock.Object,
                 _userPreferenceServiceMock.Object,
+                _dialogServiceMock.Object,
                 _onLoginSuccessMock.Object);
         }
 
@@ -72,6 +75,7 @@ namespace Open_lab.Tests.ViewModels
                 _adminSetupServiceMock.Object,
                 _attendanceServiceMock.Object,
                 _userPreferenceServiceMock.Object,
+                _dialogServiceMock.Object,
                 _onLoginSuccessMock.Object);
 
             // Assert
@@ -122,7 +126,10 @@ namespace Open_lab.Tests.ViewModels
             await _viewModel.InvokePrivateAsync("LoginAsync");
 
             // Assert
-            _viewModel.StatusMessage.Should().Be("بيانات الدخول غير صحيحة.");
+            _dialogServiceMock.Verify(x => x.ShowError(
+                "اسم المستخدم أو كلمة المرور غير صحيحة",
+                "خطأ"), Times.Once);
+            _viewModel.StatusMessage.Should().Be(string.Empty);
             _viewModel.IsBusy.Should().BeFalse();
         }
 

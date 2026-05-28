@@ -1,5 +1,6 @@
 using System.Linq;
 using System.Windows;
+using System.Windows.Threading;
 using Microsoft.Extensions.DependencyInjection;
 using Open_lab.Data;
 using Open_lab.Services;
@@ -14,12 +15,37 @@ namespace Open_lab
         private ServiceProvider? _serviceProvider;
         private Window? _loginWindow;
 
+        public App()
+        {
+            DispatcherUnhandledException += (_, args) =>
+            {
+                var ex = args.Exception;
+                System.Windows.MessageBox.Show(
+                    $"خطأ غير متوقع: {ex.GetType().FullName}\n\n{ex.Message}\n\n{ex.StackTrace}",
+                    "خطأ في بدء التشغيل",
+                    System.Windows.MessageBoxButton.OK,
+                    System.Windows.MessageBoxImage.Error);
+                args.Handled = true;
+            };
+        }
+
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
 
-            _serviceProvider = ConfigureServices();
-            ShowStartupWindow();
+            try
+            {
+                _serviceProvider = ConfigureServices();
+                ShowStartupWindow();
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show(
+                    $"فشل بدء التشغيل: {ex.GetType().FullName}\n\n{ex.Message}\n\n{ex.StackTrace}",
+                    "خطأ",
+                    System.Windows.MessageBoxButton.OK,
+                    System.Windows.MessageBoxImage.Error);
+            }
         }
 
         protected override void OnExit(ExitEventArgs e)
@@ -43,6 +69,8 @@ namespace Open_lab
             });
 
             RegisterServicesByConvention(services);
+
+            services.AddSingleton<IDialogService, DialogService>();
 
             services.AddSingleton<ISessionContext>(SessionContext.Current);
             services.AddSingleton<IMutableSessionContext>(SessionContext.Current);

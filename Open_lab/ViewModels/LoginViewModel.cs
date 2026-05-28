@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
 using Open_lab.Services;
 
@@ -13,6 +14,7 @@ namespace Open_lab.ViewModels
         private readonly IAdminSetupService _adminSetupService;
         private readonly IAttendanceService _attendanceService;
         private readonly IUserPreferenceService _userPreferenceService;
+        private readonly IDialogService _dialogService;
         private readonly Action _onLoginSuccess;
         private string _username = string.Empty;
         private string _password = string.Empty;
@@ -27,6 +29,7 @@ namespace Open_lab.ViewModels
             IAdminSetupService adminSetupService,
             IAttendanceService attendanceService,
             IUserPreferenceService userPreferenceService,
+            IDialogService dialogService,
             Action onLoginSuccess)
         {
             _authService = authService;
@@ -34,6 +37,7 @@ namespace Open_lab.ViewModels
             _adminSetupService = adminSetupService;
             _attendanceService = attendanceService;
             _userPreferenceService = userPreferenceService;
+            _dialogService = dialogService;
             _onLoginSuccess = onLoginSuccess;
 
             var rememberedUsername = _userPreferenceService.GetRememberedUsername();
@@ -106,7 +110,10 @@ namespace Open_lab.ViewModels
                 var user = await _authService.ValidateCredentialsAsync(Username, Password);
                 if (user == null)
                 {
-                    StatusMessage = "بيانات الدخول غير صحيحة.";
+                    _dialogService.ShowError(
+                        "اسم المستخدم أو كلمة المرور غير صحيحة",
+                        "خطأ");
+                    StatusMessage = string.Empty;
                     return;
                 }
 

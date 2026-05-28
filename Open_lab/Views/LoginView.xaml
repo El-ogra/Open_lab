@@ -2,6 +2,7 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:behaviors="clr-namespace:Open_lab.Behaviors"
+             xmlns:automation="clr-namespace:System.Windows.Automation;assembly=PresentationCore"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d"
@@ -128,12 +129,14 @@
                 <StackPanel Grid.Row="1">
                     <TextBlock Text="اسم المستخدم" FontWeight="SemiBold" Foreground="#323130" Margin="0,0,0,8"/>
                     <TextBox Text="{Binding Username, UpdateSourceTrigger=PropertyChanged}" 
+                             automation:AutomationProperties.AutomationId="UsernameTextBox"
                              Style="{StaticResource ModernInputField}" />
 
                     <TextBlock Text="كلمة المرور" FontWeight="SemiBold" Foreground="#323130" Margin="0,20,0,8"/>
                     <Grid>
                         <!-- PasswordBox -->
                         <PasswordBox x:Name="PasswordInput" 
+                                     automation:AutomationProperties.AutomationId="PasswordBox"
                                      behaviors:PasswordBoxAssistant.BindPassword="True"
                                      behaviors:PasswordBoxAssistant.BoundPassword="{Binding Password, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                             <PasswordBox.Style>
@@ -198,6 +201,7 @@
 
                 <Button Grid.Row="3" 
                         Content="دخول" 
+                        automation:AutomationProperties.AutomationId="LoginButton"
                         IsDefault="True"
                         Command="{Binding LoginCommand}"
                         Style="{StaticResource LoginButtonStyle}"/>
