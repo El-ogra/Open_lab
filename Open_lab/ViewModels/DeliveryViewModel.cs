@@ -16,6 +16,7 @@ namespace Open_lab.ViewModels
         private DeliveryVisitRow? _selectedVisit;
         private decimal _paymentAmount;
         private string _statusMessage = string.Empty;
+        private string _deliveryNotes = string.Empty;
 
         private bool _isVIP;
         private bool _isLab;
@@ -46,6 +47,7 @@ namespace Open_lab.ViewModels
 
             RefreshCommand = new RelayCommand(async _ => await LoadAsync());
             PatientAccountCommand = new RelayCommand(_ => ShowPatientAccount(), _ => SelectedVisit != null);
+            ShowNotesCommand = new RelayCommand(_ => ShowNotes(), _ => SelectedVisit != null);
             FilterAllCommand = new RelayCommand(_ => { IsVIP = false; IsLab = false; IsPat = false; UndeliveredOnly = false; _ = LoadAsync(); });
         }
 
@@ -112,12 +114,19 @@ namespace Open_lab.ViewModels
             private set => SetProperty(ref _statusMessage, value);
         }
 
+        public string DeliveryNotes
+        {
+            get => _deliveryNotes;
+            set => SetProperty(ref _deliveryNotes, value);
+        }
+
         public ICommand SearchCommand { get; }
         public ICommand DeliverCommand { get; }
         public ICommand ReopenCommand { get; }
         public ICommand PayCommand { get; }
         public ICommand RefreshCommand { get; }
         public ICommand PatientAccountCommand { get; }
+        public ICommand ShowNotesCommand { get; }
         public ICommand FilterAllCommand { get; }
 
         private async Task LoadSelectedVisitDetailsAsync()
@@ -283,6 +292,7 @@ namespace Open_lab.ViewModels
             (ReopenCommand as RelayCommand)?.RaiseCanExecuteChanged();
             (PayCommand as RelayCommand)?.RaiseCanExecuteChanged();
             (PatientAccountCommand as RelayCommand)?.RaiseCanExecuteChanged();
+            (ShowNotesCommand as RelayCommand)?.RaiseCanExecuteChanged();
         }
 
         private void ShowPatientAccount()
@@ -295,6 +305,19 @@ namespace Open_lab.ViewModels
 
             StatusMessage = $"عرض حساب المريض: {SelectedVisit.PatientName} (Lab ID: {SelectedVisit.LabId}) — باقي: {SelectedVisit.Balance:N2}";
             // Navigation to patient account view would be handled by the main window
+        }
+
+        private void ShowNotes()
+        {
+            if (SelectedVisit == null)
+            {
+                StatusMessage = "لم يتم تحديد زيارة.";
+                return;
+            }
+
+            StatusMessage = string.IsNullOrWhiteSpace(DeliveryNotes)
+                ? $"لا توجد ملاحظات مسجلة للزيارة: {SelectedVisit.PatientName}."
+                : $"ملاحظات {SelectedVisit.PatientName}: {DeliveryNotes}";
         }
     }
 }

@@ -102,13 +102,13 @@
 
                     <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" Margin="2">
                         <Button Content="الاستلام" Command="{Binding PayCommand}" Style="{StaticResource DeliveryBlueButtonStyle}" Width="100"/>
-                        <TextBox Width="120" Margin="5,0" Text="{Binding PaymentAmount, UpdateSourceTrigger=PropertyChanged}"/>
+                        <TextBox Width="120" Margin="5,0" Text="{Binding PaymentAmount, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                         <Button Content="مستلمة" Command="{Binding DeliverCommand}" Style="{StaticResource DeliveryYellowButtonStyle}" Width="80"/>
                     </StackPanel>
 
                     <StackPanel Grid.Row="0" Grid.Column="2" Orientation="Horizontal" Margin="2">
-                        <TextBox Width="300" Margin="5,0" IsReadOnly="True"/>
-                        <Button Content="ملاحظات" Background="{StaticResource DeliveryOrange}" Foreground="White" Style="{StaticResource DeliveryBaseButtonStyle}" Width="100"/>
+                        <TextBox Width="300" Margin="5,0" Text="{Binding DeliveryNotes, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                        <Button Content="ملاحظات" Command="{Binding ShowNotesCommand}" Background="{StaticResource DeliveryOrange}" Foreground="White" Style="{StaticResource DeliveryBaseButtonStyle}" Width="100"/>
                     </StackPanel>
 
                     <StackPanel Grid.Row="1" Grid.ColumnSpan="3" Orientation="Horizontal" Margin="2">
@@ -198,10 +198,10 @@
                     <ToggleButton Grid.Row="0" Grid.Column="3" Content="ALL" Command="{Binding FilterAllCommand}" Margin="2" Background="White"/>
 
                     <!-- VIP Pat Lab £ -->
-                    <ToggleButton Grid.Row="1" Grid.Column="0" Content="VIP" IsChecked="{Binding IsVIP}" Margin="2" Background="{StaticResource DeliveryPanelGreen}" Foreground="White"/>
-                    <ToggleButton Grid.Row="1" Grid.Column="1" Content="Pat" IsChecked="{Binding IsPat}" Margin="2" Background="{StaticResource DeliveryPanelGreen}" Foreground="White"/>
-                    <ToggleButton Grid.Row="1" Grid.Column="2" Content="Lab" IsChecked="{Binding IsLab}" Margin="2" Background="{StaticResource DeliveryPanelGreen}" Foreground="White"/>
-                    <ToggleButton Grid.Row="1" Grid.Column="3" Content="لم تسلم" IsChecked="{Binding UndeliveredOnly}" Margin="2" Background="{StaticResource DeliveryOrange}" Foreground="White"/>
+                    <ToggleButton Grid.Row="1" Grid.Column="0" Content="VIP" IsChecked="{Binding IsVIP, Mode=TwoWay}" Margin="2" Background="{StaticResource DeliveryPanelGreen}" Foreground="White"/>
+                    <ToggleButton Grid.Row="1" Grid.Column="1" Content="Pat" IsChecked="{Binding IsPat, Mode=TwoWay}" Margin="2" Background="{StaticResource DeliveryPanelGreen}" Foreground="White"/>
+                    <ToggleButton Grid.Row="1" Grid.Column="2" Content="Lab" IsChecked="{Binding IsLab, Mode=TwoWay}" Margin="2" Background="{StaticResource DeliveryPanelGreen}" Foreground="White"/>
+                    <ToggleButton Grid.Row="1" Grid.Column="3" Content="لم تسلم" IsChecked="{Binding UndeliveredOnly, Mode=TwoWay}" Margin="2" Background="{StaticResource DeliveryOrange}" Foreground="White"/>
 
                     <!-- Date From / To -->
                     <Grid Grid.Row="2" Grid.ColumnSpan="4" Margin="2">
@@ -214,10 +214,10 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <Border Grid.Row="0" Grid.Column="0" Background="{StaticResource DeliveryOrange}" Width="30" Margin="0,2"><TextBlock Text="من" Foreground="White" TextAlignment="Center"/></Border>
-                        <DatePicker Grid.Row="0" Grid.Column="1" SelectedDate="{Binding DateFrom}" Margin="2" FlowDirection="LeftToRight"/>
+                        <DatePicker Grid.Row="0" Grid.Column="1" SelectedDate="{Binding DateFrom, Mode=TwoWay}" Margin="2" FlowDirection="LeftToRight"/>
                         
                         <Border Grid.Row="1" Grid.Column="0" Background="{StaticResource DeliveryOrange}" Width="30" Margin="0,2"><TextBlock Text="إلى" Foreground="White" TextAlignment="Center"/></Border>
-                        <DatePicker Grid.Row="1" Grid.Column="1" SelectedDate="{Binding DateTo}" Margin="2" FlowDirection="LeftToRight"/>
+                        <DatePicker Grid.Row="1" Grid.Column="1" SelectedDate="{Binding DateTo, Mode=TwoWay}" Margin="2" FlowDirection="LeftToRight"/>
                     </Grid>
                 </Grid>
             </Border>

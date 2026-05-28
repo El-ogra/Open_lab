@@ -171,7 +171,16 @@ namespace Open_lab.Data
                 entity.Property(e => e.LastSequence).IsRequired();
                 entity.Property(e => e.CreatedAt).IsRequired();
                 entity.Property(e => e.UpdatedAt).IsRequired();
-                entity.Property(e => e.RowVersion).IsRowVersion();
+                if (string.Equals(Database.ProviderName, "Microsoft.EntityFrameworkCore.Sqlite", StringComparison.OrdinalIgnoreCase))
+                {
+                    entity.Property(e => e.RowVersion)
+                        .IsRequired()
+                        .HasDefaultValueSql("randomblob(8)");
+                }
+                else
+                {
+                    entity.Property(e => e.RowVersion).IsRowVersion();
+                }
             });
 
             modelBuilder.Entity<Visit>(entity =>

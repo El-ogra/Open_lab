@@ -105,8 +105,8 @@
                             <ColumnDefinition/>
                             <ColumnDefinition/>
                         </Grid.ColumnDefinitions>
-                        <TextBox Grid.Column="0" Text="{Binding Phone}" Margin="0,0,2,0" FlowDirection="LeftToRight"/>
-                        <TextBox Grid.Column="1" Text="{Binding MobilePhone, FallbackValue=''}" FlowDirection="LeftToRight"/>
+                        <TextBox Grid.Column="0" Text="{Binding Phone, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,2,0" FlowDirection="LeftToRight"/>
+                        <TextBox Grid.Column="1" Text="{Binding MobilePhone, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, FallbackValue=''}" FlowDirection="LeftToRight"/>
                     </Grid>
                 </StackPanel>
 
@@ -115,19 +115,19 @@
                         <TextBlock Text="بحث بسن المريض" Style="{StaticResource SearchHeaderTextStyle}" FlowDirection="RightToLeft"/>
                     </Border>
                     <StackPanel Orientation="Horizontal" FlowDirection="RightToLeft">
-                        <RadioButton Content="حر" Foreground="White" IsChecked="True" Margin="0,0,5,0" VerticalAlignment="Center" FlowDirection="RightToLeft"/>
-                        <RadioButton Content="مقيد" Foreground="White" Margin="0,0,5,0" VerticalAlignment="Center" FlowDirection="RightToLeft"/>
-                        <ComboBox SelectedIndex="0" Margin="0,0,5,0" FlowDirection="LeftToRight">
+                        <RadioButton Content="حر" Foreground="White" IsChecked="{Binding IsAgeFree, Mode=TwoWay}" Margin="0,0,5,0" VerticalAlignment="Center" FlowDirection="RightToLeft"/>
+                        <RadioButton Content="مقيد" Foreground="White" IsChecked="{Binding IsAgeRestricted, Mode=TwoWay}" Margin="0,0,5,0" VerticalAlignment="Center" FlowDirection="RightToLeft"/>
+                        <ComboBox SelectedValue="{Binding AgeUnit, Mode=TwoWay}" SelectedValuePath="Content" Margin="0,0,5,0" FlowDirection="LeftToRight">
                             <ComboBoxItem Content="Years"/>
                         </ComboBox>
                         <Border Background="{StaticResource AppOrange}" Padding="2,0" Margin="0,0,5,0">
                             <TextBlock Text="من" Foreground="White" VerticalAlignment="Center" FlowDirection="RightToLeft"/>
                         </Border>
-                        <TextBox Width="30" Text="{Binding AgeFrom, FallbackValue=''}" FlowDirection="LeftToRight"/>
+                        <TextBox Width="30" Text="{Binding AgeFrom, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, FallbackValue=''}" FlowDirection="LeftToRight"/>
                         <Border Background="{StaticResource AppOrange}" Padding="2,0" Margin="5,0,5,0">
                             <TextBlock Text="إلى" Foreground="White" VerticalAlignment="Center" FlowDirection="RightToLeft"/>
                         </Border>
-                        <TextBox Width="30" Text="{Binding AgeTo, FallbackValue=''}" FlowDirection="LeftToRight"/>
+                        <TextBox Width="30" Text="{Binding AgeTo, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, FallbackValue=''}" FlowDirection="LeftToRight"/>
                     </StackPanel>
                 </StackPanel>
 
@@ -135,7 +135,7 @@
                     <Border Style="{StaticResource SearchHeaderStyle}" Margin="0,0,0,2">
                         <TextBlock Text="بحث بالفئة العمرية" Style="{StaticResource SearchHeaderTextStyle}" FlowDirection="RightToLeft"/>
                     </Border>
-                    <ComboBox SelectedValue="{Binding AgeGroup}" SelectedValuePath="Content" FlowDirection="RightToLeft">
+                    <ComboBox SelectedValue="{Binding AgeGroup, Mode=TwoWay}" SelectedValuePath="Content" FlowDirection="RightToLeft">
                         <ComboBoxItem Content="الكل" IsSelected="True"/>
                         <ComboBoxItem Content="أطفال"/>
                         <ComboBoxItem Content="بالغين"/>
@@ -147,12 +147,12 @@
                     <Border Style="{StaticResource SearchHeaderStyle}" Margin="0,0,0,2">
                         <TextBlock Text="بحث باسم المريض (مطابق)" Style="{StaticResource SearchHeaderTextStyle}" FlowDirection="RightToLeft"/>
                     </Border>
-                    <TextBox Text="{Binding NameExact, FallbackValue=''}" FlowDirection="RightToLeft"/>
+                    <TextBox Text="{Binding NameExact, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, FallbackValue=''}" FlowDirection="RightToLeft"/>
                 </StackPanel>
 
                 <StackPanel Grid.Row="0" Grid.Column="4" Margin="10,2,2,2">
                     <Border Background="White" BorderBrush="Black" BorderThickness="1" Padding="5">
-                        <TextBox Text="{Binding LabId, UpdateSourceTrigger=PropertyChanged}" FontWeight="Bold" HorizontalContentAlignment="Center" BorderThickness="0" FlowDirection="LeftToRight"/>
+                        <TextBox Text="{Binding LabId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" FontWeight="Bold" HorizontalContentAlignment="Center" BorderThickness="0" FlowDirection="LeftToRight"/>
                     </Border>
                     <Button Content="🔄 New search" Command="{Binding SearchCommand}" Style="{StaticResource GreenActionButtonStyle}" Margin="0,5,0,0" FlowDirection="LeftToRight"/>
                 </StackPanel>
@@ -162,7 +162,7 @@
                     <Border Style="{StaticResource SearchHeaderStyle}" Margin="0,0,0,2">
                         <TextBlock Text="بحث بالرقم القومي" Style="{StaticResource SearchHeaderTextStyle}" FlowDirection="RightToLeft"/>
                     </Border>
-                    <TextBox Text="{Binding NationalId}" FlowDirection="LeftToRight"/>
+                    <TextBox Text="{Binding NationalId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" FlowDirection="LeftToRight"/>
                 </StackPanel>
 
                 <StackPanel Grid.Row="1" Grid.Column="1" Margin="2">
@@ -170,16 +170,16 @@
                         <TextBlock Text="بحث بتاريخ الطلب" Style="{StaticResource SearchHeaderTextStyle}" FlowDirection="RightToLeft"/>
                     </Border>
                     <StackPanel Orientation="Horizontal" FlowDirection="RightToLeft">
-                        <RadioButton Content="حر" Foreground="White" IsChecked="True" Margin="0,0,5,0" VerticalAlignment="Center" FlowDirection="RightToLeft"/>
-                        <RadioButton Content="مقيد" Foreground="White" Margin="0,0,5,0" VerticalAlignment="Center" FlowDirection="RightToLeft"/>
+                        <RadioButton Content="حر" Foreground="White" IsChecked="{Binding IsDateFree, Mode=TwoWay}" Margin="0,0,5,0" VerticalAlignment="Center" FlowDirection="RightToLeft"/>
+                        <RadioButton Content="مقيد" Foreground="White" IsChecked="{Binding IsDateRestricted, Mode=TwoWay}" Margin="0,0,5,0" VerticalAlignment="Center" FlowDirection="RightToLeft"/>
                         <Border Background="{StaticResource AppOrange}" Padding="2,0" Margin="0,0,5,0">
                             <TextBlock Text="من" Foreground="White" VerticalAlignment="Center" FlowDirection="RightToLeft"/>
                         </Border>
-                        <DatePicker SelectedDate="{Binding DateFrom}" Width="90" FlowDirection="LeftToRight"/>
+                        <DatePicker SelectedDate="{Binding DateFrom, Mode=TwoWay}" Width="90" FlowDirection="LeftToRight"/>
                         <Border Background="{StaticResource AppOrange}" Padding="2,0" Margin="5,0,5,0">
                             <TextBlock Text="إلى" Foreground="White" VerticalAlignment="Center" FlowDirection="RightToLeft"/>
                         </Border>
-                        <DatePicker SelectedDate="{Binding DateTo}" Width="90" FlowDirection="LeftToRight"/>
+                        <DatePicker SelectedDate="{Binding DateTo, Mode=TwoWay}" Width="90" FlowDirection="LeftToRight"/>
                     </StackPanel>
                 </StackPanel>
 
@@ -187,19 +187,19 @@
                     <Border Style="{StaticResource SearchHeaderStyle}" Margin="0,0,0,2">
                         <TextBlock Text="بحث باسم الطبيب" Style="{StaticResource SearchHeaderTextStyle}" FlowDirection="RightToLeft"/>
                     </Border>
-                    <ComboBox SelectedItem="{Binding DoctorName, FallbackValue=''}" FlowDirection="RightToLeft"/>
+                    <ComboBox SelectedItem="{Binding DoctorName, Mode=TwoWay, FallbackValue=''}" FlowDirection="RightToLeft"/>
                 </StackPanel>
 
                 <StackPanel Grid.Row="1" Grid.Column="3" Margin="2">
                     <Border Style="{StaticResource SearchHeaderStyle}" Margin="0,0,0,2">
                         <TextBlock Text="بحث باسم المريض (عشوائي)" Style="{StaticResource SearchHeaderTextStyle}" FlowDirection="RightToLeft"/>
                     </Border>
-                    <TextBox Text="{Binding Name}" FlowDirection="RightToLeft"/>
+                    <TextBox Text="{Binding Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" FlowDirection="RightToLeft"/>
                 </StackPanel>
 
                 <StackPanel Grid.Row="1" Grid.Column="4" Margin="10,2,2,2" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" FlowDirection="LeftToRight">
-                    <RadioButton Content="Database" Foreground="White" IsChecked="True" Margin="0,0,10,0"/>
-                    <RadioButton Content="Backup" Foreground="White"/>
+                    <RadioButton Content="Database" Foreground="White" IsChecked="{Binding IsDatabaseSearch, Mode=TwoWay}" Margin="0,0,10,0"/>
+                    <RadioButton Content="Backup" Foreground="White" IsChecked="{Binding IsBackupSearch, Mode=TwoWay}"/>
                 </StackPanel>
             </Grid>
         </Border>

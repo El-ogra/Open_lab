@@ -120,15 +120,15 @@
                     <StackPanel Orientation="Horizontal" FlowDirection="RightToLeft">
                         <Button Content="F2 بيانات المرضى" Command="{Binding DataContext.NavigatePatientRegistrationCommand, RelativeSource={RelativeSource AncestorType=Window}}" Margin="2" Padding="10,4" Background="White" BorderBrush="LightGray" />
                         <Button Content="F3 البحث" Command="{Binding DataContext.NavigatePatientSearchCommand, RelativeSource={RelativeSource AncestorType=Window}}" Margin="2" Padding="10,4" Background="White" BorderBrush="LightGray" />
-                        <Button Content="F4 نتائج" Margin="2" Padding="10,4" Background="#6E9F16" Foreground="White" BorderBrush="Transparent" />
+                        <Button Content="F4 نتائج" Command="{Binding RefreshCommand}" Margin="2" Padding="10,4" Background="#6E9F16" Foreground="White" BorderBrush="Transparent" />
                         <Button Content="F6 التسليم" Command="{Binding DataContext.NavigateDeliveryCommand, RelativeSource={RelativeSource AncestorType=Window}}" Margin="2" Padding="10,4" Background="White" BorderBrush="LightGray" />
                         <Button Content="القائمة الرئيسية" Command="{Binding DataContext.NavigateToPatientsCommand, RelativeSource={RelativeSource AncestorType=Window}}" Margin="2" Padding="10,4" Background="White" BorderBrush="LightGray" />
 
                         <!-- Date Filters -->
                         <TextBlock Text="من تاريخ" VerticalAlignment="Center" Margin="15,0,5,0" />
-                        <DatePicker SelectedDate="{Binding DateFrom}" Width="120" VerticalAlignment="Center" />
+                        <DatePicker SelectedDate="{Binding DateFrom, Mode=TwoWay}" Width="120" VerticalAlignment="Center" />
                         <TextBlock Text="إلى" VerticalAlignment="Center" Margin="10,0,5,0" />
-                        <DatePicker SelectedDate="{Binding DateTo}" Width="120" VerticalAlignment="Center" />
+                        <DatePicker SelectedDate="{Binding DateTo, Mode=TwoWay}" Width="120" VerticalAlignment="Center" />
                         <Button Content="F5 / Refresh" Command="{Binding SearchByDateCommand}" Margin="10,2,2,2" Padding="15,4" Background="#6E9F16" Foreground="White" BorderThickness="0" />
                     </StackPanel>
                 </Border>

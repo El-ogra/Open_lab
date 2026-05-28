@@ -23,6 +23,13 @@ namespace Open_lab.ViewModels
         private DateTime? _date;
         private DateTime? _dateFrom;
         private DateTime? _dateTo;
+        private bool _isAgeFree = true;
+        private bool _isAgeRestricted;
+        private string _ageUnit = "Years";
+        private bool _isDateFree = true;
+        private bool _isDateRestricted;
+        private bool _isDatabaseSearch = true;
+        private bool _isBackupSearch;
 
         public PatientSearchViewModel(IPatientSearchService patientSearchService)
         {
@@ -74,6 +81,36 @@ namespace Open_lab.ViewModels
             set => SetProperty(ref _ageGroup, value);
         }
 
+        public bool IsAgeFree
+        {
+            get => _isAgeFree;
+            set
+            {
+                if (SetProperty(ref _isAgeFree, value) && value)
+                {
+                    IsAgeRestricted = false;
+                }
+            }
+        }
+
+        public bool IsAgeRestricted
+        {
+            get => _isAgeRestricted;
+            set
+            {
+                if (SetProperty(ref _isAgeRestricted, value) && value)
+                {
+                    IsAgeFree = false;
+                }
+            }
+        }
+
+        public string AgeUnit
+        {
+            get => _ageUnit;
+            set => SetProperty(ref _ageUnit, value);
+        }
+
         public DateTime? Date
         {
             get => _date;
@@ -90,6 +127,54 @@ namespace Open_lab.ViewModels
         {
             get => _dateTo;
             set => SetProperty(ref _dateTo, value);
+        }
+
+        public bool IsDateFree
+        {
+            get => _isDateFree;
+            set
+            {
+                if (SetProperty(ref _isDateFree, value) && value)
+                {
+                    IsDateRestricted = false;
+                }
+            }
+        }
+
+        public bool IsDateRestricted
+        {
+            get => _isDateRestricted;
+            set
+            {
+                if (SetProperty(ref _isDateRestricted, value) && value)
+                {
+                    IsDateFree = false;
+                }
+            }
+        }
+
+        public bool IsDatabaseSearch
+        {
+            get => _isDatabaseSearch;
+            set
+            {
+                if (SetProperty(ref _isDatabaseSearch, value) && value)
+                {
+                    IsBackupSearch = false;
+                }
+            }
+        }
+
+        public bool IsBackupSearch
+        {
+            get => _isBackupSearch;
+            set
+            {
+                if (SetProperty(ref _isBackupSearch, value) && value)
+                {
+                    IsDatabaseSearch = false;
+                }
+            }
         }
 
         public string StatusMessage

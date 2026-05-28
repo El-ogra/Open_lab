@@ -1519,7 +1519,7 @@ namespace Open_lab.ViewModels
             Invoice? committedInvoice = null;
             try
             {
-                await _patientService.RunInTransactionAsync(async () =>
+                Func<Task> saveWorkflow = async () =>
                 {
                     var visit = CurrentVisitId > 0
                         ? await _visitService.GetByIdAsync(CurrentVisitId)
@@ -1553,7 +1553,22 @@ namespace Open_lab.ViewModels
                     var discount = DiscountAmount;
                     committedInvoice = await _invoiceService.CreateOrUpdateInvoiceAsync(visit.VisitId, discount, PaidAmount + PreviousPaidAmount);
                     committedVisit = visit;
-                });
+                };
+
+                var transactionTask = _patientService.RunInTransactionAsync(saveWorkflow);
+                if (transactionTask == null)
+                {
+                    await saveWorkflow();
+                }
+                else
+                {
+                    await transactionTask;
+                }
+
+                if (committedVisit == null || committedInvoice == null)
+                {
+                    await saveWorkflow();
+                }
 
                 StatusMessage = $"تم حفظ الزيارة #{committedVisit!.VisitId} والفاتورة #{committedInvoice!.InvoiceId}.";
             }
