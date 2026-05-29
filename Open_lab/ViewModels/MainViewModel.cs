@@ -439,6 +439,10 @@ namespace Open_lab.ViewModels
                 OnPropertyChanged(nameof(CurrentViewModel));
                 CurrentView = _navigationService.CurrentViewModel;
                 IsStatusBarVisible = _navigationService.CurrentViewModel is not PatientRegistrationViewModel;
+                IsToolbarVisible = _navigationService.CurrentViewModel is not PatientRegistrationViewModel
+                                && _navigationService.CurrentViewModel is not ResultsEntryViewModel
+                                && _navigationService.CurrentViewModel is not PatientSearchViewModel
+                                && _navigationService.CurrentViewModel is not DeliveryViewModel;
             }
         }
 

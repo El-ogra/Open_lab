@@ -235,6 +235,8 @@
                               Style="{StaticResource ListGrid}"
                               ItemsSource="{Binding AvailableTests}"
                               SelectedItem="{Binding SelectedAvailableTest}"
+                              IsReadOnly="True"
+                              IsSynchronizedWithCurrentItem="True"
                               FlowDirection="LeftToRight">
                         <DataGrid.InputBindings>
                             <MouseBinding MouseAction="LeftDoubleClick" Command="{Binding AddSelectedTestCommand}" />
@@ -277,7 +279,13 @@
                                   SelectedItem="{Binding SelectedTest}"
                                   FlowDirection="LeftToRight">
                             <DataGrid.Columns>
-                                <DataGridTextColumn Binding="{Binding TestName}" Width="*" />
+                                <DataGridTextColumn Binding="{Binding TestName}" Width="*">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Foreground" Value="White" />
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
                             </DataGrid.Columns>
                         </DataGrid>
                     </Grid>
@@ -390,12 +398,9 @@
                         <Border Grid.Column="0" Style="{StaticResource BlueLabel}">
                             <TextBlock Text="اسم المريض" Style="{StaticResource LabelText}" />
                         </Border>
-                        <ComboBox Grid.Column="1" Style="{StaticResource Combo}" SelectedItem="{Binding Title, Mode=TwoWay}" IsEditable="True">
-                            <ComboBoxItem Content="السيد/" />
-                            <ComboBoxItem Content="السيدة/" />
-                            <ComboBoxItem Content="الآنسة/" />
-                            <ComboBoxItem Content="الطفل/" />
-                        </ComboBox>
+                        <ComboBox Grid.Column="1" Style="{StaticResource Combo}" 
+          ItemsSource="{Binding AvailableTitles}"
+          SelectedItem="{Binding Title, Mode=TwoWay}" IsEditable="True" />
                         <TextBox Grid.Column="2" Style="{StaticResource Box}" Text="{Binding FullName, UpdateSourceTrigger=PropertyChanged}" FontWeight="Bold" Foreground="#0B2CFF" />
                         <StackPanel Grid.Column="3" Orientation="Horizontal" FlowDirection="LeftToRight" Background="#FFE7D4" Margin="1" VerticalAlignment="Stretch">
                             <RadioButton Content="Male" IsChecked="{Binding Gender, Converter={StaticResource StringEqualsConverter}, ConverterParameter=Male}" VerticalAlignment="Center" Margin="4,0" FontWeight="Bold" Foreground="#B60000" />
@@ -511,6 +516,11 @@
                               IsEditable="True"
                               IsTextSearchEnabled="True"
                               StaysOpenOnEdit="True" />
+                    <TextBlock Grid.Row="1" Grid.Column="3"
+                               Text="جديد" Foreground="Orange" FontWeight="Bold" FontSize="10"
+                               VerticalAlignment="Center" Margin="4,0,0,0"
+                               Visibility="{Binding IsNewReferralPending, 
+                                           Converter={StaticResource BoolToVisibility}}" />
                 </Grid>
             </Border>
 
@@ -637,15 +647,16 @@
                     <RowDefinition Height="36" />
                     <RowDefinition Height="43" />
                 </Grid.RowDefinitions>
-                <UniformGrid Grid.Row="0" Columns="4" Rows="1">
+                <UniformGrid Grid.Row="0" Columns="5" Rows="1">
                     <Button Content="تراجع  ✖" Command="{Binding UndoCommand}" Style="{StaticResource MainActionButton}" Foreground="#E00000" />
+                    <Button Content="إلغاء  ✖" Command="{Binding CancelCommand}" Style="{StaticResource MainActionButton}" Foreground="#E00000" />
                     <Button Content="حفظ  ✔" Command="{Binding SaveCommand}" Style="{StaticResource MainActionButton}" Foreground="#047A00" />
-                    <Button Content="تعديل  👤" Command="{Binding EditCommand}" Style="{StaticResource MainActionButton}" />
-                    <Button Content="إضافة  👤" Command="{Binding NewCommand}" Style="{StaticResource MainActionButton}" />
+                    <Button Content="{Binding EditButtonText}" Command="{Binding EditCommand}" Style="{StaticResource MainActionButton}" />
+                    <Button Content="{Binding AddButtonText}" Command="{Binding NewCommand}" Style="{StaticResource MainActionButton}" />
                 </UniformGrid>
 
                 <UniformGrid Grid.Row="1" Columns="4" Rows="1">
-                    <Button Content="الكارنية" Command="{Binding InsuranceCommand}" Style="{StaticResource MainActionButton}" Background="#FFE214" />
+                    <Button Content="حذف  🗑" Command="{Binding DeleteCommand}" Style="{StaticResource MainActionButton}" Foreground="#E00000" />
                     <Button Content="ورقة العمل" Command="{Binding WorksheetCommand}" Style="{StaticResource MainActionButton}" Background="#FFE214" />
                     <Button Content="الباركود" Command="{Binding ShowBarcodeCommand}" Style="{StaticResource MainActionButton}" Background="#FFE214" />
                     <Button Content="الإيصال" Command="{Binding PrintReceiptCommand}" Style="{StaticResource MainActionButton}" Background="#FFE214" />

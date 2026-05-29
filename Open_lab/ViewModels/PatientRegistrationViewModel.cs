@@ -133,7 +133,7 @@ namespace Open_lab.ViewModels
 
         // G5.1: Edit-mode flag — true means form fields are writable; false locks them.
         // Default true so a fresh registration screen is immediately editable.
-        private bool _isEditMode = true;
+        private bool _isEditMode = false;
 
         // ============ Constructors ============
         public PatientRegistrationViewModel(IPatientService patientService)
@@ -190,8 +190,8 @@ namespace Open_lab.ViewModels
             SelectedTests = new ObservableCollection<SelectedTestItem>();
             QuickPatientsList = new ObservableCollection<Patient>();
 
-            SaveCommand = new RelayCommand(async _ => await SaveAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.PatientsEdit) && (IsEditMode || PatientId == 0));
-            NewCommand = new RelayCommand(async _ => await ClearFormAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.PatientsEdit));
+            SaveCommand = new RelayCommand(async _ => await SaveAsync());
+            NewCommand = new RelayCommand(async _ => await ClearFormAsync());
             GenerateLabIdCommand = new RelayCommand(async _ => await GenerateLabIdAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.PatientsEdit) && PatientId == 0);
             LoadByLabIdCommand = new RelayCommand(async _ => await LoadByLabIdAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.PatientsView));
             SearchCommand = new RelayCommand(async _ => await SearchAsync(), _ => SessionContext.Current.HasPermission(PermissionCodes.PatientsView));
@@ -204,7 +204,14 @@ namespace Open_lab.ViewModels
             SendCommand = new RelayCommand(async _ => await PrintReceiptAsync(), _ => CurrentVisitId > 0);
             AddSelectedTestCommand = new RelayCommand(_ => AddSelectedTest(), _ => SelectedAvailableTest != null);
             RemoveSelectedTestCommand = new RelayCommand(_ => RemoveSelectedTest(), _ => SelectedTest != null);
-            EditCommand = new RelayCommand(_ => EnterEditMode(), _ => SessionContext.Current.HasPermission(PermissionCodes.PatientsEdit) && PatientId > 0 && !IsEditMode);
+            EditCommand = new RelayCommand(
+                _ => {
+                    if (IsEditMode)
+                        CancelEditMode();
+                    else
+                        EnterEditMode();
+                },
+                _ => PatientId > 0);
             GoToResultsCommand = new RelayCommand(_ => NavigateToResults(), _ => true);
             ResetCommand = new RelayCommand(async _ => await ClearFormAsync(), _ => true);
             DocumentsCommand = new RelayCommand(_ => ShowDocuments(), _ => PatientId > 0);
@@ -222,6 +229,9 @@ namespace Open_lab.ViewModels
             WorksheetCommand = new RelayCommand(async _ => await PrintWorksheetAsync(), _ => true);
             InsuranceCommand = new RelayCommand(_ => ShowInsuranceInfo(), _ => true);
             StartCommand = new RelayCommand(async _ => await ApplyTestFilterAsync(), _ => true);
+            CancelCommand = new RelayCommand(
+                _ => CancelEditMode(),
+                _ => IsEditMode);
 
             if (initialize)
             {
@@ -292,13 +302,25 @@ namespace Open_lab.ViewModels
         public string Gender
         {
             get => _gender;
-            set => SetProperty(ref _gender, value);
+            set
+            {
+                if (SetProperty(ref _gender, value))
+                {
+                    RefreshAvailableTitles();
+                }
+            }
         }
 
         public DateTime? BirthDate
         {
             get => _birthDate;
-            set => SetProperty(ref _birthDate, value);
+            set
+            {
+                if (SetProperty(ref _birthDate, value))
+                {
+                    SyncBirthDateToAge();
+                }
+            }
         }
 
         public string? Phone
@@ -370,13 +392,27 @@ namespace Open_lab.ViewModels
         public int? Age
         {
             get => _age;
-            set => SetProperty(ref _age, value);
+            set
+            {
+                var validated = ValidateAgeValue(value, _ageUnit);
+                if (SetProperty(ref _age, validated))
+                {
+                    SyncAgeToBirthDate();
+                }
+            }
         }
 
         public string AgeUnit
         {
             get => _ageUnit;
-            set => SetProperty(ref _ageUnit, value);
+            set
+            {
+                var normalized = AgeConverter.NormalizeUnit(value);
+                if (SetProperty(ref _ageUnit, normalized))
+                {
+                    Age = ValidateAgeValue(_age, normalized);
+                }
+            }
         }
 
         public bool IsVip
@@ -407,6 +443,14 @@ namespace Open_lab.ViewModels
         {
             get => _title;
             set => SetProperty(ref _title, value);
+        }
+
+        private ObservableCollection<string> _availableTitles = new();
+
+        public ObservableCollection<string> AvailableTitles
+        {
+            get => _availableTitles;
+            set => SetProperty(ref _availableTitles, value);
         }
 
         public string? PatientTitleNote
@@ -476,7 +520,13 @@ namespace Open_lab.ViewModels
         public string ReferralSource
         {
             get => _referralSource;
-            set => SetProperty(ref _referralSource, value);
+            set
+            {
+                if (SetProperty(ref _referralSource, value))
+                {
+                    CheckIfNewReferral();
+                }
+            }
         }
 
         public string ReferralAddress
@@ -962,6 +1012,7 @@ namespace Open_lab.ViewModels
                 if (SetProperty(ref _selectedReferral, value) && value != null)
                 {
                     ReferralSource = value.Name;
+                    IsNewReferralPending = false;
                 }
             }
         }
@@ -997,6 +1048,14 @@ namespace Open_lab.ViewModels
             set => SetProperty(ref _isQuickPatientsListVisible, value);
         }
 
+        private bool _isNewReferralPending;
+
+        public bool IsNewReferralPending
+        {
+            get => _isNewReferralPending;
+            set => SetProperty(ref _isNewReferralPending, value);
+        }
+
         public bool IsEditMode
         {
             get => _isEditMode;
@@ -1009,6 +1068,9 @@ namespace Open_lab.ViewModels
                 }
             }
         }
+
+        public string AddButtonText => PatientId == 0 && IsEditMode ? "إلغاء  ✖" : "إضافة  👤";
+        public string EditButtonText => PatientId > 0 && IsEditMode ? "إلغاء  ✖" : "تعديل  👤";
 
         // ============ Commands ============
         public ICommand SaveCommand { get; }
@@ -1040,6 +1102,7 @@ namespace Open_lab.ViewModels
         public ICommand WorksheetCommand { get; }
         public ICommand InsuranceCommand { get; }
         public ICommand StartCommand { get; }
+        public ICommand CancelCommand { get; }
 
         // ============ Methods ============
 
@@ -1055,6 +1118,7 @@ namespace Open_lab.ViewModels
 
                 if (PatientId == 0)
                 {
+                    await SaveNewReferralIfNeededAsync();
                     var created = await _patientService.CreateAsync(new Patient
                     {
                         LabId = LabId,
@@ -1107,6 +1171,8 @@ namespace Open_lab.ViewModels
 
                 // G5.1: after a successful save, return to view-only mode.
                 IsEditMode = false;
+                OnPropertyChanged(nameof(EditButtonText));
+                OnPropertyChanged(nameof(AddButtonText));
             }
             catch (Exception ex)
             {
@@ -1122,7 +1188,23 @@ namespace Open_lab.ViewModels
                 return;
             }
             IsEditMode = true;
+            OnPropertyChanged(nameof(EditButtonText));
             StatusMessage = "وضع التعديل مفعّل.";
+        }
+
+        private void CancelEditMode()
+        {
+            if (PatientId > 0 && !string.IsNullOrWhiteSpace(LabId))
+            {
+                _ = LoadByLabIdAsync();
+            }
+            else
+            {
+                IsEditMode = false;
+            }
+            OnPropertyChanged(nameof(EditButtonText));
+            OnPropertyChanged(nameof(AddButtonText));
+            StatusMessage = "تم الإلغاء.";
         }
 
         private async Task GenerateLabIdAsync()
@@ -1214,10 +1296,15 @@ namespace Open_lab.ViewModels
 
         private async Task DeleteAsync()
         {
-            if (PatientId == 0)
-            {
-                return;
-            }
+            if (PatientId == 0) return;
+
+            var result = System.Windows.MessageBox.Show(
+                "هل أنت متأكد من حذف هذا المريض؟",
+                "تأكيد الحذف",
+                System.Windows.MessageBoxButton.YesNo,
+                System.Windows.MessageBoxImage.Warning);
+
+            if (result != System.Windows.MessageBoxResult.Yes) return;
 
             try
             {
@@ -1236,10 +1323,13 @@ namespace Open_lab.ViewModels
             PatientId = 0;
             // G5.1: a fresh form is editable from the start.
             IsEditMode = true;
+            OnPropertyChanged(nameof(EditButtonText));
+            OnPropertyChanged(nameof(AddButtonText));
             FullName = string.Empty;
             Gender = string.Empty;
             BirthDate = null;
             Age = null;
+            AgeUnit = "Year";
             MobilePhone = null;
             HomePhone = null;
             NationalId = null;
@@ -1264,6 +1354,7 @@ namespace Open_lab.ViewModels
             QuickSelectedPatient = null;
             PatientCode = string.Empty;
             Title = "السيد/";
+            RefreshAvailableTitles();
             PatientTitleNote = null;
             EntryDate = DateTime.Today;
             DeliveryDate = DateTime.Today;
@@ -1313,11 +1404,13 @@ namespace Open_lab.ViewModels
             LabId = patient.LabId;
             // G5.1: loading a saved patient starts in view-only mode.
             IsEditMode = false;
+            OnPropertyChanged(nameof(EditButtonText));
+            OnPropertyChanged(nameof(AddButtonText));
             FullName = patient.FullName;
             Gender = patient.Gender;
             BirthDate = patient.BirthDate;
-            Age = patient.Age;
             AgeUnit = string.IsNullOrWhiteSpace(patient.AgeUnit) ? "Year" : patient.AgeUnit;
+            Age = patient.Age;
             IsVip = patient.IsVip;
             IsPregnant = patient.IsPregnant;
             Phone = patient.Phone;
@@ -1332,6 +1425,7 @@ namespace Open_lab.ViewModels
 
         private async Task InitializeAsync()
         {
+            RefreshAvailableTitles();
             await LoadReferralsAsync();
             await LoadAvailableTestsAsync();
             await LoadTodayPatientsAsync();
@@ -1956,7 +2050,124 @@ namespace Open_lab.ViewModels
                 return;
             }
 
-            _navigationService.Navigate(NavigationTarget.Home);
+            _navigationService.Navigate(NavigationTarget.Dashboard);
+        }
+
+        private void RefreshAvailableTitles()
+        {
+            AvailableTitles.Clear();
+            if (string.Equals(_gender, "Female", StringComparison.OrdinalIgnoreCase))
+            {
+                AvailableTitles.Add("السيدة/");
+                AvailableTitles.Add("الآنسة/");
+            }
+            else if (string.Equals(_gender, "Male", StringComparison.OrdinalIgnoreCase))
+            {
+                AvailableTitles.Add("السيد/");
+                AvailableTitles.Add("الطفل/");
+            }
+            else
+            {
+                AvailableTitles.Add("السيد/");
+                AvailableTitles.Add("السيدة/");
+                AvailableTitles.Add("الآنسة/");
+                AvailableTitles.Add("الطفل/");
+            }
+            if (!AvailableTitles.Contains(Title) && AvailableTitles.Count > 0)
+                Title = AvailableTitles[0];
+        }
+
+        private static int? ValidateAgeValue(int? value, string unit)
+        {
+            if (!value.HasValue) return null;
+            var normalizedUnit = AgeConverter.NormalizeUnit(unit);
+            int maxValue = normalizedUnit switch
+            {
+                AgeConverter.UnitDay => 30,
+                AgeConverter.UnitMonth => 11,
+                _ => int.MaxValue
+            };
+            return value.Value > maxValue ? maxValue : value.Value;
+        }
+
+        private void SyncAgeToBirthDate()
+        {
+            if (!_age.HasValue || string.IsNullOrWhiteSpace(_ageUnit))
+            {
+                BirthDate = null;
+                return;
+            }
+            var normalizedUnit = AgeConverter.NormalizeUnit(_ageUnit);
+            int totalDays = AgeConverter.ToDays(_age.Value, normalizedUnit);
+            BirthDate = DateTime.Today.AddDays(-totalDays);
+        }
+
+        private void SyncBirthDateToAge()
+        {
+            if (!_birthDate.HasValue)
+            {
+                Age = null;
+                return;
+            }
+            var today = DateTime.Today;
+            var ageSpan = today - _birthDate.Value;
+            if (ageSpan.TotalDays < 0)
+            {
+                BirthDate = null;
+                return;
+            }
+            if (ageSpan.TotalDays < 30)
+            {
+                _ageUnit = AgeConverter.UnitDay;
+                Age = (int)ageSpan.TotalDays;
+            }
+            else if (ageSpan.TotalDays < 365)
+            {
+                _ageUnit = AgeConverter.UnitMonth;
+                Age = (int)(ageSpan.TotalDays / AgeConverter.DaysPerMonth);
+            }
+            else
+            {
+                _ageUnit = AgeConverter.UnitYear;
+                Age = (int)(ageSpan.TotalDays / AgeConverter.DaysPerYear);
+            }
+            OnPropertyChanged(nameof(AgeUnit));
+            OnPropertyChanged(nameof(Age));
+        }
+
+        private void CheckIfNewReferral()
+        {
+            if (string.IsNullOrWhiteSpace(ReferralSource))
+            {
+                IsNewReferralPending = false;
+                return;
+            }
+            var match = Referrals.FirstOrDefault(r =>
+                string.Equals(r.Name, ReferralSource, StringComparison.OrdinalIgnoreCase));
+            IsNewReferralPending = match == null;
+        }
+
+        private async Task SaveNewReferralIfNeededAsync()
+        {
+            if (!_isNewReferralPending || string.IsNullOrWhiteSpace(ReferralSource))
+                return;
+            if (_testCatalogService == null) return;
+            try
+            {
+                var newReferral = new Referral
+                {
+                    Name = ReferralSource.Trim(),
+                    ReferralType = "Direct"
+                };
+                var created = await _testCatalogService.CreateReferralAsync(newReferral);
+                Referrals.Add(created);
+                SelectedReferral = created;
+                IsNewReferralPending = false;
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = $"تعذّر حفظ الإحالة الجديدة: {ex.Message}";
+            }
         }
     }
 }
